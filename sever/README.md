@@ -134,9 +134,37 @@ spring.security.oauth2.client.registration.github.scope=user:email
 
 ```bash
 mvn clean package -DskipTests
+
 ```
 
-### 4. Chạy các service (mở terminal riêng cho mỗi service):
+### 4. Install package
+
+```bash
+# Discovery Service
+mvn clean install -pl discovery-service
+```
+
+```bash
+# Gateway Service
+mvn clean install -pl gateway-service
+```
+
+```bash
+# User Service
+mvn clean install -pl user-service
+```
+
+```bash
+# CV Service
+mvn clean install -pl cv-service
+```
+
+```bash
+# Auth Service
+mvn clean install -pl auth-service
+```
+
+### 5. Chạy các service (mở terminal riêng cho mỗi service):
 
 ```bash
 # Gen Key
@@ -162,13 +190,13 @@ mvn spring-boot:run -pl auth-service
 # mvn spring-boot:run -pl auth-service -Dspring-boot.run.profiles=oauth2
 ```
 
-### 5. Kiểm tra services
+### 6. Kiểm tra services
 
 - Eureka Dashboard: http://localhost:8761
 - Gateway Health: http://localhost:8080/actuator/health
 - RabbitMQ Management: http://localhost:15672 (guest/guest)
 
-### 6. Test OAuth2 Login
+### 7. Test OAuth2 Login
 
 #### Google Login:
 
