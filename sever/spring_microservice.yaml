@@ -1,0 +1,492 @@
+type: collection.insomnia.rest/5.0
+name: Spring Microservices API Tests
+meta:
+  id: wrk_174e27efe9f74adcac2d6cf9a1dd1f60
+  created: 1759734068351
+  modified: 1759734068351
+  description: ""
+collection:
+  - name: Spring Microservices API Tests
+    meta:
+      id: fld_5b1fd38adc01441090d741780e4f8557
+      created: 1759734068355
+      modified: 1759736419693
+      sortKey: -1759734066754
+      description: Postman collection để test toàn bộ Spring Microservices project
+    children:
+      - name: Health Checks
+        meta:
+          id: fld_28979af668c3404f946c9a3ff348b89a
+          created: 1759734068357
+          modified: 1759734068357
+          sortKey: -1759734066753
+          description: ""
+        children:
+          - url: http://localhost:8080/actuator/health
+            name: Gateway Health
+            meta:
+              id: req_e2d38faf44a748aba77972ad87c5bd95
+              created: 1759734068359
+              modified: 1759734068359
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066752
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8761
+            name: Eureka Dashboard
+            meta:
+              id: req_750b84c6ac2a4b768cc3ab5eba52c9af
+              created: 1759734068361
+              modified: 1759734068361
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066751
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8082/auth/health
+            name: Auth Service Health
+            meta:
+              id: req_ba61367bbff7440c984ae20d5fe0c509
+              created: 1759734068363
+              modified: 1759734068363
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066750
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8083/users/health
+            name: User Service Health
+            meta:
+              id: req_a328a8948f1e45f79319e62719e39987
+              created: 1759734068365
+              modified: 1759734068365
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066749
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: User Management
+        meta:
+          id: fld_ee47c65bd1424436883142aa42393442
+          created: 1759734068367
+          modified: 1759736358736
+          sortKey: -1759734066748
+          description: ""
+        children:
+          - url: http://localhost:8080/users
+            name: Get All Users (with JWT)
+            meta:
+              id: req_7641b8df7df1417c9a4e3aeb929480ee
+              created: 1759734068372
+              modified: 1759735990511
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066745
+            method: GET
+            headers:
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Response is array", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData).to.be.an('array');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/users/1
+            name: Get User by ID
+            meta:
+              id: req_dc419168d7cb40609c36dc443d4d63ce
+              created: 1759734068375
+              modified: 1759736043123
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066744
+            method: GET
+            headers:
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Response has user data", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.username).to.eql("testuser");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/users/1
+            name: Update User
+            meta:
+              id: req_f248bd08b486425488745657272266ba
+              created: 1759734068377
+              modified: 1759736057532
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066743
+            method: PUT
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                    "email": "updated@example.com",
+                    "firstName": "UpdatedTest",
+                    "lastName": "UpdatedUser"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("User updated successfully", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.firstName).to.eql("UpdatedTest");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Authentication
+        meta:
+          id: fld_5f957f52644b41428d356a5d4342ed65
+          created: 1759734068379
+          modified: 1759736369314
+          sortKey: -1759734066742
+          description: ""
+        children:
+          - url: http://localhost:8080/gateway/auth/register
+            name: Register
+            meta:
+              id: req_ad7c59666cea4afda6c7db91d9cf2bbb
+              created: 1759734068369
+              modified: 1759738301210
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066740.875
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                    "username": "testuser",
+                    "password": "password123",
+                    "email": "test@example.com",
+                    "firstName": "Test",
+                    "lastName": "User"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 201", function () {
+                    insomnia.response.to.have.status(201);
+                });
+
+                insomnia.test("Response has user data", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.username).to.eql("testuser");
+                    insomnia.environment.set("userId", jsonData.id);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/gateway/auth/login
+            name: Login User
+            meta:
+              id: req_fc9d57fec88c4c74ac6837a9baffd720
+              created: 1759734068371
+              modified: 1759738274049
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066740.75
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                    "username": "testuser",
+                    "password": "password123"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Response has token", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.token).to.not.be.null;
+                    insomnia.environment.set("authToken", jsonData.token);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/gateway/auth/validate
+            name: Validate Token
+            meta:
+              id: req_ba85d3c90ad74cd890d3ca890e3554f3
+              created: 1759734068381
+              modified: 1759738277813
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066740.375
+            method: POST
+            parameters:
+              - name: token
+                value: "{{authToken}}"
+                disabled: false
+                id: pair_c6862476412544f48e634ef7c86e60cd
+              - name: username
+                value: testuser
+                disabled: false
+                id: pair_91f57a5702944f20ba2d436f3d18f94a
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Token is valid", function () {
+                    var response = insomnia.response.text();
+                    insomnia.expect(response).to.eql("true");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/users
+            name: Access without token (Should fail)
+            meta:
+              id: req_dd841bc749234d8991451662e5044b4d
+              created: 1759734068383
+              modified: 1759734068383
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066740
+            method: GET
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 401", function () {
+                    insomnia.response.to.have.status(401);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Direct Service Access
+        meta:
+          id: fld_77d7f3a3ce794c1589ffb7f479fc2548
+          created: 1759734068384
+          modified: 1759734068384
+          sortKey: -1759734066739
+          description: ""
+        children:
+          - url: http://localhost:8082/auth/login
+            name: Direct Auth Service Login
+            meta:
+              id: req_587846ac3ef74c3cb06229192a22b00e
+              created: 1759734068386
+              modified: 1759734068386
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066738
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                    "username": "testuser",
+                    "password": "password123"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8083/users
+            name: Direct User Service - Get Users
+            meta:
+              id: req_7dd774f10584427e9a2d7bc40b2ac88a
+              created: 1759734068388
+              modified: 1759734068388
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066737
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: RabbitMQ Testing
+        meta:
+          id: fld_5bcef6698be84ed2920ba47637a36aa3
+          created: 1759734068391
+          modified: 1759736419693
+          sortKey: -1759734066736
+          description: ""
+        children:
+          - url: http://localhost:8080/gateway/auth/login
+            name: Login to trigger RabbitMQ event
+            meta:
+              id: req_66552349262c41798d34cf59230ec3ac
+              created: 1759734068393
+              modified: 1759734068393
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066735
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                    "username": "testuser",
+                    "password": "password123"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test("Login successful", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+
+                console.log("Check RabbitMQ Management UI at
+                http://localhost:15672");
+
+                console.log("Check User Service logs for received events");
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+    environment:
+      baseUrl: http://localhost:8080
+      authToken: ""
+      userId: ""
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_61cafe6550703de8f511d434f774740092a1bbd0
+    created: 1759734068401
+    modified: 1759736419687
+environments:
+  name: Base Environment
+  meta:
+    id: env_61cafe6550703de8f511d434f774740092a1bbd0
+    created: 1759734068395
+    modified: 1759736419691
+    isPrivate: false
+  data:
+    userId: 1
+    authToken: eyJhbGciOiJSUzI1NiJ9.eyJ1c2VySWQiOiJ1c2VySWQiLCJ1c2VybmFtZSI6InRlc3R1c2VyIiwic3ViIjoidGVzdHVzZXIiLCJpYXQiOjE3NTk3MzYwNjQsImV4cCI6MTc1OTgyMjQ2NH0.ZNgqk_3ZVQb_G2jLV2o2XynhBQqW6DMvZHmAPjSTZ_YkbH7vXl1UD9IMQVm-1TPs_eONc0987PpsNcBLz1l50Amf8Wxt5r8yOs1EIXGVlF60T4dmu2MPGrpr5oiujKEp-hveyg-YhQ0RDFrQSMHEcfVXihVr4jndbZiN5clod6P2r892XUJSll_Os52FX3HzQ0i4_3vC1py0QSHbl9n8fYYFgkOvuQuQK_Wrw2HXywUj02s1nn6eL0FuGVsybKykCTwKm_ZNbU3O-Lwut5ML_cCVksbTLWhIRTEqPcCQ6aUMa6na5ZgXJYBXyLpHCVLcEM-B-FGfjcqJS_wiv2l-tw

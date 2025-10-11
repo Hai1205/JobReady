@@ -1,0 +1,64 @@
+# Gateway Service OAuth2 Configuration
+# File: gateway-service/src/main/resources/application-oauth2.properties
+
+# ===================================
+# SERVER CONFIGURATION
+# ===================================
+server.port=8080
+spring.application.name=gateway-service
+
+# ===================================
+# EUREKA CONFIGURATION
+# ===================================
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
+
+# ===================================
+# GATEWAY ROUTES CONFIGURATION
+# ===================================
+spring.cloud.gateway.routes[0].id=auth-oauth2-authorize
+spring.cloud.gateway.routes[0].uri=lb://auth-service
+spring.cloud.gateway.routes[0].predicates[0]=Path=/oauth2/authorize/**
+
+spring.cloud.gateway.routes[1].id=auth-oauth2-callback
+spring.cloud.gateway.routes[1].uri=lb://auth-service
+spring.cloud.gateway.routes[1].predicates[0]=Path=/oauth2/callback/**
+
+spring.cloud.gateway.routes[2].id=auth-traditional
+spring.cloud.gateway.routes[2].uri=lb://auth-service
+spring.cloud.gateway.routes[2].predicates[0]=Path=/auth/**
+
+spring.cloud.gateway.routes[3].id=user-service
+spring.cloud.gateway.routes[3].uri=lb://user-service
+spring.cloud.gateway.routes[3].predicates[0]=Path=/users/**
+
+# ===================================
+# JWT CONFIGURATION
+# ===================================
+app.jwt.public-key-path=classpath:public-key.pem
+
+# ===================================
+# CORS CONFIGURATION
+# ===================================
+spring.cloud.gateway.globalcors.cors-configurations.[/**].allowed-origins=http://localhost:3000,http://localhost:3001
+spring.cloud.gateway.globalcors.cors-configurations.[/**].allowed-methods=GET,POST,PUT,DELETE,OPTIONS
+spring.cloud.gateway.globalcors.cors-configurations.[/**].allowed-headers=*
+spring.cloud.gateway.globalcors.cors-configurations.[/**].allow-credentials=true
+
+# ===================================
+# SECURITY CONFIGURATION
+# ===================================
+# Skip JWT authentication cho OAuth2 endpoints
+app.security.excluded-paths=/oauth2/**,/auth/login,/auth/validate,/actuator/health
+
+# ===================================
+# LOGGING
+# ===================================
+logging.level.com.example.gatewayservice=DEBUG
+logging.level.org.springframework.cloud.gateway=DEBUG
+logging.level.reactor.netty.http.client=DEBUG
+
+# ===================================
+# ACTUATOR
+# ===================================
+management.endpoints.web.exposure.include=health,info,gateway
+management.endpoint.health.show-details=always

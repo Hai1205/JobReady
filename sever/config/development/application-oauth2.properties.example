@@ -1,0 +1,86 @@
+# OAuth2 Development Configuration
+# Copy và điền thông tin OAuth2 apps vào file này
+
+# ===================================
+# AUTH SERVICE CONFIGURATION
+# File: auth-service/src/main/resources/application-oauth2.properties
+# ===================================
+
+# Server Configuration
+server.port=8082
+spring.application.name=auth-service
+
+# Eureka Configuration
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
+
+# JWT Configuration
+app.jwt.private-key-path=classpath:private-key.pem
+app.jwt.public-key-path=classpath:public-key.pem
+app.jwt.expiration=86400000
+
+# RabbitMQ Configuration
+spring.rabbitmq.host=localhost
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
+
+# ===================================
+# OAUTH2 PROVIDERS CONFIGURATION
+# ===================================
+
+# Google OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/oauth2/callback/google
+
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/v2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://www.googleapis.com/oauth2/v4/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v2/userinfo
+spring.security.oauth2.client.provider.google.user-name-attribute=sub
+
+# Facebook OAuth2 Configuration
+spring.security.oauth2.client.registration.facebook.client-id=YOUR_FACEBOOK_APP_ID
+spring.security.oauth2.client.registration.facebook.client-secret=YOUR_FACEBOOK_APP_SECRET
+spring.security.oauth2.client.registration.facebook.scope=email,public_profile
+spring.security.oauth2.client.registration.facebook.redirect-uri=http://localhost:8080/oauth2/callback/facebook
+
+spring.security.oauth2.client.provider.facebook.authorization-uri=https://www.facebook.com/v18.0/dialog/oauth
+spring.security.oauth2.client.provider.facebook.token-uri=https://graph.facebook.com/v18.0/oauth/access_token
+spring.security.oauth2.client.provider.facebook.user-info-uri=https://graph.facebook.com/v18.0/me?fields=id,name,email
+spring.security.oauth2.client.provider.facebook.user-name-attribute=id
+
+# GitHub OAuth2 Configuration
+spring.security.oauth2.client.registration.github.client-id=YOUR_GITHUB_CLIENT_ID
+spring.security.oauth2.client.registration.github.client-secret=YOUR_GITHUB_CLIENT_SECRET
+spring.security.oauth2.client.registration.github.scope=user:email
+spring.security.oauth2.client.registration.github.redirect-uri=http://localhost:8080/oauth2/callback/github
+
+spring.security.oauth2.client.provider.github.authorization-uri=https://github.com/login/oauth/authorize
+spring.security.oauth2.client.provider.github.token-uri=https://github.com/login/oauth/access_token
+spring.security.oauth2.client.provider.github.user-info-uri=https://api.github.com/user
+spring.security.oauth2.client.provider.github.user-name-attribute=id
+
+# ===================================
+# USER SERVICE COMMUNICATION
+# ===================================
+user-service.base-url=http://localhost:8083
+
+# ===================================
+# CLIENT REDIRECT URLS
+# ===================================
+app.frontend.success-url=http://localhost:3000/login-success
+app.frontend.error-url=http://localhost:3000/login-error
+
+# ===================================
+# LOGGING
+# ===================================
+logging.level.com.example.authservice=DEBUG
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.security.oauth2=DEBUG
+
+# ===================================
+# ACTUATOR
+# ===================================
+management.endpoints.web.exposure.include=health,info,metrics
+management.endpoint.health.show-details=always
