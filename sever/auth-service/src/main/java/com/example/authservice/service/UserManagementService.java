@@ -4,6 +4,7 @@ import com.example.authservice.dto.OAuth2UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,7 +20,7 @@ public class UserManagementService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${user-service.base-url:http://localhost:8083}")
+    @Value("${USER_SERVICE_BASE_URL}")
     private String userServiceBaseUrl;
 
     public UserManagementService() {
@@ -50,8 +51,9 @@ public class UserManagementService {
             logger.info("Checking if OAuth2 user exists: email={}, provider={}, providerId={}",
                     email, provider, providerId);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url, HttpMethod.POST, entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url, HttpMethod.POST, entity, new ParameterizedTypeReference<Map<String, Object>>() {
+                    });
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 logger.info("User check successful for email: {}", email);
@@ -86,8 +88,9 @@ public class UserManagementService {
             logger.info("Creating OAuth2 user: email={}, provider={}",
                     oauth2UserDto.getEmail(), oauth2UserDto.getProvider());
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url, HttpMethod.POST, entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url, HttpMethod.POST, entity, new ParameterizedTypeReference<Map<String, Object>>() {
+                    });
 
             if (response.getStatusCode() == HttpStatus.CREATED ||
                     response.getStatusCode() == HttpStatus.OK) {
@@ -120,8 +123,9 @@ public class UserManagementService {
 
             logger.info("Updating OAuth2 user: userId={}, email={}", userId, oauth2UserDto.getEmail());
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url, HttpMethod.PUT, entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url, HttpMethod.PUT, entity, new ParameterizedTypeReference<Map<String, Object>>() {
+                    });
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 logger.info("OAuth2 user updated successfully for userId: {}", userId);

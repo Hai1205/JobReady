@@ -3,10 +3,8 @@ package com.example.gatewayservice.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -17,15 +15,15 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    @Value("classpath:keys/public_key.pem")
-    private Resource publicKeyResource;
+    @Value("${JWT_PUBLIC_KEY}")
+    private String publicKeyString;
 
     private PublicKey publicKey;
 
     private PublicKey getPublicKey() {
         if (publicKey == null) {
             try {
-                String publicKeyPEM = Files.readString(publicKeyResource.getFile().toPath())
+                String publicKeyPEM = publicKeyString
                         .replace("-----BEGIN PUBLIC KEY-----", "")
                         .replace("-----END PUBLIC KEY-----", "")
                         .replaceAll("\\s", "");

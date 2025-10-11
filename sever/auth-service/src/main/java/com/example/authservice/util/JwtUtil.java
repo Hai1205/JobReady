@@ -3,10 +3,8 @@ package com.example.authservice.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -21,19 +19,19 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Value("classpath:keys/private_key.pem")
-    private Resource privateKeyResource;
+    @Value("${JWT_PRIVATE_KEY}")
+    private String privateKeyString;
 
-    @Value("classpath:keys/public_key.pem")
-    private Resource publicKeyResource;
+    @Value("${JWT_PUBLIC_KEY}")
+    private String publicKeyString;
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
     private final long jwtExpiration = 86400000; // 24 hours
 
-    private Key getKey(Resource resource, String header, String footer, boolean isPrivate) {
+    private Key getKey(String keyPEM, String header, String footer, boolean isPrivate) {
         try {
-            String keyPEM = Files.readString(resource.getFile().toPath())
+            keyPEM = keyPEM
                     .replace(header, "")
                     .replace(footer, "")
                     .replaceAll("\\s", "");
@@ -55,7 +53,7 @@ public class JwtUtil {
 
     private PrivateKey getPrivateKey() {
         if (privateKey == null) {
-            privateKey = (PrivateKey) getKey(privateKeyResource,
+            privateKey = (PrivateKey) getKey(privateKeyString,
                     "-----BEGIN PRIVATE KEY-----",
                     "-----END PRIVATE KEY-----",
                     true);
@@ -65,7 +63,7 @@ public class JwtUtil {
 
     private PublicKey getPublicKey() {
         if (publicKey == null) {
-            publicKey = (PublicKey) getKey(publicKeyResource,
+            publicKey = (PublicKey) getKey(publicKeyString,
                     "-----BEGIN PUBLIC KEY-----",
                     "-----END PUBLIC KEY-----",
                     false);

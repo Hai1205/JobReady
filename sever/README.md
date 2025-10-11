@@ -67,8 +67,8 @@ Dự án mẫu Spring Boot Microservice với kiến trúc hoàn chỉnh bao g�
 ### JWT Token Authentication
 
 - **JWT Token**: Sử dụng RSA 2048-bit key pair
-- **Private Key**: Chỉ Auth Service có quyền truy cập
-- **Public Key**: Chia sẻ cho Gateway và User Service để verify
+- **Private Key**: Lưu trong biến môi trường, chỉ Auth Service có quyền truy cập
+- **Public Key**: Lưu trong biến môi trường, chia sẻ cho các service khác để verify
 
 ### OAuth2 Social Login
 
@@ -228,11 +228,13 @@ http://localhost:8080/oauth2/authorize/github
 
 ### Production
 
-Cập nhật các environment variables trong `docker-compose.yml`:
+Cập nhật các environment variables trong `.env` file và `docker-compose.yml`:
 
 - Database credentials
 - RabbitMQ credentials
-- JWT key paths
+- JWT RSA keys (định dạng PEM bao gồm header)
+  - `JWT_PRIVATE_KEY` - Private key cho Auth Service
+  - `JWT_PUBLIC_KEY` - Public key cho tất cả services
 
 ## 📝 API Endpoints
 

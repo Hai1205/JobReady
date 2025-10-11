@@ -300,11 +300,15 @@ public class OAuth2Controller {
                 userInfo.put("name", attributes.get("name"));
                 // Facebook picture structure: {"data":{"url":"..."}}
                 Object picture = attributes.get("picture");
-                if (picture instanceof Map) {
+                if (picture instanceof Map<?, ?>) {
+                    // Type-safe approach for nested map access
+                    @SuppressWarnings("unchecked")
                     Map<String, Object> pictureMap = (Map<String, Object>) picture;
                     Object data = pictureMap.get("data");
-                    if (data instanceof Map) {
-                        userInfo.put("picture", ((Map<String, Object>) data).get("url"));
+                    if (data instanceof Map<?, ?>) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> dataMap = (Map<String, Object>) data;
+                        userInfo.put("picture", dataMap.get("url"));
                     }
                 }
                 userInfo.put("id", attributes.get("id"));

@@ -57,9 +57,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod,oauth2
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - JWT_PUBLIC_KEY_PATH=file:/secrets/public-key.pem
-    volumes:
-      - ./secrets:/secrets:ro
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
     depends_on:
       - eureka-server
     networks:
@@ -75,8 +73,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod,oauth2
       - EUREKA_URL=http://eureka-server:8761/eureka/
-      - JWT_PRIVATE_KEY_PATH=file:/secrets/private-key.pem
-      - JWT_PUBLIC_KEY_PATH=file:/secrets/public-key.pem
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
@@ -90,8 +88,6 @@ services:
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
       - FRONTEND_SUCCESS_URL=${FRONTEND_SUCCESS_URL}
       - FRONTEND_ERROR_URL=${FRONTEND_ERROR_URL}
-    volumes:
-      - ./secrets:/secrets:ro
     depends_on:
       - eureka-server
       - rabbitmq
@@ -114,9 +110,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-      - JWT_PUBLIC_KEY_PATH=file:/secrets/public-key.pem
-    volumes:
-      - ./secrets:/secrets:ro
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
     depends_on:
       - eureka-server
       - mysql

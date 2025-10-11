@@ -36,8 +36,8 @@ public class OAuth2LoginService {
             String providerId = extractProviderId(oauth2User, provider);
             String avatarUrl = extractAvatarUrl(oauth2User, provider);
 
-            logger.info("Processing OAuth2 login for provider: {}, email: {}, name: {}",
-                    provider, email, name);
+            logger.info("Processing OAuth2 login for provider: {}, email: {}, name: {}, avatarUrl: {}",
+                    provider, email, name, avatarUrl);
 
             // Tạo OAuth2UserDto để gửi đến user-service
             OAuth2UserDto oauth2UserDto = createOAuth2UserDto(oauth2User, provider);
