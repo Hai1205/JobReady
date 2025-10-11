@@ -38,7 +38,7 @@ target/
 
 # Environment files
 .env
-.env.*
+
 
 # Spring Boot
 *.log
