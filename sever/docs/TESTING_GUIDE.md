@@ -123,7 +123,7 @@
           "username": "testuser",
           "email": "test@example.com",
           "password": "password123",
-          "fullName": "Test User"
+          "fullname": "Test User"
         }'
    ```
 

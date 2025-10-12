@@ -28,16 +28,20 @@ public class UserRegistrationEventListener {
                     null, // ID will be generated
                     registerRequest.getUsername(),
                     registerRequest.getEmail(),
-                    registerRequest.getFirstName(),
-                    registerRequest.getLastName());
+                    registerRequest.getFullname());
             // Set password separately since constructor doesn't include it
             userDto.setPassword(registerRequest.getPassword()); // In production, this should be hashed
 
             // Save user through UserService
-            UserDto savedUser = userService.createUser(userDto);
+            com.example.userservice.dto.Response response = userService.createUser(userDto);
 
-            logger.info("Successfully created user with ID: {} for username: {}",
-                    savedUser.getId(), savedUser.getUsername());
+            if (response.getStatusCode() == 201) {
+                UserDto savedUser = (UserDto) response.getData().getUser();
+                logger.info("Successfully created user with ID: {} for username: {}",
+                        savedUser.getId(), savedUser.getUsername());
+            } else {
+                logger.error("Failed to create user: {}", response.getMessage());
+            }
 
         } catch (Exception e) {
             logger.error("Failed to create user for registration request: {}",

@@ -2,6 +2,7 @@ package com.example.gatewayservice.service;
 
 import com.example.gatewayservice.dto.AuthRequest;
 import com.example.gatewayservice.dto.AuthResponse;
+import com.example.gatewayservice.dto.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -24,6 +25,17 @@ public class GatewayAuthService {
                         return Mono.error(new RuntimeException("Invalid credentials"));
                     }
                 });
+    }
+
+    public Mono<AuthResponse> registerUser(RegisterRequest registerRequest) {
+        // Register user through Auth Service
+        return webClientBuilder.build()
+                .post()
+                .uri("http://auth-service/auth/register")
+                .bodyValue(registerRequest)
+                .retrieve()
+                .bodyToMono(AuthResponse.class)
+                .onErrorResume(error -> Mono.error(new RuntimeException("Registration failed: " + error.getMessage())));
     }
 
     private Mono<Boolean> validateUserCredentials(AuthRequest authRequest) {

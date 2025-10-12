@@ -18,8 +18,15 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    private String firstName;
-    private String lastName;
+    private String fullname;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.USER;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status = UserStatus.PENDING;
 
     // OAuth2 Provider Information
     private String oauthProvider; // google, facebook, github
@@ -30,23 +37,21 @@ public class User {
     public User() {
     }
 
-    public User(String username, String password, String email, String firstName, String lastName) {
+    public User(String username, String password, String email, String fullname) {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.fullname = fullname;
         this.isOAuthUser = false;
     }
 
     // Constructor for OAuth2 users
-    public User(String username, String email, String firstName, String lastName,
+    public User(String username, String email, String fullname, String lastName,
             String oauthProvider, String oauthProviderId, String avatarUrl) {
         this.username = username;
         this.password = "OAUTH_USER"; // OAuth users don't have traditional passwords
         this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.fullname = fullname;
         this.oauthProvider = oauthProvider;
         this.oauthProviderId = oauthProviderId;
         this.avatarUrl = avatarUrl;
@@ -86,20 +91,12 @@ public class User {
         this.email = email;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFullname() {
+        return fullname;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     // OAuth2 related getters and setters
@@ -133,5 +130,32 @@ public class User {
 
     public void setOAuthUser(boolean isOAuthUser) {
         this.isOAuthUser = isOAuthUser;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public enum UserRole {
+        USER,
+        ADMIN
+    }
+
+    public enum UserStatus {
+        ACTIVE,
+        INACTIVE,
+        PENDING
     }
 }

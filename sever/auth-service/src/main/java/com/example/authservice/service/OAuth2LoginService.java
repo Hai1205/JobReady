@@ -110,22 +110,22 @@ public class OAuth2LoginService {
     /**
      * Extract first name từ full name
      */
-    private String extractFirstName(String fullName) {
-        if (fullName == null || fullName.trim().isEmpty())
+    private String extractFirstName(String fullname) {
+        if (fullname == null || fullname.trim().isEmpty())
             return null;
 
-        String[] parts = fullName.trim().split("\\s+");
+        String[] parts = fullname.trim().split("\\s+");
         return parts[0];
     }
 
     /**
      * Extract last name từ full name
      */
-    private String extractLastName(String fullName) {
-        if (fullName == null || fullName.trim().isEmpty())
+    private String extractLastName(String fullname) {
+        if (fullname == null || fullname.trim().isEmpty())
             return null;
 
-        String[] parts = fullName.trim().split("\\s+");
+        String[] parts = fullname.trim().split("\\s+");
         if (parts.length > 1) {
             return String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
         }

@@ -104,11 +104,8 @@ public class OAuth2UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
         // Cập nhật thông tin
-        if (oauth2UserDto.getFirstName() != null) {
-            existingUser.setFirstName(oauth2UserDto.getFirstName());
-        }
-        if (oauth2UserDto.getLastName() != null) {
-            existingUser.setLastName(oauth2UserDto.getLastName());
+        if (oauth2UserDto.getLastName() != null && oauth2UserDto.getFirstName() != null) {
+            existingUser.setFullname(oauth2UserDto.getLastName() + " " + oauth2UserDto.getFirstName());
         }
         if (oauth2UserDto.getAvatarUrl() != null) {
             existingUser.setAvatarUrl(oauth2UserDto.getAvatarUrl());
@@ -140,11 +137,9 @@ public class OAuth2UserService {
         existingUser.setOAuthUser(true);
 
         // Cập nhật name nếu chưa có
-        if (existingUser.getFirstName() == null && oauth2UserDto.getFirstName() != null) {
-            existingUser.setFirstName(oauth2UserDto.getFirstName());
-        }
-        if (existingUser.getLastName() == null && oauth2UserDto.getLastName() != null) {
-            existingUser.setLastName(oauth2UserDto.getLastName());
+        if (existingUser.getFullname() == null && oauth2UserDto.getFirstName() != null
+                && oauth2UserDto.getLastName() != null) {
+            existingUser.setFullname(oauth2UserDto.getFirstName() + "" + oauth2UserDto.getLastName());
         }
 
         User savedUser = userRepository.save(existingUser);
@@ -179,22 +174,22 @@ public class OAuth2UserService {
     /**
      * Extract first name từ full name
      */
-    private String extractFirstName(String fullName) {
-        if (fullName == null || fullName.trim().isEmpty())
+    private String extractFirstName(String fullname) {
+        if (fullname == null || fullname.trim().isEmpty())
             return null;
 
-        String[] parts = fullName.trim().split("\\s+");
+        String[] parts = fullname.trim().split("\\s+");
         return parts[0];
     }
 
     /**
      * Extract last name từ full name
      */
-    private String extractLastName(String fullName) {
-        if (fullName == null || fullName.trim().isEmpty())
+    private String extractLastName(String fullname) {
+        if (fullname == null || fullname.trim().isEmpty())
             return null;
 
-        String[] parts = fullName.trim().split("\\s+");
+        String[] parts = fullname.trim().split("\\s+");
         if (parts.length > 1) {
             return String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
         }
@@ -209,8 +204,7 @@ public class OAuth2UserService {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getFirstName(),
-                user.getLastName());
+                user.getFullname());
 
         // Set OAuth2 related fields
         dto.setOauthProvider(user.getOauthProvider());

@@ -134,7 +134,6 @@ spring.security.oauth2.client.registration.github.scope=user:email
 
 ```bash
 mvn clean package -DskipTests
-
 ```
 
 ### 4. Install package
@@ -282,7 +281,7 @@ curl -X POST http://localhost:8080/users \
     "username": "testuser",
     "email": "test@example.com",
     "password": "password123",
-    "fullName": "Test User"
+    "fullname": "Test User"
   }'
 
 # 2. Login traditional

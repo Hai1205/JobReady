@@ -1,12 +1,14 @@
 package com.example.authservice.controller;
 
 import com.example.authservice.dto.AuthRequest;
-import com.example.authservice.dto.AuthResponse;
 import com.example.authservice.dto.RegisterRequest;
 import com.example.authservice.service.AuthService;
+import com.example.dto.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,41 +18,49 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
-        try {
-            String token = authService.authenticate(authRequest);
-            return ResponseEntity.ok(new AuthResponse(token, "Login successful"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new AuthResponse(null, "Authentication failed: " + e.getMessage()));
+    public ResponseEntity<Response> login(@RequestBody AuthRequest authRequest) {
+        Response response = authService.authenticate(authRequest);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<Response> authenticateUser(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+
+        if (username == null || password == null) {
+            Response response = new Response(400, "Username and password are required");
+            return ResponseEntity.status(response.getStatusCode()).body(response);
         }
+
+        // Create AuthRequest from the credentials map
+        AuthRequest authRequest = new AuthRequest(username, password);
+        Response response = authService.authenticate(authRequest);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
-        try {
-            authService.registerUser(registerRequest);
-            return ResponseEntity.ok(new AuthResponse(null, "User registration request sent successfully"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new AuthResponse(null, "Registration failed: " + e.getMessage()));
-        }
+    public ResponseEntity<Response> register(@RequestBody RegisterRequest registerRequest) {
+        Response response = authService.registerUser(registerRequest);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<Boolean> validateToken(@RequestParam String token, @RequestParam String username) {
-        boolean isValid = authService.validateToken(token, username);
-        return ResponseEntity.ok(isValid);
+    public ResponseEntity<Response> validateToken(@RequestParam String token, @RequestParam String username) {
+        Response response = authService.validateToken(token, username);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Auth Service is running");
+    public ResponseEntity<Response> health() {
+        Response response = new Response(200, "Auth Service is running");
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     // OAuth2 test endpoint để kiểm tra routing
     @GetMapping("/oauth2/test")
-    public ResponseEntity<String> oauth2Test() {
-        return ResponseEntity.ok("OAuth2 routing is working! Ready for OAuth2 implementation.");
+    public ResponseEntity<Response> oauth2Test() {
+        Response response = new Response(200, "OAuth2 routing is working! Ready for OAuth2 implementation.");
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

@@ -1,29 +1,4 @@
-package com.example.authservice.dto;
-
-public class AuthResponse {
-    private String token;
-    private String message;
-
-    public AuthResponse() {}
-
-    public AuthResponse(String token, String message) {
-        this.token = token;
-        this.message = message;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-}
+// This file has been deprecated and is no longer in use.
+// The functionality has been replaced by the standardized Response class in
+// com.example.dto.Response
+// This file is kept only for reference and should be removed in future cleanup.

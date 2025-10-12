@@ -368,7 +368,7 @@ Authorization: Bearer {jwt_token}
   "username": "newuser",
   "email": "newuser@example.com",
   "password": "password123",
-  "fullName": "New User"
+  "fullname": "New User"
 }
 ```
 
@@ -380,7 +380,7 @@ Authorization: Bearer {jwt_token}
   "id": 3,
   "username": "newuser",
   "email": "newuser@example.com",
-  "fullName": "New User",
+  "fullname": "New User",
   "isOAuthUser": false,
   "createdDate": "2024-01-01T10:00:00Z"
 }
@@ -408,7 +408,7 @@ Authorization: Bearer {jwt_token}
 ```json
 {
   "email": "updated@example.com",
-  "fullName": "Updated Name"
+  "fullname": "Updated Name"
 }
 ```
 
@@ -419,7 +419,7 @@ Authorization: Bearer {jwt_token}
 {
   "id": 1,
   "email": "updated@example.com",
-  "fullName": "Updated Name",
+  "fullname": "Updated Name",
   "lastModifiedDate": "2024-01-01T11:00:00Z"
 }
 ```

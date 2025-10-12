@@ -2,6 +2,7 @@ package com.example.gatewayservice.controller;
 
 import com.example.gatewayservice.dto.AuthRequest;
 import com.example.gatewayservice.dto.AuthResponse;
+import com.example.gatewayservice.dto.RegisterRequest;
 import com.example.gatewayservice.service.GatewayAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,14 @@ public class AuthController {
                 .map(response -> ResponseEntity.ok(response))
                 .onErrorReturn(ResponseEntity.badRequest()
                         .body(new AuthResponse(null, "Authentication failed")));
+    }
+
+    @PostMapping("/register")
+    public Mono<ResponseEntity<AuthResponse>> register(@RequestBody RegisterRequest registerRequest) {
+        return gatewayAuthService.registerUser(registerRequest)
+                .map(response -> ResponseEntity.ok(response))
+                .onErrorReturn(ResponseEntity.badRequest()
+                        .body(new AuthResponse(null, "Registration failed")));
     }
 
     @PostMapping("/validate")

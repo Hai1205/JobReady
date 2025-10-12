@@ -4,7 +4,7 @@ import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class PersonalInfo {
-    private String fullName;
+    private String fullname;
     private String email;
     private String phone;
     private String location;
@@ -13,20 +13,20 @@ public class PersonalInfo {
     public PersonalInfo() {
     }
 
-    public PersonalInfo(String fullName, String email, String phone, String location, String summary) {
-        this.fullName = fullName;
+    public PersonalInfo(String fullname, String email, String phone, String location, String summary) {
+        this.fullname = fullname;
         this.email = email;
         this.phone = phone;
         this.location = location;
         this.summary = summary;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getFullname() {
+        return fullname;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     public String getEmail() {

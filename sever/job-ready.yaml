@@ -1,18 +1,18 @@
 type: collection.insomnia.rest/5.0
-name: Spring Microservices API Tests
+name: JobReady API Tests
 meta:
   id: wrk_174e27efe9f74adcac2d6cf9a1dd1f60
   created: 1759734068351
   modified: 1759734068351
   description: ""
 collection:
-  - name: Spring Microservices API Tests
+  - name: JobReady API Tests
     meta:
       id: fld_5b1fd38adc01441090d741780e4f8557
       created: 1759734068355
       modified: 1759736419693
       sortKey: -1759734066754
-      description: Postman collection để test toàn bộ Spring Microservices project
+      description: Postman collection để test toàn bộ JobReady project
     children:
       - name: Health Checks
         meta:
@@ -85,6 +85,24 @@ collection:
               isPrivate: false
               description: ""
               sortKey: -1759734066749
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8084/cvs/health
+            name: CV Service Health
+            meta:
+              id: req_cv_health_001
+              created: 1759734068366
+              modified: 1759734068366
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066748
             method: GET
             settings:
               renderRequestBody: true
@@ -211,6 +229,276 @@ collection:
                 insomnia.test("User updated successfully", function () {
                     var jsonData = insomnia.response.json();
                     insomnia.expect(jsonData.firstName).to.eql("UpdatedTest");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/users/username/testuser
+            name: Get User by Username
+            meta:
+              id: req_user_get_by_username_001
+              created: 1759734068378
+              modified: 1759734068378
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066742
+            method: GET
+            headers:
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Response has user data", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.username).to.eql("testuser");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/users/1
+            name: Delete User
+            meta:
+              id: req_user_delete_001
+              created: 1759734068379
+              modified: 1759734068379
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066741
+            method: DELETE
+            headers:
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: CV Management
+        meta:
+          id: fld_cv_management_001
+          created: 1759734068378
+          modified: 1759734068378
+          sortKey: -1759734066747
+          description: ""
+        children:
+          - url: http://localhost:8080/cvs
+            name: Get All CVs (with JWT)
+            meta:
+              id: req_cv_get_all_001
+              created: 1759734068379
+              modified: 1759734068379
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066746
+            method: GET
+            headers:
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Response is array", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData).to.be.an('array');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/cvs/1
+            name: Get CV by ID
+            meta:
+              id: req_cv_get_by_id_001
+              created: 1759734068380
+              modified: 1759734068380
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066745
+            method: GET
+            headers:
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Response has CV data", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.id).to.not.be.null;
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/cvs
+            name: Create CV
+            meta:
+              id: req_cv_create_001
+              created: 1759734068381
+              modified: 1759734068381
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066744
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                    "title": "Software Developer CV",
+                    "content": "Experienced software developer...",
+                    "userId": 1
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("CV created successfully", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.title).to.eql("Software Developer CV");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/cvs/1
+            name: Update CV
+            meta:
+              id: req_cv_update_001
+              created: 1759734068382
+              modified: 1759734068382
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066743
+            method: PUT
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                    "title": "Updated Software Developer CV",
+                    "content": "Updated content...",
+                    "userId": 1
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("CV updated successfully", function () {
+                    var jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.title).to.eql("Updated Software Developer CV");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8080/cvs/1
+            name: Delete CV
+            meta:
+              id: req_cv_delete_001
+              created: 1759734068383
+              modified: 1759734068383
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066742
+            method: DELETE
+            headers:
+              - name: Authorization
+                value: Bearer {{authToken}}
+            authentication:
+              type: bearer
+              disabled: false
+              token: "{{authToken}}"
+              prefix: ""
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
                 });
             settings:
               renderRequestBody: true
@@ -414,6 +702,24 @@ collection:
               isPrivate: false
               description: ""
               sortKey: -1759734066737
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8084/cvs
+            name: Direct CV Service - Get CVs
+            meta:
+              id: req_direct_cv_get_001
+              created: 1759734068389
+              modified: 1759734068389
+              isPrivate: false
+              description: ""
+              sortKey: -1759734066736
             method: GET
             settings:
               renderRequestBody: true

@@ -5,8 +5,9 @@ public class UserDto {
     private String username;
     private String password;
     private String email;
-    private String firstName;
-    private String lastName;
+    private String fullname;
+    private String status;
+    private String role;
 
     // OAuth2 Provider Information
     private String oauthProvider;
@@ -17,23 +18,21 @@ public class UserDto {
     public UserDto() {
     }
 
-    public UserDto(Long id, String username, String email, String firstName, String lastName) {
+    public UserDto(Long id, String username, String email, String fullname) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.fullname = fullname;
         this.isOAuthUser = false;
     }
 
     // Constructor for OAuth2 users
-    public UserDto(Long id, String username, String email, String firstName, String lastName,
+    public UserDto(Long id, String username, String email, String fullname,
             String oauthProvider, String oauthProviderId, String avatarUrl) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.fullname = fullname;
         this.oauthProvider = oauthProvider;
         this.oauthProviderId = oauthProviderId;
         this.avatarUrl = avatarUrl;
@@ -73,20 +72,12 @@ public class UserDto {
         this.email = email;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFullname() {
+        return fullname;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     // OAuth2 related getters and setters
@@ -120,5 +111,21 @@ public class UserDto {
 
     public void setOAuthUser(boolean isOAuthUser) {
         this.isOAuthUser = isOAuthUser;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

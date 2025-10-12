@@ -1,7 +1,7 @@
 package com.example.cvservice.dto;
 
 public class PersonalInfoDto {
-    private String fullName;
+    private String fullname;
     private String email;
     private String phone;
     private String location;
@@ -10,12 +10,12 @@ public class PersonalInfoDto {
     public PersonalInfoDto() {
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getFullname() {
+        return fullname;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     public String getEmail() {
