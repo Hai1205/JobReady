@@ -1,6 +1,7 @@
 package com.example.userservice.dto;
 
 public class OAuth2UserDto {
+    private Long id;
     private String email;
     private String name;
     private String firstName;
@@ -88,5 +89,13 @@ public class OAuth2UserDto {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

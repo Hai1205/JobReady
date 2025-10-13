@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.example.authservice.dto.responses;
 
 public class Pagination {
     private long totalItems;

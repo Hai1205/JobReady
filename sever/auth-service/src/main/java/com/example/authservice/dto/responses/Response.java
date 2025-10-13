@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.example.authservice.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

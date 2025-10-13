@@ -19,7 +19,7 @@ public class OAuth2LoginService {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserManagementService userManagementService;
+    private UserService userService;
 
     /**
      * Xử lý đăng nhập OAuth2 thành công
@@ -42,8 +42,9 @@ public class OAuth2LoginService {
             // Tạo OAuth2UserDto để gửi đến user-service
             OAuth2UserDto oauth2UserDto = createOAuth2UserDto(oauth2User, provider);
 
-            // Xử lý user trong user-service (check exists, create/update)
-            Map<String, Object> userResult = userManagementService.processOAuth2User(oauth2UserDto);
+            // Xử lý user trong user-service thông qua RabbitMQ (check exists,
+            // create/update)
+            Map<String, Object> userResult = userService.processOAuth2User(oauth2UserDto);
 
             if (userResult == null) {
                 throw new RuntimeException("Failed to process user in user-service");
@@ -53,8 +54,14 @@ public class OAuth2LoginService {
             Object userIdObj = userResult.get("id");
             String userId = userIdObj != null ? userIdObj.toString() : providerId;
 
+            // Lấy username và role từ kết quả
+            String username = userResult.get("username") != null ? userResult.get("username").toString()
+                    : oauth2UserDto.getUsername();
+
+            String role = userResult.get("role") != null ? userResult.get("role").toString() : "ROLE_USER";
+
             // Tạo JWT token với thông tin user
-            String token = jwtUtil.generateToken(email, userId);
+            String token = jwtUtil.generateToken(userId, username, role);
 
             logger.info("Successfully generated JWT token for OAuth2 user: {}, userId: {}", email, userId);
             return token;

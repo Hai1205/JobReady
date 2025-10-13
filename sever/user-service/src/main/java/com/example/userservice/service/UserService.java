@@ -5,10 +5,14 @@ import com.example.userservice.dto.Response;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.entity.User;
 import com.example.userservice.exception.AccountNotVerifiedException;
+import com.example.userservice.exception.BadRequestException;
+import com.example.userservice.exception.NotFoundException;
 import com.example.userservice.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,11 +20,15 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public Response createUser(UserDto userDto) {
         Response response = new Response();
@@ -131,14 +139,113 @@ public class UserService {
         } catch (RuntimeException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
+            logger.error("Error finding user by username: {}", username, e);
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
+            logger.error("Error finding user by username: {}", username, e);
         }
 
         return response;
+    }
+
+    /**
+     * Tìm kiếm người dùng theo email cho RabbitMQ
+     * 
+     * @param email Email của người dùng
+     * @return User đối tượng nếu tìm thấy, null nếu không
+     */
+    public User findByEmail(String email) {
+        logger.info("Finding user by email: {}", email);
+        return userRepository.findByEmail(email)
+                .orElse(null);
+    }
+
+    /**
+     * Thay đổi mật khẩu cho người dùng
+     * 
+     * @param userId          ID của người dùng
+     * @param currentPassword Mật khẩu hiện tại
+     * @param newPassword     Mật khẩu mới
+     * @return User đã cập nhật
+     */
+    @Transactional
+    public User changePassword(long userId, String currentPassword, String newPassword) {
+        logger.info("Changing password for user ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+
+        // Kiểm tra mật khẩu hiện tại
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new BadRequestException("Current password is incorrect");
+        }
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return userRepository.save(user);
+    }
+
+    /**
+     * Đặt lại mật khẩu cho người dùng
+     * 
+     * @param userId      ID của người dùng
+     * @param newPassword Mật khẩu mới
+     * @return User đã cập nhật
+     */
+    @Transactional
+    public User resetPassword(long userId, String newPassword) {
+        logger.info("Resetting password for user ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return userRepository.save(user);
+    }
+
+    /**
+     * Đặt lại mật khẩu bằng email
+     * 
+     * @param email       Email của người dùng
+     * @param newPassword Mật khẩu mới
+     * @return User đã cập nhật
+     */
+    @Transactional
+    public User resetPasswordByEmail(String email, String newPassword) {
+        logger.info("Resetting password for email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return userRepository.save(user);
+    }
+
+    /**
+     * Thay đổi trạng thái người dùng (kích hoạt/vô hiệu hóa)
+     * 
+     * @param userId ID của người dùng
+     * @param status Trạng thái mới (true: kích hoạt, false: vô hiệu hóa)
+     * @return User đã cập nhật
+     */
+    @Transactional
+    public User changeStatus(long userId, boolean status) {
+        logger.info("Changing status for user ID: {} to {}", userId, status);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+
+        // Cập nhật trạng thái
+        if (status) {
+            user.setStatus(User.UserStatus.ACTIVE);
+        } else {
+            user.setStatus(User.UserStatus.INACTIVE);
+        }
+
+        return userRepository.save(user);
     }
 
     public Response updateUser(Long id, UserDto userDto) {
@@ -245,6 +352,38 @@ public class UserService {
         }
 
         return response;
+    }
+
+    /**
+     * Authenticate a user by email and password
+     * This method is specifically for RabbitMQ authentication requests
+     * 
+     * @param email    User email
+     * @param password User password
+     * @return UserDto if authenticated, null otherwise
+     */
+    public UserDto authenticateUserByEmail(String email, String password) {
+        try {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Check if the account is pending verification
+            if (user.getStatus() == User.UserStatus.PENDING) {
+                throw new AccountNotVerifiedException(
+                        "User account is not verified. Please verify your account first.");
+            }
+
+            // Verify password
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                throw new RuntimeException("Invalid email or password");
+            }
+
+            // Return the user data if authentication is successful
+            return convertToDto(user);
+        } catch (Exception e) {
+            System.out.println("Authentication failed: " + e.getMessage());
+            return null;
+        }
     }
 
     public Response activateUser(String username) {

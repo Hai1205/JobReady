@@ -6,6 +6,8 @@ public class UserDto {
     private String password;
     private String email;
     private String fullname;
+    private String firstName;
+    private String lastName;
     private String status;
     private String role;
 
@@ -127,5 +129,21 @@ public class UserDto {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

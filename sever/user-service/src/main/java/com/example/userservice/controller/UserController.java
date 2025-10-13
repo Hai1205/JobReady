@@ -58,7 +58,7 @@ public class UserController {
      *             instead.
      */
     @Deprecated
-    @PostMapping("/authenticate")
+    @PostMapping("/authenticate-user")
     public ResponseEntity<Response> authenticateUser(@RequestBody UserDto userDto) {
         Response response = userService.authenticateUser(userDto.getUsername(), userDto.getPassword());
         return ResponseEntity.status(response.getStatusCode()).body(response);

@@ -130,13 +130,26 @@ spring.security.oauth2.client.registration.github.client-secret=your-github-clie
 spring.security.oauth2.client.registration.github.scope=user:email
 ```
 
-### 3. Build project
+### 3. Create Key
+
+```bash
+node -e "const { generateKeyPairSync } = require('crypto');
+const { privateKey, publicKey } = generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+  publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
+  privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
+});
+console.log('PRIVATE KEY:\\n', privateKey);
+console.log('PUBLIC KEY:\\n', publicKey);"
+```
+
+### 4. Build project
 
 ```bash
 mvn clean package -DskipTests
 ```
 
-### 4. Install package
+### 5. Install package
 
 ```bash
 # Discovery Service
@@ -163,7 +176,7 @@ mvn clean install -pl cv-service
 mvn clean install -pl auth-service
 ```
 
-### 5. Chạy các service (mở terminal riêng cho mỗi service):
+### 6. Chạy các service (mở terminal riêng cho mỗi service):
 
 ```bash
 # Gen Key
@@ -184,18 +197,18 @@ mvn spring-boot:run -pl user-service
 # CV Service
 mvn spring-boot:run -pl cv-service
 
-# Auth Service (với OAuth2 profile)
+# Auth Service
 mvn spring-boot:run -pl auth-service
 # mvn spring-boot:run -pl auth-service -Dspring-boot.run.profiles=oauth2
 ```
 
-### 6. Kiểm tra services
+### 7. Kiểm tra services
 
 - Eureka Dashboard: http://localhost:8761
 - Gateway Health: http://localhost:8080/actuator/health
 - RabbitMQ Management: http://localhost:15672 (guest/guest)
 
-### 7. Test OAuth2 Login
+### 8. Test OAuth2 Login
 
 #### Google Login:
 
