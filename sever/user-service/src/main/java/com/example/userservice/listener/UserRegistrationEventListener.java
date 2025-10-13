@@ -1,8 +1,8 @@
 package com.example.userservice.listener;
 
 import com.example.userservice.config.RabbitConfig;
-import com.example.userservice.dto.RegisterRequest;
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.dto.requests.RegisterRequest;
 import com.example.userservice.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class UserRegistrationEventListener {
             userDto.setPassword(registerRequest.getPassword()); // In production, this should be hashed
 
             // Save user through UserService
-            com.example.userservice.dto.Response response = userService.createUser(userDto);
+            com.example.userservice.dto.response.Response response = userService.createUser(userDto);
 
             if (response.getStatusCode() == 201) {
                 UserDto savedUser = (UserDto) response.getData().getUser();

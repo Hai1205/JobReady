@@ -13,6 +13,7 @@ import com.example.cvservice.repository.CVRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,7 +79,7 @@ public class CVService {
         return response;
     }
 
-    public Response getCVById(Long id) {
+    public Response getCVById(UUID id) {
         Response response = new Response();
 
         try {
@@ -91,6 +92,10 @@ public class CVService {
             response.setStatusCode(200);
             response.setMessage("CV retrieved successfully");
             response.setData(data);
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid CV ID format");
+            System.out.println(e.getMessage());
         } catch (RuntimeException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
@@ -135,11 +140,12 @@ public class CVService {
         return response;
     }
 
-    public Response updateCV(Long id, CVDto dto) {
+    public Response updateCV(UUID id, CVDto dto) {
         Response response = new Response();
 
         try {
-            CV existing = cvRepository.findById(id).orElseThrow(() -> new RuntimeException("CV not found"));
+            CV existing = cvRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("CV not found"));
 
             // update fields
             existing.setTitle(dto.getTitle());
@@ -203,17 +209,22 @@ public class CVService {
         return response;
     }
 
-    public Response deleteCV(Long id) {
+    public Response deleteCV(UUID id) {
         Response response = new Response();
 
         try {
-            if (!cvRepository.existsById(id))
+            UUID uuid = id;
+            if (!cvRepository.existsById(uuid))
                 throw new RuntimeException("CV not found");
 
-            cvRepository.deleteById(id);
+            cvRepository.deleteById(uuid);
 
             response.setStatusCode(200);
             response.setMessage("CV deleted successfully");
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid CV ID format");
+            System.out.println(e.getMessage());
         } catch (RuntimeException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
@@ -230,7 +241,7 @@ public class CVService {
     // mapping helpers
     private CVDto convertToDto(CV cv) {
         CVDto dto = new CVDto();
-        dto.setId(cv.getId() == null ? null : String.valueOf(cv.getId()));
+        dto.setId(cv.getId() == null ? null : cv.getId());
         dto.setTitle(cv.getTitle());
 
         if (cv.getPersonalInfo() != null) {
@@ -246,7 +257,7 @@ public class CVService {
         if (cv.getExperience() != null) {
             dto.setExperience(cv.getExperience().stream().map(e -> {
                 ExperienceDto ed = new ExperienceDto();
-                ed.setId(e.getId() == null ? null : String.valueOf(e.getId()));
+                ed.setId(e.getId() == null ? null : e.getId());
                 ed.setCompany(e.getCompany());
                 ed.setPosition(e.getPosition());
                 ed.setStartDate(e.getStartDate());
@@ -259,7 +270,7 @@ public class CVService {
         if (cv.getEducation() != null) {
             dto.setEducation(cv.getEducation().stream().map(ed -> {
                 EducationDto e = new EducationDto();
-                e.setId(ed.getId() == null ? null : String.valueOf(ed.getId()));
+                e.setId(ed.getId() == null ? null : ed.getId());
                 e.setSchool(ed.getSchool());
                 e.setDegree(ed.getDegree());
                 e.setField(ed.getField());

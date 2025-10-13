@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class OAuth2UserService {
@@ -109,7 +110,7 @@ public class OAuth2UserService {
     @SendTo(RabbitConfig.USER_OAUTH2_UPDATE_REPLY_QUEUE)
     public Map<String, Object> updateOAuth2UserRabbit(OAuth2UserDto oauth2UserDto) {
         try {
-            Long userId = oauth2UserDto.getId();
+            UUID userId = oauth2UserDto.getId();
             logger.info("Received request to update OAuth2 user: id={}, email={}",
                     userId, oauth2UserDto.getEmail());
 
@@ -222,7 +223,7 @@ public class OAuth2UserService {
     /**
      * Cập nhật user OAuth2
      */
-    public UserDto updateOAuth2User(Long userId, OAuth2UserDto oauth2UserDto) {
+    public UserDto updateOAuth2User(UUID userId, OAuth2UserDto oauth2UserDto) {
         logger.info("Updating OAuth2 user: userId={}", userId);
 
         User existingUser = userRepository.findById(userId)

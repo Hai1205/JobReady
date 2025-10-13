@@ -1,7 +1,9 @@
 package com.example.userservice.dto;
 
+import java.util.UUID;
+
 public class UserDto {
-    private Long id;
+    private UUID id;
     private String username;
     private String password;
     private String email;
@@ -20,7 +22,7 @@ public class UserDto {
     public UserDto() {
     }
 
-    public UserDto(Long id, String username, String email, String fullname) {
+    public UserDto(UUID id, String username, String email, String fullname) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -29,7 +31,7 @@ public class UserDto {
     }
 
     // Constructor for OAuth2 users
-    public UserDto(Long id, String username, String email, String fullname,
+    public UserDto(UUID id, String username, String email, String fullname,
             String oauthProvider, String oauthProviderId, String avatarUrl) {
         this.id = id;
         this.username = username;
@@ -42,11 +44,11 @@ public class UserDto {
     }
 
     // Getters and Setters
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

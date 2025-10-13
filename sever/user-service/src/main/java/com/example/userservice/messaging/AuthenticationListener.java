@@ -1,7 +1,7 @@
 package com.example.userservice.messaging;
 
-import com.example.userservice.dto.AuthenticationRequest;
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.dto.requests.AuthenticationRequest;
 import com.example.userservice.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

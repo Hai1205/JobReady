@@ -1,4 +1,4 @@
-package com.example.userservice.dto;
+package com.example.userservice.dto.requests;
 
 import java.io.Serializable;
 

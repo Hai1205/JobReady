@@ -1,11 +1,12 @@
-package com.example.userservice.dto;
+package com.example.userservice.dto.results;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class UserResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Long id;
+    private UUID id;
     private String firstName;
     private String lastName;
     private String email;
@@ -22,11 +23,11 @@ public class UserResult implements Serializable {
         this.message = message;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

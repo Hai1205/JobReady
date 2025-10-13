@@ -1,13 +1,14 @@
 package com.example.userservice.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -59,11 +60,11 @@ public class User {
     }
 
     // Getters and Setters
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

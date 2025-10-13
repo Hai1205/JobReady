@@ -1,6 +1,7 @@
 package com.example.authservice.controller;
 
 import com.example.authservice.service.OAuth2LoginService;
+import com.example.authservice.dto.requests.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -226,15 +227,14 @@ public class OAuth2Controller {
      */
     @GetMapping("/error")
     public ResponseEntity<Map<String, Object>> oauthError(
-            @RequestParam(required = false) String error,
-            @RequestParam(required = false) String error_description) {
+            @ModelAttribute OAuthErrorRequest oAuthErrorRequest) {
 
-        logger.error("OAuth2 error occurred: {}, description: {}", error, error_description);
+        logger.error("OAuth2 error occurred: {}, description: {}", oAuthErrorRequest.getError(), oAuthErrorRequest.getErrorDescription());
 
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("success", false);
-        errorResponse.put("error", error != null ? error : "oauth2_error");
-        errorResponse.put("message", error_description != null ? error_description : "OAuth2 authentication failed");
+        errorResponse.put("error", oAuthErrorRequest.getError() != null ? oAuthErrorRequest.getError() : "oauth2_error");
+        errorResponse.put("message", oAuthErrorRequest.getErrorDescription() != null ? oAuthErrorRequest.getErrorDescription() : "OAuth2 authentication failed");
 
         return ResponseEntity.badRequest().body(errorResponse);
     }

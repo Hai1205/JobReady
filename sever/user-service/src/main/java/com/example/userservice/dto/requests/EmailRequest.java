@@ -1,4 +1,4 @@
-package com.example.userservice.dto;
+package com.example.userservice.dto.requests;
 
 import com.example.userservice.messaging.CorrelationIdAware;
 import java.io.Serializable;

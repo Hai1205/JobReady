@@ -1,21 +1,23 @@
-package com.example.userservice.dto;
+package com.example.userservice.dto.results;
 
 import java.io.Serializable;
 
-public class StatusChangeResultDto implements Serializable {
+import com.example.userservice.dto.UserDto;
+
+public class PasswordResetResultDto implements Serializable {
     private boolean success;
     private String message;
     private UserDto user;
 
-    public StatusChangeResultDto() {
+    public PasswordResetResultDto() {
     }
 
-    public StatusChangeResultDto(boolean success, String message) {
+    public PasswordResetResultDto(boolean success, String message) {
         this.success = success;
         this.message = message;
     }
 
-    public StatusChangeResultDto(boolean success, String message, UserDto user) {
+    public PasswordResetResultDto(boolean success, String message, UserDto user) {
         this.success = success;
         this.message = message;
         this.user = user;

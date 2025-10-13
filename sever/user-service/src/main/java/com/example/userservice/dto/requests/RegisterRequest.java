@@ -1,21 +1,19 @@
-package com.example.gatewayservice.dto;
+package com.example.userservice.dto.requests;
 
 public class RegisterRequest {
     private String username;
     private String password;
     private String email;
-    private String firstName;
-    private String lastName;
+    private String fullname;
 
     public RegisterRequest() {
     }
 
-    public RegisterRequest(String username, String password, String email, String firstName, String lastName) {
+    public RegisterRequest(String username, String password, String email, String fullname) {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.fullname = fullname;
     }
 
     public String getUsername() {
@@ -42,19 +40,11 @@ public class RegisterRequest {
         this.email = email;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFullname() {
+        return fullname;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 }

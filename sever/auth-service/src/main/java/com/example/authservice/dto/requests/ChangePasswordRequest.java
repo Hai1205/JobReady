@@ -6,15 +6,17 @@ public class ChangePasswordRequest implements Serializable {
     private String userId;
     private String currentPassword;
     private String newPassword;
+    private String rePassword;
     private String correlationId;
 
     public ChangePasswordRequest() {
     }
 
-    public ChangePasswordRequest(String userId, String currentPassword, String newPassword) {
+    public ChangePasswordRequest(String userId, String currentPassword, String newPassword, String rePassword) {
         this.userId = userId;
         this.currentPassword = currentPassword;
         this.newPassword = newPassword;
+        this.rePassword = rePassword;
     }
 
     public String getUserId() {
@@ -39,6 +41,14 @@ public class ChangePasswordRequest implements Serializable {
 
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
+    }
+
+    public String getRePassword() {
+        return rePassword;
+    }
+
+    public void setRePassword(String rePassword) {
+        this.rePassword = rePassword;
     }
 
     public String getCorrelationId() {

@@ -1,29 +1,30 @@
-package com.example.userservice.dto;
+package com.example.userservice.dto.requests;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class ResetPasswordRequest implements Serializable {
-    private String userId;
+    private UUID userId;
     private String newPassword;
     private String correlationId;
 
     public ResetPasswordRequest() {
     }
 
-    public ResetPasswordRequest(String userId) {
+    public ResetPasswordRequest(UUID userId) {
         this.userId = userId;
     }
 
-    public ResetPasswordRequest(String userId, String newPassword) {
+    public ResetPasswordRequest(UUID userId, String newPassword) {
         this.userId = userId;
         this.newPassword = newPassword;
     }
 
-    public String getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 

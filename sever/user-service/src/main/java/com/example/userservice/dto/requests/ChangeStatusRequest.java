@@ -1,25 +1,26 @@
-package com.example.userservice.dto;
+package com.example.userservice.dto.requests;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class ChangeStatusRequest implements Serializable {
-    private String userId;
+    private UUID userId;
     private String status;
     private String correlationId;
 
     public ChangeStatusRequest() {
     }
 
-    public ChangeStatusRequest(String userId, String status) {
+    public ChangeStatusRequest(UUID userId, String status) {
         this.userId = userId;
         this.status = status;
     }
 
-    public String getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 

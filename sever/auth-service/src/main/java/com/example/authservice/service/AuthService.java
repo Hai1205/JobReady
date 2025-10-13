@@ -138,12 +138,17 @@ public class AuthService {
 
                 logger.info("Sent authentication request for user: {} with correlationId: {}", email, correlationId);
 
-                // Wait for the response with a timeout
-                UserDto userDto = responseQueue.poll(10, java.util.concurrent.TimeUnit.SECONDS);
+                // Wait for the response with a timeout (increased from 10 to 30 seconds)
+                logger.info("Waiting for authentication response with correlationId: {}", correlationId);
+                UserDto userDto = responseQueue.poll(30, java.util.concurrent.TimeUnit.SECONDS);
                 if (userDto != null) {
+                    logger.info("Received authentication response for user: {} with correlationId: {}", email,
+                            correlationId);
                     return userDto;
                 } else {
-                    throw new RuntimeException("Authentication timeout");
+                    logger.error("Authentication timeout for user: {} with correlationId: {}", email, correlationId);
+                    throw new RuntimeException(
+                            "Authentication timeout - No response from user-service. Please check if user-service is running and RabbitMQ connection is established");
                 }
             } finally {
                 // Always clean up the container

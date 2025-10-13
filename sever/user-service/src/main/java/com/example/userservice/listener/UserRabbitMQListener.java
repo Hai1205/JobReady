@@ -1,9 +1,9 @@
 package com.example.userservice.listener;
 
 import com.example.userservice.config.RabbitConfig;
-import com.example.userservice.dto.*;
-import com.example.userservice.exception.BadRequestException;
-import com.example.userservice.exception.NotFoundException;
+import com.example.userservice.dto.results.*;
+import com.example.userservice.dto.requests.*;
+import com.example.userservice.exception.*;
 import com.example.userservice.entity.User;
 import com.example.userservice.service.UserService;
 import org.slf4j.Logger;
@@ -79,9 +79,7 @@ public class UserRabbitMQListener {
             logger.info("Received request to change password for userId: {}", request.getUserId());
 
             User user = userService.changePassword(
-                    Long.parseLong(request.getUserId()),
-                    request.getCurrentPassword(),
-                    request.getNewPassword());
+                    request);
 
             UserResult result = new UserResult();
             result.setId(user.getId());
@@ -124,8 +122,7 @@ public class UserRabbitMQListener {
             logger.info("Received request to reset password for userId: {}", request.getUserId());
 
             User user = userService.resetPassword(
-                    Long.parseLong(request.getUserId()),
-                    request.getNewPassword());
+                    request);
 
             UserResult result = new UserResult();
             result.setId(user.getId());
@@ -162,8 +159,7 @@ public class UserRabbitMQListener {
             logger.info("Received request to change status for userId: {} to {}",
                     request.getUserId(), request.getStatus());
 
-            boolean status = "enable".equalsIgnoreCase(request.getStatus());
-            User user = userService.changeStatus(Long.parseLong(request.getUserId()), status);
+            User user = userService.changeStatus(request);
 
             UserResult result = new UserResult();
             result.setId(user.getId());

@@ -1,13 +1,14 @@
 package com.example.cvservice.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 
 @Entity
 @Table(name = "experiences")
 public class Experience {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     private String company;
     private String position;
@@ -28,11 +29,11 @@ public class Experience {
         this.description = description;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

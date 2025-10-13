@@ -1,6 +1,7 @@
 package com.example.authservice.controller;
 
-import com.example.authservice.dto.responses.Response;
+import com.example.authservice.dto.responses.*;
+import com.example.authservice.dto.requests.*;
 import com.example.authservice.service.AuthService;
 
 import jakarta.servlet.http.Cookie;
@@ -20,12 +21,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(
-            @RequestParam String email,
-            @RequestParam String password,
+            @ModelAttribute LoginRequest loginRequest,
             HttpServletResponse response) {
-        Response loginResponse = authService.login(email, password);
+        Response loginResponse = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
 
-        boolean isActive = loginResponse.getData().getUser().getStatus().equals("ACTIVE");
+        boolean isActive = loginResponse.getData() != null && loginResponse.getData().getUser() != null
+                && loginResponse.getData().getUser().getStatus().equals("ACTIVE");
         boolean isOk = loginResponse.getStatusCode() == 200;
 
         if (isOk && isActive) {
@@ -45,9 +46,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(
-            @RequestParam String email,
-            @RequestParam String password) {
-        Response response = authService.register(email, password);
+            @ModelAttribute RegisterRequest registerRequest) {
+        Response response = authService.register(registerRequest.getEmail(), registerRequest.getPassword());
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -61,8 +61,8 @@ public class AuthController {
     @PostMapping("/verify-otp/{email}")
     public ResponseEntity<Response> verifyOTP(
             @PathVariable String email,
-            @RequestParam String otp) {
-        Response response = authService.verifyOTP(email, otp);
+            @ModelAttribute OtpVerifyRequest otpRequest) {
+        Response response = authService.verifyOTP(email, otpRequest.getOtp());
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -70,11 +70,11 @@ public class AuthController {
     @PutMapping("/change-password/{userId}")
     public ResponseEntity<Response> changePassword(
             @PathVariable String userId,
-            @RequestParam String currentPassword,
-            @RequestParam String newPassword,
-            @RequestParam String rePassword
-            ) {
-        Response response = authService.changePassword(userId, currentPassword, newPassword, rePassword);
+            @ModelAttribute com.example.authservice.dto.requests.ChangePasswordRequest changePasswordRequest) {
+        Response response = authService.changePassword(userId,
+                changePasswordRequest.getCurrentPassword(),
+                changePasswordRequest.getNewPassword(),
+                changePasswordRequest.getRePassword());
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -91,9 +91,10 @@ public class AuthController {
     @PutMapping("/forgot-password/{email}")
     public ResponseEntity<Response> forgotPassword(
             @PathVariable String email,
-            @RequestParam String newPassword,
-            @RequestParam String rePassword) {
-        Response response = authService.forgotPassword(email, newPassword, rePassword);
+            @ModelAttribute ForgotPasswordRequest forgotPasswordRequest) {
+        Response response = authService.forgotPassword(email,
+                forgotPasswordRequest.getNewPassword(),
+                forgotPasswordRequest.getRePassword());
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -117,8 +118,8 @@ public class AuthController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<Response> validateToken(@RequestParam String token, @RequestParam String username) {
-        Response response = authService.validateToken(token, username);
+    public ResponseEntity<Response> validateToken(@ModelAttribute TokenValidationRequest validationRequest) {
+        Response response = authService.validateToken(validationRequest.getToken(), validationRequest.getUsername());
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

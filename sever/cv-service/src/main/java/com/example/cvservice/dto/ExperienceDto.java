@@ -1,7 +1,9 @@
 package com.example.cvservice.dto;
 
+import java.util.UUID;
+
 public class ExperienceDto {
-    private String id;
+    private UUID id;
     private String company;
     private String position;
     private String startDate;
@@ -11,11 +13,11 @@ public class ExperienceDto {
     public ExperienceDto() {
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

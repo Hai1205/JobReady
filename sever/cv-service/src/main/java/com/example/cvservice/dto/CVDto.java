@@ -1,9 +1,10 @@
 package com.example.cvservice.dto;
 
 import java.util.List;
+import java.util.UUID;
 
 public class CVDto {
-    private String id;
+    private UUID id;
     private String title;
     private PersonalInfoDto personalInfo;
     private List<ExperienceDto> experience;
@@ -15,11 +16,11 @@ public class CVDto {
     public CVDto() {
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

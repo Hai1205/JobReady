@@ -1,9 +1,10 @@
-package com.example.userservice.dto;
+package com.example.userservice.dto.requests;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class ChangePasswordRequest implements Serializable {
-    private String userId;
+    private UUID userId;
     private String currentPassword;
     private String newPassword;
     private String correlationId;
@@ -11,17 +12,17 @@ public class ChangePasswordRequest implements Serializable {
     public ChangePasswordRequest() {
     }
 
-    public ChangePasswordRequest(String userId, String currentPassword, String newPassword) {
+    public ChangePasswordRequest(UUID userId, String currentPassword, String newPassword) {
         this.userId = userId;
         this.currentPassword = currentPassword;
         this.newPassword = newPassword;
     }
 
-    public String getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 

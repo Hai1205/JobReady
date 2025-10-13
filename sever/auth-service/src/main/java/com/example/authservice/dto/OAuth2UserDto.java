@@ -1,7 +1,9 @@
 package com.example.authservice.dto;
 
+import java.util.UUID;
+
 public class OAuth2UserDto {
-    private Long id;
+    private UUID id;
     private String email;
     private String name;
     private String firstName;
@@ -27,11 +29,11 @@ public class OAuth2UserDto {
     }
 
     // Getters and Setters
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

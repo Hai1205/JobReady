@@ -5,14 +5,16 @@ import java.io.Serializable;
 public class ForgotPasswordRequest implements Serializable {
     private String email;
     private String newPassword;
+    private String rePassword;
     private String correlationId;
 
     public ForgotPasswordRequest() {
     }
 
-    public ForgotPasswordRequest(String email, String newPassword) {
+    public ForgotPasswordRequest(String email, String newPassword, String rePassword) {
         this.email = email;
         this.newPassword = newPassword;
+        this.rePassword = rePassword;
     }
 
     public String getEmail() {
@@ -29,6 +31,14 @@ public class ForgotPasswordRequest implements Serializable {
 
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
+    }
+
+    public String getRePassword() {
+        return rePassword;
+    }
+
+    public void setRePassword(String rePassword) {
+        this.rePassword = rePassword;
     }
 
     public String getCorrelationId() {

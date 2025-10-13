@@ -1,8 +1,11 @@
 package com.example.userservice.service;
 
-import com.example.userservice.dto.Data;
-import com.example.userservice.dto.Response;
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.dto.requests.ChangePasswordRequest;
+import com.example.userservice.dto.requests.ChangeStatusRequest;
+import com.example.userservice.dto.requests.ResetPasswordRequest;
+import com.example.userservice.dto.response.Data;
+import com.example.userservice.dto.response.Response;
 import com.example.userservice.entity.User;
 import com.example.userservice.exception.AccountNotVerifiedException;
 import com.example.userservice.exception.BadRequestException;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -95,7 +99,7 @@ public class UserService {
         return response;
     }
 
-    public Response getUserById(Long id) {
+    public Response getUserById(UUID id) {
         Response response = new Response();
 
         try {
@@ -109,6 +113,10 @@ public class UserService {
             response.setStatusCode(200);
             response.setMessage("User retrieved successfully");
             response.setData(data);
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid user ID format");
+            System.out.println(e.getMessage());
         } catch (RuntimeException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
@@ -170,19 +178,19 @@ public class UserService {
      * @return User đã cập nhật
      */
     @Transactional
-    public User changePassword(long userId, String currentPassword, String newPassword) {
-        logger.info("Changing password for user ID: {}", userId);
+    public User changePassword(ChangePasswordRequest request) {
+        logger.info("Changing password for user ID: {}", request.getUserId());
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + request.getUserId()));
 
         // Kiểm tra mật khẩu hiện tại
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new BadRequestException("Current password is incorrect");
         }
 
         // Cập nhật mật khẩu mới
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         return userRepository.save(user);
     }
 
@@ -194,14 +202,14 @@ public class UserService {
      * @return User đã cập nhật
      */
     @Transactional
-    public User resetPassword(long userId, String newPassword) {
-        logger.info("Resetting password for user ID: {}", userId);
+    public User resetPassword(ResetPasswordRequest request) {
+        logger.info("Resetting password for user ID: {}", request.getUserId());
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + request.getUserId()));
 
         // Cập nhật mật khẩu mới
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         return userRepository.save(user);
     }
 
@@ -232,13 +240,14 @@ public class UserService {
      * @return User đã cập nhật
      */
     @Transactional
-    public User changeStatus(long userId, boolean status) {
-        logger.info("Changing status for user ID: {} to {}", userId, status);
+    public User changeStatus(ChangeStatusRequest request) {
+        logger.info("Changing status for user ID: {} to {}", request.getUserId(), request.getStatus());
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + request.getUserId()));
 
         // Cập nhật trạng thái
+        boolean status = "enable".equalsIgnoreCase(request.getStatus());
         if (status) {
             user.setStatus(User.UserStatus.ACTIVE);
         } else {
@@ -248,7 +257,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Response updateUser(Long id, UserDto userDto) {
+    public Response updateUser(UUID id, UserDto userDto) {
         Response response = new Response();
 
         try {
@@ -271,6 +280,10 @@ public class UserService {
             response.setStatusCode(200);
             response.setMessage("User updated successfully");
             response.setData(data);
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid user ID format");
+            System.out.println(e.getMessage());
         } catch (RuntimeException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
@@ -284,18 +297,23 @@ public class UserService {
         return response;
     }
 
-    public Response deleteUser(Long id) {
+    public Response deleteUser(UUID id) {
         Response response = new Response();
 
         try {
-            if (!userRepository.existsById(id)) {
+            UUID uuid = id;
+            if (!userRepository.existsById(uuid)) {
                 throw new RuntimeException("User not found");
             }
 
-            userRepository.deleteById(id);
+            userRepository.deleteById(uuid);
 
             response.setStatusCode(200);
             response.setMessage("User deleted successfully");
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid user ID format");
+            System.out.println(e.getMessage());
         } catch (RuntimeException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
@@ -448,7 +466,7 @@ public class UserService {
 
     private UserDto convertToDto(User user) {
         UserDto dto = new UserDto(
-                user.getId(),
+                user.getId() != null ? user.getId() : null,
                 user.getUsername(),
                 user.getEmail(),
                 user.getFullname());

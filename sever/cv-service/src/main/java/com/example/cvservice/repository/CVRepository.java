@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 import com.example.cvservice.entity.CV;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface CVRepository extends JpaRepository<CV, Long> {
+public interface CVRepository extends JpaRepository<CV, UUID> {
     // Query by embedded personalInfo.email
     Optional<CV> findByPersonalInfoEmail(String email);
 
