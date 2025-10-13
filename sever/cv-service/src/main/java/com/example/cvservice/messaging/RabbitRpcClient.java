@@ -93,6 +93,7 @@ public class RabbitRpcClient {
             SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(
                     rabbitTemplate.getConnectionFactory());
             container.setQueueNames(replyQueue);
+            container.setShutdownTimeout(containerShutdownTimeoutSeconds * 1000L);
             container.setMessageListener(message -> {
                 String receivedCorrelationId = message.getMessageProperties().getCorrelationId();
                 log.debug("Received response with correlationId: {}", receivedCorrelationId);

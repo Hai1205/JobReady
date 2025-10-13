@@ -10,7 +10,6 @@ import com.example.authservice.exception.NotFoundException;
 import com.example.authservice.messaging.RabbitRpcClient;
 import com.example.authservice.messaging.RabbitRpcException;
 
-import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,6 +2,8 @@ package com.example.gatewayservice.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,27 +18,23 @@ import java.util.function.Function;
 public class JwtUtil {
 
     @Value("${JWT_PUBLIC_KEY}")
-    private String publicKeyString;
-
+    private String publicKeyStr;
     private PublicKey publicKey;
 
-    private PublicKey getPublicKey() {
-        if (publicKey == null) {
-            try {
-                String publicKeyPEM = publicKeyString
-                        .replace("-----BEGIN PUBLIC KEY-----", "")
-                        .replace("-----END PUBLIC KEY-----", "")
-                        .replaceAll("\\s", "");
+    @PostConstruct
+    public void init() {
+        this.publicKey = getPublicKey(publicKeyStr);
+    }
 
-                byte[] decoded = Base64.getDecoder().decode(publicKeyPEM);
-                X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                publicKey = keyFactory.generatePublic(keySpec);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to load public key", e);
-            }
+    private PublicKey getPublicKey(String key) {
+        try {
+            byte[] decoded = Base64.getDecoder().decode(key);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
+            return keyFactory.generatePublic(keySpec);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load public key", e);
         }
-        return publicKey;
     }
 
     public String extractUsername(String token) {
@@ -54,7 +52,7 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getPublicKey())
+                .verifyWith(publicKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

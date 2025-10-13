@@ -8,7 +8,6 @@ import com.example.userservice.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
@@ -25,14 +24,11 @@ public class OAuth2UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
     /**
      * Kiểm tra nếu người dùng đã tồn tại trong hệ thống (RabbitMQ listener)
      */
     @RabbitListener(queues = RabbitConfig.USER_OAUTH2_CHECK_QUEUE)
-    @SendTo("#{rabbitListenerContainerFactory.resolveReplyToAddress(message)}")
+    @SendTo(RabbitConfig.USER_OAUTH2_CHECK_REPLY_QUEUE)
     public Map<String, Object> checkUserExistsRabbit(Map<String, String> request) {
         try {
             String email = request.get("email");
@@ -76,7 +72,7 @@ public class OAuth2UserService {
      * Tạo người dùng mới từ thông tin OAuth2 (RabbitMQ listener)
      */
     @RabbitListener(queues = RabbitConfig.USER_OAUTH2_CREATE_QUEUE)
-    @SendTo("#{rabbitListenerContainerFactory.resolveReplyToAddress(message)}")
+    @SendTo(RabbitConfig.USER_OAUTH2_CREATE_REPLY_QUEUE)
     public Map<String, Object> createOAuth2UserRabbit(OAuth2UserDto oauth2UserDto) {
         try {
             logger.info("Received request to create OAuth2 user: email={}, provider={}",
@@ -110,7 +106,7 @@ public class OAuth2UserService {
      * Cập nhật thông tin người dùng OAuth2 (RabbitMQ listener)
      */
     @RabbitListener(queues = RabbitConfig.USER_OAUTH2_UPDATE_QUEUE)
-    @SendTo("#{rabbitListenerContainerFactory.resolveReplyToAddress(message)}")
+    @SendTo(RabbitConfig.USER_OAUTH2_UPDATE_REPLY_QUEUE)
     public Map<String, Object> updateOAuth2UserRabbit(OAuth2UserDto oauth2UserDto) {
         try {
             Long userId = oauth2UserDto.getId();

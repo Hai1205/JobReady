@@ -39,13 +39,13 @@ services:
       retries: 10
 
     # Redis Cache
-    redis:
-      image: redis:latest
-      ports:
-        - "6379:6379"
-      volumes:
-        - redis_data:/data
-      restart: always
+    # redis:
+    #   image: redis:latest
+    #   ports:
+    #     - "6379:6379"
+    #   volumes:
+    #     - redis_data:/data
+    #   restart: always
 
 volumes:
   mysql_data:

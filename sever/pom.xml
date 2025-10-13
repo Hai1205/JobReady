@@ -22,7 +22,6 @@
     </properties>
 
     <modules>
-        <module>shared</module>
         <module>discovery-service</module>
         <module>gateway-service</module>
         <module>auth-service</module>
