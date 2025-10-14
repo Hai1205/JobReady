@@ -48,18 +48,12 @@ public class UserController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    /**
-     * @deprecated This endpoint is deprecated and will be removed in future
-     *             versions.
-     *             Please use the auth-service's /auth/authenticate endpoint
-     *             instead.
-     */
-    @Deprecated
-    @PostMapping("/authenticate-user")
-    public ResponseEntity<Response> authenticateUser(@ModelAttribute UserDto userDto) {
-        Response response = userService.authenticateUser(userDto.getUsername(), userDto.getPassword());
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
+    // @Deprecated
+    // @PostMapping("/authenticate-user")
+    // public ResponseEntity<Response> authenticateUser(@ModelAttribute UserDto userDto) {
+    //     Response response = userService.authenticateUser(userDto.getUsername(), userDto.getPassword());
+    //     return ResponseEntity.status(response.getStatusCode()).body(response);
+    // }
 
     @GetMapping("/health")
     public ResponseEntity<Response> health() {

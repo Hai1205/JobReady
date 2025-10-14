@@ -3,14 +3,13 @@ package com.example.userservice.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor // Empty constructor for MapStruct
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -41,6 +40,25 @@ public class User {
     private String avatarUrl; // Profile picture URL
     private boolean isOAuthUser = false; // Flag to distinguish OAuth vs regular users
 
+    // Full constructor for MapStruct
+    @Builder
+    public User(UUID id, String username, String password, String email, String fullname,
+            UserRole role, UserStatus status, String oauthProvider, String oauthProviderId,
+            String avatarUrl, boolean isOAuthUser) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.fullname = fullname;
+        this.role = role;
+        this.status = status;
+        this.oauthProvider = oauthProvider;
+        this.oauthProviderId = oauthProviderId;
+        this.avatarUrl = avatarUrl;
+        this.isOAuthUser = isOAuthUser;
+    }
+
+    // Basic constructor
     public User(String username, String password, String email, String fullname) {
         this.username = username;
         this.password = password;

@@ -8,7 +8,7 @@
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>Spring Microservices</name>
+        <name>Spring Microservices</name>
     <description>Spring Boot Microservices Project with Eureka, Gateway, Auth and User services</description>
 
     <properties>
@@ -22,6 +22,7 @@
     </properties>
 
     <modules>
+        <module>rabbit-common</module>
         <module>discovery-service</module>
         <module>gateway-service</module>
         <module>auth-service</module>
@@ -31,13 +32,6 @@
 
     <dependencyManagement>
         <dependencies>
-        <!-- Lombok for this module -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.32</version>
-            <scope>provided</scope>
-        </dependency>
             <!-- Lombok for all modules -->
             <dependency>
                 <groupId>org.projectlombok</groupId>

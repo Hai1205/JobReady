@@ -7,6 +7,7 @@ import com.example.cvservice.dto.*;
 import com.example.cvservice.dto.responses.*;
 import com.example.cvservice.entity.*;
 import com.example.cvservice.repository.CVRepository;
+import com.example.cvservice.mapper.CVMapper;
 
 import java.time.Instant;
 import java.util.List;
@@ -20,6 +21,9 @@ public class CVService {
     @Autowired
     private CVRepository cvRepository;
 
+    @Autowired
+    private CVMapper cvMapper;
+
     public Response createCV(CVDto dto) {
         Response response = new Response();
 
@@ -31,9 +35,9 @@ public class CVService {
                 }
             }
 
-            CV entity = convertToEntity(dto);
+            CV entity = cvMapper.toEntity(dto);
             CV saved = cvRepository.save(entity);
-            CVDto savedDto = convertToDto(saved);
+            CVDto savedDto = cvMapper.toDto(saved);
 
             ResponseData data = new ResponseData();
             data.setCv(savedDto);
@@ -59,7 +63,7 @@ public class CVService {
 
         try {
             List<CVDto> cvDtos = cvRepository.findAll().stream()
-                    .map(this::convertToDto)
+                    .map(cvMapper::toDto)
                     .collect(Collectors.toList());
 
             ResponseData data = new ResponseData();
@@ -82,7 +86,7 @@ public class CVService {
 
         try {
             CV cv = cvRepository.findById(id).orElseThrow(() -> new RuntimeException("CV not found"));
-            CVDto cvDto = convertToDto(cv);
+            CVDto cvDto = cvMapper.toDto(cv);
 
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
@@ -114,7 +118,7 @@ public class CVService {
             Optional<CV> cvOpt = cvRepository.findByTitle(title);
 
             if (cvOpt.isPresent()) {
-                CVDto cvDto = convertToDto(cvOpt.get());
+                CVDto cvDto = cvMapper.toDto(cvOpt.get());
 
                 ResponseData data = new ResponseData();
                 data.setCv(cvDto);
@@ -186,7 +190,7 @@ public class CVService {
             existing.setUpdatedAt(Instant.now());
 
             CV saved = cvRepository.save(existing);
-            CVDto updatedDto = convertToDto(saved);
+            CVDto updatedDto = cvMapper.toDto(saved);
 
             ResponseData data = new ResponseData();
             data.setCv(updatedDto);
@@ -234,93 +238,5 @@ public class CVService {
         }
 
         return response;
-    }
-
-    // mapping helpers
-    private CVDto convertToDto(CV cv) {
-        CVDto dto = new CVDto();
-        dto.setId(cv.getId() == null ? null : cv.getId());
-        dto.setTitle(cv.getTitle());
-
-        if (cv.getPersonalInfo() != null) {
-            PersonalInfoDto pid = new PersonalInfoDto();
-            pid.setFullname(cv.getPersonalInfo().getFullname());
-            pid.setEmail(cv.getPersonalInfo().getEmail());
-            pid.setPhone(cv.getPersonalInfo().getPhone());
-            pid.setLocation(cv.getPersonalInfo().getLocation());
-            pid.setSummary(cv.getPersonalInfo().getSummary());
-            dto.setPersonalInfo(pid);
-        }
-
-        if (cv.getExperience() != null) {
-            dto.setExperience(cv.getExperience().stream().map(e -> {
-                ExperienceDto ed = new ExperienceDto();
-                ed.setId(e.getId() == null ? null : e.getId());
-                ed.setCompany(e.getCompany());
-                ed.setPosition(e.getPosition());
-                ed.setStartDate(e.getStartDate());
-                ed.setEndDate(e.getEndDate());
-                ed.setDescription(e.getDescription());
-                return ed;
-            }).collect(Collectors.toList()));
-        }
-
-        if (cv.getEducation() != null) {
-            dto.setEducation(cv.getEducation().stream().map(ed -> {
-                EducationDto e = new EducationDto();
-                e.setId(ed.getId() == null ? null : ed.getId());
-                e.setSchool(ed.getSchool());
-                e.setDegree(ed.getDegree());
-                e.setField(ed.getField());
-                e.setStartDate(ed.getStartDate());
-                e.setEndDate(ed.getEndDate());
-                return e;
-            }).collect(Collectors.toList()));
-        }
-
-        dto.setSkills(cv.getSkills());
-        dto.setCreatedAt(cv.getCreatedAt() == null ? null : cv.getCreatedAt().toString());
-        dto.setUpdatedAt(cv.getUpdatedAt() == null ? null : cv.getUpdatedAt().toString());
-
-        return dto;
-    }
-
-    private CV convertToEntity(CVDto dto) {
-        CV cv = new CV();
-        cv.setTitle(dto.getTitle());
-
-        if (dto.getPersonalInfo() != null) {
-            PersonalInfo pi = new PersonalInfo();
-            pi.setFullname(dto.getPersonalInfo().getFullname());
-            pi.setEmail(dto.getPersonalInfo().getEmail());
-            pi.setPhone(dto.getPersonalInfo().getPhone());
-            pi.setLocation(dto.getPersonalInfo().getLocation());
-            pi.setSummary(dto.getPersonalInfo().getSummary());
-            cv.setPersonalInfo(pi);
-        }
-
-        if (dto.getExperience() != null) {
-            for (ExperienceDto e : dto.getExperience()) {
-                Experience ex = new Experience(e.getCompany(), e.getPosition(), e.getStartDate(), e.getEndDate(),
-                        e.getDescription());
-                cv.getExperience().add(ex);
-            }
-        }
-
-        if (dto.getEducation() != null) {
-            for (EducationDto ed : dto.getEducation()) {
-                Education e = new Education(ed.getSchool(), ed.getDegree(), ed.getField(), ed.getStartDate(),
-                        ed.getEndDate());
-                cv.getEducation().add(e);
-            }
-        }
-
-        if (dto.getSkills() != null)
-            cv.getSkills().addAll(dto.getSkills());
-
-        cv.setCreatedAt(dto.getCreatedAt() != null ? Instant.parse(dto.getCreatedAt()) : Instant.now());
-        cv.setUpdatedAt(dto.getUpdatedAt() != null ? Instant.parse(dto.getUpdatedAt()) : cv.getCreatedAt());
-
-        return cv;
     }
 }

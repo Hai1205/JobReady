@@ -1,9 +1,10 @@
 package com.example.userservice.service;
 
 import com.example.userservice.dto.UserDto;
-import com.example.userservice.dto.response.ResponseData;
 import com.example.userservice.dto.response.Response;
+import com.example.userservice.dto.response.ResponseData;
 import com.example.userservice.entity.User;
+import com.example.userservice.mapper.UserMapper;
 import com.example.userservice.exception.OurException;
 import com.example.userservice.repository.UserRepository;
 import org.slf4j.Logger;
@@ -22,10 +23,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     public Response createUser(UserDto userDto) {
@@ -49,7 +52,7 @@ public class UserService {
             user.setStatus(User.UserStatus.PENDING);
 
             User savedUser = userRepository.save(user);
-            UserDto savedUserDto = convertToDto(savedUser);
+            UserDto savedUserDto = userMapper.toDto(savedUser);
 
             ResponseData data = new ResponseData();
             data.setUser(savedUserDto);
@@ -75,7 +78,7 @@ public class UserService {
 
         try {
             List<UserDto> userDtos = userRepository.findAll().stream()
-                    .map(this::convertToDto)
+                    .map(userMapper::toDto)
                     .collect(Collectors.toList());
 
             ResponseData data = new ResponseData();
@@ -99,7 +102,7 @@ public class UserService {
         try {
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("User not found"));
-            UserDto userDto = convertToDto(user);
+            UserDto userDto = userMapper.toDto(user);
 
             ResponseData data = new ResponseData();
             data.setUser(userDto);
@@ -120,33 +123,6 @@ public class UserService {
         return response;
     }
 
-    public Response getUserByUsername(String username) {
-        Response response = new Response();
-
-        try {
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            UserDto userDto = convertToDto(user);
-
-            ResponseData data = new ResponseData();
-            data.setUser(userDto);
-
-            response.setStatusCode(200);
-            response.setMessage("User retrieved successfully");
-            response.setData(data);
-        } catch (OurException e) {
-            response.setStatusCode(e.getStatusCode());
-            response.setMessage(e.getMessage());
-            logger.error("Error finding user by username: {}", username, e);
-        } catch (Exception e) {
-            response.setStatusCode(500);
-            response.setMessage(e.getMessage());
-            logger.error("Error finding user by username: {}", username, e);
-        }
-
-        return response;
-    }
-
     public Response updateUser(UUID id, UserDto userDto) {
         Response response = new Response();
 
@@ -162,7 +138,7 @@ public class UserService {
             }
 
             User updatedUser = userRepository.save(existingUser);
-            UserDto updatedUserDto = convertToDto(updatedUser);
+            UserDto updatedUserDto = userMapper.toDto(updatedUser);
 
             ResponseData data = new ResponseData();
             data.setUser(updatedUserDto);
@@ -209,256 +185,237 @@ public class UserService {
         return response;
     }
 
-    public Response authenticateUser(String username, String password) {
-        Response response = new Response();
-
-        try {
-            boolean isAuthenticated = userRepository.findByUsername(username)
-                    .map(user -> {
-                        if (user.getStatus() == User.UserStatus.PENDING) {
-                            throw new OurException(
-                                    "User account is not verified. Please verify your account first.", 403);
-                        }
-                        return passwordEncoder.matches(password, user.getPassword());
-                    })
-                    .orElse(false);
-
-            if (!isAuthenticated) {
-                throw new RuntimeException("Invalid username or password");
-            }
-
-            User user = userRepository.findByUsername(username).get(); // We know it exists at this point
-            UserDto userDto = convertToDto(user);
-
-            ResponseData data = new ResponseData();
-            data.setUser(userDto);
-            data.setAuthenticated(true);
-
-            response.setStatusCode(200);
-            response.setMessage("User authenticated successfully");
-            response.setData(data);
-        } catch (OurException e) {
-            response.setStatusCode(e.getStatusCode());
-            response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            response.setStatusCode(500);
-            response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
-        }
-
-        return response;
+    public UserDto findByEmail(String email) {
+        logger.info("Finding user by email: {}", email);
+        return userRepository.findByEmail(email)
+                .map(userMapper::toDto)
+                .orElse(null);
     }
 
-    /**
-     * Authenticate a user by email and password
-     * This method is specifically for RabbitMQ authentication requests
-     * 
-     * @param email    User email
-     * @param password User password
-     * @return UserDto if authenticated, null otherwise
-     */
-    public UserDto authenticateUserByEmail(String email, String password) {
-        try {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+        // public Response authenticateUser(String username, String password) {
+    //     Response response = new Response();
 
-            // Check if the account is pending verification
-            if (user.getStatus() == User.UserStatus.PENDING) {
-                throw new OurException(
-                        "User account is not verified. Please verify your account first.");
-            }
+    //     try {
+    //         boolean isAuthenticated = userRepository.findByUsername(username)
+    //                 .map(user -> {
+    //                     if (user.getStatus() == User.UserStatus.PENDING) {
+    //                         throw new OurException(
+    //                                 "User account is not verified. Please verify your account first.", 403);
+    //                     }
+    //                     return passwordEncoder.matches(password, user.getPassword());
+    //                 })
+    //                 .orElse(false);
 
-            // Verify password
-            if (!passwordEncoder.matches(password, user.getPassword())) {
-                throw new RuntimeException("Invalid email or password");
-            }
+    //         if (!isAuthenticated) {
+    //             throw new RuntimeException("Invalid username or password");
+    //         }
 
-            // Return the user data if authentication is successful
-            return convertToDto(user);
-        } catch (Exception e) {
-            System.out.println("Authentication failed: " + e.getMessage());
-            return null;
-        }
-    }
+    //         User user = userRepository.findByUsername(username).get(); // We know it exists at this point
+    //         UserDto userDto = userMapper.toDto(user);
 
-    public Response activateUser(String username) {
-        Response response = new Response();
+    //         ResponseData data = new ResponseData();
+    //         data.setUser(userDto);
+    //         data.setAuthenticated(true);
 
-        try {
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+    //         response.setStatusCode(200);
+    //         response.setMessage("User authenticated successfully");
+    //         response.setData(data);
+    //     } catch (OurException e) {
+    //         response.setStatusCode(e.getStatusCode());
+    //         response.setMessage(e.getMessage());
+    //         System.out.println(e.getMessage());
+    //     } catch (Exception e) {
+    //         response.setStatusCode(500);
+    //         response.setMessage(e.getMessage());
+    //         System.out.println(e.getMessage());
+    //     }
 
-            if (user.getStatus() == User.UserStatus.PENDING) {
-                user.setStatus(User.UserStatus.ACTIVE);
-                userRepository.save(user);
-            }
-
-            UserDto userDto = convertToDto(user);
-
-            ResponseData data = new ResponseData();
-            data.setUser(userDto);
-
-            response.setStatusCode(200);
-            response.setMessage("User activated successfully");
-            response.setData(data);
-        } catch (OurException e) {
-            response.setStatusCode(e.getStatusCode());
-            response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            response.setStatusCode(500);
-            response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
-        }
-
-        return response;
-    }
-
-    public Response getUserStatus(String username) {
-        Response response = new Response();
-
-        try {
-            User.UserStatus status = userRepository.findByUsername(username)
-                    .map(User::getStatus)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            ResponseData data = new ResponseData();
-            data.setStatus(status.toString());
-
-            response.setStatusCode(200);
-            response.setMessage("User status retrieved successfully");
-            response.setData(data);
-        } catch (OurException e) {
-            response.setStatusCode(e.getStatusCode());
-            response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            response.setStatusCode(500);
-            response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
-        }
-
-        return response;
-    }
-
-    private UserDto convertToDto(User user) {
-        UserDto dto = new UserDto(
-                user.getId() != null ? user.getId() : null,
-                user.getUsername(),
-                user.getEmail(),
-                user.getFullname());
-
-        // Set OAuth2 related fields
-        dto.setOauthProvider(user.getOauthProvider());
-        dto.setOauthProviderId(user.getOauthProviderId());
-        dto.setAvatarUrl(user.getAvatarUrl());
-        dto.setOAuthUser(user.isOAuthUser());
-
-        // Add status and role to DTO
-        dto.setStatus(user.getStatus().toString());
-        dto.setRole(user.getRole().toString());
-
-        return dto;
-    }
-
-    // /**
-    //  * Tìm kiếm người dùng theo email cho RabbitMQ
-    //  * 
-    //  * @param email Email của người dùng
-    //  * @return User đối tượng nếu tìm thấy, null nếu không
-    //  */
-    // public User findByEmail(String email) {
-    //     logger.info("Finding user by email: {}", email);
-    //     return userRepository.findByEmail(email)
-    //             .orElse(null);
+    //     return response;
     // }
 
     // /**
-    //  * Thay đổi mật khẩu cho người dùng
+    //  * Authenticate a user by email and password
+    //  * This method is specifically for RabbitMQ authentication requests
     //  * 
-    //  * @param userId          ID của người dùng
-    //  * @param currentPassword Mật khẩu hiện tại
-    //  * @param newPassword     Mật khẩu mới
-    //  * @return User đã cập nhật
+    //  * @param email    User email
+    //  * @param password User password
+    //  * @return UserDto if authenticated, null otherwise
     //  */
+    // public UserDto authenticateUserByEmail(String email, String password) {
+    //     try {
+    //         User user = userRepository.findByEmail(email)
+    //                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+    //         // Check if the account is pending verification
+    //         if (user.getStatus() == User.UserStatus.PENDING) {
+    //             throw new OurException(
+    //                     "User account is not verified. Please verify your account first.");
+    //         }
+
+    //         // Verify password
+    //         if (!passwordEncoder.matches(password, user.getPassword())) {
+    //             throw new RuntimeException("Invalid email or password");
+    //         }
+
+    //         // Return the user data if authentication is successful
+    //         return userMapper.toDto(user);
+    //     } catch (Exception e) {
+    //         System.out.println("Authentication failed: " + e.getMessage());
+    //         return null;
+    //     }
+    // }
+
+    // public Response activateUser(String username) {
+    //     Response response = new Response();
+
+    //     try {
+    //         User user = userRepository.findByUsername(username)
+    //                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+    //         if (user.getStatus() == User.UserStatus.PENDING) {
+    //             user.setStatus(User.UserStatus.ACTIVE);
+    //             userRepository.save(user);
+    //         }
+
+    //         UserDto userDto = userMapper.toDto(user);
+
+    //         ResponseData data = new ResponseData();
+    //         data.setUser(userDto);
+
+    //         response.setStatusCode(200);
+    //         response.setMessage("User activated successfully");
+    //         response.setData(data);
+    //     } catch (OurException e) {
+    //         response.setStatusCode(e.getStatusCode());
+    //         response.setMessage(e.getMessage());
+    //         System.out.println(e.getMessage());
+    //     } catch (Exception e) {
+    //         response.setStatusCode(500);
+    //         response.setMessage(e.getMessage());
+    //         System.out.println(e.getMessage());
+    //     }
+
+    //     return response;
+    // }
+
+    // public Response getUserStatus(String username) {
+    //     Response response = new Response();
+
+    //     try {
+    //         User.UserStatus status = userRepository.findByUsername(username)
+    //                 .map(User::getStatus)
+    //                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+    //         ResponseData data = new ResponseData();
+    //         data.setStatus(status.toString());
+
+    //         response.setStatusCode(200);
+    //         response.setMessage("User status retrieved successfully");
+    //         response.setData(data);
+    //     } catch (OurException e) {
+    //         response.setStatusCode(e.getStatusCode());
+    //         response.setMessage(e.getMessage());
+    //         System.out.println(e.getMessage());
+    //     } catch (Exception e) {
+    //         response.setStatusCode(500);
+    //         response.setMessage(e.getMessage());
+    //         System.out.println(e.getMessage());
+    //     }
+
+    //     return response;
+    // }
+
+    // /**
+    // * Thay đổi mật khẩu cho người dùng
+    // *
+    // * @param userId ID của người dùng
+    // * @param currentPassword Mật khẩu hiện tại
+    // * @param newPassword Mật khẩu mới
+    // * @return User đã cập nhật
+    // */
     // @Transactional
     // public User changePassword(ChangePasswordRequest request) {
-    //     logger.info("Changing password for user ID: {}", request.getUserId());
+    // logger.info("Changing password for user ID: {}", request.getUserId());
 
-    //     User user = userRepository.findById(request.getUserId())
-    //             .orElseThrow(() -> new OurException("User not found with ID: " + request.getUserId(), 404));
+    // User user = userRepository.findById(request.getUserId())
+    // .orElseThrow(() -> new OurException("User not found with ID: " +
+    // request.getUserId(), 404));
 
-    //     // Kiểm tra mật khẩu hiện tại
-    //     if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-    //         throw new OurException("Current password is incorrect", 400);
-    //     }
+    // // Kiểm tra mật khẩu hiện tại
+    // if (!passwordEncoder.matches(request.getCurrentPassword(),
+    // user.getPassword())) {
+    // throw new OurException("Current password is incorrect", 400);
+    // }
 
-    //     // Cập nhật mật khẩu mới
-    //     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-    //     return userRepository.save(user);
+    // // Cập nhật mật khẩu mới
+    // user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    // return userRepository.save(user);
     // }
 
     // /**
-    //  * Đặt lại mật khẩu cho người dùng
-    //  * 
-    //  * @param userId      ID của người dùng
-    //  * @param newPassword Mật khẩu mới
-    //  * @return User đã cập nhật
-    //  */
+    // * Đặt lại mật khẩu cho người dùng
+    // *
+    // * @param userId ID của người dùng
+    // * @param newPassword Mật khẩu mới
+    // * @return User đã cập nhật
+    // */
     // @Transactional
     // public User resetPassword(ResetPasswordRequest request) {
-    //     logger.info("Resetting password for user ID: {}", request.getUserId());
+    // logger.info("Resetting password for user ID: {}", request.getUserId());
 
-    //     User user = userRepository.findById(request.getUserId())
-    //             .orElseThrow(() -> new OurException("User not found with ID: " + request.getUserId(), 404));
+    // User user = userRepository.findById(request.getUserId())
+    // .orElseThrow(() -> new OurException("User not found with ID: " +
+    // request.getUserId(), 404));
 
-    //     // Cập nhật mật khẩu mới
-    //     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-    //     return userRepository.save(user);
+    // // Cập nhật mật khẩu mới
+    // user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    // return userRepository.save(user);
     // }
 
     // /**
-    //  * Đặt lại mật khẩu bằng email
-    //  * 
-    //  * @param email       Email của người dùng
-    //  * @param newPassword Mật khẩu mới
-    //  * @return User đã cập nhật
-    //  */
+    // * Đặt lại mật khẩu bằng email
+    // *
+    // * @param email Email của người dùng
+    // * @param newPassword Mật khẩu mới
+    // * @return User đã cập nhật
+    // */
     // @Transactional
     // public User resetPasswordByEmail(String email, String newPassword) {
-    //     logger.info("Resetting password for email: {}", email);
+    // logger.info("Resetting password for email: {}", email);
 
-    //     User user = userRepository.findByEmail(email)
-    //             .orElseThrow(() -> new OurException("User not found with email: " + email, 404));
+    // User user = userRepository.findByEmail(email)
+    // .orElseThrow(() -> new OurException("User not found with email: " + email,
+    // 404));
 
-    //     // Cập nhật mật khẩu mới
-    //     user.setPassword(passwordEncoder.encode(newPassword));
-    //     return userRepository.save(user);
+    // // Cập nhật mật khẩu mới
+    // user.setPassword(passwordEncoder.encode(newPassword));
+    // return userRepository.save(user);
     // }
 
     // /**
-    //  * Thay đổi trạng thái người dùng (kích hoạt/vô hiệu hóa)
-    //  * 
-    //  * @param userId ID của người dùng
-    //  * @param status Trạng thái mới (true: kích hoạt, false: vô hiệu hóa)
-    //  * @return User đã cập nhật
-    //  */
+    // * Thay đổi trạng thái người dùng (kích hoạt/vô hiệu hóa)
+    // *
+    // * @param userId ID của người dùng
+    // * @param status Trạng thái mới (true: kích hoạt, false: vô hiệu hóa)
+    // * @return User đã cập nhật
+    // */
     // @Transactional
     // public User changeStatus(ChangeStatusRequest request) {
-    //     logger.info("Changing status for user ID: {} to {}", request.getUserId(), request.getStatus());
+    // logger.info("Changing status for user ID: {} to {}", request.getUserId(),
+    // request.getStatus());
 
-    //     User user = userRepository.findById(request.getUserId())
-    //             .orElseThrow(() -> new OurException("User not found with ID: " + request.getUserId(), 404));
+    // User user = userRepository.findById(request.getUserId())
+    // .orElseThrow(() -> new OurException("User not found with ID: " +
+    // request.getUserId(), 404));
 
-    //     // Cập nhật trạng thái
-    //     boolean status = "enable".equalsIgnoreCase(request.getStatus());
-    //     if (status) {
-    //         user.setStatus(User.UserStatus.ACTIVE);
-    //     } else {
-    //         user.setStatus(User.UserStatus.INACTIVE);
-    //     }
+    // // Cập nhật trạng thái
+    // boolean status = "enable".equalsIgnoreCase(request.getStatus());
+    // if (status) {
+    // user.setStatus(User.UserStatus.ACTIVE);
+    // } else {
+    // user.setStatus(User.UserStatus.INACTIVE);
+    // }
 
-    //     return userRepository.save(user);
+    // return userRepository.save(user);
     // }
 }

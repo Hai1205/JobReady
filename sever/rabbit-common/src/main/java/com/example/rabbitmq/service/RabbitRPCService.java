@@ -1,7 +1,7 @@
-package com.example.cvservice.config.rabbitmq;
+package com.example.rabbitmq.service;
 
-import com.example.cvservice.dto.RabbitHeader;
-import com.example.cvservice.dto.responses.RabbitResponse;
+import com.example.rabbitmq.dto.RabbitHeader;
+import com.example.rabbitmq.dto.RabbitResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Message;
@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Service for RabbitMQ RPC operations
+ * Handles sending messages and receiving responses
+ */
 @Service
 @RequiredArgsConstructor
 public class RabbitRPCService {
@@ -20,17 +24,26 @@ public class RabbitRPCService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Gửi message với metadata tùy chọn và nhận phản hồi
+     * Send message with metadata and receive response
+     * 
+     * @param <R>          Type of response data
+     * @param exchange     Exchange to send message to
+     * @param routingKey   Routing key for message
+     * @param header       Header with metadata
+     * @param payload      Payload to send
+     * @param responseType Class of response data
+     * @return Response data of type R
      */
-    public <T, R> R sendAndReceive(String exchange, String routingKey, RabbitHeader header, T payload, Class<R> responseType) {
+    public <R> R sendAndReceive(String exchange, String routingKey, RabbitHeader header, Object payload,
+            Class<R> responseType) {
         try {
             if (header == null) {
                 header = RabbitHeader.builder()
                         .correlationId(UUID.randomUUID().toString())
                         .replyTo("common.reply.queue")
                         .timestamp(System.currentTimeMillis())
-                        .sourceService("auth-service")
-                        .targetService("user-service")
+                        .sourceService("default-service")
+                        .targetService("target-service")
                         .build();
             }
 
@@ -44,7 +57,7 @@ public class RabbitRPCService {
             if (response == null)
                 throw new RuntimeException("Timeout waiting for response");
 
-            // Parse thành RabbitResponse chuẩn
+            // Parse to standard RabbitResponse
             RabbitResponse<R> result = objectMapper.readValue(response.toString(),
                     objectMapper.getTypeFactory().constructParametricType(RabbitResponse.class, responseType));
 
@@ -58,6 +71,30 @@ public class RabbitRPCService {
         }
     }
 
+    /**
+     * Send message with parameters and receive response
+     * 
+     * @param <R>          Type of response data
+     * @param exchange     Exchange to send message to
+     * @param routingKey   Routing key for message
+     * @param header       Header with metadata
+     * @param params       Map of parameters to send
+     * @param responseType Class of response data
+     * @return Response data of type R
+     */
+    public <R> R sendAndReceiveWithParams(String exchange, String routingKey, RabbitHeader header,
+            Map<String, Object> params, Class<R> responseType) {
+        return sendAndReceive(exchange, routingKey, header, params, responseType);
+    }
+
+    /**
+     * Send reply to a received message
+     * 
+     * @param exchange      Exchange to send reply to
+     * @param replyTo       Reply queue
+     * @param correlationId Correlation ID of original message
+     * @param payload       Payload to send
+     */
     public void sendReply(String exchange, String replyTo, String correlationId, Object payload) {
         try {
             var header = RabbitHeader.builder()

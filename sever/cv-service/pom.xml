@@ -45,9 +45,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+        <!-- Rabbit Common Module -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
+            <groupId>com.example</groupId>
+            <artifactId>rabbit-common</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

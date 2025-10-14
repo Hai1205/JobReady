@@ -2,11 +2,72 @@ package com.example.userservice.mapper;
 
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.entity.User;
-import org.mapstruct.Mapper;
+import com.example.userservice.entity.User.UserRole;
+import com.example.userservice.entity.User.UserStatus;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface UserMapper {
-    UserDto toDto(User user);
+@Component
+public class UserMapper {
 
-    User toEntity(UserDto dto);
+    /**
+     * Maps User entity to UserDto
+     */
+    public UserDto toDto(User user) {
+        if (user == null) {
+            return null;
+        }
+
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setFullname(user.getFullname());
+        dto.setRole(user.getRole() != null ? user.getRole().name() : null);
+        dto.setStatus(user.getStatus() != null ? user.getStatus().name() : null);
+        dto.setOauthProvider(user.getOauthProvider());
+        dto.setOauthProviderId(user.getOauthProviderId());
+        dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setOAuthUser(user.isOAuthUser());
+
+        return dto;
+    }
+
+    /**
+     * Maps UserDto to User entity
+     */
+    public User toEntity(UserDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        User user = new User();
+        // Don't set ID - it's generated
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword());
+        user.setEmail(dto.getEmail());
+        user.setFullname(dto.getFullname());
+
+        if (dto.getRole() != null) {
+            try {
+                user.setRole(UserRole.valueOf(dto.getRole()));
+            } catch (IllegalArgumentException e) {
+                user.setRole(UserRole.USER);
+            }
+        }
+
+        if (dto.getStatus() != null) {
+            try {
+                user.setStatus(UserStatus.valueOf(dto.getStatus()));
+            } catch (IllegalArgumentException e) {
+                user.setStatus(UserStatus.PENDING);
+            }
+        }
+
+        user.setOauthProvider(dto.getOauthProvider());
+        user.setOauthProviderId(dto.getOauthProviderId());
+        user.setAvatarUrl(dto.getAvatarUrl());
+        user.setOAuthUser(dto.isOAuthUser());
+
+        return user;
+    }
 }

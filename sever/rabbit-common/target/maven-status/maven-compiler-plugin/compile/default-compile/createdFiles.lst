@@ -1,0 +1,10 @@
+com\example\rabbitmq\dto\RabbitResponse.class
+com\example\rabbitmq\consumer\BaseConsumer.class
+com\example\rabbitmq\dto\QueueDef.class
+com\example\rabbitmq\dto\RabbitHeader$RabbitHeaderBuilder.class
+com\example\rabbitmq\service\RabbitRPCService.class
+com\example\rabbitmq\dto\RabbitHeader.class
+com\example\rabbitmq\constants\RabbitConstants.class
+com\example\rabbitmq\config\BaseRabbitConfig.class
+com\example\rabbitmq\dto\ExchangeDef.class
+com\example\rabbitmq\dto\RabbitResponse$RabbitResponseBuilder.class
