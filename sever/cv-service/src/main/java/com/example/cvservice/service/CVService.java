@@ -35,7 +35,7 @@ public class CVService {
             CV saved = cvRepository.save(entity);
             CVDto savedDto = convertToDto(saved);
 
-            Data data = new Data();
+            ResponseData data = new ResponseData();
             data.setCv(savedDto);
 
             response.setStatusCode(201);
@@ -62,7 +62,7 @@ public class CVService {
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
 
-            Data data = new Data();
+            ResponseData data = new ResponseData();
             data.setCvs(cvDtos);
 
             response.setStatusCode(200);
@@ -84,7 +84,7 @@ public class CVService {
             CV cv = cvRepository.findById(id).orElseThrow(() -> new RuntimeException("CV not found"));
             CVDto cvDto = convertToDto(cv);
 
-            Data data = new Data();
+            ResponseData data = new ResponseData();
             data.setCv(cvDto);
 
             response.setStatusCode(200);
@@ -116,7 +116,7 @@ public class CVService {
             if (cvOpt.isPresent()) {
                 CVDto cvDto = convertToDto(cvOpt.get());
 
-                Data data = new Data();
+                ResponseData data = new ResponseData();
                 data.setCv(cvDto);
 
                 response.setStatusCode(200);
@@ -188,7 +188,7 @@ public class CVService {
             CV saved = cvRepository.save(existing);
             CVDto updatedDto = convertToDto(saved);
 
-            Data data = new Data();
+            ResponseData data = new ResponseData();
             data.setCv(updatedDto);
 
             response.setStatusCode(200);

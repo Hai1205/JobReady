@@ -1,4 +1,4 @@
-package com.example.authservice.config.rabbitmq;
+package com.example.userservice.config.rabbitmq;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.*;

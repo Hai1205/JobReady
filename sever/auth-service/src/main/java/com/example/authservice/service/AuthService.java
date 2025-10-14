@@ -56,7 +56,7 @@ public class AuthService {
 
             String token = jwtUtil.generateToken(userId, username, role);
 
-            Data data = new Data();
+            ResponseData data = new ResponseData();
             data.setToken(token);
             data.setUser(userDto);
 
@@ -86,7 +86,7 @@ public class AuthService {
         try {
             boolean isValid = jwtUtil.validateToken(token, username);
 
-            Data data = new Data();
+            ResponseData data = new ResponseData();
             Map<String, Object> additionalData = new HashMap<>();
             additionalData.put("valid", isValid);
             data.setAdditionalData(additionalData);

@@ -1,7 +1,7 @@
-package com.example.authservice.config.rabbitmq;
+package com.example.userservice.config.rabbitmq;
 
-import com.example.authservice.dto.RabbitHeader;
-import com.example.authservice.dto.responses.RabbitResponse;
+import com.example.userservice.dto.RabbitHeader;
+import com.example.userservice.dto.response.RabbitResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Message;

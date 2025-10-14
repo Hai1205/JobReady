@@ -5,9 +5,12 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.util.UUID;
 
+import lombok.*;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserDto {
     private UUID id;
     private String username;
@@ -23,7 +26,7 @@ public class UserDto {
     private String oauthProvider;
     private String oauthProviderId;
     private String avatarUrl;
-    private boolean isOAuthUser = false;
+    private boolean isOAuthUser;
 
     public UserDto(UUID id, String username, String email, String fullname) {
         this.id = id;
