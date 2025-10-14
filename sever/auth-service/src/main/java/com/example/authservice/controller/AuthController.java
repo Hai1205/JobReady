@@ -23,23 +23,23 @@ public class AuthController {
     public ResponseEntity<Response> login(
             @ModelAttribute LoginRequest loginRequest,
             HttpServletResponse response) {
-        Response loginResponse = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
+        Response loginResponse = authService.login(loginRequest);
 
-        boolean isActive = loginResponse.getData() != null && loginResponse.getData().getUser() != null
-                && loginResponse.getData().getUser().getStatus().equals("ACTIVE");
-        boolean isOk = loginResponse.getStatusCode() == 200;
+        // boolean isActive = loginResponse.getData() != null && loginResponse.getData().getUser() != null
+        //         && loginResponse.getData().getUser().getStatus().equals("ACTIVE");
+        // boolean isOk = loginResponse.getStatusCode() == 200;
 
-        if (isOk && isActive) {
-            int SevenDays = 7 * 24 * 60 * 60;
-            Cookie jwtCookie = new Cookie("JWT_TOKEN", loginResponse.getData().getToken());
-            jwtCookie.setHttpOnly(true);
-            jwtCookie.setSecure(false);
-            jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(SevenDays);
+        // if (isOk && isActive) {
+        //     int SevenDays = 7 * 24 * 60 * 60;
+        //     Cookie jwtCookie = new Cookie("JWT_TOKEN", loginResponse.getData().getToken());
+        //     jwtCookie.setHttpOnly(true);
+        //     jwtCookie.setSecure(false);
+        //     jwtCookie.setPath("/");
+        //     jwtCookie.setMaxAge(SevenDays);
 
-            response.addCookie(jwtCookie);
-            response.setHeader("X-JWT-TOKEN", loginResponse.getData().getToken());
-        }
+        //     response.addCookie(jwtCookie);
+        //     response.setHeader("X-JWT-TOKEN", loginResponse.getData().getToken());
+        // }
 
         return ResponseEntity.status(loginResponse.getStatusCode()).body(loginResponse);
     }
@@ -67,17 +67,17 @@ public class AuthController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/change-password/{userId}")
-    public ResponseEntity<Response> changePassword(
-            @PathVariable String userId,
-            @ModelAttribute com.example.authservice.dto.requests.ChangePasswordRequest changePasswordRequest) {
-        Response response = authService.changePassword(userId,
-                changePasswordRequest.getCurrentPassword(),
-                changePasswordRequest.getNewPassword(),
-                changePasswordRequest.getRePassword());
+    // @PutMapping("/change-password/{userId}")
+    // public ResponseEntity<Response> changePassword(
+    //         @PathVariable String userId,
+    //         @ModelAttribute ChangePasswordMessage changePasswordRequest) {
+    //     Response response = authService.changePassword(userId,
+    //             changePasswordRequest.getCurrentPassword(),
+    //             changePasswordRequest.getNewPassword(),
+    //             changePasswordRequest.getRePassword());
 
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
+    //     return ResponseEntity.status(response.getStatusCode()).body(response);
+    // }
 
     @PutMapping("/reset-password/{userId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -88,16 +88,16 @@ public class AuthController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/forgot-password/{email}")
-    public ResponseEntity<Response> forgotPassword(
-            @PathVariable String email,
-            @ModelAttribute ForgotPasswordRequest forgotPasswordRequest) {
-        Response response = authService.forgotPassword(email,
-                forgotPasswordRequest.getNewPassword(),
-                forgotPasswordRequest.getRePassword());
+    // @PutMapping("/forgot-password/{email}")
+    // public ResponseEntity<Response> forgotPassword(
+    //         @PathVariable String email,
+    //         @ModelAttribute ForgotPasswordMessage forgotPasswordRequest) {
+    //     Response response = authService.forgotPassword(email,
+    //             forgotPasswordRequest.getNewPassword(),
+    //             forgotPasswordRequest.getRePassword());
 
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
+    //     return ResponseEntity.status(response.getStatusCode()).body(response);
+    // }
 
     @PostMapping("/logout")
     public ResponseEntity<Response> logout(HttpServletResponse response) {

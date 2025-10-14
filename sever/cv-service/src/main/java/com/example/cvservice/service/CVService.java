@@ -4,10 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.cvservice.dto.*;
-import com.example.cvservice.entity.CV;
-import com.example.cvservice.entity.Education;
-import com.example.cvservice.entity.Experience;
-import com.example.cvservice.entity.PersonalInfo;
+import com.example.cvservice.dto.responses.*;
+import com.example.cvservice.entity.*;
 import com.example.cvservice.repository.CVRepository;
 
 import java.time.Instant;

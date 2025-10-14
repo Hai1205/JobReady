@@ -1,6 +1,9 @@
 package com.example.cvservice.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +11,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "cvs")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CV {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -15,7 +21,8 @@ public class CV {
 
     private String title;
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "cv_id")
     private PersonalInfo personalInfo;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -34,9 +41,6 @@ public class CV {
     private Instant createdAt;
     private Instant updatedAt;
 
-    public CV() {
-    }
-
     @PrePersist
     protected void onCreate() {
         createdAt = Instant.now();
@@ -46,70 +50,5 @@ public class CV {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = Instant.now();
-    }
-
-    // Getters and setters
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public PersonalInfo getPersonalInfo() {
-        return personalInfo;
-    }
-
-    public void setPersonalInfo(PersonalInfo personalInfo) {
-        this.personalInfo = personalInfo;
-    }
-
-    public List<Experience> getExperience() {
-        return experience;
-    }
-
-    public void setExperience(List<Experience> experience) {
-        this.experience = experience;
-    }
-
-    public List<Education> getEducation() {
-        return education;
-    }
-
-    public void setEducation(List<Education> education) {
-        this.education = education;
-    }
-
-    public List<String> getSkills() {
-        return skills;
-    }
-
-    public void setSkills(List<String> skills) {
-        this.skills = skills;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

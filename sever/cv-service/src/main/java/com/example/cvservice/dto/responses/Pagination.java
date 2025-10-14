@@ -1,4 +1,4 @@
-package com.example.cvservice.dto;
+package com.example.cvservice.dto.responses;
 
 public class Pagination {
     private long totalItems;

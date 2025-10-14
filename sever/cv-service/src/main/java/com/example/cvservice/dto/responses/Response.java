@@ -1,4 +1,4 @@
-package com.example.userservice.dto.response;
+package com.example.cvservice.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;

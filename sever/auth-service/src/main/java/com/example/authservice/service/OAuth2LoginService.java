@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -18,8 +19,8 @@ public class OAuth2LoginService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Autowired
-    private UserService userService;
+    // @Autowired
+    // private UserService userService;
 
     /**
      * Xử lý đăng nhập OAuth2 thành công
@@ -44,7 +45,8 @@ public class OAuth2LoginService {
 
             // Xử lý user trong user-service thông qua RabbitMQ (check exists,
             // create/update)
-            Map<String, Object> userResult = userService.processOAuth2User(oauth2UserDto);
+            // Map<String, Object> userResult = userService.processOAuth2User(oauth2UserDto);
+            Map<String, Object> userResult = new HashMap<>(); // Giả lập user-service response
 
             if (userResult == null) {
                 throw new RuntimeException("Failed to process user in user-service");

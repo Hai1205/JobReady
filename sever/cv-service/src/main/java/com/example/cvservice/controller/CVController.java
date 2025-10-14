@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.cvservice.dto.CVDto;
-import com.example.cvservice.dto.Response;
+import com.example.cvservice.dto.responses.Response;
 import com.example.cvservice.service.CVService;
 
 @RestController

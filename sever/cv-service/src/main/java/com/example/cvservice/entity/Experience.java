@@ -1,10 +1,16 @@
 package com.example.cvservice.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.util.UUID;
 
 @Entity
 @Table(name = "experiences")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -18,62 +24,11 @@ public class Experience {
     @Column(length = 2000)
     private String description;
 
-    public Experience() {
-    }
-
     public Experience(String company, String position, String startDate, String endDate, String description) {
         this.company = company;
         this.position = position;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.description = description;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getCompany() {
-        return company;
-    }
-
-    public void setCompany(String company) {
-        this.company = company;
-    }
-
-    public String getPosition() {
-        return position;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
-    public String getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-
-    public String getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
     }
 }

@@ -181,12 +181,12 @@ mvn spring-boot:run -pl gateway-service
 # User Service
 mvn spring-boot:run -pl user-service
 
-# CV Service
-mvn spring-boot:run -pl cv-service
-
 # Auth Service
 mvn spring-boot:run -pl auth-service
 # mvn spring-boot:run -pl auth-service -Dspring-boot.run.profiles=oauth2
+
+# CV Service
+mvn spring-boot:run -pl cv-service
 ```
 
 ### 6. Kiểm tra services

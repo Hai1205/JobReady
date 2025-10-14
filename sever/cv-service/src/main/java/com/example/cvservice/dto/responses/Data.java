@@ -1,4 +1,4 @@
-package com.example.cvservice.dto;
+package com.example.cvservice.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
