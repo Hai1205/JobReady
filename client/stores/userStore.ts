@@ -18,15 +18,17 @@ export interface IUserStore extends IBaseStore {
 	createUser: (
 		email: string,
 		password: string,
-		name: string,
+		fullname: string,
 		role: string,
+		status: string,
+		avatar: File,
 	) => Promise<IApiResponse<IUserDataResponse>>;
 	updateUser: (
 		userId: string,
-		email: string,
-		password: string,
-		name: string,
+		fullname: string,
 		role: string,
+		status: string,
+		avatar: File,
 	) => Promise<IApiResponse<IUserDataResponse>>;
 	deleteUser: (
 		userId: string
@@ -58,15 +60,19 @@ export const useUserStore = createStore<IUserStore>(
 		createUser: async (
 			email: string,
 			password: string,
-			name: string,
+			fullname: string,
 			role: string,
+			status: string,
+			avatar: File,
 		): Promise<IApiResponse<IUserDataResponse>> => {
 			return await get().handleRequest(async () => {
 				const formData = new FormData();
 				formData.append("email", email);
 				formData.append("password", password);
-				formData.append("name", name);
+				formData.append("fullname", fullname);
 				formData.append("role", role);
+				formData.append("status", status);
+				formData.append("avatar", avatar);
 
 				return await handleRequest(EHttpType.POST, `/users`, formData);
 			});
@@ -74,16 +80,16 @@ export const useUserStore = createStore<IUserStore>(
 
 		updateUser: async (
 			userId: string,
-			email: string,
-			password: string,
-			name: string,
+			fullname: string,
 			role: string,
+			status: string,
+			avatar: File,
 		): Promise<IApiResponse<IUserDataResponse>> => {
 			return await get().handleRequest(async () => {
 				const formData = new FormData();
-				formData.append("email", email);
-				formData.append("password", password);
-				formData.append("name", name);
+				formData.append("status", status);
+				formData.append("avatar", avatar);
+				formData.append("fullname", fullname);
 				formData.append("role", role);
 
 				return await handleRequest(EHttpType.PATCH, `/users/${userId}`, formData);

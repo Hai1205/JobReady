@@ -31,21 +31,21 @@ public class UserController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Response> getUserById(@PathVariable UUID id) {
-        Response response = userService.getUserById(id);
+    @GetMapping("/{userId}")
+    public ResponseEntity<Response> getUserById(@PathVariable UUID userId) {
+        Response response = userService.getUserById(userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Response> updateUser(@PathVariable UUID id, @ModelAttribute UpdateUserRequest request) {
-        Response response = userService.updateUser(id, request);
+    @PutMapping("/{userId}")
+    public ResponseEntity<Response> updateUser(@PathVariable UUID userId, @ModelAttribute UpdateUserRequest request) {
+        Response response = userService.updateUser(userId, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Response> deleteUser(@PathVariable UUID id) {
-        Response response = userService.deleteUser(id);
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Response> deleteUser(@PathVariable UUID userId) {
+        Response response = userService.deleteUser(userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

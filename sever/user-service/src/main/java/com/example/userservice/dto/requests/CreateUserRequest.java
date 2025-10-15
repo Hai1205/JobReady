@@ -12,5 +12,5 @@ public class CreateUserRequest {
     private String fullname;
     private String role;
     private String status;
-    private String avatarUrl;
+    private String avatar;
 }

@@ -21,9 +21,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(
-            @ModelAttribute LoginRequest loginRequest,
+            @ModelAttribute LoginRequest request,
             HttpServletResponse response) {
-        Response loginResponse = authService.login(loginRequest);
+        Response loginResponse = authService.login(request);
 
         boolean isActive = loginResponse.getData() != null && loginResponse.getData().getUser() != null
                 && loginResponse.getData().getUser().getStatus().equals("ACTIVE");
@@ -48,8 +48,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(
-            @ModelAttribute RegisterRequest registerRequest) {
-        Response response = authService.register(registerRequest);
+            @ModelAttribute RegisterRequest request) {
+        Response response = authService.register(request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -95,6 +95,12 @@ public class AuthController {
         Response response = authService.forgotPassword(email,
                 changePasswordRequest);
 
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    
+    @PutMapping("/refresh-token")
+    public ResponseEntity<Response> refreshToken() {
+        Response response = authService.refreshToken();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

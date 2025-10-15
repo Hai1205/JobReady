@@ -4,7 +4,6 @@ import com.example.authservice.dto.OAuth2UserDto;
 import com.example.authservice.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +15,11 @@ public class OAuth2LoginService {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2LoginService.class);
 
-    @Autowired
     private JwtUtil jwtUtil;
 
-    // @Autowired
-    // private UserService userService;
+    public OAuth2LoginService(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     /**
      * Xử lý đăng nhập OAuth2 thành công
@@ -154,11 +153,9 @@ public class OAuth2LoginService {
                 // Facebook picture structure: {"data":{"url":"..."}}
                 Object picture = attributes.get("picture");
                 if (picture instanceof Map) {
-                    @SuppressWarnings("unchecked")
                     Map<String, Object> pictureMap = (Map<String, Object>) picture;
                     Object data = pictureMap.get("data");
                     if (data instanceof Map) {
-                        @SuppressWarnings("unchecked")
                         Map<String, Object> dataMap = (Map<String, Object>) data;
                         return (String) dataMap.get("url");
                     }

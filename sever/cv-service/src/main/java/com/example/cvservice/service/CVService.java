@@ -1,6 +1,7 @@
 package com.example.cvservice.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.cvservice.dto.*;
 import com.example.cvservice.dto.requests.*;
@@ -38,8 +39,8 @@ public class CVService {
         this.cvMapper = cvMapper;
     }
 
-    public CVDto handleGetCVById(UUID id) {
-        CV cv = cvRepository.findById(id).orElseThrow(() -> new OurException("CV not found"));
+    public CVDto handleGetCVById(UUID cvId) {
+        CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found"));
         return cvMapper.toDto(cv);
     }
 
@@ -133,11 +134,132 @@ public class CVService {
         return response;
     }
 
-    public Response getCVById(UUID id) {
+    public Response getCVById(UUID cvId) {
         Response response = new Response();
 
         try {
-            CVDto cvDto = handleGetCVById(id);
+            CVDto cvDto = handleGetCVById(cvId);
+
+            ResponseData data = new ResponseData();
+            data.setCv(cvDto);
+
+            response.setStatusCode(200);
+            response.setMessage("CV retrieved successfully");
+            response.setData(data);
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid CV ID format");
+            System.out.println(e.getMessage());
+        } catch (OurException e) {
+            response.setStatusCode(404);
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
+        }
+
+        return response;
+    }
+
+    public Response analyseCV(UUID cvId) {
+        Response response = new Response();
+
+        try {
+            CVDto cvDto = handleGetCVById(cvId);
+
+            ResponseData data = new ResponseData();
+            data.setCv(cvDto);
+
+            response.setStatusCode(200);
+            response.setMessage("CV retrieved successfully");
+            response.setData(data);
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid CV ID format");
+            System.out.println(e.getMessage());
+        } catch (OurException e) {
+            response.setStatusCode(404);
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
+        }
+
+        return response;
+    }
+
+    public Response improveCV(UUID cvId, ImproveCVRequest request) {
+        Response response = new Response();
+
+        try {
+            CVDto cvDto = handleGetCVById(cvId);
+
+            ResponseData data = new ResponseData();
+            data.setCv(cvDto);
+
+            response.setStatusCode(200);
+            response.setMessage("CV retrieved successfully");
+            response.setData(data);
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid CV ID format");
+            System.out.println(e.getMessage());
+        } catch (OurException e) {
+            response.setStatusCode(404);
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
+        }
+
+        return response;
+    }
+
+    public List<CVDto> handleGetUserCVs(UUID userId) {
+        List<CV> cvs = cvRepository.findAllByUserId(userId);
+        return cvs.stream().map(cvMapper::toDto).collect(Collectors.toList());
+    }
+
+    public Response getUserCVs(UUID userId) {
+        Response response = new Response();
+
+        try {
+            List<CVDto> userCVs = handleGetUserCVs(userId);
+
+            ResponseData data = new ResponseData();
+            data.setCvs(userCVs);
+
+            response.setStatusCode(200);
+            response.setMessage("CV retrieved successfully");
+            response.setData(data);
+        } catch (IllegalArgumentException e) {
+            response.setStatusCode(400);
+            response.setMessage("Invalid CV ID format");
+            System.out.println(e.getMessage());
+        } catch (OurException e) {
+            response.setStatusCode(404);
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
+        }
+
+        return response;
+    }
+
+    public Response importFile(UUID cvId, MultipartFile file) {
+        Response response = new Response();
+
+        try {
+            CVDto cvDto = handleGetCVById(cvId);
 
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
@@ -193,13 +315,13 @@ public class CVService {
         return response;
     }
 
-    public CVDto handleUpdateCV(UUID id,
+    public CVDto handleUpdateCV(UUID cvId,
             String title,
             PersonalInfoDto personalInfoDto,
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
             List<String> skills) {
-        CV existing = cvRepository.findById(id)
+        CV existing = cvRepository.findById(cvId)
                 .orElseThrow(() -> new OurException("CV not found", 404));
 
         existing.setTitle(title);
@@ -244,12 +366,12 @@ public class CVService {
         return cvMapper.toDto(saved);
     }
 
-    public Response updateCV(UUID id, CVDto dto) {
+    public Response updateCV(UUID cvId, UpdateCVRequest request) {
         Response response = new Response();
 
         try {
-            CVDto updatedDto = handleUpdateCV(id, dto.getTitle(), dto.getPersonalInfo(),
-                    dto.getExperience(), dto.getEducation(), dto.getSkills());
+            CVDto updatedDto = handleUpdateCV(cvId, request.getTitle(), request.getPersonalInfo(),
+                    request.getExperience(), request.getEducation(), request.getSkills());
 
             ResponseData data = new ResponseData();
             data.setCv(updatedDto);
@@ -270,18 +392,18 @@ public class CVService {
         return response;
     }
 
-    public boolean handleDeleteCV(UUID id) {
-        handleGetCVById(id);
+    public boolean handleDeleteCV(UUID cvId) {
+        handleGetCVById(cvId);
 
-        cvRepository.deleteById(id);
+        cvRepository.deleteById(cvId);
         return true;
     }
 
-    public Response deleteCV(UUID id) {
+    public Response deleteCV(UUID cvId) {
         Response response = new Response();
 
         try {
-            handleDeleteCV(id);
+            handleDeleteCV(cvId);
             
             response.setStatusCode(200);
             response.setMessage("CV deleted successfully");

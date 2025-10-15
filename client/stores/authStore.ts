@@ -49,7 +49,7 @@ export const useAuthStore = createStore<IAuthStore>(
 			formData.append("password", password);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest<IAuthDataResponse>(EHttpType.POST, "/auth/register", formData);
+				return await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/register`, formData);
 			});
 		},
 
@@ -59,7 +59,7 @@ export const useAuthStore = createStore<IAuthStore>(
 			formData.append("password", password);
 
 			return await get().handleRequest(async () => {
-				const response = await handleRequest<IAuthDataResponse>(EHttpType.POST, "/auth/login", formData);
+				const response = await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/login`, formData);
 				if (response && response.data) {
 					const user = response.data.user;
 					set({
@@ -74,9 +74,8 @@ export const useAuthStore = createStore<IAuthStore>(
 
 		logout: async (): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
-				const response = await handleRequest(EHttpType.POST, "/auth/logout");
+				const response = await handleRequest(EHttpType.POST, `/auth/logout`);
 
-				// Reset state regardless of response to ensure client is logged out
 				get().reset();
 
 				return response;
@@ -84,55 +83,46 @@ export const useAuthStore = createStore<IAuthStore>(
 		},
 
 		sendOTP: async (email: string): Promise<IApiResponse> => {
-			const formData = new FormData();
-			formData.append("email", email);
-
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, "/auth/send-otp", formData);
+				return await handleRequest(EHttpType.POST, `/auth/send-otp/${email}`);
 			});
 		},
 
 		verifyOTP: async (email: string, otp: string): Promise<IApiResponse> => {
 			const formData = new FormData();
-			formData.append("email", email);
 			formData.append("otp", otp);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, "/auth/verify-otp", formData);
+				return await handleRequest(EHttpType.POST, `/auth/verify-otp/${email}`, formData);
 
 			});
 		},
 
 		resetPassword: async (email: string): Promise<IApiResponse> => {
-			const formData = new FormData();
-			formData.append("email", email);
-
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, "/auth/reset-password", formData);
+				return await handleRequest(EHttpType.POST, `/auth/reset-password/${email}`);
 
 			});
 		},
 
 		forgotPassword: async (email: string, password: string, confirmPassword: string): Promise<IApiResponse> => {
 			const formData = new FormData();
-			formData.append("email", email);
 			formData.append("password", password);
 			formData.append("confirmPassword", confirmPassword);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.PATCH, "/auth/forgot-password", formData);
+				return await handleRequest(EHttpType.PATCH, `/auth/forgot-password/${email}`, formData);
 			});
 		},
 
 		changePassword: async (email: string, oldPassword: string, password: string, confirmPassword: string): Promise<IApiResponse> => {
 			const formData = new FormData();
-			formData.append("email", email);
 			formData.append("oldPassword", oldPassword);
 			formData.append("newPassword", password);
 			formData.append("confirmPassword", confirmPassword);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.PATCH, "/auth/change-password", formData);
+				return await handleRequest(EHttpType.PATCH, `/auth/change-password/${email}`, formData);
 			});
 		},
 
