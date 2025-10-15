@@ -4,13 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>spring-microservices</artifactId>
+    <artifactId>jobready</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-
-        <name>Spring Microservices</name>
-    <description>Spring Boot Microservices Project with Eureka, Gateway, Auth and User services</description>
-
+        <name>JobReady</name>
+    <description>Where you can setup for your carreer</description>
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -19,6 +17,7 @@
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <mysql.version>8.2.0</mysql.version>
         <jjwt.version>0.12.3</jjwt.version>
+        <cloudinary.version>1.38.0</cloudinary.version>
     </properties>
 
     <modules>
@@ -79,6 +78,12 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.cloudinary</groupId>
+                <artifactId>cloudinary-http44</artifactId>
+                <version>${cloudinary.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -18,8 +18,10 @@ public class CV {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
+    
     private String title;
+
+    private UUID userId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cv_id")

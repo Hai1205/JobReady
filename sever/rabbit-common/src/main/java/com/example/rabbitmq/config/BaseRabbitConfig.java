@@ -39,15 +39,26 @@ public abstract class BaseRabbitConfig {
                         .to(exchange)
                         .with(qDef.routingKey);
                 declarables.add(binding);
-
-                if (qDef.hasReplyQueue) {
-                    org.springframework.amqp.core.Queue replyQueue = QueueBuilder.durable(qDef.replyQueue()).build();
-                    declarables.add(replyQueue);
-                }
             }
         }
 
         return new Declarables(declarables);
+    }
+
+    /**
+     * Creates a declarable for a reply queue with proper binding to an exchange
+     * 
+     * @param queueName Name of the reply queue
+     * @param exchangeName Name of the exchange to bind to
+     * @param routingKey Routing key for binding
+     * @return Declarables object with queue and binding
+     */
+    public Declarables createReplyQueueDeclarable(String queueName, String exchangeName, String routingKey) {
+        org.springframework.amqp.core.Queue replyQueue = QueueBuilder.durable(queueName).build();
+        TopicExchange exchange = new TopicExchange(exchangeName, true, false);
+        Binding binding = BindingBuilder.bind(replyQueue).to(exchange).with(routingKey);
+        
+        return new Declarables(replyQueue, binding);
     }
 
     /**

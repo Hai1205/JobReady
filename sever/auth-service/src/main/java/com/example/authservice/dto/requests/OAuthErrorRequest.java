@@ -1,30 +1,12 @@
 package com.example.authservice.dto.requests;
 
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OAuthErrorRequest {
     private String error;
-    private String error_description;
-
-    public OAuthErrorRequest() {
-    }
-
-    public OAuthErrorRequest(String error, String error_description) {
-        this.error = error;
-        this.error_description = error_description;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error){
-        this.error=error;
-    }
-
-    public String getErrorDescription() {
-        return error_description;
-    }
-
-    public void setErrorDescription(String error_description){
-        this.error_description=error_description;
-    }
+    private String errorDescription;
 }

@@ -1,6 +1,7 @@
 package com.example.userservice.controller;
 
-import com.example.userservice.dto.UserDto;
+import com.example.userservice.dto.requests.CreateUserRequest;
+import com.example.userservice.dto.requests.UpdateUserRequest;
 import com.example.userservice.dto.response.Response;
 import com.example.userservice.service.UserService;
 
@@ -19,8 +20,8 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<Response> createUser(@ModelAttribute UserDto userDto) {
-        Response response = userService.createUser(userDto);
+    public ResponseEntity<Response> createUser(@ModelAttribute CreateUserRequest request) {
+        Response response = userService.createUser(request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -37,8 +38,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateUser(@PathVariable UUID id, @ModelAttribute UserDto userDto) {
-        Response response = userService.updateUser(id, userDto);
+    public ResponseEntity<Response> updateUser(@PathVariable UUID id, @ModelAttribute UpdateUserRequest request) {
+        Response response = userService.updateUser(id, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -47,13 +48,6 @@ public class UserController {
         Response response = userService.deleteUser(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-
-    // @Deprecated
-    // @PostMapping("/authenticate-user")
-    // public ResponseEntity<Response> authenticateUser(@ModelAttribute UserDto userDto) {
-    //     Response response = userService.authenticateUser(userDto.getUsername(), userDto.getPassword());
-    //     return ResponseEntity.status(response.getStatusCode()).body(response);
-    // }
 
     @GetMapping("/health")
     public ResponseEntity<Response> health() {

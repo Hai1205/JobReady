@@ -25,21 +25,23 @@ public class AuthController {
             HttpServletResponse response) {
         Response loginResponse = authService.login(loginRequest);
 
-        // boolean isActive = loginResponse.getData() != null && loginResponse.getData().getUser() != null
-        //         && loginResponse.getData().getUser().getStatus().equals("ACTIVE");
-        // boolean isOk = loginResponse.getStatusCode() == 200;
+        boolean isActive = loginResponse.getData() != null && loginResponse.getData().getUser() != null
+                && loginResponse.getData().getUser().getStatus().equals("ACTIVE");
+        boolean isOk = loginResponse.getStatusCode() == 200;
 
-        // if (isOk && isActive) {
-        //     int SevenDays = 7 * 24 * 60 * 60;
-        //     Cookie jwtCookie = new Cookie("JWT_TOKEN", loginResponse.getData().getToken());
-        //     jwtCookie.setHttpOnly(true);
-        //     jwtCookie.setSecure(false);
-        //     jwtCookie.setPath("/");
-        //     jwtCookie.setMaxAge(SevenDays);
+        if (isOk && isActive) {
+            int SevenDays = 7 * 24 * 60 * 60;
+            Cookie jwtCookie = new Cookie("JWT_TOKEN", loginResponse.getData().getToken());
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setSecure(false);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(SevenDays);
 
-        //     response.addCookie(jwtCookie);
-        //     response.setHeader("X-JWT-TOKEN", loginResponse.getData().getToken());
-        // }
+            response.addCookie(jwtCookie);
+            response.setHeader("X-JWT-TOKEN", loginResponse.getData().getToken());
+
+            loginResponse.getData().setToken("");
+        }
 
         return ResponseEntity.status(loginResponse.getStatusCode()).body(loginResponse);
     }
@@ -47,12 +49,12 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Response> register(
             @ModelAttribute RegisterRequest registerRequest) {
-        Response response = authService.register(registerRequest.getEmail(), registerRequest.getPassword());
+        Response response = authService.register(registerRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/send-otp/{email}")
-    public ResponseEntity<Response> sendOTP(@PathVariable("email") String email) {
+    public ResponseEntity<Response> sendOTP(@PathVariable String email) {
         Response response = authService.sendOTP(email);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -61,43 +63,40 @@ public class AuthController {
     @PostMapping("/verify-otp/{email}")
     public ResponseEntity<Response> verifyOTP(
             @PathVariable String email,
-            @ModelAttribute OtpVerifyRequest otpRequest) {
-        Response response = authService.verifyOTP(email, otpRequest.getOtp());
+            @ModelAttribute String otp) {
+        Response response = authService.verifyOTP(email, otp);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // @PutMapping("/change-password/{userId}")
-    // public ResponseEntity<Response> changePassword(
-    //         @PathVariable String userId,
-    //         @ModelAttribute ChangePasswordMessage changePasswordRequest) {
-    //     Response response = authService.changePassword(userId,
-    //             changePasswordRequest.getCurrentPassword(),
-    //             changePasswordRequest.getNewPassword(),
-    //             changePasswordRequest.getRePassword());
+    @PutMapping("/change-password/{email}")
+    public ResponseEntity<Response> changePassword(
+            @PathVariable String email,
+            @ModelAttribute ChangePasswordRequest changePasswordRequest) {
+        Response response = authService.changePassword(email,
+                changePasswordRequest);
 
-    //     return ResponseEntity.status(response.getStatusCode()).body(response);
-    // }
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 
-    @PutMapping("/reset-password/{userId}")
+    @PutMapping("/reset-password/{email}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> resetPassword(
-            @PathVariable String userId) {
-        Response response = authService.resetPassword(userId);
+            @PathVariable String email) {
+        Response response = authService.resetPassword(email);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // @PutMapping("/forgot-password/{email}")
-    // public ResponseEntity<Response> forgotPassword(
-    //         @PathVariable String email,
-    //         @ModelAttribute ForgotPasswordMessage forgotPasswordRequest) {
-    //     Response response = authService.forgotPassword(email,
-    //             forgotPasswordRequest.getNewPassword(),
-    //             forgotPasswordRequest.getRePassword());
+    @PutMapping("/forgot-password/{email}")
+    public ResponseEntity<Response> forgotPassword(
+            @PathVariable String email,
+            @ModelAttribute ChangePasswordRequest changePasswordRequest) {
+        Response response = authService.forgotPassword(email,
+                changePasswordRequest);
 
-    //     return ResponseEntity.status(response.getStatusCode()).body(response);
-    // }
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<Response> logout(HttpServletResponse response) {
@@ -117,22 +116,9 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/validate")
-    public ResponseEntity<Response> validateToken(@ModelAttribute TokenValidationRequest validationRequest) {
-        Response response = authService.validateToken(validationRequest.getToken(), validationRequest.getUsername());
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
     @GetMapping("/health")
     public ResponseEntity<Response> health() {
         Response response = new Response(200, "Auth Service is running");
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
-    // OAuth2 test endpoint để kiểm tra routing
-    @GetMapping("/oauth2/test")
-    public ResponseEntity<Response> oauth2Test() {
-        Response response = new Response(200, "OAuth2 routing is working! Ready for OAuth2 implementation.");
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

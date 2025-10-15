@@ -38,13 +38,14 @@ public class User {
     private String oauthProvider; // google, facebook, github
     private String oauthProviderId; // Provider-specific user ID
     private String avatarUrl; // Profile picture URL
+    private String avatarPublicId; // Cloudinary public ID for avatar deletion
     private boolean isOAuthUser = false; // Flag to distinguish OAuth vs regular users
 
     // Full constructor for MapStruct
     @Builder
     public User(UUID id, String username, String password, String email, String fullname,
             UserRole role, UserStatus status, String oauthProvider, String oauthProviderId,
-            String avatarUrl, boolean isOAuthUser) {
+            String avatarUrl, String avatarPublicId, boolean isOAuthUser) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -55,13 +56,13 @@ public class User {
         this.oauthProvider = oauthProvider;
         this.oauthProviderId = oauthProviderId;
         this.avatarUrl = avatarUrl;
+        this.avatarPublicId = avatarPublicId;
         this.isOAuthUser = isOAuthUser;
     }
 
     // Basic constructor
-    public User(String username, String password, String email, String fullname) {
+    public User(String username, String email, String fullname) {
         this.username = username;
-        this.password = password;
         this.email = email;
         this.fullname = fullname;
         this.isOAuthUser = false;

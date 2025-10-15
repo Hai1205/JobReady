@@ -5,12 +5,10 @@ import com.example.authservice.dto.*;
 import com.example.authservice.dto.requests.*;
 import com.example.authservice.dto.responses.*;
 import com.example.authservice.exception.OurException;
+import com.example.authservice.service.producers.UserProducer;
 import com.example.authservice.util.JwtUtil;
-import com.example.authservice.util.Utils;
 
-import jakarta.mail.MessagingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,19 +26,20 @@ public class AuthService {
     @Autowired
     private MailConfig mailConfig;
 
+    @Autowired
+    private UserProducer userProducer;
+
+    @Autowired
+    private OtpService otpService;
+
     public Response login(LoginRequest loginRequest) {
         Response response = new Response();
 
         try {
-            // Validate input first
-            if (!isValidInput(loginRequest.getEmail(), loginRequest.getPassword())) {
-                throw new RuntimeException("Invalid credentials format");
-            }
-
-            UserDto userDto = new UserDto(); // Giả lập việc lấy userDto từ user-service
+            UserDto userDto = userProducer.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
 
             if (userDto == null) {
-                throw new OurException("User not found", 404);
+                throw new OurException("Invalid credentials", 404);
             }
 
             // Check user status
@@ -76,10 +75,6 @@ public class AuthService {
         return response;
     }
 
-    private boolean isValidInput(String email, String password) {
-        return email != null && password != null && !email.isEmpty() && !password.isEmpty();
-    }
-
     public Response validateToken(String token, String username) {
         Response response = new Response();
 
@@ -94,6 +89,10 @@ public class AuthService {
             response.setStatusCode(200);
             response.setMessage("Token validation successful");
             response.setData(data);
+        } catch (OurException e) {
+            response.setStatusCode(e.getStatusCode());
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
@@ -103,17 +102,19 @@ public class AuthService {
         return response;
     }
 
-    public Response register(String email, String password) {
+    public Response register(RegisterRequest registerRequest) {
         Response response = new Response();
 
         try {
-            // Validate registration request
-            if (!isValidInput(email, password)) {
-                throw new RuntimeException("Invalid credentials format");
-            }
+            UserDto userDto = userProducer.createUser(registerRequest.getEmail(), registerRequest.getPassword(),
+                    registerRequest.getFullname());
+
+            ResponseData data = new ResponseData();
+            data.setUser(userDto);
 
             response.setStatusCode(200);
-            response.setMessage("User registration request sent successfully");
+            response.setMessage("Registration successful");
+            response.setData(data);
         } catch (RuntimeException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -131,10 +132,18 @@ public class AuthService {
         Response response = new Response();
 
         try {
-            // TODO: Implement OTP verification with RabbitMQ
-            // For now, we'll just assume OTP verification is successful
+            boolean isValid = otpService.validateOtp(email, otp);
+
+            if (!isValid) {
+                throw new OurException("Invalid OTP.");
+            }
+
             response.setStatusCode(200);
             response.setMessage("Your account is activated!");
+        } catch (OurException e) {
+            response.setStatusCode(e.getStatusCode());
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
@@ -148,8 +157,7 @@ public class AuthService {
         Response response = new Response();
 
         try {
-            // Sử dụng Util để tạo OTP
-            String otp = Utils.generateOTP(6);
+            String otp = otpService.generateOtp(email);
 
             String subject = "Account Activation";
             String templateName = "mail_active_account";
@@ -159,15 +167,13 @@ public class AuthService {
             variables.put("senderName", "JobReady");
             variables.put("otp", otp);
 
-            try {
-                mailConfig.sendMail(email, subject, templateName, variables);
-                response.setStatusCode(200);
-                response.setMessage("OTP is sent!");
-            } catch (MessagingException mailException) {
-                logger.error("Error sending mail: {}", mailException.getMessage(), mailException);
-                response.setStatusCode(500);
-                response.setMessage("Failed to send OTP email: " + mailException.getMessage());
-            }
+            mailConfig.sendMail(email, subject, templateName, variables);
+            response.setStatusCode(200);
+            response.setMessage("OTP is sent!");
+        } catch (OurException e) {
+            response.setStatusCode(e.getStatusCode());
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
@@ -177,16 +183,20 @@ public class AuthService {
         return response;
     }
 
-    public Response changePassword(String userId, String currentPassword, String newPassword, String rePassword) {
+    public Response changePassword(String email, ChangePasswordRequest changePasswordRequest) {
         Response response = new Response();
 
         try {
+            String currentPassword = changePasswordRequest.getCurrentPassword();
+            String newPassword = changePasswordRequest.getNewPassword();
+            String rePassword = changePasswordRequest.getRePassword();
+
             if (!newPassword.equals(rePassword)) {
                 throw new OurException("Password does not match.");
             }
 
-            // TODO: Implement change password with RabbitMQ
-            // For now, we'll just assume the password change is successful
+            userProducer.changePasswordUser(email, currentPassword, newPassword);
+
             response.setStatusCode(200);
             response.setMessage("Password changed successfully!");
         } catch (OurException e) {
@@ -202,15 +212,28 @@ public class AuthService {
         return response;
     }
 
-    public Response resetPassword(String userId) {
+    public Response resetPassword(String email) {
         Response response = new Response();
 
         try {
-            // TODO: Implement reset password with RabbitMQ
+            String password = userProducer.resetPasswordUser(email);
 
-            // For now, we'll just assume the password reset is successful
+            String subject = "Reset Password";
+            String templateName = "mail_reset_password";
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("recipientEmail", email);
+            variables.put("recipientName", email);
+            variables.put("senderName", "JobReady");
+            variables.put("password", password);
+
+            mailConfig.sendMail(email, subject, templateName, variables);
+
             response.setStatusCode(200);
             response.setMessage("Password reset email sent successfully!");
+        } catch (OurException e) {
+            response.setStatusCode(e.getStatusCode());
+            response.setMessage(e.getMessage());
+            System.out.println(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
@@ -220,17 +243,19 @@ public class AuthService {
         return response;
     }
 
-    public Response forgotPassword(String email, String newPassword, String rePassword) {
+    public Response forgotPassword(String email, ChangePasswordRequest changePasswordRequest) {
         Response response = new Response();
 
         try {
+            String newPassword = changePasswordRequest.getNewPassword();
+            String rePassword = changePasswordRequest.getRePassword();
+
             if (!newPassword.equals(rePassword)) {
                 throw new OurException("Password does not match.");
             }
 
-            // TODO: Implement forgot password with RabbitMQ
+            userProducer.forgotPasswordUser(email, newPassword);
 
-            // For now, we'll just assume the password update is successful
             response.setStatusCode(200);
             response.setMessage("Password updated successfully!");
         } catch (OurException e) {

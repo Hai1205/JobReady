@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.cvservice.dto.CVDto;
+import com.example.cvservice.dto.requests.CreateCVRequest;
 import com.example.cvservice.dto.responses.Response;
 import com.example.cvservice.service.CVService;
 
@@ -17,9 +18,9 @@ public class CVController {
     @Autowired
     private CVService userService;
 
-    @PostMapping
-    public ResponseEntity<Response> createCV(@ModelAttribute CVDto cvDto) {
-        Response response = userService.createCV(cvDto);
+    @PostMapping("/users/{userId}")
+    public ResponseEntity<Response> createCV(@PathVariable UUID userId, @ModelAttribute CreateCVRequest request) {
+        Response response = userService.createCV(userId, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

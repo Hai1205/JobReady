@@ -1,13 +1,14 @@
 package com.example.cvservice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.cvservice.dto.*;
+import com.example.cvservice.dto.requests.*;
 import com.example.cvservice.dto.responses.*;
 import com.example.cvservice.entity.*;
-import com.example.cvservice.repository.CVRepository;
-import com.example.cvservice.mapper.CVMapper;
+import com.example.cvservice.exception.OurException;
+import com.example.cvservice.repository.*;
+import com.example.cvservice.mapper.*;
 
 import java.time.Instant;
 import java.util.List;
@@ -18,34 +19,81 @@ import java.util.stream.Collectors;
 @Service
 public class CVService {
 
-    @Autowired
-    private CVRepository cvRepository;
+    private final CVRepository cvRepository;
+    private final EducationRepository educationRepository;
+    private final ExperienceRepository experienceRepository;
+    private final PersonalInfoRepository personalInfoRepository;
+    private final CVMapper cvMapper;
 
-    @Autowired
-    private CVMapper cvMapper;
+    public CVService(
+            CVRepository cvRepository,
+            EducationRepository educationRepository,
+            ExperienceRepository experienceRepository,
+            PersonalInfoRepository personalInfoRepository,
+            CVMapper cvMapper) {
+        this.cvRepository = cvRepository;
+        this.educationRepository = educationRepository;
+        this.experienceRepository = experienceRepository;
+        this.personalInfoRepository = personalInfoRepository;
+        this.cvMapper = cvMapper;
+    }
 
-    public Response createCV(CVDto dto) {
+    public CVDto handleGetCVById(UUID id) {
+        CV cv = cvRepository.findById(id).orElseThrow(() -> new OurException("CV not found"));
+        return cvMapper.toDto(cv);
+    }
+
+    public CVDto handleCreateCV(
+            UUID userId,
+            String title,
+            PersonalInfoDto personalInfoDto,
+            List<ExperienceDto> experiencesDto,
+            List<EducationDto> educationsDto,
+            List<String> skills) {
+
+        CV cv = new CV();
+        cv.setUserId(userId);
+        cv.setTitle(title);
+        cv.setSkills(skills);
+
+        PersonalInfo personalInfo = new PersonalInfo(personalInfoDto.getEmail(), personalInfoDto.getFullname(),
+                personalInfoDto.getPhone(), personalInfoDto.getLocation(), personalInfoDto.getSummary());
+        personalInfoRepository.save(personalInfo);
+
+        cv.setPersonalInfo(personalInfo);
+
+        List<Experience> experiences = experiencesDto.stream()
+                .map(e -> new Experience(e.getCompany(), e.getPosition(), e.getStartDate(), e.getEndDate(),
+                        e.getDescription()))
+                .collect(Collectors.toList());
+
+        List<Education> educations = educationsDto.stream()
+                .map(ed -> new Education(ed.getSchool(), ed.getDegree(), ed.getField(), ed.getStartDate(),
+                        ed.getEndDate()))
+                .collect(Collectors.toList());
+
+        cv.setExperience(experiences);
+        cv.setEducation(educations);
+
+        CV savedCV = cvRepository.save(cv);
+
+        return cvMapper.toDto(savedCV);
+    }
+
+    public Response createCV(UUID userId, CreateCVRequest request) {
         Response response = new Response();
 
         try {
-            // simple uniqueness check by email
-            if (dto.getPersonalInfo() != null && dto.getPersonalInfo().getEmail() != null) {
-                if (cvRepository.existsByPersonalInfoEmail(dto.getPersonalInfo().getEmail())) {
-                    throw new RuntimeException("Email already exists");
-                }
-            }
-
-            CV entity = cvMapper.toEntity(dto);
-            CV saved = cvRepository.save(entity);
-            CVDto savedDto = cvMapper.toDto(saved);
+            CVDto cvDto = handleCreateCV(userId, request.getTitle(), request.getPersonalInfo(),
+                    request.getExperience(), request.getEducation(), request.getSkills());
 
             ResponseData data = new ResponseData();
-            data.setCv(savedDto);
+            data.setCv(cvDto);
 
             response.setStatusCode(201);
             response.setMessage("CV created successfully");
             response.setData(data);
-        } catch (RuntimeException e) {
+        } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
@@ -58,13 +106,17 @@ public class CVService {
         return response;
     }
 
+    public List<CVDto> handleGetAllCVs() {
+        return cvRepository.findAll().stream()
+                .map(cvMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     public Response getAllCVs() {
         Response response = new Response();
 
         try {
-            List<CVDto> cvDtos = cvRepository.findAll().stream()
-                    .map(cvMapper::toDto)
-                    .collect(Collectors.toList());
+            List<CVDto> cvDtos = handleGetAllCVs();
 
             ResponseData data = new ResponseData();
             data.setCvs(cvDtos);
@@ -85,8 +137,7 @@ public class CVService {
         Response response = new Response();
 
         try {
-            CV cv = cvRepository.findById(id).orElseThrow(() -> new RuntimeException("CV not found"));
-            CVDto cvDto = cvMapper.toDto(cv);
+            CVDto cvDto = handleGetCVById(id);
 
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
@@ -98,7 +149,7 @@ public class CVService {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
             System.out.println(e.getMessage());
-        } catch (RuntimeException e) {
+        } catch (OurException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
@@ -117,19 +168,19 @@ public class CVService {
         try {
             Optional<CV> cvOpt = cvRepository.findByTitle(title);
 
-            if (cvOpt.isPresent()) {
-                CVDto cvDto = cvMapper.toDto(cvOpt.get());
-
-                ResponseData data = new ResponseData();
-                data.setCv(cvDto);
-
-                response.setStatusCode(200);
-                response.setMessage("CV retrieved successfully");
-                response.setData(data);
-            } else {
-                throw new RuntimeException("CV not found with title: " + title);
+            if (!cvOpt.isPresent()) {
+                throw new OurException("CV not found with title: " + title);
             }
-        } catch (RuntimeException e) {
+
+            CVDto cvDto = cvMapper.toDto(cvOpt.get());
+
+            ResponseData data = new ResponseData();
+            data.setCv(cvDto);
+
+            response.setStatusCode(200);
+            response.setMessage("CV retrieved successfully");
+            response.setData(data);
+        } catch (OurException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
@@ -142,55 +193,63 @@ public class CVService {
         return response;
     }
 
+    public CVDto handleUpdateCV(UUID id,
+            String title,
+            PersonalInfoDto personalInfoDto,
+            List<ExperienceDto> experiencesDto,
+            List<EducationDto> educationsDto,
+            List<String> skills) {
+        CV existing = cvRepository.findById(id)
+                .orElseThrow(() -> new OurException("CV not found", 404));
+
+        existing.setTitle(title);
+
+        if (personalInfoDto != null) {
+            PersonalInfo pi = existing.getPersonalInfo();
+            if (pi == null)
+                pi = new PersonalInfo();
+            pi.setFullname(personalInfoDto.getFullname());
+            pi.setEmail(personalInfoDto.getEmail());
+            pi.setPhone(personalInfoDto.getPhone());
+            pi.setLocation(personalInfoDto.getLocation());
+            pi.setSummary(personalInfoDto.getSummary());
+            existing.setPersonalInfo(pi);
+        }
+
+        existing.getExperience().clear();
+        if (experiencesDto != null) {
+            for (ExperienceDto e : experiencesDto) {
+                Experience ex = new Experience(e.getCompany(), e.getPosition(), e.getStartDate(), e.getEndDate(),
+                        e.getDescription());
+                existing.getExperience().add(ex);
+            }
+        }
+
+        existing.getEducation().clear();
+        if (educationsDto != null) {
+            for (EducationDto ed : educationsDto) {
+                Education e = new Education(ed.getSchool(), ed.getDegree(), ed.getField(), ed.getStartDate(),
+                        ed.getEndDate());
+                existing.getEducation().add(e);
+            }
+        }
+
+        existing.getSkills().clear();
+        if (skills != null)
+            existing.getSkills().addAll(skills);
+
+        existing.setUpdatedAt(Instant.now());
+
+        CV saved = cvRepository.save(existing);
+        return cvMapper.toDto(saved);
+    }
+
     public Response updateCV(UUID id, CVDto dto) {
         Response response = new Response();
 
         try {
-            CV existing = cvRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("CV not found"));
-
-            // update fields
-            existing.setTitle(dto.getTitle());
-
-            if (dto.getPersonalInfo() != null) {
-                PersonalInfo pi = existing.getPersonalInfo();
-                if (pi == null)
-                    pi = new PersonalInfo();
-                pi.setFullname(dto.getPersonalInfo().getFullname());
-                pi.setEmail(dto.getPersonalInfo().getEmail());
-                pi.setPhone(dto.getPersonalInfo().getPhone());
-                pi.setLocation(dto.getPersonalInfo().getLocation());
-                pi.setSummary(dto.getPersonalInfo().getSummary());
-                existing.setPersonalInfo(pi);
-            }
-
-            // replace lists
-            existing.getExperience().clear();
-            if (dto.getExperience() != null) {
-                for (ExperienceDto e : dto.getExperience()) {
-                    Experience ex = new Experience(e.getCompany(), e.getPosition(), e.getStartDate(), e.getEndDate(),
-                            e.getDescription());
-                    existing.getExperience().add(ex);
-                }
-            }
-
-            existing.getEducation().clear();
-            if (dto.getEducation() != null) {
-                for (EducationDto ed : dto.getEducation()) {
-                    Education e = new Education(ed.getSchool(), ed.getDegree(), ed.getField(), ed.getStartDate(),
-                            ed.getEndDate());
-                    existing.getEducation().add(e);
-                }
-            }
-
-            existing.getSkills().clear();
-            if (dto.getSkills() != null)
-                existing.getSkills().addAll(dto.getSkills());
-
-            existing.setUpdatedAt(Instant.now());
-
-            CV saved = cvRepository.save(existing);
-            CVDto updatedDto = cvMapper.toDto(saved);
+            CVDto updatedDto = handleUpdateCV(id, dto.getTitle(), dto.getPersonalInfo(),
+                    dto.getExperience(), dto.getEducation(), dto.getSkills());
 
             ResponseData data = new ResponseData();
             data.setCv(updatedDto);
@@ -198,7 +257,7 @@ public class CVService {
             response.setStatusCode(200);
             response.setMessage("CV updated successfully");
             response.setData(data);
-        } catch (RuntimeException e) {
+        } catch (OurException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
@@ -211,23 +270,26 @@ public class CVService {
         return response;
     }
 
+    public boolean handleDeleteCV(UUID id) {
+        handleGetCVById(id);
+
+        cvRepository.deleteById(id);
+        return true;
+    }
+
     public Response deleteCV(UUID id) {
         Response response = new Response();
 
         try {
-            UUID uuid = id;
-            if (!cvRepository.existsById(uuid))
-                throw new RuntimeException("CV not found");
-
-            cvRepository.deleteById(uuid);
-
+            handleDeleteCV(id);
+            
             response.setStatusCode(200);
             response.setMessage("CV deleted successfully");
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
             System.out.println(e.getMessage());
-        } catch (RuntimeException e) {
+        } catch (OurException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());

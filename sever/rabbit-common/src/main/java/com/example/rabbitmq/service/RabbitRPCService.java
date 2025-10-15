@@ -57,8 +57,12 @@ public class RabbitRPCService {
             if (response == null)
                 throw new RuntimeException("Timeout waiting for response");
 
+            // Parse the wrapper first
+            Map<String, Object> responseWrapper = objectMapper.readValue(response.toString(), Map.class);
+            Object responsePayload = responseWrapper.get("payload");
+
             // Parse to standard RabbitResponse
-            RabbitResponse<R> result = objectMapper.readValue(response.toString(),
+            RabbitResponse<R> result = objectMapper.convertValue(responsePayload,
                     objectMapper.getTypeFactory().constructParametricType(RabbitResponse.class, responseType));
 
             if (result.getCode() != 200)
@@ -103,10 +107,8 @@ public class RabbitRPCService {
                     .timestamp(System.currentTimeMillis())
                     .build();
 
-            var wrapper = Map.of("header", header, "payload",
-                    RabbitResponse.builder().code(200).message("OK").data(payload).build());
-
-            String json = objectMapper.writeValueAsString(wrapper);
+            String json = objectMapper.writeValueAsString(
+                    Map.of("header", header, "payload", payload));
             rabbitTemplate.convertAndSend(exchange, replyTo, json);
             System.out.println("✅ [Reply Sent] corrId=" + correlationId);
 

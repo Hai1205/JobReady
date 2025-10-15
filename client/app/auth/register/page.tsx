@@ -16,6 +16,7 @@ const RegisterPage: React.FC = () => {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
+    fullname: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -35,6 +36,10 @@ const RegisterPage: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
+
+    if (!formData.fullname) {
+      newErrors.fullname = "Họ và tên là bắt buộc";
+    }
 
     if (!formData.email.trim()) {
       newErrors.email = "Email là bắt buộc";
@@ -65,7 +70,7 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    const response = await register(formData.email, formData.password);
+    const response = await register(formData.fullname, formData.email, formData.password);
 
     if (response?.success) {
       router.push(
@@ -86,6 +91,27 @@ const RegisterPage: React.FC = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="fullname">Fullname</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="fullname"
+              name="fullname"
+              type="text"
+              placeholder="Nhập họ và tên của bạn"
+              value={formData.fullname}
+              onChange={handleChange}
+              className="pl-10"
+            />
+          </div>
+          {errors.fullname && (
+            <Alert variant="destructive">
+              <AlertDescription>{errors.fullname}</AlertDescription>
+            </Alert>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">

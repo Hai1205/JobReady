@@ -139,6 +139,11 @@ mvn clean package -DskipTests
 ### 4. Install package
 
 ```bash
+# Rabbit Common
+mvn clean install -pl rabbit-common
+```
+
+```bash
 # Discovery Service
 mvn clean install -pl discovery-service
 ```

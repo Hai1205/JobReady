@@ -16,19 +16,19 @@ public class RabbitConstants {
     public static final String USER_REPLY_QUEUE = "user.reply.queue";
     public static final String CV_REPLY_QUEUE = "cv.reply.queue";
     
+    // --- User Service ---
     // --- Routing keys - User Service ---
     public static final String USER_FIND_BY_EMAIL = "user.find.by.email";
-    public static final String USER_FIND_WITH_PARAMS = "user.find.with.params";
-    
-    // --- Routing keys - Auth Service ---
-    public static final String AUTH_LOGIN = "auth.login";
-    public static final String AUTH_VERIFY = "auth.verify";
-    
+    public static final String USER_CREATE = "user.create";
+    public static final String USER_CHANGE_PASSWORD = "user.change.password";
+    public static final String USER_AUTHENTICATE = "user.authenticate";
+    public static final String USER_RESET_PASSWORD = "user.reset.password";
+    public static final String USER_FORGOT_PASSWORD = "user.forgot.password";
     // --- Queue names - User Service ---
     public static final String USER_FIND_BY_EMAIL_QUEUE = "user.find.by.email.queue";
-    public static final String USER_FIND_WITH_PARAMS_QUEUE = "user.find.with.params.queue";
-    
-    // --- Queue names - Auth Service ---
-    public static final String AUTH_LOGIN_QUEUE = "auth.login.queue";
-    public static final String AUTH_VERIFY_QUEUE = "auth.verify.queue";
+    public static final String USER_CREATE_QUEUE = "user.create.queue";
+    public static final String USER_CHANGE_PASSWORD_QUEUE = "user.change.password.queue";
+    public static final String USER_AUTHENTICATE_QUEUE = "user.authenticate.queue";
+    public static final String USER_RESET_PASSWORD_QUEUE = "user.reset.password.queue";
+    public static final String USER_FORGOT_PASSWORD_QUEUE = "user.forgot.password.queue";
 }
