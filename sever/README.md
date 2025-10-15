@@ -1,6 +1,6 @@
-# 🚀 Spring Microservices Project
+# 🚀 JobReady Backend - Spring Boot Microservices
 
-Dự án mẫu Spring Boot Microservice với kiến trúc hoàn chỉnh bao gồm Service Discovery, API Gateway, Authentication Service, User Service và Message Broker.
+Hệ thống backend JobReady với kiến trúc microservices hoàn chỉnh, tích hợp AI-powered CV processing và authentication system.
 
 ## 🏗️ Kiến trúc tổng thể
 
@@ -15,6 +15,12 @@ Dự án mẫu Spring Boot Microservice với kiến trúc hoàn chỉnh bao g�
                        ┌─────────────────┐    ┌─────────────────┐
                        │   User Service  │    │    RabbitMQ     │
                        │     :8083       │◄──►│     :5672       │
+                       └─────────────────┘    └─────────────────┘
+                                │                        │
+                                │                        ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │    CV Service   │    │   OpenRouter AI  │
+                       │     :8084       │◄──►│   (External)     │
                        └─────────────────┘    └─────────────────┘
                                 │
                                 ▼
@@ -43,6 +49,7 @@ Dự án mẫu Spring Boot Microservice với kiến trúc hoàn chỉnh bao g�
 - Sinh JWT token bằng RSA private key
 - Publish login events qua RabbitMQ
 - Xác thực và validate token
+- Hỗ trợ OAuth2 Social Login (Google, Facebook, GitHub)
 
 ### 4. **User Service** (Port: 8083)
 
@@ -51,18 +58,33 @@ Dự án mẫu Spring Boot Microservice với kiến trúc hoàn chỉnh bao g�
 - Listen RabbitMQ events
 - Verify JWT bằng RSA public key
 
-### 5. **MySQL Database** (Port: 3306)
+### 5. **CV Service** (Port: 8084) ⭐ **NEW**
 
-- Lưu trữ thông tin user
+- **AI-Powered CV Processing**: Tích hợp OpenRouter API với Llama-3.2-3b-instruct model
+- **File Import**: Hỗ trợ upload và parse PDF, DOCX, TXT files
+- **CV Analysis**: Phân tích CV và đưa ra suggestions cải thiện
+- **Job Description Matching**: So sánh CV với job description
+- **Smart Improvements**: AI-generated suggestions cho từng section của CV
+- **File Parsing**: Sử dụng Apache PDFBox và POI để extract text
+
+### 6. **MySQL Database** (Port: 3306)
+
+- Lưu trữ thông tin user và CV data
 - Database: `jobready`
 
-### 6. **RabbitMQ** (Port: 5672, Management: 15672)
+### 7. **RabbitMQ** (Port: 5672, Management: 15672)
 
 - Message broker cho async communication
 - Exchange: `user.exchange`
 - Queue: `user.login.queue`
 
-## 🔐 Bảo mật
+### 8. **OpenRouter AI** (External API)
+
+- AI model: `meta-llama/llama-3.2-3b-instruct`
+- Sử dụng cho CV analysis và improvement suggestions
+- API Key required trong environment variables
+
+## 🔐 Bảo mật & Authentication
 
 ### JWT Token Authentication
 
@@ -75,27 +97,7 @@ Dự án mẫu Spring Boot Microservice với kiến trúc hoàn chỉnh bao g�
 - **Supported Providers**: Google, Facebook, GitHub
 - **Authorization Flow**: OAuth2 Authorization Code Grant
 - **User Integration**: Tự động tạo hoặc cập nhật user sau OAuth2 login
-- **JWT Generation**: OAuth2 login cũng tạo JWT token để sử dụng tiếp trong hệ thống
-
-### Authentication Flows
-
-#### 1. Traditional Login Flow:
-
-1. Client gửi login request đến Gateway
-2. Gateway validate credentials với User Service
-3. Gateway request token từ Auth Service
-4. Auth Service publish login event qua RabbitMQ
-5. User Service nhận và log login event
-
-#### 2. OAuth2 Login Flow:
-
-1. Client redirect đến `/oauth2/authorize/{provider}` (Google/Facebook/GitHub)
-2. User xác thực với OAuth2 provider
-3. Provider callback về `/oauth2/callback/{provider}`
-4. Auth Service lấy user info từ provider
-5. Auth Service tạo/cập nhật user trong database
-6. Auth Service tạo JWT token
-7. Redirect client với JWT token
+- **JWT Generation**: OAuth2 login cũng tạo JWT token
 
 ## 🚀 Cách chạy
 
@@ -104,123 +106,141 @@ Dự án mẫu Spring Boot Microservice với kiến trúc hoàn chỉnh bao g�
 - Docker và Docker Compose
 - Java 21
 - Maven 3.6+
+- OpenRouter API Key (cho CV Service)
 
-### 1. Chuẩn bị OAuth2 Provider Apps
+### 1. Chuẩn bị Environment Variables
 
-Trước khi chạy hệ thống với OAuth2, bạn cần đăng ký ứng dụng với các OAuth2 providers. Xem hướng dẫn chi tiết trong [`docs/OAUTH2_SETUP_GUIDE.md`](docs/OAUTH2_SETUP_GUIDE.md).
-
-### 2. Cấu hình OAuth2 Credentials
-
-Tạo file `auth-service/src/main/resources/application-oauth2.properties`:
-
-```properties
-# Google OAuth2
-spring.security.oauth2.client.registration.google.client-id=your-google-client-id
-spring.security.oauth2.client.registration.google.client-secret=your-google-client-secret
-spring.security.oauth2.client.registration.google.scope=profile,email
-
-# Facebook OAuth2
-spring.security.oauth2.client.registration.facebook.client-id=your-facebook-app-id
-spring.security.oauth2.client.registration.facebook.client-secret=your-facebook-app-secret
-spring.security.oauth2.client.registration.facebook.scope=email,public_profile
-
-# GitHub OAuth2
-spring.security.oauth2.client.registration.github.client-id=your-github-client-id
-spring.security.oauth2.client.registration.github.client-secret=your-github-client-secret
-spring.security.oauth2.client.registration.github.scope=user:email
-```
-
-### 3. Build project
+Tạo file `.env` trong thư mục `sever`:
 
 ```bash
+# JWT Keys (tạo bằng KeyGenerator.java)
+JWT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+
+# OpenRouter AI API (cho CV Service)
+OPENROUTER_API_KEY=your-openrouter-api-key-here
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_MODEL=meta-llama/llama-3.2-3b-instruct
+
+# Database
+MYSQL_ROOT_PASSWORD=password
+MYSQL_DATABASE=jobready
+
+# RabbitMQ
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+```
+
+### 2. Chuẩn bị OAuth2 (Optional)
+
+Xem hướng dẫn trong [`docs/OAUTH2_SETUP_GUIDE.md`](docs/OAUTH2_SETUP_GUIDE.md) để setup OAuth2 providers.
+
+### 3. Build và Install
+
+```bash
+# Build tất cả modules
 mvn clean package -DskipTests
-```
 
-### 4. Install package
-
-```bash
-# Rabbit Common
+# Hoặc build từng module
 mvn clean install -pl rabbit-common
-```
-
-```bash
-# Discovery Service
 mvn clean install -pl discovery-service
-```
-
-```bash
-# Gateway Service
 mvn clean install -pl gateway-service
-```
-
-```bash
-# User Service
 mvn clean install -pl user-service
-```
-
-```bash
-# CV Service
 mvn clean install -pl cv-service
-```
-
-```bash
-# Auth Service
 mvn clean install -pl auth-service
 ```
 
-### 5. Chạy các service (mở terminal riêng cho mỗi service):
+### 4. Chạy Services
 
 ```bash
-# Gen Key
-cd .\config\keys\  && javac KeyGenerator.java && java KeyGenerator
+# 1. Tạo JWT Keys
+cd config/keys && javac KeyGenerator.java && java KeyGenerator
 
-# RabiitMQ - MySQL
+# 2. Khởi động Infrastructure
 docker-compose up -d
 
-# Discovery Service
+# 3. Chạy Services (mỗi service trong terminal riêng)
 mvn spring-boot:run -pl discovery-service
-
-# Gateway Service
 mvn spring-boot:run -pl gateway-service
-
-# User Service
 mvn spring-boot:run -pl user-service
-
-# Auth Service
-mvn spring-boot:run -pl auth-service
-# mvn spring-boot:run -pl auth-service -Dspring-boot.run.profiles=oauth2
-
-# CV Service
 mvn spring-boot:run -pl cv-service
+mvn spring-boot:run -pl auth-service
 ```
 
-### 6. Kiểm tra services
+### 5. Kiểm tra Services
 
-- Eureka Dashboard: http://localhost:8761
-- Gateway Health: http://localhost:8080/actuator/health
-- RabbitMQ Management: http://localhost:15672 (guest/guest)
+- **Eureka Dashboard**: http://localhost:8761
+- **Gateway Health**: http://localhost:8080/actuator/health
+- **RabbitMQ Management**: http://localhost:15672 (guest/guest)
+- **CV Service Health**: http://localhost:8084/actuator/health
 
-### 7. Test OAuth2 Login
+## 📝 API Endpoints
 
-#### Google Login:
+### CV Service (Port: 8084, qua Gateway: /cv)
 
+#### File Import & Analysis
+
+- `POST /cv/import` - Upload và parse CV file (PDF/DOCX/TXT)
+- `POST /cv/analyze` - Phân tích CV và đưa ra suggestions
+- `POST /cv/analyze-with-jd` - Phân tích CV so với Job Description
+- `POST /cv/improve` - Cải thiện CV dựa trên AI suggestions
+
+#### CV Management
+
+- `GET /cv` - Lấy danh sách CV của user
+- `GET /cv/{id}` - Lấy CV theo ID
+- `POST /cv` - Tạo CV mới
+- `PUT /cv/{id}` - Cập nhật CV
+- `DELETE /cv/{id}` - Xóa CV
+
+### Authentication Endpoints
+
+- `POST /gateway/auth/login` - Đăng nhập
+- `POST /gateway/auth/validate` - Validate JWT token
+- `GET /oauth2/authorize/{provider}` - OAuth2 login (google/facebook/github)
+
+### User Management
+
+- `GET /users` - Lấy danh sách users
+- `POST /users` - Tạo user mới
+- `GET /users/{id}` - Lấy user theo ID
+- `PUT /users/{id}` - Cập nhật user
+- `DELETE /users/{id}` - Xóa user
+
+## 🧪 Testing CV Service
+
+### Import CV File
+
+```bash
+curl -X POST http://localhost:8080/cv/import \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "file=@/path/to/your/cv.pdf"
 ```
-http://localhost:8080/oauth2/authorize/google
+
+### Analyze CV
+
+```bash
+curl -X POST http://localhost:8080/cv/analyze \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cvId": "your-cv-id",
+    "sections": ["experience", "skills", "education"]
+  }'
 ```
 
-#### Facebook Login:
+### Analyze CV with Job Description
 
+```bash
+curl -X POST http://localhost:8080/cv/analyze-with-jd \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cvId": "your-cv-id",
+    "jobDescription": "Paste job description here...",
+    "focusAreas": ["technical-skills", "experience-match"]
+  }'
 ```
-http://localhost:8080/oauth2/authorize/facebook
-```
-
-#### GitHub Login:
-
-```
-http://localhost:8080/oauth2/authorize/github
-```
-
-**Kết quả**: Sau khi đăng nhập thành công, user sẽ được redirect với JWT token và thông tin user được lưu trong database.
 
 ## 🔧 Cấu hình Environment
 
@@ -229,197 +249,80 @@ http://localhost:8080/oauth2/authorize/github
 - Tất cả services chạy trên localhost
 - MySQL: root/password
 - RabbitMQ: guest/guest
+- OpenRouter API: Cần API key
 
 ### Production
 
-Cập nhật các environment variables trong `.env` file và `docker-compose.yml`:
+- Sử dụng environment variables
+- Database credentials từ secrets
+- JWT keys từ secure storage
+- OpenRouter API key từ environment
 
-- Database credentials
-- RabbitMQ credentials
-- JWT RSA keys (định dạng PEM bao gồm header)
-  - `JWT_PRIVATE_KEY` - Private key cho Auth Service
-  - `JWT_PUBLIC_KEY` - Public key cho tất cả services
+## 📊 Monitoring & Health Checks
 
-## 📝 API Endpoints
-
-### Gateway Service (Port: 8080)
-
-#### Traditional Authentication:
-
-- `POST /gateway/auth/login` - Đăng nhập bằng username/password
-- `POST /gateway/auth/validate` - Validate JWT token
-- `GET /gateway/auth/health` - Health check
-
-#### OAuth2 Authentication:
-
-- `GET /oauth2/authorize/{provider}` - Khởi tạo OAuth2 login (provider: google, facebook, github)
-- `GET /oauth2/callback/{provider}` - OAuth2 callback endpoint (được provider gọi tự động)
-
-### User Service (qua Gateway)
-
-- `GET /users` - Lấy danh sách users
-- `POST /users` - Tạo user mới
-- `GET /users/{id}` - Lấy user theo ID
-- `PUT /users/{id}` - Cập nhật user
-- `DELETE /users/{id}` - Xóa user
-- `POST /users/authenticate` - Xác thực user bằng username/password
-
-#### OAuth2 User Endpoints:
-
-- `POST /users/oauth2` - Tạo hoặc cập nhật OAuth2 user
-- `GET /users/oauth2/{provider}/{providerId}` - Tìm user bằng OAuth2 provider info
-
-### Auth Service (qua Gateway)
-
-- `POST /auth/login` - Đăng nhập traditional
-- `POST /auth/validate` - Validate JWT token
-
-## 🧪 Testing
-
-### Traditional Authentication Test
-
-```bash
-# 1. Tạo user
-curl -X POST http://localhost:8080/users \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "password123",
-    "fullname": "Test User"
-  }'
-
-# 2. Login traditional
-curl -X POST http://localhost:8080/gateway/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "password": "password123"
-  }'
-
-# 3. Sử dụng JWT token nhận được để gọi protected endpoints
-curl -X GET http://localhost:8080/users \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-### OAuth2 Authentication Test
-
-1. **Google Login**: Truy cập `http://localhost:8080/oauth2/authorize/google` trên browser
-2. **Facebook Login**: Truy cập `http://localhost:8080/oauth2/authorize/facebook` trên browser
-3. **GitHub Login**: Truy cập `http://localhost:8080/oauth2/authorize/github` trên browser
-
-Sau khi đăng nhập thành công, check database để thấy user mới được tạo với thông tin OAuth2.
-
-### Postman Collection
-
-Import file `api-test.postman_collection.json` vào Postman để test toàn bộ flow.
-
-## 🔄 RabbitMQ Events
-
-### Login Events
-
-Khi user login thành công (cả traditional và OAuth2):
-
-1. Auth Service publish `UserLoginEvent` vào exchange `user.exchange`
-2. User Service listen queue `user.login.queue`
-3. Event chứa thông tin: username, timestamp, loginType (TRADITIONAL/OAUTH2)
-
-### Event Schema
-
-```json
-{
-  "username": "user@example.com",
-  "timestamp": "2024-01-01T12:00:00Z",
-  "loginType": "OAUTH2",
-  "provider": "google" // chỉ có khi loginType = OAUTH2
-}
-```
-
-## 📊 Monitoring
-
-- **Actuator Endpoints**: `/actuator/health`, `/actuator/metrics`
-- **Eureka Dashboard**: Xem trạng thái các services
+- **Actuator Endpoints**: `/actuator/health`, `/actuator/metrics`, `/actuator/info`
+- **Eureka Dashboard**: Trạng thái các services
 - **RabbitMQ Management**: Monitor queues và messages
-
-## 🔧 Thêm Service mới
-
-1. Tạo Maven module mới trong parent POM
-2. Thêm Eureka Client dependency
-3. Cấu hình `application.properties`
-4. Tạo Dockerfile
-5. Thêm service vào `docker-compose.yml`
-6. Cập nhật Gateway routes nếu cần
+- **CV Service Metrics**: AI API usage, file processing stats
 
 ## 🚨 Troubleshooting
 
-### Service không register với Eureka
+### CV Service Issues
 
-- Kiểm tra network connectivity
-- Verify Eureka URL trong config
+- **"OpenRouter API Error"**: Kiểm tra API key và network connectivity
+- **"File parsing failed"**: Verify file format (PDF/DOCX/TXT only)
+- **"AI model timeout"**: Check OpenRouter service status
 
-### JWT validation failed
+### Common Issues
 
-- Kiểm tra public/private key paths
-- Verify token format (Bearer prefix)
-
-### OAuth2 Login Issues
-
-- **"Invalid redirect_uri"**: Kiểm tra redirect URI trong OAuth2 provider console phải khớp với callback URL
-- **"Invalid client_id/secret"**: Verify credentials trong `application-oauth2.properties`
-- **"Scope not granted"**: Đảm bảo scope được khai báo chính xác trong provider app
-- **User info extraction failed**: Check provider response format và mapping trong `OAuth2LoginService`
-
-### RabbitMQ connection failed
-
-- Kiểm tra RabbitMQ service status
-- Verify credentials và host config
-
-### Database connection issues
-
-- Kiểm tra MySQL service status
-- Verify database URL và credentials
-- Đảm bảo database `jobready` đã được tạo
-- Check User table có các cột OAuth2 fields: `oauth_provider`, `oauth_provider_id`, `avatar_url`, `is_oauth_user`
+- **Service registration failed**: Kiểm tra Eureka connectivity
+- **JWT validation failed**: Verify RSA key pair
+- **Database connection**: Check MySQL service và credentials
+- **OAuth2 redirect error**: Verify callback URLs trong provider console
 
 ## 📚 Tech Stack
 
-- **Spring Boot 3.2.0**
-- **Spring Cloud 2023.0.0**
-- **Spring Security 6+** (với OAuth2 Client support)
-- **Java 21**
-- **MySQL 8.0**
-- **RabbitMQ 3.11**
-- **JWT (JJWT 0.12.3)**
-- **Docker & Docker Compose**
+- **Spring Boot 3.2.0** - Framework chính
+- **Spring Cloud 2023.0.0** - Microservices support
+- **Spring Security 6+** - Authentication & OAuth2
+- **Java 21** - Runtime
+- **MySQL 8.0** - Database
+- **RabbitMQ 3.11** - Message broker
+- **Apache PDFBox 2.0.29** - PDF parsing
+- **Apache POI 5.2.5** - DOCX parsing
+- **OpenRouter AI** - AI processing
+- **JWT (JJWT 0.12.3)** - Token management
+- **Docker & Docker Compose** - Containerization
 
-## 🔍 Features
+## 🔍 Key Features
 
 ### ✅ Implemented
 
 - [x] Service Discovery với Eureka
-- [x] API Gateway với Spring Cloud Gateway
-- [x] JWT Authentication với RSA key pair
+- [x] API Gateway với JWT authentication
 - [x] User Management với MySQL
+- [x] OAuth2 Social Login (Google, Facebook, GitHub)
 - [x] Async Messaging với RabbitMQ
-- [x] **OAuth2 Social Login** (Google, Facebook, GitHub)
-- [x] **Automatic User Registration** từ OAuth2 providers
-- [x] **JWT Token Generation** cho OAuth2 users
-- [x] **Inter-service Communication** cho OAuth2 user management
+- [x] **AI-Powered CV Processing** ⭐
+- [x] **Multi-format File Import** (PDF, DOCX, TXT)
+- [x] **CV Analysis & Improvement**
+- [x] **Job Description Matching**
+- [x] **Smart AI Suggestions**
 
-### 🔮 Planned
+### 🔮 Future Enhancements
 
-- [ ] Redis Cache Integration
-- [ ] Email Notification Service
-- [ ] File Upload Service
-- [ ] Monitoring với Prometheus/Grafana
-- [ ] API Rate Limiting
-- [ ] OAuth2 Token Refresh
+- [ ] Redis caching cho AI responses
+- [ ] Batch CV processing
+- [ ] Advanced AI models integration
+- [ ] CV template generation
+- [ ] Interview preparation features
 
 ## 📖 Documentation
 
-- [OAuth2 Setup Guide](docs/OAUTH2_SETUP_GUIDE.md) - Hướng dẫn chi tiết setup OAuth2 providers
-- [API Documentation](docs/API_DOCUMENTATION.md) - Chi tiết về tất cả endpoints
-- [Architecture Guide](docs/ARCHITECTURE.md) - Kiến trúc và design patterns được sử dụng
+- [CV Service API Guide](CV_AI_FEATURES_README.md) - Chi tiết AI features
+- [OAuth2 Setup Guide](docs/OAUTH2_SETUP_GUIDE.md) - Setup OAuth2 providers
+- [Architecture Guide](docs/ARCHITECTURE.md) - System architecture
+- [API Documentation](docs/API_DOCUMENTATION.md) - Complete API reference
 
 ## 📄 License
 

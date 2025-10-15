@@ -52,10 +52,15 @@ public class AuthService {
             String username = userDto.getUsername();
             String role = userDto.getRole();
 
-            String token = jwtUtil.generateToken(userId, username, role);
+            // Tạo Access Token (ngắn hạn - 15 phút)
+            String accessToken = jwtUtil.generateAccessToken(userId, username, role);
+
+            // Tạo Refresh Token (dài hạn - 7 ngày)
+            String refreshToken = jwtUtil.generateRefreshToken(userId, username);
 
             ResponseData data = new ResponseData();
-            data.setToken(token);
+            data.setAccessToken(accessToken);
+            data.setRefreshToken(refreshToken);
             data.setUser(userDto);
 
             response.setStatusCode(200);
@@ -269,22 +274,72 @@ public class AuthService {
 
         return response;
     }
-    
-    public Response refreshToken() {
+
+    /**
+     * Refresh Token Service
+     * Nhận refresh token, validate và tạo access token + refresh token mới
+     * 
+     * @param refreshToken Refresh token từ client
+     * @return Response chứa access token và refresh token mới
+     */
+    public Response refreshToken(String refreshToken) {
         Response response = new Response();
 
         try {
+            // Validate refresh token
+            if (refreshToken == null || refreshToken.isEmpty()) {
+                throw new OurException("Refresh token is required", 400);
+            }
+
+            // Kiểm tra refresh token có hợp lệ không
+            boolean isValidRefreshToken = jwtUtil.validateRefreshToken(refreshToken);
+
+            if (!isValidRefreshToken) {
+                throw new OurException("Invalid or expired refresh token", 401);
+            }
+
+            // Extract thông tin từ refresh token
+            String username = jwtUtil.extractUsername(refreshToken);
+            String userId = jwtUtil.extractUserId(refreshToken);
+
+            // Lấy thông tin user từ User Service để có role
+            // (Refresh token không chứa role nên cần query lại)
+            // Username trong hệ thống hiện tại là email
+            UserDto userDto = userProducer.findUserByEmail(username);
+
+            if (userDto == null) {
+                throw new OurException("User not found", 404);
+            }
+
+            String role = userDto.getRole();
+
+            // Tạo Access Token mới (ngắn hạn - 15 phút)
+            String newAccessToken = jwtUtil.generateAccessToken(userId, username, role);
+
+            // Tạo Refresh Token mới (dài hạn - 7 ngày)
+            // Rotation strategy: tạo refresh token mới để tăng security
+            String newRefreshToken = jwtUtil.generateRefreshToken(userId, username);
+
+            // Prepare response
+            ResponseData data = new ResponseData();
+            data.setAccessToken(newAccessToken);
+            data.setRefreshToken(newRefreshToken);
+            data.setUser(userDto);
 
             response.setStatusCode(200);
-            response.setMessage("Refresh token successfully!");
+            response.setMessage("Token refreshed successfully!");
+            response.setData(data);
+
+            logger.info("Token refreshed successfully for user: {}", username);
+
         } catch (OurException e) {
-            response.setStatusCode(400);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
+            logger.error("Refresh token error: {}", e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
+            response.setMessage("Internal server error: " + e.getMessage());
+            logger.error("Unexpected error during token refresh", e);
         }
 
         return response;
