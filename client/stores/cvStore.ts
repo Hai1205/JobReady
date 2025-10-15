@@ -11,6 +11,7 @@ export interface ICVStore extends IBaseStore {
 	cvList: ICV[]
 	currentStep: number
 	aiSuggestions: IAISuggestion[]
+	jobDescription: string
 
 	getAllCVs: () => Promise<IApiResponse<ICVDataResponse>>;
 	getUserCVs: (userId: string) => Promise<IApiResponse<ICVDataResponse>>;
@@ -43,6 +44,10 @@ export interface ICVStore extends IBaseStore {
 	analyzeCV: (
 		cvId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
+	analyzeCVWithJD: (
+		cvId: string,
+		jobDescription: string
+	) => Promise<IApiResponse<ICVDataResponse>>;
 	improveCV: (
 		cvId: string, section: string, content: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
@@ -50,9 +55,10 @@ export interface ICVStore extends IBaseStore {
 	handleUpdateCV: (cvData: Partial<ICV>) => void;
 	handleSetCurrentStep: (step: number) => void;
 	handleSetCurrentCV: (cv: ICV | null) => void;
-	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void
-	handleApplySuggestion: (id: string) => void
-	handleClearCVList: () => void
+	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void;
+	handleSetJobDescription: (jd: string) => void;
+	handleApplySuggestion: (id: string) => void;
+	handleClearCVList: () => void;
 }
 
 const storeName = "cv";
@@ -61,6 +67,7 @@ const initialState = {
 	cvList: [],
 	currentStep: 0,
 	aiSuggestions: [],
+	jobDescription: "",
 };
 
 export const useCVStore = createStore<ICVStore>(
@@ -142,17 +149,19 @@ export const useCVStore = createStore<ICVStore>(
 
 		analyzeCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/analyse/${cvId}`);
+				return await handleRequest(EHttpType.POST, `/cvs/analyze/${cvId}`, undefined);
+			});
+		},
+
+		analyzeCVWithJD: async (cvId: string, jobDescription: string): Promise<IApiResponse<ICVDataResponse>> => {
+			return await get().handleRequest(async () => {
+				return await handleRequest(EHttpType.POST, `/cvs/analyze-with-jd/${cvId}`, { jobDescription });
 			});
 		},
 
 		improveCV: async (cvId: string, section: string, content: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				const formData = new FormData();
-				formData.append("section", section);
-				formData.append("content", content);
-
-				return await handleRequest(EHttpType.POST, `/cvs/improve/${cvId}`, formData);
+				return await handleRequest(EHttpType.POST, `/cvs/improve/${cvId}`, { section, content });
 			});
 		},
 
@@ -173,6 +182,22 @@ export const useCVStore = createStore<ICVStore>(
 
 		handleSetAISuggestions: (suggestions: IAISuggestion[]): void => {
 			set({ aiSuggestions: suggestions });
+		},
+
+		handleSetJobDescription: (jd: string): void => {
+			set({ jobDescription: jd });
+		},
+
+		handleApplySuggestion: (id: string): void => {
+			const currentState = get();
+			const updatedSuggestions = currentState.aiSuggestions.map(suggestion =>
+				suggestion.id === id ? { ...suggestion, applied: true } : suggestion
+			);
+			set({ aiSuggestions: updatedSuggestions });
+		},
+
+		handleClearCVList: (): void => {
+			set({ cvList: [] });
 		},
 
 

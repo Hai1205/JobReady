@@ -100,13 +100,13 @@ interface IAxiosError {
 export const handleRequest = async <T = unknown>(
   type: EHttpType,
   route: string,
-  formData?: FormData,
+  data?: FormData | Record<string, unknown>,
   toastMessage?: boolean
 ): Promise<IApiResponse<T>> => {
   let response;
 
   try {
-    const headers = formData instanceof FormData
+    const headers = data instanceof FormData
       ? { 'Content-Type': 'multipart/form-data' }
       : { 'Content-Type': 'application/json' };
 
@@ -116,21 +116,21 @@ export const handleRequest = async <T = unknown>(
         break;
 
       case EHttpType.POST:
-        response = await axiosInstance.post(route, formData, { headers });
+        response = await axiosInstance.post(route, data, { headers });
         break;
 
       case EHttpType.PUT:
-        if (!formData) {
-          throw new Error("FormData is required for PUT requests");
+        if (!data) {
+          throw new Error("Data is required for PUT requests");
         }
-        response = await axiosInstance.put(route, formData, { headers });
+        response = await axiosInstance.put(route, data, { headers });
         break;
 
       case EHttpType.PATCH:
-        if (!formData) {
-          throw new Error("FormData is required for PATCH requests");
+        if (!data) {
+          throw new Error("Data is required for PATCH requests");
         }
-        response = await axiosInstance.patch(route, formData, { headers });
+        response = await axiosInstance.patch(route, data, { headers });
         break;
 
       case EHttpType.DELETE:

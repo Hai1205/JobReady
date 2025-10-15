@@ -428,13 +428,13 @@ export function PreviewStep() {
                         {edu.degree}
                         {edu.field && ` - ${edu.field}`}
                       </p>
-                      <div className="mt-2 text-sm text-gray-700">
+                      {/* <div className="mt-2 text-sm text-gray-700">
                         <p className="font-semibold">Thành tích nổi bật:</p>
                         <ul className="ml-5 mt-1 list-disc space-y-1">
                           <li>Xếp loại: Xuất sắc (GPA: 3.7/4.0)</li>
                           <li>Giải nhì Business Case Competition 2022</li>
                         </ul>
-                      </div>
+                      </div> */}
                     </div>
                   ))}
                 </div>
@@ -466,7 +466,7 @@ export function PreviewStep() {
                           </p>
                         </div>
                       )}
-                      <div className="mt-2 text-sm text-gray-700">
+                      {/* <div className="mt-2 text-sm text-gray-700">
                         <p className="font-semibold">Thành tích nổi bật:</p>
                         <ul className="ml-5 mt-1 list-disc space-y-1">
                           <li>Đạt hoặc vượt chỉ tiêu kinh doanh hàng tháng</li>
@@ -475,7 +475,7 @@ export function PreviewStep() {
                             Quản lý pipeline bán hàng trị giá 80.000.000 VNĐ
                           </li>
                         </ul>
-                      </div>
+                      </div> */}
                     </div>
                   ))}
                 </div>
@@ -497,7 +497,7 @@ export function PreviewStep() {
             )}
 
             {/* Activities (Optional Section) */}
-            <div>
+            {/* <div>
               <h2 className="border-b-2 border-blue-900 pb-1 text-xl font-bold text-blue-900 mb-3">
                 HOẠT ĐỘNG
               </h2>
@@ -505,13 +505,13 @@ export function PreviewStep() {
                 <li>Tình nguyện viên tại chương trình XYZ</li>
                 <li>Thành viên CLB ABC</li>
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-4">
+      {/* <div className="flex gap-4">
         <Button onClick={generatePDF} size="lg" className="flex-1 gap-2">
           <Download className="h-5 w-5" />
           Tải CV (PDF)
@@ -520,7 +520,7 @@ export function PreviewStep() {
           <FileText className="h-5 w-5" />
           Lưu Nháp
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

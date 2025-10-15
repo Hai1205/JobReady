@@ -24,6 +24,13 @@ public class ResponseData {
     private List<?> educations;
     private List<?> skills;
 
+    // AI Analysis and Improvement
+    private String analysis;
+    private String improvedSection;
+    private List<?> suggestions;
+    private String extractedText;
+    private Double matchScore;
+
     // Pagination and stats
     private Object pagination;
     private Map<String, Object> stats;

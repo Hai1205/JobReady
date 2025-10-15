@@ -16,65 +16,75 @@ import com.example.cvservice.service.CVService;
 public class CVController {
 
     @Autowired
-    private CVService userService;
+    private CVService cvService;
 
     @PostMapping("/users/{userId}")
     public ResponseEntity<Response> createCV(@PathVariable UUID userId, @ModelAttribute CreateCVRequest request) {
-        Response response = userService.createCV(userId, request);
+        Response response = cvService.createCV(userId, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping
     public ResponseEntity<Response> getAllCVs() {
-        Response response = userService.getAllCVs();
+        Response response = cvService.getAllCVs();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/{cvId}")
     public ResponseEntity<Response> getCVById(@PathVariable UUID cvId) {
-        Response response = userService.getCVById(cvId);
+        Response response = cvService.getCVById(cvId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/analyze/{cvId}")
+    @PostMapping("/analyze/{cvId}")
     public ResponseEntity<Response> analyzeCV(@PathVariable UUID cvId) {
-        Response response = userService.analyzeCV(cvId);
+        Response response = cvService.analyzeCV(cvId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/improve/{cvId}")
-    public ResponseEntity<Response> improveCV(@PathVariable UUID cvId, @ModelAttribute ImproveCVRequest request) {
-        Response response = userService.improveCV(cvId, request);
+    @PostMapping("/improve/{cvId}")
+    public ResponseEntity<Response> improveCV(@PathVariable UUID cvId, @RequestBody ImproveCVRequest request) {
+        Response response = cvService.improveCV(cvId, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/users/{userId}")
+    @PostMapping("/analyze-with-jd/{cvId}")
+    public ResponseEntity<Response> analyzeCVWithJobDescription(
+            @PathVariable UUID cvId,
+            @RequestBody AnalyzeCVWithJDRequest request) {
+        Response response = cvService.analyzeCVWithJobDescription(cvId, request);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/user/{userId}")
     public ResponseEntity<Response> getUserCVs(@PathVariable UUID userId) {
-        Response response = userService.getUserCVs(userId);
+        Response response = cvService.getUserCVs(userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/users/{userId}/import")
-    public ResponseEntity<Response> importFile(@PathVariable UUID userId, @ModelAttribute MultipartFile file) {
-        Response response = userService.importFile(userId, file);
+    public ResponseEntity<Response> importFile(
+            @PathVariable UUID userId,
+            @RequestParam("file") MultipartFile file) {
+        Response response = cvService.importFile(userId, file);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/title/{title}")
     public ResponseEntity<Response> getCVByTitle(@PathVariable String title) {
-        Response response = userService.getCVByTitle(title);
+        Response response = cvService.getCVByTitle(title);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/{cvId}")
+    @PatchMapping("/{cvId}")
     public ResponseEntity<Response> updateCV(@PathVariable UUID cvId, @ModelAttribute UpdateCVRequest request) {
-        Response response = userService.updateCV(cvId, request);
+        Response response = cvService.updateCV(cvId, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @DeleteMapping("/{cvId}")
     public ResponseEntity<Response> deleteCV(@PathVariable UUID cvId) {
-        Response response = userService.deleteCV(cvId);
+        Response response = cvService.deleteCV(cvId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
