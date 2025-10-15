@@ -70,7 +70,11 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    const response = await register(formData.fullname, formData.email, formData.password);
+    const response = await register(
+      formData.fullname,
+      formData.email,
+      formData.password
+    );
 
     if (response?.success) {
       router.push(
@@ -92,7 +96,7 @@ const RegisterPage: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="fullname">Fullname</Label>
+          <Label htmlFor="fullname">fullname</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input

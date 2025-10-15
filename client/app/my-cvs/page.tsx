@@ -51,11 +51,6 @@ export default function MyCVsPage() {
   const [cvToDelete, setCvToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!userAuth) {
-      router.push("/login");
-      return;
-    }
-
     loadCVs();
   }, [userAuth, router]);
 
@@ -93,14 +88,14 @@ export default function MyCVsPage() {
   };
 
   const handleDuplicate = (cv: ICV) => {
-    const duplicatedCV: ICV = {
-      ...cv,
-      id: crypto.randomUUID(),
-      title: `${cv.title} (Copy)`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    createCV(duplicatedCV);
+    // const duplicatedCV: ICV = {
+    //   ...cv,
+    //   id: crypto.randomUUID(),
+    //   title: `${cv.title} (Copy)`,
+    //   createdAt: new Date().toISOString(),
+    //   updatedAt: new Date().toISOString(),
+    // };
+    // createCV(duplicatedCV);
   };
 
   if (!userAuth) {
@@ -172,7 +167,7 @@ export default function MyCVsPage() {
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
                       <p className="text-sm font-medium">
-                        {cv.personalInfo.fullName || "Untitled"}
+                        {cv.personalInfo.fullname || "Untitled"}
                       </p>
                       <p className="text-xs text-muted-foreground line-clamp-2">
                         {cv.personalInfo.summary || "No summary added"}

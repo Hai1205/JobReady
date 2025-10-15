@@ -66,7 +66,7 @@ public class UserConsumer extends BaseConsumer {
                         Map<String, Object> params = objectMapper.readValue(message.getBody(),
                                         new TypeReference<Map<String, Object>>() {
                                         });
-                                        
+
                         Map<String, Object> payload = (Map<String, Object>) params.get("payload");
                         String email = (String) payload.get("email");
                         String password = (String) payload.get("password");
@@ -133,7 +133,7 @@ public class UserConsumer extends BaseConsumer {
                                                         .build());
                 }
         }
-        
+
         @RabbitListener(queues = RabbitConstants.USER_FORGOT_PASSWORD_QUEUE)
         public void handleForgotPasswordUser(Message message) {
                 RabbitHeader header = extractHeader(message);
@@ -170,7 +170,7 @@ public class UserConsumer extends BaseConsumer {
                                                         .build());
                 }
         }
-        
+
         @RabbitListener(queues = RabbitConstants.USER_AUTHENTICATE_QUEUE)
         public void handleAuthenticateUser(Message message) {
                 RabbitHeader header = extractHeader(message);
@@ -207,7 +207,7 @@ public class UserConsumer extends BaseConsumer {
                                                         .build());
                 }
         }
-        
+
         @RabbitListener(queues = RabbitConstants.USER_RESET_PASSWORD_QUEUE)
         public void handleResetPasswordUser(Message message) {
                 RabbitHeader header = extractHeader(message);

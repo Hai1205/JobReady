@@ -19,18 +19,21 @@ public class OpenRouterConfig {
 
     @Value("${API_KEY}")
     private static String apiKey;
+    
+    @Value("${API_MODEL}")
+    private static String apiModel;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public String callModel(String prompt, String model) {
+    public String callModel(String prompt) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(apiKey);
 
             Map<String, Object> body = new HashMap<>();
-            body.put("model", model);
+            body.put("model", apiModel);
             body.put("messages", new Object[]{
                     Map.of("role", "user", "content", prompt)
             });

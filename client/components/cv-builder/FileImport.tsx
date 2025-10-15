@@ -6,9 +6,12 @@ import { useState } from "react";
 import { Upload, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCVStore } from "@/stores/cvStore";
+import { toast } from "react-toastify";
+import { useAuthStore } from "@/stores/authStore";
 
 export function FileImport() {
   const { handleSetCurrentCV, importFile } = useCVStore();
+  const { userAuth } = useAuthStore();
 
   const [isUploading, setIsUploading] = useState(false);
 
@@ -22,16 +25,21 @@ export function FileImport() {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
     if (!validTypes.includes(file.type)) {
-      alert("Please upload a PDF or DOCX file");
+      toast.error("Please upload a PDF or DOCX file");
+      return;
+    }
+
+    if (!userAuth?.id) {
+      toast.error("User not authenticated. Please log in.");
       return;
     }
 
     setIsUploading(true);
-    const res = await importFile(file);
+    const res = await importFile(userAuth?.id, file);
     if (res.success || res.data) {
       handleSetCurrentCV(res.data?.cv || null);
     }
-   
+
     setIsUploading(false);
   };
 

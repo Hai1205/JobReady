@@ -3,6 +3,7 @@ package com.example.cvservice.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.cvservice.config.OpenRouterConfig;
 import com.example.cvservice.dto.*;
 import com.example.cvservice.dto.requests.*;
 import com.example.cvservice.dto.responses.*;
@@ -24,6 +25,8 @@ public class CVService {
     private final EducationRepository educationRepository;
     private final ExperienceRepository experienceRepository;
     private final PersonalInfoRepository personalInfoRepository;
+
+    private OpenRouterConfig openRouterConfig;
     private final CVMapper cvMapper;
 
     public CVService(
@@ -163,30 +166,32 @@ public class CVService {
         return response;
     }
 
-    public Response analyseCV(UUID cvId) {
+    public Response analyzeCV(UUID cvId) {
         Response response = new Response();
 
         try {
             CVDto cvDto = handleGetCVById(cvId);
 
+            String prompt = "Analyze the following CV and provide insights:\n\n" + cvDto.toString();
+            String result = openRouterConfig.callModel(prompt);
+
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
+            data.setAnalysis(result);
 
             response.setStatusCode(200);
-            response.setMessage("CV retrieved successfully");
+            response.setMessage("CV analyzed successfully");
             response.setData(data);
+
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
-            System.out.println(e.getMessage());
         } catch (OurException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
         }
 
         return response;
@@ -198,24 +203,30 @@ public class CVService {
         try {
             CVDto cvDto = handleGetCVById(cvId);
 
+            String prompt = String.format(
+                    "You are an expert resume writer. Improve the following %s section to make it professional, concise, and effective:\n\n%s",
+                    request.getSection(),
+                    request.getContent());
+
+            String improved = openRouterConfig.callModel(prompt);
+
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
+            data.setImprovedSection(improved);
 
             response.setStatusCode(200);
-            response.setMessage("CV retrieved successfully");
+            response.setMessage("CV section improved successfully");
             response.setData(data);
+
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
-            System.out.println(e.getMessage());
         } catch (OurException e) {
             response.setStatusCode(404);
             response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
-            System.out.println(e.getMessage());
         }
 
         return response;
@@ -404,7 +415,7 @@ public class CVService {
 
         try {
             handleDeleteCV(cvId);
-            
+
             response.setStatusCode(200);
             response.setMessage("CV deleted successfully");
         } catch (IllegalArgumentException e) {

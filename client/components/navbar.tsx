@@ -117,7 +117,7 @@ export function Navbar() {
           {userAuth ? (
             <div className="hidden md:flex items-center gap-2">
               <div className="flex flex-col items-end">
-                <span className="text-sm font-medium">{userAuth.name}</span>
+                <span className="text-sm font-medium">{userAuth.fullname}</span>
                 {isAdmin && (
                   <span className="text-xs text-muted-foreground">Admin</span>
                 )}
@@ -165,7 +165,7 @@ export function Navbar() {
                 {userAuth ? (
                   <div className="flex flex-col gap-4 pt-4 border-t">
                     <div>
-                      <p className="text-sm font-medium">{userAuth.name}</p>
+                      <p className="text-sm font-medium">{userAuth.fullname}</p>
                       <p className="text-xs text-muted-foreground">
                         {userAuth.email}
                       </p>

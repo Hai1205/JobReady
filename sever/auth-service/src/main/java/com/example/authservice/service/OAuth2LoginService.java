@@ -44,7 +44,8 @@ public class OAuth2LoginService {
 
             // Xử lý user trong user-service thông qua RabbitMQ (check exists,
             // create/update)
-            // Map<String, Object> userResult = userService.processOAuth2User(oauth2UserDto);
+            // Map<String, Object> userResult =
+            // userService.processOAuth2User(oauth2UserDto);
             Map<String, Object> userResult = new HashMap<>(); // Giả lập user-service response
 
             if (userResult == null) {

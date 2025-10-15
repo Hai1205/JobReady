@@ -35,25 +35,25 @@ public class CVController {
         Response response = userService.getCVById(cvId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-    
+
     @GetMapping("/analyze/{cvId}")
-    public ResponseEntity<Response> analyseCV(@PathVariable UUID cvId) {
-        Response response = userService.analyseCV(cvId);
+    public ResponseEntity<Response> analyzeCV(@PathVariable UUID cvId) {
+        Response response = userService.analyzeCV(cvId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-    
+
     @GetMapping("/improve/{cvId}")
     public ResponseEntity<Response> improveCV(@PathVariable UUID cvId, @ModelAttribute ImproveCVRequest request) {
         Response response = userService.improveCV(cvId, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-    
+
     @GetMapping("/users/{userId}")
     public ResponseEntity<Response> getUserCVs(@PathVariable UUID userId) {
         Response response = userService.getUserCVs(userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-    
+
     @PostMapping("/users/{userId}/import")
     public ResponseEntity<Response> importFile(@PathVariable UUID userId, @ModelAttribute MultipartFile file) {
         Response response = userService.importFile(userId, file);

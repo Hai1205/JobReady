@@ -19,9 +19,8 @@ export function AISuggestionsSidebar() {
   const {
     currentCV,
     aiSuggestions,
-    handleSetAISuggestions,
     handleApplySuggestion,
-    analyzCV,
+    analyzeCV,
   } = useCVStore();
   const [analyzing, setAnalyzing] = useState(false);
 
@@ -30,7 +29,7 @@ export function AISuggestionsSidebar() {
 
     setAnalyzing(true);
 
-    analyzCV(currentCV.id);
+    analyzeCV(currentCV.id);
   };
 
   const getSuggestionIcon = (type: string) => {

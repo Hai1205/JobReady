@@ -1,27 +1,31 @@
-"use client"
+"use client";
 
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Mail, Phone, MapPin, Calendar } from "lucide-react"
-import { useCVStore } from "@/stores/cvStore"
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Mail, Phone, MapPin, Calendar } from "lucide-react";
+import { useCVStore } from "@/stores/cvStore";
 
 export function ReviewStep() {
-  const { currentCV } = useCVStore()
+  const { currentCV } = useCVStore();
 
-  if (!currentCV) return null
+  if (!currentCV) return null;
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="text-2xl font-bold">Review Your CV</h2>
-        <p className="text-muted-foreground">Review all information before saving</p>
+        <p className="text-muted-foreground">
+          Review all information before saving
+        </p>
       </div>
 
       <Card className="p-8">
         {/* Personal Info */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">{currentCV.personalInfo.fullName || "Your Name"}</h1>
+          <h1 className="text-3xl font-bold">
+            {currentCV.personalInfo.fullname || "Your Name"}
+          </h1>
           <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
             {currentCV.personalInfo.email && (
               <div className="flex items-center gap-2">
@@ -42,7 +46,11 @@ export function ReviewStep() {
               </div>
             )}
           </div>
-          {currentCV.personalInfo.summary && <p className="mt-4 leading-relaxed">{currentCV.personalInfo.summary}</p>}
+          {currentCV.personalInfo.summary && (
+            <p className="mt-4 leading-relaxed">
+              {currentCV.personalInfo.summary}
+            </p>
+          )}
         </div>
 
         <Separator className="my-8" />
@@ -66,7 +74,11 @@ export function ReviewStep() {
                       {exp.startDate} - {exp.endDate || "Present"}
                     </div>
                   </div>
-                  {exp.description && <p className="mt-2 text-sm leading-relaxed">{exp.description}</p>}
+                  {exp.description && (
+                    <p className="mt-2 text-sm leading-relaxed">
+                      {exp.description}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -119,5 +131,5 @@ export function ReviewStep() {
         )}
       </Card>
     </div>
-  )
+  );
 }

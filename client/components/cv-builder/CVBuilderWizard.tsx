@@ -2,17 +2,19 @@
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { PersonalInfoStep } from "./steps/personal-info-step";
-import { ExperienceStep } from "./steps/experience-step";
-import { EducationStep } from "./steps/education-step";
-import { SkillsStep } from "./steps/skills-step";
-import { ReviewStep } from "./steps/review-step";
-import { FileImport } from "./file-import";
+import { PersonalInfoStep } from "./steps/PersonalInfoStep";
+import { ExperienceStep } from "./steps/ExperienceStep";
+import { EducationStep } from "./steps/EducationStep";
+import { SkillsStep } from "./steps/SkillsStep";
+import { ReviewStep } from "./steps/ReviewStep";
+import { PreviewStep } from "./steps/PreviewStep";
+import { FileImport } from "./FileImport";
 import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCVStore } from "@/stores/cvStore";
+import { useAuthStore } from "@/stores/authStore";
 
 const steps = [
   { id: 0, title: "Personal Info", component: PersonalInfoStep },
@@ -20,12 +22,19 @@ const steps = [
   { id: 2, title: "Education", component: EducationStep },
   { id: 3, title: "Skills", component: SkillsStep },
   { id: 4, title: "Review", component: ReviewStep },
+  { id: 5, title: "Preview & Export", component: PreviewStep },
 ];
 
 export function CVBuilderWizard() {
   const router = useRouter();
-  const { currentStep, handleSetCurrentStep, currentCV, createCV, handleUpdateCV } =
-    useCVStore();
+  const { userAuth } = useAuthStore();
+  const {
+    currentStep,
+    handleSetCurrentStep,
+    currentCV,
+    createCV,
+    handleUpdateCV,
+  } = useCVStore();
   const CurrentStepComponent = steps[currentStep].component;
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -45,7 +54,16 @@ export function CVBuilderWizard() {
   const handleSave = async () => {
     if (!currentCV) return;
 
-    createCV(currentCV);
+    // Prepare data for API
+    const userId = userAuth?.id || "";
+    createCV(
+      userId,
+      currentCV.title,
+      currentCV.personalInfo,
+      currentCV.experience,
+      currentCV.education,
+      currentCV.skills
+    );
   };
 
   return (

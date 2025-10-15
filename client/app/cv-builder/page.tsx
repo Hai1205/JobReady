@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CVBuilderWizard } from "@/components/cv-builder/cv-builder-wizard";
-import { AISuggestionsSidebar } from "@/components/cv-builder/ai-suggestions-sidebar";
+import { CVBuilderWizard } from "@/components/cv-builder/CVBuilderWizard";
+import { AISuggestionsSidebar } from "@/components/cv-builder/AISuggestionsSidebar";
 import { Card } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
@@ -14,18 +14,13 @@ export default function CVBuilderPage() {
   const { currentCV, handleSetCurrentCV, handleSetCurrentStep } = useCVStore();
 
   useEffect(() => {
-    if (!userAuth) {
-      router.push("/login");
-      return;
-    }
-
     // Initialize new CV if none exists
     if (!currentCV) {
       handleSetCurrentCV({
         id: crypto.randomUUID(),
         title: "Untitled CV",
         personalInfo: {
-          fullName: "",
+          fullname: "",
           email: "",
           phone: "",
           location: "",
@@ -41,12 +36,12 @@ export default function CVBuilderPage() {
     }
   }, [userAuth, currentCV, router, handleSetCurrentCV, handleSetCurrentStep]);
 
-  if (!userAuth) {
-    return null;
-  }
+  // if (!userAuth) {
+  //   return null;
+  // }
 
   return (
-    <div className="container py-12">
+    <div className="container mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="text-3xl font-bold">CV Builder</h1>

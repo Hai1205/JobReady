@@ -28,43 +28,46 @@ public class OAuth2UserService {
      */
     // @RabbitListener(queues = RabbitConfig.USER_OAUTH2_CHECK_QUEUE)
     // @SendTo(RabbitConfig.USER_OAUTH2_CHECK_REPLY_QUEUE)
-    // public Map<String, Object> checkUserExistsRabbit(Map<String, String> request) {
-    //     try {
-    //         String email = request.get("email");
-    //         String provider = request.get("provider");
-    //         String providerId = request.get("providerId");
+    // public Map<String, Object> checkUserExistsRabbit(Map<String, String> request)
+    // {
+    // try {
+    // String email = request.get("email");
+    // String provider = request.get("provider");
+    // String providerId = request.get("providerId");
 
-    //         logger.info("Received request to check user: email={}, provider={}, providerId={}",
-    //                 email, provider, providerId);
+    // logger.info("Received request to check user: email={}, provider={},
+    // providerId={}",
+    // email, provider, providerId);
 
-    //         // Tìm user theo email và provider
-    //         Optional<User> userOptional = userRepository.findByEmailAndOauthProvider(email, provider);
+    // // Tìm user theo email và provider
+    // Optional<User> userOptional =
+    // userRepository.findByEmailAndOauthProvider(email, provider);
 
-    //         Map<String, Object> response = new HashMap<>();
+    // Map<String, Object> response = new HashMap<>();
 
-    //         if (userOptional.isPresent()) {
-    //             User user = userOptional.get();
-    //             response.put("exists", true);
-    //             response.put("id", user.getId());
-    //             response.put("email", user.getEmail());
-    //             response.put("username", user.getUsername());
-    //             response.put("role", user.getRole().toString());
-    //             response.put("provider", user.getOauthProvider());
-    //             response.put("providerId", user.getOauthProviderId());
-    //             logger.info("User exists: {}", email);
-    //         } else {
-    //             response.put("exists", false);
-    //             logger.info("User does not exist: {}", email);
-    //         }
+    // if (userOptional.isPresent()) {
+    // User user = userOptional.get();
+    // response.put("exists", true);
+    // response.put("id", user.getId());
+    // response.put("email", user.getEmail());
+    // response.put("username", user.getUsername());
+    // response.put("role", user.getRole().toString());
+    // response.put("provider", user.getOauthProvider());
+    // response.put("providerId", user.getOauthProviderId());
+    // logger.info("User exists: {}", email);
+    // } else {
+    // response.put("exists", false);
+    // logger.info("User does not exist: {}", email);
+    // }
 
-    //         return response;
-    //     } catch (Exception e) {
-    //         logger.error("Error checking user exists", e);
-    //         Map<String, Object> errorResponse = new HashMap<>();
-    //         errorResponse.put("exists", false);
-    //         errorResponse.put("error", e.getMessage());
-    //         return errorResponse;
-    //     }
+    // return response;
+    // } catch (Exception e) {
+    // logger.error("Error checking user exists", e);
+    // Map<String, Object> errorResponse = new HashMap<>();
+    // errorResponse.put("exists", false);
+    // errorResponse.put("error", e.getMessage());
+    // return errorResponse;
+    // }
     // }
 
     /**
@@ -72,32 +75,33 @@ public class OAuth2UserService {
      */
     // @RabbitListener(queues = RabbitConfig.USER_OAUTH2_CREATE_QUEUE)
     // @SendTo(RabbitConfig.USER_OAUTH2_CREATE_REPLY_QUEUE)
-    // public Map<String, Object> createOAuth2UserRabbit(OAuth2UserDto oauth2UserDto) {
-    //     try {
-    //         logger.info("Received request to create OAuth2 user: email={}, provider={}",
-    //                 oauth2UserDto.getEmail(), oauth2UserDto.getProvider());
+    // public Map<String, Object> createOAuth2UserRabbit(OAuth2UserDto
+    // oauth2UserDto) {
+    // try {
+    // logger.info("Received request to create OAuth2 user: email={}, provider={}",
+    // oauth2UserDto.getEmail(), oauth2UserDto.getProvider());
 
-    //         // Sử dụng phương thức tạo OAuth2 user hiện có
-    //         UserDto createdUser = createOAuth2User(oauth2UserDto);
+    // // Sử dụng phương thức tạo OAuth2 user hiện có
+    // UserDto createdUser = createOAuth2User(oauth2UserDto);
 
-    //         // Trả về thông tin user
-    //         Map<String, Object> response = new HashMap<>();
-    //         response.put("id", createdUser.getId());
-    //         response.put("email", createdUser.getEmail());
-    //         response.put("username", createdUser.getUsername());
-    //         response.put("fullname", createdUser.getFullname());
-    //         response.put("role", "ROLE_USER");
-    //         response.put("avatarUrl", createdUser.getAvatarUrl());
-    //         response.put("provider", createdUser.getOauthProvider());
-    //         response.put("providerId", createdUser.getOauthProviderId());
+    // // Trả về thông tin user
+    // Map<String, Object> response = new HashMap<>();
+    // response.put("id", createdUser.getId());
+    // response.put("email", createdUser.getEmail());
+    // response.put("username", createdUser.getUsername());
+    // response.put("fullname", createdUser.getFullname());
+    // response.put("role", "ROLE_USER");
+    // response.put("avatarUrl", createdUser.getAvatarUrl());
+    // response.put("provider", createdUser.getOauthProvider());
+    // response.put("providerId", createdUser.getOauthProviderId());
 
-    //         return response;
-    //     } catch (Exception e) {
-    //         logger.error("Error creating OAuth2 user", e);
-    //         Map<String, Object> errorResponse = new HashMap<>();
-    //         errorResponse.put("error", e.getMessage());
-    //         return errorResponse;
-    //     }
+    // return response;
+    // } catch (Exception e) {
+    // logger.error("Error creating OAuth2 user", e);
+    // Map<String, Object> errorResponse = new HashMap<>();
+    // errorResponse.put("error", e.getMessage());
+    // return errorResponse;
+    // }
     // }
 
     /**
@@ -105,40 +109,41 @@ public class OAuth2UserService {
      */
     // @RabbitListener(queues = RabbitConfig.USER_OAUTH2_UPDATE_QUEUE)
     // @SendTo(RabbitConfig.USER_OAUTH2_UPDATE_REPLY_QUEUE)
-    // public Map<String, Object> updateOAuth2UserRabbit(OAuth2UserDto oauth2UserDto) {
-    //     try {
-    //         UUID userId = oauth2UserDto.getId();
-    //         logger.info("Received request to update OAuth2 user: id={}, email={}",
-    //                 userId, oauth2UserDto.getEmail());
+    // public Map<String, Object> updateOAuth2UserRabbit(OAuth2UserDto
+    // oauth2UserDto) {
+    // try {
+    // UUID userId = oauth2UserDto.getId();
+    // logger.info("Received request to update OAuth2 user: id={}, email={}",
+    // userId, oauth2UserDto.getEmail());
 
-    //         if (userId == null) {
-    //             logger.error("User ID is required for update");
-    //             Map<String, Object> errorResponse = new HashMap<>();
-    //             errorResponse.put("error", "User ID is required for update");
-    //             return errorResponse;
-    //         }
+    // if (userId == null) {
+    // logger.error("User ID is required for update");
+    // Map<String, Object> errorResponse = new HashMap<>();
+    // errorResponse.put("error", "User ID is required for update");
+    // return errorResponse;
+    // }
 
-    //         // Sử dụng phương thức update OAuth2 user hiện có
-    //         UserDto updatedUser = updateOAuth2User(userId, oauth2UserDto);
+    // // Sử dụng phương thức update OAuth2 user hiện có
+    // UserDto updatedUser = updateOAuth2User(userId, oauth2UserDto);
 
-    //         // Trả về thông tin user
-    //         Map<String, Object> response = new HashMap<>();
-    //         response.put("id", updatedUser.getId());
-    //         response.put("email", updatedUser.getEmail());
-    //         response.put("username", updatedUser.getUsername());
-    //         response.put("fullname", updatedUser.getFullname());
-    //         response.put("role", "ROLE_USER");
-    //         response.put("avatarUrl", updatedUser.getAvatarUrl());
-    //         response.put("provider", updatedUser.getOauthProvider());
-    //         response.put("providerId", updatedUser.getOauthProviderId());
+    // // Trả về thông tin user
+    // Map<String, Object> response = new HashMap<>();
+    // response.put("id", updatedUser.getId());
+    // response.put("email", updatedUser.getEmail());
+    // response.put("username", updatedUser.getUsername());
+    // response.put("fullname", updatedUser.getFullname());
+    // response.put("role", "ROLE_USER");
+    // response.put("avatarUrl", updatedUser.getAvatarUrl());
+    // response.put("provider", updatedUser.getOauthProvider());
+    // response.put("providerId", updatedUser.getOauthProviderId());
 
-    //         return response;
-    //     } catch (Exception e) {
-    //         logger.error("Error updating OAuth2 user", e);
-    //         Map<String, Object> errorResponse = new HashMap<>();
-    //         errorResponse.put("error", e.getMessage());
-    //         return errorResponse;
-    //     }
+    // return response;
+    // } catch (Exception e) {
+    // logger.error("Error updating OAuth2 user", e);
+    // Map<String, Object> errorResponse = new HashMap<>();
+    // errorResponse.put("error", e.getMessage());
+    // return errorResponse;
+    // }
     // }
 
     /**

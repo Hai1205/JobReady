@@ -40,7 +40,7 @@ export interface ICVStore extends IBaseStore {
 		userId: string,
 		file: File
 	) => Promise<IApiResponse<ICVDataResponse>>;
-	analyseCV: (
+	analyzeCV: (
 		cvId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	improveCV: (
@@ -140,7 +140,7 @@ export const useCVStore = createStore<ICVStore>(
 			});
 		},
 
-		analyseCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
+		analyzeCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.POST, `/cvs/analyse/${cvId}`);
 			});

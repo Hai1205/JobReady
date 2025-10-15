@@ -4,7 +4,7 @@ declare global {
     interface IUser {
         id: string
         email: string
-        fullName: string
+        fullname: string
         role: EUserRole
         status: EUserStatus
     }
@@ -21,11 +21,12 @@ declare global {
     }
 
     interface IPersonalInfo {
-        fullName: string
+        fullname: string
         email: string
         phone: string
         location: string
         summary: string
+        avatar?: string
     }
 
     interface IExperience {
