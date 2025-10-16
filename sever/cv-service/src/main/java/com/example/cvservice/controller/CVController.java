@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.cvservice.dto.requests.*;
 import com.example.cvservice.dto.responses.Response;
 import com.example.cvservice.service.CVService;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/cvs")
@@ -25,6 +26,7 @@ public class CVController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> getAllCVs() {
         Response response = cvService.getAllCVs();
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -89,6 +91,7 @@ public class CVController {
     }
 
     @GetMapping("/health")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> health() {
         Response response = new Response(200, "CV Service is running");
         return ResponseEntity.status(response.getStatusCode()).body(response);

@@ -19,7 +19,7 @@
         <jjwt.version>0.12.3</jjwt.version>
         <cloudinary.version>1.38.0</cloudinary.version>
         <pdfbox.version>2.0.29</pdfbox.version>
-        <poi.version>5.2.5</poi.version>
+        <poi.version>5.4.0</poi.version>
     </properties>
 
     <modules>

@@ -244,6 +244,7 @@ public class AuthController {
     }
 
     @GetMapping("/health")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> health() {
         Response response = new Response(200, "Auth Service is running");
         return ResponseEntity.status(response.getStatusCode()).body(response);

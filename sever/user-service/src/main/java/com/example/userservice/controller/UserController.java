@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/users")
@@ -20,12 +21,14 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> createUser(@ModelAttribute CreateUserRequest request) {
         Response response = userService.createUser(request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> getAllUsers() {
         Response response = userService.getAllUsers();
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -44,12 +47,14 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> deleteUser(@PathVariable UUID userId) {
         Response response = userService.deleteUser(userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/health")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> health() {
         Response response = new Response();
         response.setStatusCode(200);
