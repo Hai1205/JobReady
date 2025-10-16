@@ -6,8 +6,10 @@ import com.example.userservice.config.ImageValidator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.annotation.PostConstruct;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,7 +21,16 @@ public class CloudinaryService {
 
     private final ImageValidator imageValidator;
 
-    private final Cloudinary cloudinary = new Cloudinary(System.getenv("CLOUDINARY_URL"));
+    @Value("${CLOUDINARY_URL}")
+    private String cloudinaryUrl;
+
+    private Cloudinary cloudinary;
+
+    @PostConstruct
+    public void init() {
+        this.cloudinary = new Cloudinary(cloudinaryUrl);
+    }
+
     private static final String FOLDER_NAME = "jobready";
 
     public Map<String, Object> uploadImage(MultipartFile file) {
@@ -36,11 +47,12 @@ public class CloudinaryService {
                     "use_filename", true,
                     "unique_filename", true,
                     "overwrite", false,
-                    "transformation", new HashMap<String, Object>() {{
-                        put("quality", "auto");
-                        put("fetch_format", "auto");
-                    }}
-            );
+                    "transformation", new HashMap<String, Object>() {
+                        {
+                            put("quality", "auto");
+                            put("fetch_format", "auto");
+                        }
+                    });
 
             Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
 
@@ -113,4 +125,3 @@ public class CloudinaryService {
         return results;
     }
 }
-

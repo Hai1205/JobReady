@@ -1,4 +1,4 @@
-package com.example.userservice.config;
+package com.example.cvservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,14 +7,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.example.userservice.security.JsonAccessDeniedHandler;
-import com.example.userservice.security.JsonAuthenticationEntryPoint;
-import com.example.userservice.security.JwtAuthenticationFilter;
+import com.example.cvservice.security.JsonAccessDeniedHandler;
+import com.example.cvservice.security.JsonAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -31,11 +28,6 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean

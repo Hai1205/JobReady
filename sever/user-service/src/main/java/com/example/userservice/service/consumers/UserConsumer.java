@@ -42,12 +42,16 @@ public class UserConsumer extends BaseConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         response);
                 } catch (Exception e) {
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         RabbitResponse.builder()
@@ -80,12 +84,16 @@ public class UserConsumer extends BaseConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         response);
                 } catch (Exception e) {
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         RabbitResponse.builder()
@@ -118,12 +126,16 @@ public class UserConsumer extends BaseConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         response);
                 } catch (Exception e) {
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         RabbitResponse.builder()
@@ -155,12 +167,16 @@ public class UserConsumer extends BaseConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         response);
                 } catch (Exception e) {
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         RabbitResponse.builder()
@@ -192,12 +208,16 @@ public class UserConsumer extends BaseConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         response);
                 } catch (Exception e) {
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         RabbitResponse.builder()
@@ -228,12 +248,16 @@ public class UserConsumer extends BaseConsumer {
                                         .data(newPassword)
                                         .build();
 
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         response);
                 } catch (Exception e) {
-                        rpcService.sendReply(RabbitConstants.USER_EXCHANGE,
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
                                         header.getReplyTo(),
                                         header.getCorrelationId(),
                                         RabbitResponse.builder()

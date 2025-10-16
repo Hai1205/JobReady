@@ -88,20 +88,29 @@ public class JwtUtil {
      * @param role     Role của user (ADMIN, USER, etc.)
      * @return Access Token string
      */
-    public String generateAccessToken(String userId, String username, String role) {
+    public String generateAccessToken(String userId, String email, String role, String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("username", username);
+        claims.put("email", email);
+        if (username != null) {
+            claims.put("username", username);
+        }
         claims.put("role", role);
         claims.put("tokenType", "ACCESS"); // Đánh dấu đây là access token
 
+        String subject = email != null ? email : username;
+
         return Jwts.builder()
                 .claims(claims)
-                .subject(username)
+                .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(privateKey)
                 .compact();
+    }
+
+    public String generateAccessToken(String userId, String username, String role) {
+        return generateAccessToken(userId, username, role, username);
     }
 
     /**
@@ -111,19 +120,28 @@ public class JwtUtil {
      * @param username Username của user
      * @return Refresh Token string
      */
-    public String generateRefreshToken(String userId, String username) {
+    public String generateRefreshToken(String userId, String email, String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("username", username);
+        claims.put("email", email);
+        if (username != null) {
+            claims.put("username", username);
+        }
         claims.put("tokenType", "REFRESH"); // Đánh dấu đây là refresh token
+
+        String subject = email != null ? email : username;
 
         return Jwts.builder()
                 .claims(claims)
-                .subject(username)
+                .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(privateKey)
                 .compact();
+    }
+
+    public String generateRefreshToken(String userId, String username) {
+        return generateRefreshToken(userId, username, username);
     }
 
     /**
@@ -132,14 +150,20 @@ public class JwtUtil {
      */
     @Deprecated
     public String generateToken(String userId, String username, String role) {
-        return generateAccessToken(userId, username, role);
+        return generateAccessToken(userId, username, role, username);
     }
 
     /**
      * Extract username từ token
      */
     public String extractUsername(String token) {
-        return extractClaims(token, Claims::getSubject);
+        return extractClaims(token, claims -> {
+            String usernameClaim = claims.get("username", String.class);
+            if (usernameClaim != null) {
+                return usernameClaim;
+            }
+            return claims.getSubject();
+        });
     }
 
     /**
@@ -154,6 +178,19 @@ public class JwtUtil {
      */
     public String extractRole(String token) {
         return extractClaims(token, claims -> claims.get("role", String.class));
+    }
+
+    /**
+     * Extract email từ token
+     */
+    public String extractEmail(String token) {
+        return extractClaims(token, claims -> {
+            String emailClaim = claims.get("email", String.class);
+            if (emailClaim != null) {
+                return emailClaim;
+            }
+            return claims.getSubject();
+        });
     }
 
     /**

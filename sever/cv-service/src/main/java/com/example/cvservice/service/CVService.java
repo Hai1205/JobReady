@@ -11,6 +11,8 @@ import com.example.cvservice.entity.*;
 import com.example.cvservice.exception.OurException;
 import com.example.cvservice.repository.*;
 import com.example.cvservice.mapper.*;
+import com.example.cvservice.security.AuthenticatedUser;
+import com.example.cvservice.security.SecurityUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,8 +53,38 @@ public class CVService {
         this.objectMapper = new ObjectMapper();
     }
 
+    private AuthenticatedUser requireAuthenticatedUser() {
+        return SecurityUtils.getCurrentUser()
+                .orElseThrow(() -> new OurException("Unauthorized", 401));
+    }
+
+    private boolean isAdmin(AuthenticatedUser user) {
+        return user.hasRole("ADMIN");
+    }
+
+    private void ensureCanAccessUser(UUID ownerId) {
+        AuthenticatedUser user = requireAuthenticatedUser();
+        if (isAdmin(user)) {
+            return;
+        }
+        if (!user.hasRole("USER")) {
+            throw new OurException("Forbidden", 403);
+        }
+        if (!user.getUserId().equals(ownerId)) {
+            throw new OurException("Forbidden", 403);
+        }
+    }
+
+    private void ensureCanAccessCv(CV cv) {
+        if (cv == null) {
+            throw new OurException("CV not found", 404);
+        }
+        ensureCanAccessUser(cv.getUserId());
+    }
+
     public CVDto handleGetCVById(UUID cvId) {
-        CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found"));
+        CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
+        ensureCanAccessCv(cv);
         return cvMapper.toDto(cv);
     }
 
@@ -63,6 +95,8 @@ public class CVService {
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
             List<String> skills) {
+
+        ensureCanAccessUser(userId);
 
         CV cv = new CV();
         cv.setUserId(userId);
@@ -115,7 +149,7 @@ public class CVService {
             response.setMessage("CV created successfully");
             response.setData(data);
         } catch (OurException e) {
-            response.setStatusCode(400);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
         } catch (Exception e) {
@@ -142,7 +176,6 @@ public class CVService {
             ResponseData data = new ResponseData();
             data.setCvs(cvDtos);
 
-            response.setStatusCode(200);
             response.setMessage("CVs retrieved successfully");
             response.setData(data);
         } catch (Exception e) {
@@ -163,7 +196,6 @@ public class CVService {
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
 
-            response.setStatusCode(200);
             response.setMessage("CV retrieved successfully");
             response.setData(data);
         } catch (IllegalArgumentException e) {
@@ -171,7 +203,7 @@ public class CVService {
             response.setMessage("Invalid CV ID format");
             System.out.println(e.getMessage());
         } catch (OurException e) {
-            response.setStatusCode(404);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
         } catch (Exception e) {
@@ -204,15 +236,13 @@ public class CVService {
             data.setAnalysis(result);
             data.setSuggestions(suggestions);
 
-            response.setStatusCode(200);
             response.setMessage("CV analyzed successfully");
             response.setData(data);
-
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
         } catch (OurException e) {
-            response.setStatusCode(404);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
@@ -242,15 +272,13 @@ public class CVService {
             data.setCv(cvDto);
             data.setImprovedSection(improved);
 
-            response.setStatusCode(200);
             response.setMessage("CV section improved successfully");
             response.setData(data);
-
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
         } catch (OurException e) {
-            response.setStatusCode(404);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
@@ -262,6 +290,7 @@ public class CVService {
     }
 
     public List<CVDto> handleGetUserCVs(UUID userId) {
+        ensureCanAccessUser(userId);
         List<CV> cvs = cvRepository.findAllByUserId(userId);
         return cvs.stream().map(cvMapper::toDto).collect(Collectors.toList());
     }
@@ -275,7 +304,6 @@ public class CVService {
             ResponseData data = new ResponseData();
             data.setCvs(userCVs);
 
-            response.setStatusCode(200);
             response.setMessage("CV retrieved successfully");
             response.setData(data);
         } catch (IllegalArgumentException e) {
@@ -283,7 +311,7 @@ public class CVService {
             response.setMessage("Invalid CV ID format");
             System.out.println(e.getMessage());
         } catch (OurException e) {
-            response.setStatusCode(404);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
         } catch (Exception e) {
@@ -299,6 +327,8 @@ public class CVService {
         Response response = new Response();
 
         try {
+            ensureCanAccessUser(userId);
+
             // Extract text from file
             String extractedText = fileParserService.extractTextFromFile(file);
 
@@ -339,19 +369,21 @@ public class CVService {
             Optional<CV> cvOpt = cvRepository.findByTitle(title);
 
             if (!cvOpt.isPresent()) {
-                throw new OurException("CV not found with title: " + title);
+                throw new OurException("CV not found with title: " + title, 404);
             }
 
-            CVDto cvDto = cvMapper.toDto(cvOpt.get());
+            CV cv = cvOpt.get();
+            ensureCanAccessCv(cv);
+
+            CVDto cvDto = cvMapper.toDto(cv);
 
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
 
-            response.setStatusCode(200);
             response.setMessage("CV retrieved successfully");
             response.setData(data);
         } catch (OurException e) {
-            response.setStatusCode(404);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
         } catch (Exception e) {
@@ -371,6 +403,8 @@ public class CVService {
             List<String> skills) {
         CV existing = cvRepository.findById(cvId)
                 .orElseThrow(() -> new OurException("CV not found", 404));
+
+        ensureCanAccessCv(existing);
 
         existing.setTitle(title);
 
@@ -424,11 +458,10 @@ public class CVService {
             ResponseData data = new ResponseData();
             data.setCv(updatedDto);
 
-            response.setStatusCode(200);
             response.setMessage("CV updated successfully");
             response.setData(data);
         } catch (OurException e) {
-            response.setStatusCode(404);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
         } catch (Exception e) {
@@ -453,14 +486,13 @@ public class CVService {
         try {
             handleDeleteCV(cvId);
 
-            response.setStatusCode(200);
             response.setMessage("CV deleted successfully");
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
             System.out.println(e.getMessage());
         } catch (OurException e) {
-            response.setStatusCode(404);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
             System.out.println(e.getMessage());
         } catch (Exception e) {
@@ -498,7 +530,6 @@ public class CVService {
             data.setSuggestions(suggestions);
             data.setMatchScore(matchScore);
 
-            response.setStatusCode(200);
             response.setMessage("CV analyzed with job description successfully");
             response.setData(data);
 
@@ -506,7 +537,7 @@ public class CVService {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
         } catch (OurException e) {
-            response.setStatusCode(404);
+            response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);

@@ -109,6 +109,9 @@ public class RabbitRPCService {
 
             String json = objectMapper.writeValueAsString(
                     Map.of("header", header, "payload", payload));
+
+            System.out.println(
+                    "✅ [Sending Reply] exchange=" + exchange + ", replyTo=" + replyTo + ", corrId=" + correlationId);
             rabbitTemplate.convertAndSend(exchange, replyTo, json);
             System.out.println("✅ [Reply Sent] corrId=" + correlationId);
 

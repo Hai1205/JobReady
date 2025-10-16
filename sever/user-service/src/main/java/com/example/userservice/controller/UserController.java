@@ -24,6 +24,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> createUser(@ModelAttribute CreateUserRequest request) {
         Response response = userService.createUser(request);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -31,18 +32,23 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> getAllUsers() {
         Response response = userService.getAllUsers();
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> getUserById(@PathVariable UUID userId) {
         Response response = userService.getUserById(userId);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PutMapping("/{userId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> updateUser(@PathVariable UUID userId, @ModelAttribute UpdateUserRequest request) {
         Response response = userService.updateUser(userId, request);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -50,6 +56,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> deleteUser(@PathVariable UUID userId) {
         Response response = userService.deleteUser(userId);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -59,6 +66,7 @@ public class UserController {
         Response response = new Response();
         response.setStatusCode(200);
         response.setMessage("User Service is running");
+        
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

@@ -24,6 +24,13 @@ public class AuthRabbitConfig extends BaseRabbitConfig {
     }
 
     @Bean
+    public Declarables authExchangeConfig() {
+        // Khai báo auth.exchange (empty queues list vì chỉ cần exchange tồn tại)
+        return createDeclarables(List.of(
+                new ExchangeDef(RabbitConstants.AUTH_EXCHANGE, List.of())));
+    }
+
+    @Bean
     public Declarables authReplyQueueConfig() {
         // Khai báo reply queue và binding của nó cho auth-service
         return createReplyQueueDeclarable(

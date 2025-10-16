@@ -11,6 +11,8 @@ import com.example.userservice.entity.User.UserStatus;
 import com.example.userservice.mapper.UserMapper;
 import com.example.userservice.exception.OurException;
 import com.example.userservice.repository.UserRepository;
+import com.example.userservice.security.AuthenticatedUser;
+import com.example.userservice.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +44,32 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.cloudinaryService = cloudinaryService;
+    }
+
+    private AuthenticatedUser requireAuthenticatedUser() {
+        return SecurityUtils.getCurrentUser()
+                .orElseThrow(() -> new OurException("Unauthorized", 401));
+    }
+
+    private boolean isAdmin(AuthenticatedUser user) {
+        return user.hasRole("ADMIN");
+    }
+
+    private void ensureAdmin() {
+        AuthenticatedUser user = requireAuthenticatedUser();
+        if (!isAdmin(user)) {
+            throw new OurException("Forbidden", 403);
+        }
+    }
+
+    private void ensureCanAccessUser(UUID userId) {
+        AuthenticatedUser user = requireAuthenticatedUser();
+        if (isAdmin(user)) {
+            return;
+        }
+        if (!user.hasRole("USER") || !user.getUserId().equals(userId)) {
+            throw new OurException("Forbidden", 403);
+        }
     }
 
     public UserDto handleCreateUser(String username, String email, String password, String fullname, String role,
@@ -122,6 +150,8 @@ public class UserService {
         Response response = new Response();
 
         try {
+            ensureAdmin();
+
             UserDto savedUserDto = handleCreateUser(createUserRequest.getUsername(), createUserRequest.getEmail(),
                     createUserRequest.getPassword(), createUserRequest.getFullname(), createUserRequest.getRole(),
                     createUserRequest.getStatus());
@@ -155,12 +185,13 @@ public class UserService {
         Response response = new Response();
 
         try {
+            ensureAdmin();
+
             List<UserDto> userDtos = handleGetAllUsers();
 
             ResponseData data = new ResponseData();
             data.setUsers(userDtos);
 
-            response.setStatusCode(200);
             response.setMessage("Users retrieved successfully");
             response.setData(data);
         } catch (OurException e) {
@@ -186,12 +217,13 @@ public class UserService {
         Response response = new Response();
 
         try {
+            ensureCanAccessUser(id);
+
             UserDto userDto = handleGetUserById(id);
 
             ResponseData data = new ResponseData();
             data.setUser(userDto);
 
-            response.setStatusCode(200);
             response.setMessage("User retrieved successfully");
             response.setData(data);
         } catch (OurException e) {
@@ -210,6 +242,9 @@ public class UserService {
     public UserDto handleUpdateUser(UUID id, String fullname, String role, String status, MultipartFile avatar) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        AuthenticatedUser currentUser = SecurityUtils.getCurrentUser().orElse(null);
+        boolean privilegedChangeAllowed = currentUser == null || currentUser.hasRole("ADMIN");
 
         // Handle avatar upload
         if (avatar != null && !avatar.isEmpty()) {
@@ -235,10 +270,16 @@ public class UserService {
         }
 
         if (role != null && !role.isEmpty()) {
+            if (!privilegedChangeAllowed) {
+                throw new OurException("Forbidden", 403);
+            }
             existingUser.setRole(UserRole.valueOf(role.toUpperCase()));
         }
 
         if (status != null && !status.isEmpty()) {
+            if (!privilegedChangeAllowed) {
+                throw new OurException("Forbidden", 403);
+            }
             existingUser.setStatus(UserStatus.valueOf(status.toUpperCase()));
         }
 
@@ -250,13 +291,14 @@ public class UserService {
         Response response = new Response();
 
         try {
+            ensureCanAccessUser(id);
+
             UserDto updatedUserDto = handleUpdateUser(id, request.getFullname(), request.getRole(), request.getStatus(),
                     request.getAvatar());
 
             ResponseData data = new ResponseData();
             data.setUser(updatedUserDto);
 
-            response.setStatusCode(200);
             response.setMessage("User updated successfully");
             response.setData(data);
         } catch (OurException e) {
@@ -288,9 +330,10 @@ public class UserService {
         Response response = new Response();
 
         try {
+            ensureAdmin();
+
             handleDeleteUser(id);
 
-            response.setStatusCode(200);
             response.setMessage("User deleted successfully");
         } catch (OurException e) {
             response.setStatusCode(e.getStatusCode());

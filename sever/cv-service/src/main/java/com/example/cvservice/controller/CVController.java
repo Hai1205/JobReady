@@ -20,8 +20,10 @@ public class CVController {
     private CVService cvService;
 
     @PostMapping("/users/{userId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> createCV(@PathVariable UUID userId, @ModelAttribute CreateCVRequest request) {
         Response response = cvService.createCV(userId, request);
+        
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -29,71 +31,91 @@ public class CVController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> getAllCVs() {
         Response response = cvService.getAllCVs();
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/{cvId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> getCVById(@PathVariable UUID cvId) {
         Response response = cvService.getCVById(cvId);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/analyze/{cvId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> analyzeCV(@PathVariable UUID cvId) {
         Response response = cvService.analyzeCV(cvId);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/improve/{cvId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> improveCV(@PathVariable UUID cvId, @RequestBody ImproveCVRequest request) {
         Response response = cvService.improveCV(cvId, request);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/analyze-with-jd/{cvId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> analyzeCVWithJobDescription(
             @PathVariable UUID cvId,
             @RequestBody AnalyzeCVWithJDRequest request) {
         Response response = cvService.analyzeCVWithJobDescription(cvId, request);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> getUserCVs(@PathVariable UUID userId) {
         Response response = cvService.getUserCVs(userId);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/users/{userId}/import")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> importFile(
             @PathVariable UUID userId,
             @RequestParam("file") MultipartFile file) {
         Response response = cvService.importFile(userId, file);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/title/{title}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> getCVByTitle(@PathVariable String title) {
         Response response = cvService.getCVByTitle(title);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PatchMapping("/{cvId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> updateCV(@PathVariable UUID cvId, @ModelAttribute UpdateCVRequest request) {
         Response response = cvService.updateCV(cvId, request);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @DeleteMapping("/{cvId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> deleteCV(@PathVariable UUID cvId) {
         Response response = cvService.deleteCV(cvId);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/health")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMINA')")
     public ResponseEntity<Response> health() {
         Response response = new Response(200, "CV Service is running");
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }
