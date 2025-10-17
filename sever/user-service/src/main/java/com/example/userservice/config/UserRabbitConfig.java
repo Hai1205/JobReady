@@ -20,6 +20,8 @@ public class UserRabbitConfig extends BaseRabbitConfig {
                 new ExchangeDef(RabbitConstants.USER_EXCHANGE, List.of(
                         new QueueDef(RabbitConstants.USER_FIND_BY_EMAIL_QUEUE,
                                 RabbitConstants.USER_FIND_BY_EMAIL, false),
+                        new QueueDef(RabbitConstants.USER_FIND_BY_ID_QUEUE,
+                                RabbitConstants.USER_FIND_BY_ID, false),
                         new QueueDef(RabbitConstants.USER_CREATE_QUEUE,
                                 RabbitConstants.USER_CREATE, false),
                         new QueueDef(RabbitConstants.USER_CHANGE_PASSWORD_QUEUE,
@@ -29,7 +31,9 @@ public class UserRabbitConfig extends BaseRabbitConfig {
                         new QueueDef(RabbitConstants.USER_RESET_PASSWORD_QUEUE,
                                 RabbitConstants.USER_RESET_PASSWORD, false),
                         new QueueDef(RabbitConstants.USER_FORGOT_PASSWORD_QUEUE,
-                                RabbitConstants.USER_FORGOT_PASSWORD, false)
+                                RabbitConstants.USER_FORGOT_PASSWORD, false),
+                        new QueueDef(RabbitConstants.USER_ACTIVATE_QUEUE,
+                                RabbitConstants.USER_ACTIVATE, false)
                 ))));
     }
 

@@ -1,4 +1,4 @@
-package com.example.authservice.config;
+package com.example.cvservice.config;
 
 import java.util.List;
 
@@ -14,16 +14,16 @@ import com.example.rabbitmq.dto.ExchangeDef;
 public class AuthRabbitConfig extends BaseRabbitConfig {
 
     @Bean
-    public Declarables authExchangeConfig() {
+    public Declarables cvExchangeConfig() {
         return createDeclarables(List.of(
-                new ExchangeDef(RabbitConstants.AUTH_EXCHANGE, List.of())));
+                new ExchangeDef(RabbitConstants.CV_EXCHANGE, List.of())));
     }
 
     @Bean
-    public Declarables authReplyQueueConfig() {
+    public Declarables cvReplyQueueConfig() {
         return createReplyQueueDeclarable(
-                RabbitConstants.AUTH_REPLY_QUEUE,
-                RabbitConstants.AUTH_EXCHANGE,
-                RabbitConstants.AUTH_REPLY_QUEUE);
+                RabbitConstants.CV_REPLY_QUEUE,
+                RabbitConstants.CV_EXCHANGE,
+                RabbitConstants.CV_REPLY_QUEUE);
     }
 }

@@ -29,6 +29,12 @@ public class RootUserInitializer implements CommandLineRunner {
     @Value("${ROOT_USERNAME}")
     private String rootUsername;
 
+    @Value("${ROOT_ROLE}")
+    private String rootRole;
+
+    @Value("${ROOT_STATUS}")
+    private String rootStatus;
+
     public RootUserInitializer(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -44,7 +50,7 @@ public class RootUserInitializer implements CommandLineRunner {
         if (existingUser == null) {
             log.info("Root user not found. Creating root user: {}", rootEmail);
 
-            userService.handleCreateUser(rootUsername, rootEmail, rootPassword, rootFullname, "ADMIN", "ACTIVE");
+            userService.handleCreateUser(rootUsername, rootEmail, rootPassword, rootFullname, rootRole, rootStatus, null);
 
             log.info("Root user created successfully");
         } else {

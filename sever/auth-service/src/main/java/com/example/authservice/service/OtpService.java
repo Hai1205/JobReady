@@ -23,12 +23,6 @@ public class OtpService {
         this.redisTemplate = redisTemplate;
     }
 
-    /**
-     * Tạo OTP mới cho email cụ thể
-     * 
-     * @param email Email cần tạo OTP
-     * @return OTP được tạo
-     */
     public String generateOtp(String email) {
         try {
             String otp = generateRandomOtp(OTP_LENGTH);
@@ -40,12 +34,6 @@ public class OtpService {
         }
     }
 
-    /**
-     * Tạo OTP ngẫu nhiên
-     * 
-     * @param length Độ dài của OTP
-     * @return Chuỗi OTP
-     */
     private String generateRandomOtp(int length) {
         StringBuilder otp = new StringBuilder();
         Random random = new Random();
@@ -57,9 +45,6 @@ public class OtpService {
         return otp.toString();
     }
 
-    /**
-     * Lưu OTP cho email cụ thể vào Redis với TTL
-     */
     public void saveOtp(String email, String otp) {
         try {
             String key = OTP_PREFIX + email;

@@ -1,5 +1,7 @@
 package com.example.userservice.dto.requests;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.*;
 
 @Data
@@ -12,5 +14,5 @@ public class CreateUserRequest {
     private String fullname;
     private String role;
     private String status;
-    private String avatar;
+    private MultipartFile avatar;
 }

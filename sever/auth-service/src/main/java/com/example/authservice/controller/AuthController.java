@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/send-otp/{email}")
-    public ResponseEntity<Response> sendOTP(@PathVariable String email) {
+    public ResponseEntity<Response> sendOTP(@PathVariable("email") String email) {
         Response response = authService.sendOTP(email);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -44,16 +44,16 @@ public class AuthController {
 
     @PostMapping("/verify-otp/{email}")
     public ResponseEntity<Response> verifyOTP(
-            @PathVariable String email,
-            @ModelAttribute String otp) {
-        Response response = authService.verifyOTP(email, otp);
+            @PathVariable("email") String email,
+            @ModelAttribute VerifyOtpRequest request) {
+        Response response = authService.verifyOTP(email, request);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PutMapping("/change-password/{email}")
     public ResponseEntity<Response> changePassword(
-            @PathVariable String email,
+            @PathVariable("email") String email,
             @ModelAttribute ChangePasswordRequest changePasswordRequest) {
         Response response = authService.changePassword(email,
                 changePasswordRequest);
@@ -64,7 +64,7 @@ public class AuthController {
     @PutMapping("/reset-password/{email}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> resetPassword(
-            @PathVariable String email) {
+            @PathVariable("email") String email) {
         Response response = authService.resetPassword(email);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -72,7 +72,7 @@ public class AuthController {
 
     @PutMapping("/forgot-password/{email}")
     public ResponseEntity<Response> forgotPassword(
-            @PathVariable String email,
+            @PathVariable("email") String email,
             @ModelAttribute ChangePasswordRequest changePasswordRequest) {
         Response response = authService.forgotPassword(email,
                 changePasswordRequest);

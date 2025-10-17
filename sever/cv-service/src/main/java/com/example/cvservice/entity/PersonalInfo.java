@@ -21,6 +21,8 @@ public class PersonalInfo {
     private String phone;
     private String location;
     private String summary;
+    private String avatarUrl;
+    private String avatarPublicId;
 
     public PersonalInfo(String fullname, String email, String phone, String location, String summary) {
         this.fullname = fullname;

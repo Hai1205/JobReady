@@ -38,7 +38,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<Response> getUserById(@PathVariable UUID userId) {
+    public ResponseEntity<Response> getUserById(@PathVariable("userId") UUID userId) {
         Response response = userService.getUserById(userId);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -46,7 +46,7 @@ public class UserController {
 
     @PutMapping("/{userId}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<Response> updateUser(@PathVariable UUID userId, @ModelAttribute UpdateUserRequest request) {
+    public ResponseEntity<Response> updateUser(@PathVariable("userId") UUID userId, @ModelAttribute UpdateUserRequest request) {
         Response response = userService.updateUser(userId, request);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -54,7 +54,7 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Response> deleteUser(@PathVariable UUID userId) {
+    public ResponseEntity<Response> deleteUser(@PathVariable("userId") UUID userId) {
         Response response = userService.deleteUser(userId);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);

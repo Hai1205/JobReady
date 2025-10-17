@@ -13,6 +13,7 @@ import org.springframework.amqp.core.Message;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -61,6 +62,44 @@ public class UserConsumer extends BaseConsumer {
                                                         .build());
                 }
         }
+        
+        @RabbitListener(queues = RabbitConstants.USER_FIND_BY_ID_QUEUE)
+        public void handleFindById(Message message) {
+                RabbitHeader header = extractHeader(message);
+
+                try {
+                        Map<String, Object> params = objectMapper.readValue(message.getBody(),
+                                        new TypeReference<Map<String, Object>>() {
+                                        });
+                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
+                        UUID userId = UUID.fromString((String) payload.get("userId"));
+                        UserDto user = userService.handleFindById(userId);
+
+                        var response = RabbitResponse.<UserDto>builder()
+                                        .code(200)
+                                        .message("Success")
+                                        .data(user)
+                                        .build();
+
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
+                                        header.getReplyTo(),
+                                        header.getCorrelationId(),
+                                        response);
+                } catch (Exception e) {
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
+                                        header.getReplyTo(),
+                                        header.getCorrelationId(),
+                                        RabbitResponse.builder()
+                                                        .code(404)
+                                                        .message(e.getMessage())
+                                                        .data(null)
+                                                        .build());
+                }
+        }
 
         @RabbitListener(queues = RabbitConstants.USER_CREATE_QUEUE)
         public void handleCreateUser(Message message) {
@@ -76,7 +115,47 @@ public class UserConsumer extends BaseConsumer {
                         String password = (String) payload.get("password");
                         String fullname = (String) payload.get("fullname");
 
-                        UserDto user = userService.handleCreateUser("", email, password, fullname, "", "");
+                        UserDto user = userService.handleCreateUser("", email, password, fullname, "", "", null);
+
+                        var response = RabbitResponse.<UserDto>builder()
+                                        .code(200)
+                                        .message("Success")
+                                        .data(user)
+                                        .build();
+
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
+                                        header.getReplyTo(),
+                                        header.getCorrelationId(),
+                                        response);
+                } catch (Exception e) {
+                        String replyExchange = header.getReplyExchange() != null ? header.getReplyExchange()
+                                        : RabbitConstants.USER_EXCHANGE;
+                        rpcService.sendReply(replyExchange,
+                                        header.getReplyTo(),
+                                        header.getCorrelationId(),
+                                        RabbitResponse.builder()
+                                                        .code(404)
+                                                        .message(e.getMessage())
+                                                        .data(null)
+                                                        .build());
+                }
+        }
+
+        @RabbitListener(queues = RabbitConstants.USER_ACTIVATE_QUEUE)
+        public void handleActivateUser(Message message) {
+                RabbitHeader header = extractHeader(message);
+
+                try {
+                        Map<String, Object> params = objectMapper.readValue(message.getBody(),
+                                        new TypeReference<Map<String, Object>>() {
+                                        });
+
+                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
+                        String email = (String) payload.get("email");
+
+                        UserDto user = userService.handleActivateUser(email);
 
                         var response = RabbitResponse.<UserDto>builder()
                                         .code(200)

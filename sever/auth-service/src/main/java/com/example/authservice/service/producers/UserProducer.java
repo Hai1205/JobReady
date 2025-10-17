@@ -71,6 +71,29 @@ public class UserProducer {
 
                 return userDto;
         }
+        
+        public UserDto activateUser(String email) {
+                RabbitHeader header = RabbitHeader.builder()
+                                .correlationId(UUID.randomUUID().toString())
+                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
+                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
+                                .timestamp(System.currentTimeMillis())
+                                .sourceService("auth-service")
+                                .targetService("user-service")
+                                .build();
+
+                Map<String, Object> params = new HashMap<>();
+                params.put("email", email);
+
+                UserDto userDto = rpcService.sendAndReceive(
+                                RabbitConstants.USER_EXCHANGE,
+                                RabbitConstants.USER_ACTIVATE,
+                                header,
+                                params,
+                                UserDto.class);
+
+                return userDto;
+        }
 
         public UserDto changePasswordUser(String email, String currentPassword, String newPassword) {
                 RabbitHeader header = RabbitHeader.builder()

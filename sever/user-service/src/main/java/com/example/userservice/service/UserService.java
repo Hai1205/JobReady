@@ -15,6 +15,7 @@ import com.example.userservice.security.AuthenticatedUser;
 import com.example.userservice.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,10 +34,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final CloudinaryService cloudinaryService;
-
-    private final String PRIVATE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-    private final int PASSWORD_LENGTH = 10;
     private final SecureRandom random = new SecureRandom();
+
+    @Value("${PRIVATE_CHARS}")
+    private String privateChars;
+
+    @Value("${PASSWORD_LENGTH}")
+    private int passwordLength;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
             CloudinaryService cloudinaryService) {
@@ -73,7 +77,7 @@ public class UserService {
     }
 
     public UserDto handleCreateUser(String username, String email, String password, String fullname, String role,
-            String status) {
+            String status, MultipartFile avatar) {
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email already exists");
         }
@@ -87,12 +91,37 @@ public class UserService {
                 email,
                 fullname);
 
+        if (avatar != null && !avatar.isEmpty()) {
+            var uploadResult = cloudinaryService.uploadImage(avatar);
+            if (uploadResult.containsKey("error")) {
+                throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
+            }
+
+            user.setAvatarUrl((String) uploadResult.get("url"));
+            user.setAvatarPublicId((String) uploadResult.get("publicId"));
+        }
+
         user.setPassword(passwordEncoder.encode(password));
-        user.setRole(UserRole.valueOf(role.toUpperCase()));
-        user.setStatus(UserStatus.valueOf(status.toUpperCase()));
+
+        if (!role.isEmpty()) {
+            user.setRole(UserRole.valueOf(role.toUpperCase()));
+        }
+        if (!status.isEmpty()) {
+            user.setStatus(UserStatus.valueOf(status.toUpperCase()));
+        }
 
         User savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);
+    }
+
+    public UserDto handleActivateUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setStatus(UserStatus.ACTIVE);
+        userRepository.save(user);
+
+        return userMapper.toDto(user);
     }
 
     public UserDto handleAuthenticateUser(String email, String currentPassword) {
@@ -107,10 +136,10 @@ public class UserService {
     }
 
     public String handleGenerateRandomPassword() {
-        StringBuilder password = new StringBuilder(PASSWORD_LENGTH);
-        for (int i = 0; i < PASSWORD_LENGTH; i++) {
-            int index = random.nextInt(PRIVATE_CHARS.length());
-            password.append(PRIVATE_CHARS.charAt(index));
+        StringBuilder password = new StringBuilder(passwordLength);
+        for (int i = 0; i < passwordLength; i++) {
+            int index = random.nextInt(privateChars.length());
+            password.append(privateChars.charAt(index));
         }
         return password.toString();
     }
@@ -154,7 +183,7 @@ public class UserService {
 
             UserDto savedUserDto = handleCreateUser(createUserRequest.getUsername(), createUserRequest.getEmail(),
                     createUserRequest.getPassword(), createUserRequest.getFullname(), createUserRequest.getRole(),
-                    createUserRequest.getStatus());
+                    createUserRequest.getStatus(), createUserRequest.getAvatar());
 
             ResponseData data = new ResponseData();
             data.setUser(savedUserDto);
@@ -350,6 +379,12 @@ public class UserService {
 
     public UserDto handleFindByEmail(String email) {
         return userRepository.findByEmail(email)
+                .map(userMapper::toDto)
+                .orElse(null);
+    }
+    
+    public UserDto handleFindById(UUID userId) {
+        return userRepository.findById(userId)
                 .map(userMapper::toDto)
                 .orElse(null);
     }

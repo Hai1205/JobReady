@@ -12,7 +12,8 @@ import com.example.cvservice.exception.OurException;
 import com.example.cvservice.repository.*;
 import com.example.cvservice.mapper.*;
 import com.example.cvservice.security.AuthenticatedUser;
-import com.example.cvservice.security.SecurityUtils;
+import com.example.cvservice.service.producers.UserProducer;
+// import com.example.cvservice.security.SecurityUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,6 +35,8 @@ public class CVService {
     private final OpenRouterConfig openRouterConfig;
     private final CVMapper cvMapper;
     private final ObjectMapper objectMapper;
+    private final CloudinaryService cloudinaryService;
+    private final UserProducer userProducer;
 
     public CVService(
             CVRepository cvRepository,
@@ -42,7 +45,9 @@ public class CVService {
             PersonalInfoRepository personalInfoRepository,
             FileParserService fileParserService,
             OpenRouterConfig openRouterConfig,
-            CVMapper cvMapper) {
+            CloudinaryService cloudinaryService,
+            CVMapper cvMapper,
+            UserProducer userProducer) {
         this.cvRepository = cvRepository;
         this.educationRepository = educationRepository;
         this.experienceRepository = experienceRepository;
@@ -50,41 +55,17 @@ public class CVService {
         this.fileParserService = fileParserService;
         this.openRouterConfig = openRouterConfig;
         this.cvMapper = cvMapper;
+        this.cloudinaryService = cloudinaryService;
+        this.userProducer = userProducer;
         this.objectMapper = new ObjectMapper();
-    }
-
-    private AuthenticatedUser requireAuthenticatedUser() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new OurException("Unauthorized", 401));
     }
 
     private boolean isAdmin(AuthenticatedUser user) {
         return user.hasRole("ADMIN");
     }
 
-    private void ensureCanAccessUser(UUID ownerId) {
-        AuthenticatedUser user = requireAuthenticatedUser();
-        if (isAdmin(user)) {
-            return;
-        }
-        if (!user.hasRole("USER")) {
-            throw new OurException("Forbidden", 403);
-        }
-        if (!user.getUserId().equals(ownerId)) {
-            throw new OurException("Forbidden", 403);
-        }
-    }
-
-    private void ensureCanAccessCv(CV cv) {
-        if (cv == null) {
-            throw new OurException("CV not found", 404);
-        }
-        ensureCanAccessUser(cv.getUserId());
-    }
-
     public CVDto handleGetCVById(UUID cvId) {
         CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
-        ensureCanAccessCv(cv);
         return cvMapper.toDto(cv);
     }
 
@@ -96,15 +77,25 @@ public class CVService {
             List<EducationDto> educationsDto,
             List<String> skills) {
 
-        ensureCanAccessUser(userId);
+        UserDto user = userProducer.findUserById(userId);
+        if (user == null) {
+            throw new OurException("User not found", 404);
+        }
 
-        CV cv = new CV();
-        cv.setUserId(userId);
-        cv.setTitle(title);
-        cv.setSkills(skills);
+        CV cv = new CV(userId, title, skills);
 
         PersonalInfo personalInfo = new PersonalInfo(personalInfoDto.getEmail(), personalInfoDto.getFullname(),
                 personalInfoDto.getPhone(), personalInfoDto.getLocation(), personalInfoDto.getSummary());
+
+        if (personalInfoDto.getAvatar() != null && !personalInfoDto.getAvatar().isEmpty()) {
+            var uploadResult = cloudinaryService.uploadImage(personalInfoDto.getAvatar());
+            if (uploadResult.containsKey("error")) {
+                throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
+            }
+
+            personalInfo.setAvatarUrl((String) uploadResult.get("url"));
+            personalInfo.setAvatarPublicId((String) uploadResult.get("publicId"));
+        }
         personalInfoRepository.save(personalInfo);
 
         cv.setPersonalInfo(personalInfo);
@@ -176,7 +167,7 @@ public class CVService {
             ResponseData data = new ResponseData();
             data.setCvs(cvDtos);
 
-            response.setMessage("CVs retrieved successfully");
+            response.setMessage("Get all cvs successfully");
             response.setData(data);
         } catch (Exception e) {
             response.setStatusCode(500);
@@ -196,7 +187,7 @@ public class CVService {
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
 
-            response.setMessage("CV retrieved successfully");
+            response.setMessage("Get cv successfully");
             response.setData(data);
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
@@ -220,20 +211,22 @@ public class CVService {
 
         try {
             CVDto cvDto = handleGetCVById(cvId);
+            if(cvDto == null) {
+                throw new OurException("CV not found", 404);
+            }
 
             String systemPrompt = "You are an expert CV/resume analyzer. Analyze the CV and provide detailed insights on strengths, weaknesses, and suggestions for improvement. Format your response as JSON with the following structure: {\"overallScore\": <number 0-100>, \"strengths\": [<array of strings>], \"weaknesses\": [<array of strings>], \"suggestions\": [{\"id\": \"<uuid>\", \"type\": \"improvement|warning|error\", \"section\": \"<section name>\", \"message\": \"<description>\", \"suggestion\": \"<specific improvement>\", \"applied\": false}]}";
 
-            String cvContent = formatCVForAnalysis(cvDto);
+            String cvContent = handleFormatCVForAnalysis(cvDto);
             String prompt = "Analyze this CV:\n\n" + cvContent;
 
             String result = openRouterConfig.callModelWithSystemPrompt(systemPrompt, prompt);
 
             // Parse suggestions from result
-            List<AISuggestionDto> suggestions = parseSuggestionsFromAIResponse(result);
+            List<AISuggestionDto> suggestions = handleParseSuggestionsFromAIResponse(result);
 
             ResponseData data = new ResponseData();
-            data.setCv(cvDto);
-            data.setAnalysis(result);
+            data.setAnalyze(result);
             data.setSuggestions(suggestions);
 
             response.setMessage("CV analyzed successfully");
@@ -258,6 +251,9 @@ public class CVService {
 
         try {
             CVDto cvDto = handleGetCVById(cvId);
+            if(cvDto == null) {
+                throw new OurException("CV not found", 404);
+            }
 
             String systemPrompt = "You are an expert resume writer and career coach. Your task is to improve specific sections of a CV to make them more professional, impactful, and effective. Use action verbs, quantify achievements where possible, and ensure clarity and conciseness.";
 
@@ -269,7 +265,6 @@ public class CVService {
             String improved = openRouterConfig.callModelWithSystemPrompt(systemPrompt, prompt);
 
             ResponseData data = new ResponseData();
-            data.setCv(cvDto);
             data.setImprovedSection(improved);
 
             response.setMessage("CV section improved successfully");
@@ -290,7 +285,11 @@ public class CVService {
     }
 
     public List<CVDto> handleGetUserCVs(UUID userId) {
-        ensureCanAccessUser(userId);
+        UserDto user = userProducer.findUserById(userId);
+        if (user == null) {
+            throw new OurException("User not found", 404);
+        }
+
         List<CV> cvs = cvRepository.findAllByUserId(userId);
         return cvs.stream().map(cvMapper::toDto).collect(Collectors.toList());
     }
@@ -304,7 +303,7 @@ public class CVService {
             ResponseData data = new ResponseData();
             data.setCvs(userCVs);
 
-            response.setMessage("CV retrieved successfully");
+            response.setMessage("Get user's CVs successfully");
             response.setData(data);
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
@@ -327,7 +326,10 @@ public class CVService {
         Response response = new Response();
 
         try {
-            ensureCanAccessUser(userId);
+            UserDto user = userProducer.findUserById(userId);
+            if (user == null) {
+                throw new OurException("User not found", 404);
+            }
 
             // Extract text from file
             String extractedText = fileParserService.extractTextFromFile(file);
@@ -340,7 +342,7 @@ public class CVService {
             String aiResponse = openRouterConfig.callModelWithSystemPrompt(systemPrompt, prompt);
 
             // Parse AI response and create CV
-            CVDto cvDto = parseAndCreateCVFromAIResponse(userId, aiResponse);
+            CVDto cvDto = handleParseAndCreateCVFromAIResponse(userId, aiResponse);
 
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
@@ -373,14 +375,13 @@ public class CVService {
             }
 
             CV cv = cvOpt.get();
-            ensureCanAccessCv(cv);
 
             CVDto cvDto = cvMapper.toDto(cv);
 
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
 
-            response.setMessage("CV retrieved successfully");
+            response.setMessage("Get cv successfully");
             response.setData(data);
         } catch (OurException e) {
             response.setStatusCode(e.getStatusCode());
@@ -404,19 +405,37 @@ public class CVService {
         CV existing = cvRepository.findById(cvId)
                 .orElseThrow(() -> new OurException("CV not found", 404));
 
-        ensureCanAccessCv(existing);
-
         existing.setTitle(title);
 
         if (personalInfoDto != null) {
             PersonalInfo pi = existing.getPersonalInfo();
+
             if (pi == null)
                 pi = new PersonalInfo();
+
             pi.setFullname(personalInfoDto.getFullname());
             pi.setEmail(personalInfoDto.getEmail());
             pi.setPhone(personalInfoDto.getPhone());
             pi.setLocation(personalInfoDto.getLocation());
             pi.setSummary(personalInfoDto.getSummary());
+
+            if (personalInfoDto.getAvatar() != null && !personalInfoDto.getAvatar().isEmpty()) {
+                // Delete old avatar if exists
+                String oldAvatarPublicId = pi.getAvatarPublicId();
+                if (oldAvatarPublicId != null && !oldAvatarPublicId.isEmpty()) {
+                    cloudinaryService.deleteImage(oldAvatarPublicId);
+                }
+
+                // Upload new avatar
+                var uploadResult = cloudinaryService.uploadImage(personalInfoDto.getAvatar());
+                if (uploadResult.containsKey("error")) {
+                    throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
+                }
+
+                pi.setAvatarUrl((String) uploadResult.get("url"));
+                pi.setAvatarPublicId((String) uploadResult.get("publicId"));
+            }
+
             existing.setPersonalInfo(pi);
         }
 
@@ -512,7 +531,7 @@ public class CVService {
 
             String systemPrompt = "You are an expert ATS (Applicant Tracking System) analyzer and career coach. Analyze how well the CV matches the job description. Provide a match score (0-100), identify missing keywords, suggest improvements, and format your response as JSON: {\"matchScore\": <number>, \"missingKeywords\": [<array>], \"strengths\": [<array>], \"suggestions\": [{\"id\": \"<uuid>\", \"type\": \"improvement\", \"section\": \"<section>\", \"message\": \"<message>\", \"suggestion\": \"<suggestion>\", \"applied\": false}]}";
 
-            String cvContent = formatCVForAnalysis(cvDto);
+            String cvContent = handleFormatCVForAnalysis(cvDto);
             String prompt = String.format(
                     "Job Description:\n%s\n\nCV Content:\n%s\n\nAnalyze the match between this CV and job description.",
                     request.getJobDescription(),
@@ -521,18 +540,16 @@ public class CVService {
             String result = openRouterConfig.callModelWithSystemPrompt(systemPrompt, prompt);
 
             // Parse suggestions from result
-            List<AISuggestionDto> suggestions = parseSuggestionsFromAIResponse(result);
-            Double matchScore = extractMatchScore(result);
+            List<AISuggestionDto> suggestions = handleParseSuggestionsFromAIResponse(result);
+            Double matchScore = handleExtractMatchScore(result);
 
             ResponseData data = new ResponseData();
-            data.setCv(cvDto);
-            data.setAnalysis(result);
+            data.setAnalyze(result);
             data.setSuggestions(suggestions);
             data.setMatchScore(matchScore);
 
             response.setMessage("CV analyzed with job description successfully");
             response.setData(data);
-
         } catch (IllegalArgumentException e) {
             response.setStatusCode(400);
             response.setMessage("Invalid CV ID format");
@@ -549,7 +566,7 @@ public class CVService {
     }
 
     // Helper methods
-    private String formatCVForAnalysis(CVDto cvDto) {
+    private String handleFormatCVForAnalysis(CVDto cvDto) {
         StringBuilder sb = new StringBuilder();
 
         // Personal Info
@@ -593,12 +610,12 @@ public class CVService {
         return sb.toString();
     }
 
-    private List<AISuggestionDto> parseSuggestionsFromAIResponse(String aiResponse) {
+    private List<AISuggestionDto> handleParseSuggestionsFromAIResponse(String aiResponse) {
         List<AISuggestionDto> suggestions = new ArrayList<>();
 
         try {
             // Try to extract JSON from the response
-            String jsonContent = extractJsonFromResponse(aiResponse);
+            String jsonContent = handleExtractJsonFromResponse(aiResponse);
             JsonNode rootNode = objectMapper.readTree(jsonContent);
 
             JsonNode suggestionsNode = rootNode.get("suggestions");
@@ -623,9 +640,9 @@ public class CVService {
         return suggestions;
     }
 
-    private Double extractMatchScore(String aiResponse) {
+    private Double handleExtractMatchScore(String aiResponse) {
         try {
-            String jsonContent = extractJsonFromResponse(aiResponse);
+            String jsonContent = handleExtractJsonFromResponse(aiResponse);
             JsonNode rootNode = objectMapper.readTree(jsonContent);
 
             if (rootNode.has("matchScore")) {
@@ -638,7 +655,7 @@ public class CVService {
         return null;
     }
 
-    private String extractJsonFromResponse(String response) {
+    private String handleExtractJsonFromResponse(String response) {
         // Try to extract JSON from markdown code blocks or plain text
         String trimmed = response.trim();
 
@@ -661,9 +678,9 @@ public class CVService {
         return trimmed;
     }
 
-    private CVDto parseAndCreateCVFromAIResponse(UUID userId, String aiResponse) {
+    private CVDto handleParseAndCreateCVFromAIResponse(UUID userId, String aiResponse) {
         try {
-            String jsonContent = extractJsonFromResponse(aiResponse);
+            String jsonContent = handleExtractJsonFromResponse(aiResponse);
             JsonNode rootNode = objectMapper.readTree(jsonContent);
 
             // Extract data from JSON

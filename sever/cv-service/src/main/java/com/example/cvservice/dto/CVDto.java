@@ -17,4 +17,8 @@ public class CVDto {
     private List<String> skills;
     private String createdAt;
     private String updatedAt;
+    public void orElseThrow(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
+    }
 }

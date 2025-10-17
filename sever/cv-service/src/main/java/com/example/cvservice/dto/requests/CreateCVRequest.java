@@ -1,7 +1,6 @@
 package com.example.cvservice.dto.requests;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.example.cvservice.dto.EducationDto;
 import com.example.cvservice.dto.ExperienceDto;
@@ -13,7 +12,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCVRequest {
-    private UUID userId;
     private String title;
     private PersonalInfoDto personalInfo;
     private List<ExperienceDto> experience;

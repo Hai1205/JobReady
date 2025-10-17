@@ -19,16 +19,20 @@ public class RabbitConstants {
     // --- User Service ---
     // --- Routing keys - User Service ---
     public static final String USER_FIND_BY_EMAIL = "user.find.by.email";
+    public static final String USER_FIND_BY_ID = "user.find.by.id";
     public static final String USER_CREATE = "user.create";
     public static final String USER_CHANGE_PASSWORD = "user.change.password";
     public static final String USER_AUTHENTICATE = "user.authenticate";
     public static final String USER_RESET_PASSWORD = "user.reset.password";
     public static final String USER_FORGOT_PASSWORD = "user.forgot.password";
+    public static final String USER_ACTIVATE = "user.activate";
     // --- Queue names - User Service ---
+    public static final String USER_FIND_BY_ID_QUEUE = "user.find.by.id.queue";
     public static final String USER_FIND_BY_EMAIL_QUEUE = "user.find.by.email.queue";
     public static final String USER_CREATE_QUEUE = "user.create.queue";
     public static final String USER_CHANGE_PASSWORD_QUEUE = "user.change.password.queue";
     public static final String USER_AUTHENTICATE_QUEUE = "user.authenticate.queue";
     public static final String USER_RESET_PASSWORD_QUEUE = "user.reset.password.queue";
     public static final String USER_FORGOT_PASSWORD_QUEUE = "user.forgot.password.queue";
+    public static final String USER_ACTIVATE_QUEUE = "user.activate.queue";
 }

@@ -147,17 +147,21 @@ public class AuthService {
         return response;
     }
 
-    public Response verifyOTP(String email, String otp) {
+    public Response verifyOTP(String email, VerifyOtpRequest request) {
         Response response = new Response();
 
         try {
-            boolean isValid = otpService.validateOtp(email, otp);
+            boolean isValid = otpService.validateOtp(email, request.getOtp());
 
             if (!isValid) {
                 throw new OurException("Invalid OTP.");
             }
 
-            response.setMessage("Your account is activated!");
+            if (request.getIsActivation()) {
+                userProducer.activateUser(email);
+            }
+
+            response.setMessage("Otp verified successfully!");
         } catch (OurException e) {
             response.setStatusCode(e.getStatusCode());
             response.setMessage(e.getMessage());
@@ -177,6 +181,11 @@ public class AuthService {
         try {
             String otp = otpService.generateOtp(email);
 
+            UserDto userDto = userProducer.findUserByEmail(email);
+            if (userDto == null) {
+                throw new OurException("User not found.", 404);
+            }
+
             String subject = "Account Activation";
             String templateName = "mail_active_account";
             Map<String, Object> variables = new HashMap<>();
@@ -184,8 +193,8 @@ public class AuthService {
             variables.put("recipientName", email);
             variables.put("senderName", "JobReady");
             variables.put("otp", otp);
-
             mailConfig.sendMail(email, subject, templateName, variables);
+
             response.setMessage("OTP is sent!");
         } catch (OurException e) {
             response.setStatusCode(e.getStatusCode());

@@ -5,6 +5,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.AllArgsConstructor;
 
 @Data
@@ -17,4 +19,7 @@ public class PersonalInfoDto {
     private String phone;
     private String location;
     private String summary;
+    private MultipartFile avatar;
+    private String avatarUrl;
+    private String avatarPublicId;
 }

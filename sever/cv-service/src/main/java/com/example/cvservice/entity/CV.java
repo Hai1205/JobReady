@@ -23,6 +23,12 @@ public class CV {
 
     private UUID userId;
 
+    public CV(UUID userId, String title, List<String> skills) {
+        this.title = title;
+        this.userId = userId;
+        this.skills = skills;
+    }
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cv_id")
     private PersonalInfo personalInfo;
