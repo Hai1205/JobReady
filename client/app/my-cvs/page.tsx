@@ -91,7 +91,7 @@ export default function MyCVsPage() {
     // const duplicatedCV: ICV = {
     //   ...cv,
     //   id: crypto.randomUUID(),
-    //   title: `${cv.title} (Copy)`,
+    //   tittle: `${cv.tittle} (Copy)`,
     //   createdAt: new Date().toISOString(),
     //   updatedAt: new Date().toISOString(),
     // };
@@ -154,7 +154,9 @@ export default function MyCVsPage() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="line-clamp-1">{cv.title}</CardTitle>
+                      <CardTitle className="line-clamp-1">
+                        {cv.tittle}
+                      </CardTitle>
                       <CardDescription className="mt-2 flex items-center gap-2">
                         <Calendar className="h-3 w-3" />
                         Updated {formatDateAgo(cv.updatedAt)}

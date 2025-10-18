@@ -6,14 +6,18 @@ import { Moon, Sun, FileText, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 
 export function Navbar() {
+  const authStore = useAuthStore();
+
+  const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const authStore = useAuthStore();
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -72,6 +76,7 @@ export function Navbar() {
   const handleLogout = () => {
     logout();
     setMobileMenuOpen(false);
+    router.push("/");
   };
 
   return (
@@ -146,6 +151,7 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent>
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <div className="flex flex-col gap-6 mt-8">
                 {allNavLinks.map((link) => (
                   <Link

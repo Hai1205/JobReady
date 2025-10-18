@@ -35,8 +35,8 @@ export function middleware(request: NextRequest) {
         response.headers.set('Server-Timing', 'middleware;dur=0')
     }
 
-    // Get the authentication token from cookies
-    const authToken = request.cookies.get('token')?.value
+    // Get the authentication token from cookies (try multiple possible cookie names)
+    const authToken = request.cookies.get('access_token')?.value;
 
     // Parse the user authentication status
     let isAuthenticated = false
@@ -52,9 +52,10 @@ export function middleware(request: NextRequest) {
             // Check if token is valid and not expired
             const currentTime = Math.floor(Date.now() / 1000)
             if (decodedPayload.exp && decodedPayload.exp > currentTime) {
-                isAuthenticated = !!decodedPayload.id
+                // Use userId from the decoded token (based on your JWT structure)
+                isAuthenticated = !!decodedPayload.userId || !!decodedPayload.id || !!decodedPayload.sub
                 userRole = decodedPayload.role
-                isAdmin = userRole === 'admin' || userRole === 'ADMIN'
+                isAdmin = userRole === 'ADMIN'
             }
         } catch (error) {
             // If parsing fails, user is not authenticated
@@ -99,11 +100,10 @@ export function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/', request.url))
         }
     }
-    
     if (pathname.startsWith('/cv-builder') || pathname.startsWith('/my-cvs')) {
         // If not authenticated, redirect to login page
         if (!isAuthenticated) {
-            // return NextResponse.redirect(new URL('/auth/login', request.url))
+            return NextResponse.redirect(new URL('/auth/login', request.url))
         }
     }
 

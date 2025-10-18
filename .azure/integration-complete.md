@@ -65,7 +65,7 @@
 - Progress bar cho match score
 - Missing keywords hiển thị dưới dạng destructive badges
 - Comprehensive parsed JD display:
-  - Job title & company
+  - Job tittle & company
   - Location, salary, experience required
   - Required skills & preferred skills (separate badges)
   - Responsibilities, requirements, benefits sections

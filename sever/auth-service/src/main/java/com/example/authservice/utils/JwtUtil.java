@@ -30,8 +30,8 @@ public class JwtUtil {
     private String publicKeyStr;
     private PublicKey publicKey;
 
-    // Access Token: 15 phút (ngắn hạn)
-    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15; // 15 minutes
+    // Access Token: 5 giờ (ngắn hạn)
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 5; // 5 hours
 
     // Refresh Token: 7 ngày (dài hạn)
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7 days

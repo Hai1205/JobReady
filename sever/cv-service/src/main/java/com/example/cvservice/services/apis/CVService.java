@@ -71,7 +71,7 @@ public class CVService extends BaseService {
 
     public CVDto handleCreateCV(
             UUID userId,
-            String title,
+            String tittle,
             PersonalInfoDto personalInfoDto,
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
@@ -82,7 +82,28 @@ public class CVService extends BaseService {
             throw new OurException("User not found", 404);
         }
 
-        CV cv = new CV(userId, title, skills);
+        System.out.println("========== CREATE CV DEBUG ==========");
+        System.out.println(">>> userId: " + userId);
+        System.out.println(">>> tittle: " + tittle);
+        System.out.println(">>> personalInfoDto: " + personalInfoDto);
+        System.out.println(">>> experiencesDto: " + experiencesDto);
+        System.out.println(">>> educationsDto: " + educationsDto);
+        System.out.println(">>> skills: " + skills);
+        System.out.println("=====================================");
+
+        if (personalInfoDto == null) {
+            throw new OurException("Personal info is required", 400);
+        }
+
+        if (experiencesDto == null || experiencesDto.isEmpty()) {
+            throw new OurException("At least one experience is required", 400);
+        }
+
+        if (educationsDto == null || educationsDto.isEmpty()) {
+            throw new OurException("At least one education is required", 400);
+        }
+
+        CV cv = new CV(userId, tittle, skills);
 
         PersonalInfo personalInfo = new PersonalInfo(personalInfoDto.getEmail(), personalInfoDto.getFullname(),
                 personalInfoDto.getPhone(), personalInfoDto.getLocation(), personalInfoDto.getSummary());
@@ -130,8 +151,22 @@ public class CVService extends BaseService {
         Response response = new Response();
 
         try {
-            CVDto cvDto = handleCreateCV(userId, request.getTitle(), request.getPersonalInfo(),
-                    request.getExperience(), request.getEducation(), request.getSkills());
+            // Parse JSON strings to DTOs
+            PersonalInfoDto personalInfoDto = objectMapper.readValue(request.getPersonalInfo(), PersonalInfoDto.class);
+            if (request.getAvatar() != null) {
+                personalInfoDto.setAvatar(request.getAvatar());
+            }
+
+            List<ExperienceDto> experiencesDto = objectMapper.readValue(request.getExperiences(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, ExperienceDto.class));
+
+            List<EducationDto> educationsDto = objectMapper.readValue(request.getEducations(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, EducationDto.class));
+
+            List<String> skills = objectMapper.readValue(request.getSkills(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
+
+            CVDto cvDto = handleCreateCV(userId, tittle, personalInfoDto, experiencesDto, educationsDto, skills);
 
             ResponseData data = new ResponseData();
             data.setCv(cvDto);
@@ -303,7 +338,7 @@ public class CVService extends BaseService {
             String extractedText = fileParserService.extractTextFromFile(file);
 
             // Use AI to parse the CV content into structured data
-            String systemPrompt = "You are an expert CV parser. Extract structured information from the CV text and return it as JSON with this exact structure: {\"title\": \"<job title or 'My CV'>\", \"personalInfo\": {\"fullname\": \"<name>\", \"email\": \"<email>\", \"phone\": \"<phone>\", \"location\": \"<location>\", \"summary\": \"<professional summary>\"}, \"experience\": [{\"company\": \"<company>\", \"position\": \"<position>\", \"startDate\": \"<YYYY-MM>\", \"endDate\": \"<YYYY-MM or Present>\", \"description\": \"<description>\"}], \"education\": [{\"school\": \"<school>\", \"degree\": \"<degree>\", \"field\": \"<field>\", \"startDate\": \"<YYYY-MM>\", \"endDate\": \"<YYYY-MM>\"}], \"skills\": [\"<skill1>\", \"<skill2>\"]}";
+            String systemPrompt = "You are an expert CV parser. Extract structured information from the CV text and return it as JSON with this exact structure: {\"tittle\": \"<job tittle or 'My CV'>\", \"personalInfo\": {\"fullname\": \"<name>\", \"email\": \"<email>\", \"phone\": \"<phone>\", \"location\": \"<location>\", \"summary\": \"<professional summary>\"}, \"experience\": [{\"company\": \"<company>\", \"position\": \"<position>\", \"startDate\": \"<YYYY-MM>\", \"endDate\": \"<YYYY-MM or Present>\", \"description\": \"<description>\"}], \"education\": [{\"school\": \"<school>\", \"degree\": \"<degree>\", \"field\": \"<field>\", \"startDate\": \"<YYYY-MM>\", \"endDate\": \"<YYYY-MM>\"}], \"skills\": [\"<skill1>\", \"<skill2>\"]}";
 
             String prompt = "Parse this CV text into structured JSON format:\n\n" + extractedText;
 
@@ -328,14 +363,14 @@ public class CVService extends BaseService {
         }
     }
 
-    public Response getCVByTitle(String title) {
+    public Response getCVByTitle(String tittle) {
         Response response = new Response();
 
         try {
-            Optional<CV> cvOpt = cvRepository.findByTitle(title);
+            Optional<CV> cvOpt = cvRepository.findByTitle(tittle);
 
             if (!cvOpt.isPresent()) {
-                throw new OurException("CV not found with title: " + title, 404);
+                throw new OurException("CV not found with tittle: " + tittle, 404);
             }
 
             CV cv = cvOpt.get();
@@ -357,7 +392,7 @@ public class CVService extends BaseService {
     }
 
     public CVDto handleUpdateCV(UUID cvId,
-            String title,
+            String tittle,
             PersonalInfoDto personalInfoDto,
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
@@ -365,7 +400,7 @@ public class CVService extends BaseService {
         CV existing = cvRepository.findById(cvId)
                 .orElseThrow(() -> new OurException("CV not found", 404));
 
-        existing.setTitle(title);
+        existing.setTitle(tittle);
 
         if (personalInfoDto != null) {
             PersonalInfo pi = existing.getPersonalInfo();
@@ -648,21 +683,6 @@ public class CVService extends BaseService {
         return suggestions;
     }
 
-    private Double handleExtractMatchScore(String aiResponse) {
-        try {
-            String jsonContent = handleExtractJsonFromResponse(aiResponse);
-            JsonNode rootNode = objectMapper.readTree(jsonContent);
-
-            if (rootNode.has("matchScore")) {
-                return rootNode.get("matchScore").asDouble();
-            }
-        } catch (Exception e) {
-            System.err.println("Error extracting match score: " + e.getMessage());
-        }
-
-        return null;
-    }
-
     private String handleExtractJsonFromResponse(String response) {
         // Try to extract JSON from markdown code blocks or plain text
         String trimmed = response.trim();
@@ -692,7 +712,7 @@ public class CVService extends BaseService {
             JsonNode rootNode = objectMapper.readTree(jsonContent);
 
             // Extract data from JSON
-            String title = rootNode.has("title") ? rootNode.get("title").asText() : "Imported CV";
+            String tittle = rootNode.has("tittle") ? rootNode.get("tittle").asText() : "Imported CV";
 
             // Personal Info
             PersonalInfoDto personalInfo = new PersonalInfoDto();
@@ -751,7 +771,7 @@ public class CVService extends BaseService {
             }
 
             // Create CV
-            return handleCreateCV(userId, title, personalInfo, experiences, educations, skills);
+            return handleCreateCV(userId, tittle, personalInfo, experiences, educations, skills);
 
         } catch (Exception e) {
             throw new OurException("Error parsing AI response: " + e.getMessage(), 500);

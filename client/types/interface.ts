@@ -12,13 +12,13 @@ declare global {
     interface ICV {
         id: string
         userId?: string
-        title: string
+        tittle: string
         personalInfo: IPersonalInfo
-        experience: IExperience[]
-        education: IEducation[]
+        experiences: IExperience[]
+        educations: IEducation[]
         skills: string[]
-        createdAt: string
-        updatedAt: string
+        createdAt?: string
+        updatedAt?: string
     }
 
     interface IPersonalInfo {

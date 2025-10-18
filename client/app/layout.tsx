@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
+import { TokenRefresher } from "@/components/TokenRefresher";
 import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "JobReady - AI-Powered CV Builder",
+  tittle: "JobReady - AI-Powered CV Builder",
   description: "Create professional CVs with AI assistance",
   icons: {
     icon: "/images/logo.png",
@@ -42,6 +43,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <TokenRefresher />
+          
           <Navbar />
           <main className="min-h-screen">{children}</main>
 

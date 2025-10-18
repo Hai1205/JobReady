@@ -89,8 +89,8 @@ export function PersonalInfoStep() {
             <Avatar className="h-24 w-24">
               <AvatarImage
                 src={
-                  currentCV.personalInfo.avatarUrl ||
-                  currentCV.personalInfo.avatarPublicId ||
+                  `${currentCV.personalInfo.avatarUrl ||
+                  currentCV.personalInfo.avatarPublicId}` ||
                   ""
                 }
               />

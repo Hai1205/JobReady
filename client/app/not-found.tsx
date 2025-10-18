@@ -51,9 +51,9 @@ export default function NotFound() {
                   size="lg"
                   className="w-full sm:w-auto bg-transparent"
                 >
-                  <Link href="/products" className="flex items-center gap-2">
+                  <Link href="/cv-builder" className="flex items-center gap-2">
                     <ShoppingBag className="h-4 w-4" />
-                    Xem sản phẩm
+                    Tạo CV
                   </Link>
                 </Button>
               </div>

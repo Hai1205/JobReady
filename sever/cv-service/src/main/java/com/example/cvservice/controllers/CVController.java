@@ -22,9 +22,11 @@ public class CVController {
 
     @PostMapping("/users/{userId}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<Response> createCV(@PathVariable("userId") UUID userId, @ModelAttribute CreateCVRequest request) {
+    public ResponseEntity<Response> createCV(
+            @PathVariable("userId") UUID userId,
+            @ModelAttribute CreateCVRequest request) {
         Response response = cvService.createCV(userId, request);
-        
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -54,7 +56,8 @@ public class CVController {
 
     @PostMapping("/improve/{cvId}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<Response> improveCV(@PathVariable("cvId") UUID cvId, @ModelAttribute ImproveCVRequest request) {
+    public ResponseEntity<Response> improveCV(@PathVariable("cvId") UUID cvId,
+            @ModelAttribute ImproveCVRequest request) {
         Response response = cvService.improveCV(cvId, request);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -88,10 +91,10 @@ public class CVController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/title/{title}")
+    @GetMapping("/tittle/{tittle}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<Response> getCVByTitle(@PathVariable("title") String title) {
-        Response response = cvService.getCVByTitle(title);
+    public ResponseEntity<Response> getCVByTitle(@PathVariable("tittle") String tittle) {
+        Response response = cvService.getCVByTitle(tittle);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

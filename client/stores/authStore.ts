@@ -1,12 +1,15 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, EStorageType, IBaseStore } from "@/lib/initialStore";
+import Cookies from 'js-cookie';
 import { EUserRole } from "@/types/enum";
 import { useCVStore } from "./cvStore";
 import { useUserStore } from "./userStore";
 
 interface IAuthDataResponse {
-	user: IUser;
-	isActive: boolean;
+	data: {
+		user: IUser;
+		isActive: boolean;
+	}
 }
 
 export interface IAuthStore extends IBaseStore {
@@ -60,8 +63,8 @@ export const useAuthStore = createStore<IAuthStore>(
 
 			return await get().handleRequest(async () => {
 				const response = await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/login`, formData);
-				if (response && response.data) {
-					const user = response.data.user;
+				if (response && response?.data?.data) {
+					const user = response.data.data.user;
 					set({
 						userAuth: user,
 						isAdmin: user.role === EUserRole.ADMIN,
@@ -75,6 +78,10 @@ export const useAuthStore = createStore<IAuthStore>(
 		logout: async (): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
 				const response = await handleRequest(EHttpType.POST, `/auth/logout`);
+
+				// Clear all auth cookies
+				Cookies.remove('access_token');
+				Cookies.remove('refresh_token');
 
 				get().reset();
 
@@ -127,10 +134,12 @@ export const useAuthStore = createStore<IAuthStore>(
 		},
 
 		handleSetUserAuth: (user: IUser): void => {
-			set({
-				userAuth: user,
-				isAdmin: user.role === EUserRole.ADMIN
-			});
+			if (user) {
+				set({
+					userAuth: user,
+					isAdmin: user.role === EUserRole.ADMIN
+				});
+			}
 		},
 
 		reset: () => {

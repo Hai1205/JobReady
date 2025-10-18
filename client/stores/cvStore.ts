@@ -20,19 +20,19 @@ export interface ICVStore extends IBaseStore {
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	createCV: (
 		userId: string,
-		title: string,
+		tittle: string,
 		personalInfo: IPersonalInfo,
-		Experiences: IExperience[],
-		Educations: IEducation[],
-		Skills: string[],
+		experience: IExperience[],
+		education: IEducation[],
+		skills: string[],
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	updateCV: (
 		cvId: string,
-		title: string,
+		tittle: string,
 		personalInfo: IPersonalInfo,
-		Experiences: IExperience[],
-		Educations: IEducation[],
-		Skills: string[],
+		experience: IExperience[],
+		education: IEducation[],
+		skills: string[],
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	deleteCV: (
 		cvId: string
@@ -96,15 +96,24 @@ export const useCVStore = createStore<ICVStore>(
 
 		createCV: async (
 			userId: string,
-			title: string,
+			tittle: string,
 			personalInfo: IPersonalInfo,
-			Experiences: IExperience[],
-			Educations: IEducation[],
-			Skills: string[],
+			experience: IExperience[],
+			education: IEducation[],
+			skills: string[],
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
+				console.log("========== CREATE CV DEBUG ==========");
+				console.log("userId:", userId);
+				console.log("tittle:", tittle);
+				console.log("personalInfo:", personalInfo);
+				console.log("experience:", experience);
+				console.log("education:", education);
+				console.log("skills:", skills);
+				console.log("=====================================");
+
 				const formData = new FormData();
-				formData.append("title", title);
+				formData.append("tittle", tittle);
 
 				// Serialize personalInfo without avatar file
 				const { avatar, ...personalInfoData } = personalInfo;
@@ -115,10 +124,15 @@ export const useCVStore = createStore<ICVStore>(
 					formData.append("avatar", avatar);
 				}
 
-				// Backend expects 'Experiences', 'Educations', 'Skills' (capitalized)
-				formData.append("Experiences", JSON.stringify(Experiences));
-				formData.append("Educations", JSON.stringify(Educations));
-				formData.append("Skills", JSON.stringify(Skills));
+				// Backend expects 'experience', 'education', 'skills' (lowercase)
+				formData.append("experience", JSON.stringify(experience));
+				formData.append("education", JSON.stringify(education));
+				formData.append("skills", JSON.stringify(skills));
+
+				console.log("FormData entries:");
+				for (let [key, value] of formData.entries()) {
+					console.log(`  ${key}:`, value);
+				}
 
 				return await handleRequest(EHttpType.POST, `/cvs/users/${userId}`, formData);
 			});
@@ -126,15 +140,15 @@ export const useCVStore = createStore<ICVStore>(
 
 		updateCV: async (
 			cvId: string,
-			title: string,
+			tittle: string,
 			personalInfo: IPersonalInfo,
-			Experiences: IExperience[],
-			Educations: IEducation[],
-			Skills: string[],
+			experience: IExperience[],
+			education: IEducation[],
+			skills: string[],
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
 				const formData = new FormData();
-				formData.append("title", title);
+				formData.append("tittle", tittle);
 
 				// Serialize personalInfo without avatar file
 				const { avatar, ...personalInfoData } = personalInfo;
@@ -145,10 +159,10 @@ export const useCVStore = createStore<ICVStore>(
 					formData.append("avatar", avatar);
 				}
 
-				// Backend expects 'Experiences', 'Educations', 'Skills' (capitalized)
-				formData.append("Experiences", JSON.stringify(Experiences));
-				formData.append("Educations", JSON.stringify(Educations));
-				formData.append("Skills", JSON.stringify(Skills));
+				// Backend expects 'experience', 'education', 'skills' (lowercase)
+				formData.append("experience", JSON.stringify(experience));
+				formData.append("education", JSON.stringify(education));
+				formData.append("skills", JSON.stringify(skills));
 
 				return await handleRequest(EHttpType.PATCH, `/cvs/${cvId}`, formData);
 			});

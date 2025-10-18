@@ -125,7 +125,7 @@ export function JobDescriptionMatchResult({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Job Title & Company */}
+            {/* Job tittle & Company */}
             <div className="space-y-2">
               {parsedJobDescription.jobTitle && (
                 <div>

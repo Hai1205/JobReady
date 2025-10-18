@@ -198,7 +198,7 @@ function UserDashboardPage() {
   return (
     <div className="space-y-4">
       <DashboardHeader
-        title="User Dashboard"
+        tittle="User Dashboard"
         onCreateClick={() => {
           // Initialize an empty object instead of null when creating new
           // const defaultUser: ExtendedUserData = {

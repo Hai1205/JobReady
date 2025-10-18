@@ -64,12 +64,12 @@ const UpdateUserDialog = ({
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title
+                <Dialog.tittle
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
                 >
                   Chỉnh sửa quản trị viên
-                </Dialog.Title>
+                </Dialog.tittle>
 
                 <ScrollArea className="h-[42vh] pr-4 mt-4">
                   <div className="grid gap-4">
@@ -119,7 +119,9 @@ const UpdateUserDialog = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="active">Hoạt động</SelectItem>
-                        <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                        <SelectItem value="inactive">
+                          Ngừng hoạt động
+                        </SelectItem>
                         <SelectItem value={EUserStatus.PENDING}>
                           Đang chờ
                         </SelectItem>

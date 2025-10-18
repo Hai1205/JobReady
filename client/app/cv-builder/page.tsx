@@ -18,7 +18,7 @@ export default function CVBuilderPage() {
     if (!currentCV) {
       handleSetCurrentCV({
         id: crypto.randomUUID(),
-        title: "Untitled CV",
+        tittle: "Untitled CV",
         personalInfo: {
           fullname: "",
           email: "",
@@ -26,11 +26,9 @@ export default function CVBuilderPage() {
           location: "",
           summary: "",
         },
-        experience: [],
-        education: [],
+        experiences: [],
+        educations: [],
         skills: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       });
       handleSetCurrentStep(0);
     }

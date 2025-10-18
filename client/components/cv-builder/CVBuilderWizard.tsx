@@ -17,12 +17,12 @@ import { useCVStore } from "@/stores/cvStore";
 import { useAuthStore } from "@/stores/authStore";
 
 const steps = [
-  { id: 0, title: "Personal Info", component: PersonalInfoStep },
-  { id: 1, title: "Experience", component: ExperienceStep },
-  { id: 2, title: "Education", component: EducationStep },
-  { id: 3, title: "Skills", component: SkillsStep },
-  { id: 4, title: "Review", component: ReviewStep },
-  { id: 5, title: "Preview & Export", component: PreviewStep },
+  { id: 0, tittle: "Personal Info", component: PersonalInfoStep },
+  { id: 1, tittle: "Experience", component: ExperienceStep },
+  { id: 2, tittle: "Education", component: EducationStep },
+  { id: 3, tittle: "Skills", component: SkillsStep },
+  { id: 4, tittle: "Review", component: ReviewStep },
+  { id: 5, tittle: "Preview & Export", component: PreviewStep },
 ];
 
 export function CVBuilderWizard() {
@@ -58,7 +58,7 @@ export function CVBuilderWizard() {
     const userId = userAuth?.id || "";
     createCV(
       userId,
-      currentCV.title,
+      currentCV.tittle,
       currentCV.personalInfo,
       currentCV.experience,
       currentCV.education,
@@ -68,14 +68,14 @@ export function CVBuilderWizard() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* CV Title */}
+      {/* CV tittle */}
       {currentCV && (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="cv-title">CV Title</Label>
+          <Label htmlFor="cv-tittle">CV tittle</Label>
           <Input
-            id="cv-title"
-            value={currentCV.title}
-            onChange={(e) => handleUpdateCV({ title: e.target.value })}
+            id="cv-tittle"
+            value={currentCV.tittle}
+            onChange={(e) => handleUpdateCV({ tittle: e.target.value })}
             placeholder="e.g., Software Engineer CV"
             className="text-lg font-semibold"
           />
@@ -93,7 +93,8 @@ export function CVBuilderWizard() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">
-            Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+            Step {currentStep + 1} of {steps.length}:{" "}
+            {steps[currentStep].tittle}
           </span>
           <span className="text-sm text-muted-foreground">
             {Math.round(progress)}% Complete
@@ -127,7 +128,7 @@ export function CVBuilderWizard() {
             >
               {index + 1}
             </span>
-            {step.title}
+            {step.tittle}
           </button>
         ))}
       </div>

@@ -63,8 +63,9 @@ public class AuthService extends BaseService {
             String accessToken = jwtUtil.generateAccessToken(userId, email, role, username);
             String refreshToken = jwtUtil.generateRefreshToken(userId, email, username);
 
-            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("ACCESS_TOKEN", accessToken, 15 * 60); // 15 minutes
-            Cookie refreshTokenCookie = handleCreateHttpOnlyCookie("REFRESH_TOKEN", refreshToken, 7 * 24 * 60 * 60); // 7 days
+            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("access_token", accessToken, 5 * 60 * 60); // 5 hours
+            Cookie refreshTokenCookie = handleCreateHttpOnlyCookie("refresh_token", refreshToken, 7 * 24 * 60 * 60); // 7
+                                                                                                                     // days
             httpServletResponse.addCookie(accessTokenCookie);
             httpServletResponse.addCookie(refreshTokenCookie);
             httpServletResponse.setHeader("X-Access-Token", accessToken);
@@ -86,10 +87,12 @@ public class AuthService extends BaseService {
 
     private Cookie handleCreateHttpOnlyCookie(String name, String value, int maxAgeInSeconds) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // Ensure the cookie is only sent over HTTPS
+        cookie.setHttpOnly(false); // Set to false to allow JavaScript access if needed
+        cookie.setSecure(false); // Set to false for localhost development (change to true in production with
+                                 // HTTPS)
         cookie.setPath("/"); // Set the path to root to make it accessible across the domain
         cookie.setMaxAge(maxAgeInSeconds);
+        cookie.setAttribute("SameSite", "Lax"); // Add SameSite attribute for better compatibility
         return cookie;
     }
 
@@ -106,7 +109,7 @@ public class AuthService extends BaseService {
 
             response.setMessage("Token validation successful");
             response.setData(data);
-        return response;
+            return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
@@ -127,7 +130,7 @@ public class AuthService extends BaseService {
 
             response.setMessage("Registration successful");
             response.setData(data);
-        return response;
+            return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
@@ -151,7 +154,7 @@ public class AuthService extends BaseService {
             }
 
             response.setMessage("Otp verified successfully!");
-        return response;
+            return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
@@ -181,7 +184,7 @@ public class AuthService extends BaseService {
             mailConfig.sendMail(email, subject, templateName, variables);
 
             response.setMessage("OTP is sent!");
-        return response;
+            return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
@@ -205,7 +208,7 @@ public class AuthService extends BaseService {
             userProducer.changePasswordUser(email, currentPassword, newPassword);
 
             response.setMessage("Password changed successfully!");
-        return response;
+            return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
@@ -231,7 +234,7 @@ public class AuthService extends BaseService {
             mailConfig.sendMail(email, subject, templateName, variables);
 
             response.setMessage("Password reset email sent successfully!");
-        return response;
+            return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
@@ -254,7 +257,7 @@ public class AuthService extends BaseService {
             userProducer.forgotPasswordUser(email, newPassword);
 
             response.setMessage("Password updated successfully!");
-        return response;
+            return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
@@ -297,7 +300,8 @@ public class AuthService extends BaseService {
             String newAccessToken = jwtUtil.generateAccessToken(userId, email, userDto.getRole(),
                     userDto.getUsername());
 
-            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("ACCESS_TOKEN", newAccessToken, 15 * 60); // 15 minutes
+            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("access_token", newAccessToken, 15 * 60); // 15
+                                                                                                            // minutes
             httpServletResponse.addCookie(accessTokenCookie);
             httpServletResponse.setHeader("X-Access-Token", newAccessToken);
 
@@ -321,15 +325,15 @@ public class AuthService extends BaseService {
         Response response = new Response();
 
         try {
-            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("ACCESS_TOKEN", "", 15 * 60);
-            Cookie refreshTokenCookie = handleCreateHttpOnlyCookie("REFRESH_TOKEN", "", 7 * 24 * 60 * 60);
+            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("access_token", "", 15 * 60);
+            Cookie refreshTokenCookie = handleCreateHttpOnlyCookie("refresh_token", "", 7 * 24 * 60 * 60);
             httpServletResponse.addCookie(accessTokenCookie);
             httpServletResponse.addCookie(refreshTokenCookie);
             httpServletResponse.setHeader("X-Access-Token", "");
             httpServletResponse.setHeader("X-Refresh-Token", "");
 
             response.setMessage("Logged out successfully");
-        return response;
+            return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {

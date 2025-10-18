@@ -12,9 +12,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCVRequest {
-    private String title;
+    private String tittle;
     private PersonalInfoDto personalInfo;
-    private List<ExperienceDto> experience;
-    private List<EducationDto> education;
+    private List<ExperienceDto> experiences;
+    private List<EducationDto> educations;
     private List<String> skills;
 }

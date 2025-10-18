@@ -74,7 +74,8 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    router.push("/admin");
+    console.log("Login successful:", response);
+    router.push("/");
   };
 
   return (

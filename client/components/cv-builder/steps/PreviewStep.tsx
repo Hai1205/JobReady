@@ -77,7 +77,7 @@ export function PreviewStep() {
         }
       }
 
-      // ========== NAME & JOB TITLE ==========
+      // ========== NAME & JOB tittle ==========
       doc.setFont("helvetica", "bold");
       doc.setFontSize(24);
       doc.setTextColor(0, 51, 153);
@@ -126,13 +126,13 @@ export function PreviewStep() {
 
       Y = 78;
 
-      // ========== SECTION TITLE HELPER ==========
-      const addSectionTitle = (title: string) => {
+      // ========== SECTION tittle HELPER ==========
+      const addSectionTitle = (tittle: string) => {
         needSpace(15);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(13);
         doc.setTextColor(0, 51, 153);
-        doc.text(plain(title), M, Y);
+        doc.text(plain(tittle), M, Y);
         doc.setDrawColor(0, 51, 153);
         doc.setLineWidth(0.8);
         doc.line(M, Y + 1.5, W - M, Y + 1.5);
