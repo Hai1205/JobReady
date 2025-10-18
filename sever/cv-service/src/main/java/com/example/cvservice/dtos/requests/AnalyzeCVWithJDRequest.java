@@ -11,7 +11,7 @@ public class AnalyzeCVWithJDRequest {
     private String jobDescription;
 
     // optional uploaded file (.pdf or .docx)
-    private MultipartFile file;
+    private MultipartFile jdFile;
 
     // desired output language: 'en' or 'vi' (default 'vi')
     private String language = "vi";

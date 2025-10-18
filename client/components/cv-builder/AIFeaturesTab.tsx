@@ -13,7 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sparkles, FileUp, Loader2 } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Sparkles, FileUp, Loader2, ChevronDown } from "lucide-react";
 import { toast } from "react-toastify";
 
 interface AIFeaturesTabProps {
@@ -22,10 +27,22 @@ interface AIFeaturesTabProps {
 
 export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isImproving, setIsImproving] = useState(false);
   const [activeTab, setActiveTab] = useState("analyze");
+  const [analyzeRawText, setAnalyzeRawText] = useState<string>("");
+  const [isRawTextOpen, setIsRawTextOpen] = useState(false);
+  const [improvedContent, setImprovedContent] = useState<{
+    section: string;
+    content: string;
+  } | null>(null);
 
-  const { analyzeCV, handleSetAISuggestions, improveCV, currentCV } =
-    useCVStore();
+  const {
+    analyzeCV,
+    handleSetAISuggestions,
+    improveCV,
+    currentCV,
+    handleUpdateCV,
+  } = useCVStore();
 
   const handleQuickAnalyze = async () => {
     if (!cvId) {
@@ -37,23 +54,29 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
     try {
       const response = await analyzeCV(cvId);
 
-      if (response.data) {
-        const apiData = response.data as unknown as {
-          data?: {
-            suggestions?: IAISuggestion[];
-            analysis?: string;
-          };
-        };
+      // Support both shapes: response.data may be the backend Response object
+      // or the backend Response.data object directly depending on typings.
+      const maybeResponse = (response as any).data;
+      const responseData: any = maybeResponse?.data
+        ? maybeResponse.data
+        : maybeResponse;
 
-        const suggestions = apiData.data?.suggestions || [];
+      const suggestions = responseData?.suggestions || [];
+      const analyzeText = responseData?.analyze || "";
+
+      // Store raw analyze text
+      if (analyzeText) {
+        setAnalyzeRawText(analyzeText);
+      }
+
+      if (suggestions.length >= 0) {
         handleSetAISuggestions(suggestions);
-
         toast.success(
           `Analysis complete! Found ${suggestions.length} suggestions`
         );
         setActiveTab("suggestions");
       } else {
-        toast.error("Failed to analyze CV");
+        toast.error((response as any)?.message || "Failed to analyze CV");
       }
     } catch (error) {
       console.error("Error analyzing CV:", error);
@@ -63,9 +86,13 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
     }
   };
 
-  const handleApplySuggestion = async (suggestion: IAISuggestion) => {
-    if (!currentCV) return;
+  const handleApplySuggestion = async (suggestion: any) => {
+    if (!currentCV || !cvId) {
+      toast.error("No CV loaded");
+      return;
+    }
 
+    setIsImproving(true);
     try {
       // Get the content from the CV based on the section
       let content = "";
@@ -88,24 +115,86 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
 
       const response = await improveCV(cvId, suggestion.section, content);
 
-      if (response.data) {
-        const apiData = response.data as unknown as {
-          data?: {
-            improvedSection?: string;
-          };
-        };
+      const maybeResponse = (response as any).data;
+      const responseData: any = maybeResponse?.data
+        ? maybeResponse.data
+        : maybeResponse;
 
-        const improvedSection = apiData.data?.improvedSection;
+      const improvedSection = responseData?.improvedSection;
 
-        if (improvedSection) {
-          toast.success("Suggestion applied! Review the improved section.");
-          // Here you would update the CV with the improved content
-          console.log("Improved section:", improvedSection);
-        }
+      if (improvedSection) {
+        // Store improved content for manual review
+        setImprovedContent({
+          section: suggestion.section,
+          content: improvedSection,
+        });
+        toast.success(
+          "Suggestion applied! Review and save the improved section."
+        );
+        console.log("Improved section:", improvedSection);
+      } else {
+        toast.error((response as any)?.message || "Failed to apply suggestion");
       }
     } catch (error) {
       console.error("Error applying suggestion:", error);
       toast.error("Failed to apply suggestion");
+    } finally {
+      setIsImproving(false);
+    }
+  };
+
+  const handleSaveImprovedContent = () => {
+    if (!improvedContent || !currentCV) return;
+
+    const { section, content } = improvedContent;
+    let applied = false;
+
+    switch (section.toLowerCase()) {
+      case "summary":
+        handleUpdateCV({
+          personalInfo: {
+            ...currentCV.personalInfo,
+            summary: content,
+          },
+        });
+        applied = true;
+        break;
+      case "experience":
+        try {
+          const parsedExperience = JSON.parse(content);
+          handleUpdateCV({ experience: parsedExperience });
+          applied = true;
+        } catch (error) {
+          toast.error("Failed to parse experience data");
+          return;
+        }
+        break;
+      case "education":
+        try {
+          const parsedEducation = JSON.parse(content);
+          handleUpdateCV({ education: parsedEducation });
+          applied = true;
+        } catch (error) {
+          toast.error("Failed to parse education data");
+          return;
+        }
+        break;
+      case "skills":
+        const skillsArray = content
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s);
+        handleUpdateCV({ skills: skillsArray });
+        applied = true;
+        break;
+      default:
+        toast.error(`Unknown section: ${section}`);
+        return;
+    }
+
+    if (applied) {
+      toast.success("Improved content applied to CV!");
+      setImprovedContent(null);
     }
   };
 
@@ -142,6 +231,37 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
               )}
             </Button>
           </div>
+
+          {/* Collapsible panel for raw AI analyze text */}
+          {analyzeRawText && (
+            <Collapsible
+              open={isRawTextOpen}
+              onOpenChange={setIsRawTextOpen}
+              className="mt-4"
+            >
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <span>View Full AI Analysis</span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      isRawTextOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2">
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="prose prose-sm max-w-none">
+                      <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md overflow-auto max-h-96">
+                        {analyzeRawText}
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </CardContent>
       </Card>
 
@@ -160,8 +280,47 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
           />
         </TabsContent>
 
-        <TabsContent value="suggestions">
-          <AISuggestionsList onApplySuggestion={handleApplySuggestion} />
+        <TabsContent value="suggestions" className="space-y-4">
+          {/* Preview improved content before applying */}
+          {improvedContent && (
+            <Card className="border-green-200 bg-green-50">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  Improved {improvedContent.section}
+                </CardTitle>
+                <CardDescription>
+                  Review the AI-improved content and apply it to your CV
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-white rounded-md border">
+                  <pre className="whitespace-pre-wrap text-sm">
+                    {improvedContent.content}
+                  </pre>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSaveImprovedContent}
+                    className="flex-1"
+                  >
+                    Apply to CV
+                  </Button>
+                  <Button
+                    onClick={() => setImprovedContent(null)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Discard
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <AISuggestionsList
+            onApplySuggestion={handleApplySuggestion}
+            isApplying={isImproving}
+          />
         </TabsContent>
       </Tabs>
     </div>

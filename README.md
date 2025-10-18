@@ -8,7 +8,7 @@ JobReady là một nền tảng xây dựng CV thông minh với tích hợp tr�
 
 JobReady kết hợp sức mạnh của **AI** và **microservices architecture** để cung cấp giải pháp toàn diện cho việc tạo và cải thiện CV. Hệ thống bao gồm:
 
-- **AI-Powered CV Analysis**: Phân tích CV thông minh và đưa ra suggestions cải thiện
+- **AI-Powered CV Analyze**: Phân tích CV thông minh và đưa ra suggestions cải thiện
 - **Job Matching**: So sánh CV với job description để tối ưu hóa cơ hội ứng tuyển
 - **Modern Web Interface**: Giao diện người dùng đẹp với Next.js và React
 - **Secure Authentication**: JWT authentication với OAuth2 social login
@@ -82,7 +82,7 @@ cd client && npm install && npm run dev
 ### 🤖 AI-Powered Features
 
 - **Smart CV Import**: Upload và tự động phân tích CV từ PDF, DOCX, TXT
-- **AI Analysis**: Phân tích CV và đưa ra suggestions cải thiện chi tiết
+- **AI Analyze**: Phân tích CV và đưa ra suggestions cải thiện chi tiết
 - **Job Matching**: So sánh CV với job description để tối ưu hóa ứng tuyển
 - **Intelligent Suggestions**: AI-generated recommendations cho từng phần của CV
 

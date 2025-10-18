@@ -478,7 +478,7 @@ public class CVService extends BaseService {
             CVDto cvDto = handleGetCVById(cvId);
 
             String jdText = handleExtractJobDescriptionText(request);
-            
+
             String cvContent = handleFormatCVForAnalysis(cvDto);
             String language = Optional.ofNullable(request.getLanguage()).orElse("English");
 
@@ -502,12 +502,12 @@ public class CVService extends BaseService {
     }
 
     private String handleExtractJobDescriptionText(AnalyzeCVWithJDRequest request) {
-        if (request.getFile() == null || request.getFile().isEmpty()) {
+        if (request.getJdFile() == null || request.getJdFile().isEmpty()) {
             return request.getJobDescription();
         }
 
         try {
-            return jobDescriptionParserService.extractTextFromFile(request.getFile());
+            return jobDescriptionParserService.extractTextFromFile(request.getJdFile());
         } catch (Exception ex) {
             System.err.println("Error extracting JD file: " + ex.getMessage());
             return request.getJobDescription(); // fallback
@@ -520,14 +520,14 @@ public class CVService extends BaseService {
                 "(1) the parsed Job Description with fields " +
                 "{\"jobTitle\",\"company\",\"jobLevel\",\"jobType\",\"salary\",\"location\",\"responsibilities\":[],\"requirements\":[],\"requiredSkills\":[],\"preferredSkills\":[],\"benefits\":[]} "
                 +
-                "and (2) an analysis of how well the CV matches the JD with fields " +
+                "and (2) an analyze of how well the CV matches the JD with fields " +
                 "{\"matchScore\":<0-100>, \"missingKeywords\":[], \"strengths\":[], \"suggestions\":[] }. " +
                 "Return ONLY valid JSON. Language for output: " + language + ".";
     }
 
     private String handleBuildUserPrompt(String jdText, String cvContent) {
         return String.format(
-                "Job Description:\n%s\n\nCV Content:\n%s\n\nReturn the parsed JD JSON and the analysis JSON.",
+                "Job Description:\n%s\n\nCV Content:\n%s\n\nReturn the parsed JD JSON and the analyze JSON.",
                 jdText, cvContent);
     }
 

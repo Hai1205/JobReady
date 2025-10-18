@@ -15,10 +15,12 @@ import { Lightbulb, AlertCircle, XCircle, Check, X } from "lucide-react";
 
 interface AISuggestionsListProps {
   onApplySuggestion?: (suggestion: IAISuggestion) => void;
+  isApplying?: boolean;
 }
 
 export function AISuggestionsList({
   onApplySuggestion,
+  isApplying = false,
 }: AISuggestionsListProps) {
   const { aiSuggestions, handleApplySuggestion } = useCVStore();
 
@@ -137,14 +139,16 @@ export function AISuggestionsList({
                             size="sm"
                             onClick={() => handleApply(suggestion)}
                             className="flex-1"
+                            disabled={isApplying}
                           >
                             <Check className="h-3 w-3 mr-1" />
-                            Apply
+                            {isApplying ? "Applying..." : "Apply"}
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleApplySuggestion(suggestion.id)}
+                            disabled={isApplying}
                           >
                             <X className="h-3 w-3 mr-1" />
                             Dismiss

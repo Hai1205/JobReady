@@ -41,16 +41,29 @@ export function PersonalInfoStep() {
         return;
       }
 
+      // Store File object for upload and base64 for preview
       const reader = new FileReader();
       reader.onload = (e) => {
-        handleChange("avatar", e.target?.result as string);
+        handleUpdateCV({
+          personalInfo: {
+            ...currentCV.personalInfo,
+            avatar: file, // Store File object for backend
+            avatarUrl: e.target?.result as string, // Store base64 for preview
+          },
+        });
       };
       reader.readAsDataURL(file);
     }
   };
 
   const removeAvatar = () => {
-    handleChange("avatar", "");
+    handleUpdateCV({
+      personalInfo: {
+        ...currentCV.personalInfo,
+        avatar: null,
+        avatarUrl: undefined,
+      },
+    });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -74,7 +87,13 @@ export function PersonalInfoStep() {
         <div className="flex items-center gap-6">
           <div className="flex flex-col items-center gap-4">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={currentCV.personalInfo.avatar} />
+              <AvatarImage
+                src={
+                  currentCV.personalInfo.avatarUrl ||
+                  currentCV.personalInfo.avatarPublicId ||
+                  ""
+                }
+              />
               <AvatarFallback className="text-lg">
                 {currentCV.personalInfo.fullname
                   ? currentCV.personalInfo.fullname

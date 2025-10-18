@@ -36,8 +36,21 @@ export function FileImport() {
 
     setIsUploading(true);
     const res = await importFile(userAuth?.id, file);
-    if (res.success || res.data) {
-      handleSetCurrentCV(res.data?.cv || null);
+    try {
+      const maybeResponse = (res as any).data;
+      const responseData = maybeResponse?.data
+        ? maybeResponse.data
+        : maybeResponse;
+
+      if (responseData?.cv) {
+        handleSetCurrentCV(responseData.cv as ICV);
+        toast.success("CV imported successfully");
+      } else {
+        toast.error((res as any)?.message || "Failed to import CV");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while importing the CV");
     }
 
     setIsUploading(false);

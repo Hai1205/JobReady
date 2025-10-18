@@ -13,6 +13,7 @@ import {
 import { Upload, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useCVStore } from "@/stores/cvStore";
+import { JobDescriptionMatchResult } from "./JobDescriptionMatchResult";
 
 interface JobDescriptionImportProps {
   cvId: string;
@@ -29,6 +30,15 @@ export function JobDescriptionImport({
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [language, setLanguage] = useState<string>("vi");
+
+  // State for analysis results
+  const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
+  const [parsedJobDescription, setParsedJobDescription] = useState<
+    IJobDescriptionResult | undefined
+  >(undefined);
+  const [missingKeywords, setMissingKeywords] = useState<string[]>([]);
+  const [analyzeSummary, setAnalyzeSummary] = useState<string>("");
 
   const { analyzeCVWithJD, handleSetAISuggestions, handleSetJobDescription } =
     useCVStore();
@@ -50,147 +60,175 @@ export function JobDescriptionImport({
 
     setFile(selectedFile);
 
-    // Read file content
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      setJobDescription(text);
-      toast.success("Job description loaded from file");
-    };
-    reader.onerror = () => {
-      toast.error("Error reading file");
-    };
-
+    // For text files, preload content into textarea. For PDF/DOCX, backend will parse.
     if (selectedFile.type === "text/plain") {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result as string;
+        setJobDescription(text);
+        toast.success("Job description loaded from file");
+      };
+      reader.onerror = () => {
+        toast.error("Error reading file");
+      };
       reader.readAsText(selectedFile);
     } else {
-      // For PDF and DOCX, we would need a parser library
-      // For now, just show a message
       toast.info(
-        "Please paste the job description manually for PDF/DOCX files"
+        "File selected. The file will be uploaded and parsed by the server."
       );
     }
   };
 
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
-      toast.error("Please enter or upload a job description");
-      return;
+      if (!file) {
+        toast.error("Please enter or upload a job description");
+        return;
+      }
     }
 
     setIsAnalyzing(true);
 
     try {
-      const response = await analyzeCVWithJD(cvId, jobDescription);
+      const response = await analyzeCVWithJD(
+        cvId,
+        jobDescription,
+        file || undefined,
+        language
+      );
 
-      if (response.data) {
-        const apiData = response.data as unknown as {
-          data?: {
-            suggestions?: IAISuggestion[];
-            matchScore?: number;
-          };
-        };
+      const maybeResponse = (response as any).data;
+      const responseData: IResponseData | undefined = maybeResponse?.data
+        ? maybeResponse.data
+        : maybeResponse;
 
-        const suggestions = apiData.data?.suggestions || [];
-        const matchScore = apiData.data?.matchScore;
+      const suggestions = responseData?.suggestions || [];
+      const score = responseData?.matchScore;
+      const parsed = responseData?.parsedJobDescription;
+      const missing = responseData?.missingKeywords || [];
+      const summary = responseData?.analyze || "";
 
-        handleSetAISuggestions(suggestions);
-        handleSetJobDescription(jobDescription);
+      // Update state with results
+      setMatchScore(score);
+      setParsedJobDescription(parsed);
+      setMissingKeywords(missing);
+      setAnalyzeSummary(summary);
 
-        toast.success(
-          `Analysis complete! Match score: ${
-            matchScore ? Math.round(matchScore) : "N/A"
-          }%`
-        );
+      handleSetAISuggestions(suggestions);
+      handleSetJobDescription(jobDescription || "");
 
-        if (onAnalysisComplete) {
-          onAnalysisComplete(suggestions, matchScore);
-        }
-      } else {
-        toast.error("Failed to analyze CV with job description");
+      toast.success(
+        `Analyze complete! Match score: ${score ? Math.round(score) : "N/A"}%`
+      );
+
+      if (onAnalysisComplete) {
+        onAnalysisComplete(suggestions, score);
       }
     } catch (error) {
       console.error("Error analyzing CV:", error);
-      toast.error("An error occurred during analysis");
+      toast.error("An error occurred during analyze");
     } finally {
       setIsAnalyzing(false);
     }
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5" />
-          AI Job Match Analysis
-        </CardTitle>
-        <CardDescription>
-          Upload or paste a job description to analyze how well your CV matches
-          the requirements
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <label
-            htmlFor="jd-file-upload"
-            className="block text-sm font-medium mb-2"
-          >
-            Upload Job Description (Optional)
-          </label>
-          <div className="flex items-center gap-2">
-            <input
-              id="jd-file-upload"
-              type="file"
-              accept=".txt,.pdf,.docx"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => document.getElementById("jd-file-upload")?.click()}
-              className="w-full"
+    <div className="space-y-4">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            AI Job Match Analyze
+          </CardTitle>
+          <CardDescription>
+            Upload or paste a job description to analyze how well your CV
+            matches the requirements
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label
+              htmlFor="jd-file-upload"
+              className="block text-sm font-medium mb-2"
             >
-              <Upload className="mr-2 h-4 w-4" />
-              {file ? file.name : "Choose File"}
-            </Button>
+              Upload Job Description (Optional)
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                id="jd-file-upload"
+                type="file"
+                accept=".txt,.pdf,.docx"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  document.getElementById("jd-file-upload")?.click()
+                }
+                className="w-full"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                {file ? file.name : "Choose File"}
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label
-            htmlFor="jd-textarea"
-            className="block text-sm font-medium mb-2"
+          <div>
+            <label
+              htmlFor="jd-textarea"
+              className="block text-sm font-medium mb-2"
+            >
+              Job Description
+            </label>
+            <div className="mb-2 flex items-center gap-2">
+              <label className="text-sm">Output Language:</label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="rounded-md border px-2 py-1"
+              >
+                <option value="vi">Vietnamese</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <Textarea
+              id="jd-textarea"
+              placeholder="Paste the job description here..."
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              className="min-h-[200px] resize-y"
+            />
+          </div>
+
+          <Button
+            onClick={handleAnalyze}
+            disabled={isAnalyzing || (!jobDescription.trim() && !file)}
+            className="w-full"
           >
-            Job Description
-          </label>
-          <Textarea
-            id="jd-textarea"
-            placeholder="Paste the job description here..."
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            className="min-h-[200px] resize-y"
-          />
-        </div>
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Analyze Match
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
 
-        <Button
-          onClick={handleAnalyze}
-          disabled={isAnalyzing || !jobDescription.trim()}
-          className="w-full"
-        >
-          {isAnalyzing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Analyzing...
-            </>
-          ) : (
-            <>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Analyze Match
-            </>
-          )}
-        </Button>
-      </CardContent>
-    </Card>
+      {/* Display analysis results */}
+      <JobDescriptionMatchResult
+        parsedJobDescription={parsedJobDescription}
+        matchScore={matchScore}
+        missingKeywords={missingKeywords}
+        analyzeSummary={analyzeSummary}
+      />
+    </div>
   );
 }

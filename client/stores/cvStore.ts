@@ -46,7 +46,9 @@ export interface ICVStore extends IBaseStore {
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	analyzeCVWithJD: (
 		cvId: string,
-		jobDescription: string
+		jobDescription: string,
+		jdFile?: File,
+		language?: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	improveCV: (
 		cvId: string, section: string, content: string
@@ -82,7 +84,7 @@ export const useCVStore = createStore<ICVStore>(
 
 		getUserCVs: async (userId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.GET, `/cvs/user/${userId}`);
+				return await handleRequest(EHttpType.GET, `/cvs/users/${userId}`);
 			});
 		},
 
@@ -103,7 +105,17 @@ export const useCVStore = createStore<ICVStore>(
 			return await get().handleRequest(async () => {
 				const formData = new FormData();
 				formData.append("title", title);
-				formData.append("personalInfo", JSON.stringify(personalInfo));
+
+				// Serialize personalInfo without avatar file
+				const { avatar, ...personalInfoData } = personalInfo;
+				formData.append("personalInfo", JSON.stringify(personalInfoData));
+
+				// Handle avatar file separately if exists
+				if (avatar && avatar instanceof File) {
+					formData.append("avatar", avatar);
+				}
+
+				// Backend expects 'Experiences', 'Educations', 'Skills' (capitalized)
 				formData.append("Experiences", JSON.stringify(Experiences));
 				formData.append("Educations", JSON.stringify(Educations));
 				formData.append("Skills", JSON.stringify(Skills));
@@ -123,7 +135,17 @@ export const useCVStore = createStore<ICVStore>(
 			return await get().handleRequest(async () => {
 				const formData = new FormData();
 				formData.append("title", title);
-				formData.append("personalInfo", JSON.stringify(personalInfo));
+
+				// Serialize personalInfo without avatar file
+				const { avatar, ...personalInfoData } = personalInfo;
+				formData.append("personalInfo", JSON.stringify(personalInfoData));
+
+				// Handle avatar file separately if exists
+				if (avatar && avatar instanceof File) {
+					formData.append("avatar", avatar);
+				}
+
+				// Backend expects 'Experiences', 'Educations', 'Skills' (capitalized)
 				formData.append("Experiences", JSON.stringify(Experiences));
 				formData.append("Educations", JSON.stringify(Educations));
 				formData.append("Skills", JSON.stringify(Skills));
@@ -153,15 +175,39 @@ export const useCVStore = createStore<ICVStore>(
 			});
 		},
 
-		analyzeCVWithJD: async (cvId: string, jobDescription: string): Promise<IApiResponse<ICVDataResponse>> => {
+		analyzeCVWithJD: async (
+			cvId: string,
+			jobDescription: string,
+			jdFile?: File,
+			language: string = "vi"
+		): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/analyze-with-jd/${cvId}`, { jobDescription });
+				const formData = new FormData();
+
+				// Add jobDescription if provided
+				if (jobDescription) {
+					formData.append("jobDescription", jobDescription);
+				}
+
+				// Add jdFile if provided
+				if (jdFile) {
+					formData.append("jdFile", jdFile);
+				}
+
+				// Add language preference
+				formData.append("language", language);
+
+				return await handleRequest(EHttpType.POST, `/cvs/analyze-with-jd/${cvId}`, formData);
 			});
 		},
 
 		improveCV: async (cvId: string, section: string, content: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/improve/${cvId}`, { section, content });
+				const formData = new FormData();
+				formData.append("section", section);
+				formData.append("content", content);
+
+				return await handleRequest(EHttpType.POST, `/cvs/improve/${cvId}`, formData);
 			});
 		},
 

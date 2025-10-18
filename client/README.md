@@ -7,7 +7,7 @@
 ### 🎯 AI-Powered CV Features
 
 - **Smart CV Import**: Upload và tự động phân tích CV từ PDF, DOCX, TXT
-- **AI Analysis**: Phân tích CV và đưa ra suggestions cải thiện chi tiết
+- **AI Analyze**: Phân tích CV và đưa ra suggestions cải thiện chi tiết
 - **Job Matching**: So sánh CV với job description để tối ưu hóa ứng tuyển
 - **Intelligent Suggestions**: AI-generated recommendations cho từng phần của CV
 - **Real-time Improvements**: Cải thiện CV theo thời gian thực với AI guidance
@@ -161,7 +161,7 @@ client/
 
 - Tab chính cho AI features
 - Tích hợp Job Description Import và AI Suggestions
-- Quản lý state cho CV analysis
+- Quản lý state cho CV analyze
 
 #### `JobDescriptionImport.tsx`
 

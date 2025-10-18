@@ -24,7 +24,7 @@ public class ResponseData {
     private List<?> educations;
     private List<?> skills;
 
-    // AI Analysis and Improvement
+    // AI Analyze and Improvement
     private String analyze;
     private String improvedSection;
     private List<?> suggestions;

@@ -62,7 +62,7 @@ Hệ thống backend JobReady với kiến trúc microservices hoàn chỉnh, t�
 
 - **AI-Powered CV Processing**: Tích hợp OpenRouter API với Llama-3.2-3b-instruct model
 - **File Import**: Hỗ trợ upload và parse PDF, DOCX, TXT files
-- **CV Analysis**: Phân tích CV và đưa ra suggestions cải thiện
+- **CV Analyze**: Phân tích CV và đưa ra suggestions cải thiện
 - **Job Description Matching**: So sánh CV với job description
 - **Smart Improvements**: AI-generated suggestions cho từng section của CV
 - **File Parsing**: Sử dụng Apache PDFBox và POI để extract text
@@ -81,7 +81,7 @@ Hệ thống backend JobReady với kiến trúc microservices hoàn chỉnh, t�
 ### 8. **OpenRouter AI** (External API)
 
 - AI model: `meta-llama/llama-3.2-3b-instruct`
-- Sử dụng cho CV analysis và improvement suggestions
+- Sử dụng cho CV analyze và improvement suggestions
 - API Key required trong environment variables
 
 ## 🔐 Bảo mật & Authentication
@@ -159,7 +159,7 @@ mvn spring-boot:run -pl auth-service
 
 ### CV Service (Port: 8084, qua Gateway: /cv)
 
-#### File Import & Analysis
+#### File Import & Analyze
 
 - `POST /cv/import` - Upload và parse CV file (PDF/DOCX/TXT)
 - `POST /cv/analyze` - Phân tích CV và đưa ra suggestions
@@ -286,7 +286,7 @@ curl -X POST http://localhost:8080/cv/analyze-with-jd \
 - [x] Async Messaging với RabbitMQ
 - [x] **AI-Powered CV Processing** ⭐
 - [x] **Multi-format File Import** (PDF, DOCX, TXT)
-- [x] **CV Analysis & Improvement**
+- [x] **CV Analyze & Improvement**
 - [x] **Job Description Matching**
 - [x] **Smart AI Suggestions**
 
