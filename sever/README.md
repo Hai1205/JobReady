@@ -110,26 +110,7 @@ Hệ thống backend JobReady với kiến trúc microservices hoàn chỉnh, t�
 
 ### 1. Chuẩn bị Environment Variables
 
-Tạo file `.env` trong thư mục `sever`:
-
-```bash
-# JWT Keys (tạo bằng KeyGenerator.java)
-JWT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
-JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
-
-# OpenRouter AI API (cho CV Service)
-OPENROUTER_API_KEY=your-openrouter-api-key-here
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-OPENROUTER_MODEL=meta-llama/llama-3.2-3b-instruct
-
-# Database
-MYSQL_ROOT_PASSWORD=password
-MYSQL_DATABASE=jobready
-
-# RabbitMQ
-RABBITMQ_DEFAULT_USER=guest
-RABBITMQ_DEFAULT_PASS=guest
-```
+Tạo file `.env` trong thư mục `sever`.
 
 ### 2. Chuẩn bị OAuth2 (Optional)
 

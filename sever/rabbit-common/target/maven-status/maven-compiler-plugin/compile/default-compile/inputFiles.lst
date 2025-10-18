@@ -1,8 +1,8 @@
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dto\QueueDef.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dto\ExchangeDef.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\service\RabbitRPCService.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dto\RabbitResponse.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dtos\ExchangeDef.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\services\RabbitRPCService.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\consumers\BaseConsumer.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dtos\RabbitResponse.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\configs\BaseRabbitConfig.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dtos\QueueDef.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\constants\RabbitConstants.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\config\BaseRabbitConfig.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\consumer\BaseConsumer.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dto\RabbitHeader.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dtos\RabbitHeader.java

@@ -1,0 +1,28 @@
+package com.example.userservice.dtos.response;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.*;
+
+@Data
+@AllArgsConstructor
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Response {
+    private int statusCode;
+    private String message;
+    private ResponseData data;
+
+    public Response(int statusCode, String message) {
+        this.statusCode = statusCode;
+        this.message = message;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public Response() {
+        this.statusCode = 200;
+    }
+}
