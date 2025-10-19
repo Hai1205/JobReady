@@ -1,7 +1,5 @@
 package com.example.userservice.controllers;
 
-import com.example.userservice.dtos.requests.CreateUserRequest;
-import com.example.userservice.dtos.requests.UpdateUserRequest;
 import com.example.userservice.dtos.response.Response;
 import com.example.userservice.services.apis.UserService;
 
@@ -22,8 +20,8 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Response> createUser(@ModelAttribute CreateUserRequest request) {
-        Response response = userService.createUser(request);
+    public ResponseEntity<Response> createUser(@RequestPart("data") String dataJson) {
+        Response response = userService.createUser(dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -46,8 +44,10 @@ public class UserController {
 
     @PutMapping("/{userId}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<Response> updateUser(@PathVariable("userId") UUID userId, @ModelAttribute UpdateUserRequest request) {
-        Response response = userService.updateUser(userId, request);
+    public ResponseEntity<Response> updateUser(
+            @PathVariable("userId") UUID userId,
+            @RequestPart("data") String dataJson) {
+        Response response = userService.updateUser(userId, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -66,7 +66,7 @@ public class UserController {
         Response response = new Response();
         response.setStatusCode(200);
         response.setMessage("User Service is running");
-        
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

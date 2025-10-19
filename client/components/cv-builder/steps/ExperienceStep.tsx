@@ -15,8 +15,8 @@ export function ExperienceStep() {
 
   const addExperience = () => {
     handleUpdateCV({
-      experience: [
-        ...currentCV.experience,
+      experiences: [
+        ...currentCV.experiences,
         {
           id: crypto.randomUUID(),
           company: "",
@@ -31,13 +31,13 @@ export function ExperienceStep() {
 
   const removeExperience = (id: string) => {
     handleUpdateCV({
-      experience: currentCV.experience.filter((exp) => exp.id !== id),
+      experiences: currentCV.experiences.filter((exp) => exp.id !== id),
     });
   };
 
   const updateExperience = (id: string, field: string, value: string) => {
     handleUpdateCV({
-      experience: currentCV.experience.map((exp) =>
+      experiences: currentCV.experiences.map((exp) =>
         exp.id === id ? { ...exp, [field]: value } : exp
       ),
     });
@@ -65,15 +65,15 @@ export function ExperienceStep() {
         </Button>
       </div>
 
-      {currentCV.experience.length === 0 ? (
+      {currentCV.experiences.length === 0 ? (
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">
-            No work experience added yet. Click "Add Experience" to get started.
+            No work experiences added yet. Click "Add Experience" to get started.
           </p>
         </Card>
       ) : (
         <div className="flex flex-col gap-4">
-          {currentCV.experience.map((exp, index) => (
+          {currentCV.experiences.map((exp, index) => (
             <Card key={exp.id} className="p-6">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
@@ -81,7 +81,7 @@ export function ExperienceStep() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeExperience(exp.id)}
+                    onClick={() => removeExperience(exp.id || "")}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
@@ -93,7 +93,7 @@ export function ExperienceStep() {
                     <Input
                       value={exp.company}
                       onChange={(e) =>
-                        updateExperience(exp.id, "company", e.target.value)
+                        updateExperience(exp.id || "", "company", e.target.value)
                       }
                       placeholder="Company Name"
                     />
@@ -104,9 +104,9 @@ export function ExperienceStep() {
                     <Input
                       value={exp.position}
                       onChange={(e) =>
-                        updateExperience(exp.id, "position", e.target.value)
+                        updateExperience(exp.id || "", "position", e.target.value)
                       }
-                      placeholder="Job tittle"
+                      placeholder="Job title"
                     />
                   </div>
 
@@ -116,7 +116,7 @@ export function ExperienceStep() {
                       type="month"
                       value={exp.startDate}
                       onChange={(e) =>
-                        updateExperience(exp.id, "startDate", e.target.value)
+                        updateExperience(exp.id || "", "startDate", e.target.value)
                       }
                     />
                   </div>
@@ -127,7 +127,7 @@ export function ExperienceStep() {
                       type="month"
                       value={exp.endDate}
                       onChange={(e) =>
-                        updateExperience(exp.id, "endDate", e.target.value)
+                        updateExperience(exp.id || "", "endDate", e.target.value)
                       }
                       placeholder="Leave empty if current"
                     />
@@ -139,7 +139,7 @@ export function ExperienceStep() {
                   <HighlightableTextarea
                     value={exp.description}
                     onChange={(value) =>
-                      updateExperience(exp.id, "description", value)
+                      updateExperience(exp.id || "", "description", value)
                     }
                     placeholder="Describe your responsibilities and achievements..."
                     rows={4}

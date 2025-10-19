@@ -24,6 +24,7 @@ const hasRefreshToken = (): boolean => {
 export function TokenRefresher() {
   const { RefreshToken, userAuth } = useAuthStore();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hasRunInitialRefresh = useRef(false);
 
   useEffect(() => {
     // Only run if user is authenticated AND refresh token exists
@@ -32,6 +33,7 @@ export function TokenRefresher() {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      hasRunInitialRefresh.current = false;
       return;
     }
 
@@ -62,8 +64,12 @@ export function TokenRefresher() {
       }
     };
 
-    // Initial refresh
-    performRefresh();
+    // Skip initial refresh if just logged in (within 30 seconds)
+    // This prevents immediate refresh right after login
+    if (!hasRunInitialRefresh.current) {
+      hasRunInitialRefresh.current = true;
+      console.log("⏭️ Skipping initial refresh - user just logged in");
+    }
 
     // Set up interval to refresh every 10 minutes
     intervalRef.current = setInterval(performRefresh, TOKEN_REFRESH_INTERVAL);

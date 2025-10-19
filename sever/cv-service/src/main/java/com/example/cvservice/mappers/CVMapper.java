@@ -37,16 +37,16 @@ public class CVMapper {
         dto.setPersonalInfo(personalInfoMapper.toDto(cv.getPersonalInfo()));
 
         List<ExperienceDto> experiences = null;
-        if (cv.getExperience() != null) {
-            experiences = cv.getExperience().stream().map(experienceMapper::toDto).collect(Collectors.toList());
+        if (cv.getExperiences() != null) {
+            experiences = cv.getExperiences().stream().map(experienceMapper::toDto).collect(Collectors.toList());
         }
-        dto.setExperience(experiences);
+        dto.setExperiences(experiences);
 
         List<EducationDto> educations = null;
-        if (cv.getEducation() != null) {
-            educations = cv.getEducation().stream().map(educationMapper::toDto).collect(Collectors.toList());
+        if (cv.getEducations() != null) {
+            educations = cv.getEducations().stream().map(educationMapper::toDto).collect(Collectors.toList());
         }
-        dto.setEducation(educations);
+        dto.setEducations(educations);
 
         dto.setSkills(cv.getSkills());
         dto.setCreatedAt(cv.getCreatedAt() != null ? cv.getCreatedAt().toString() : null);
@@ -64,16 +64,16 @@ public class CVMapper {
         cv.setTitle(cvDto.getTitle());
         cv.setPersonalInfo(personalInfoMapper.toEntity(cvDto.getPersonalInfo()));
 
-        if (cvDto.getExperience() != null) {
-            List<Experience> ex = cvDto.getExperience().stream().map(exDto -> experienceMapper.toEntity(exDto))
+        if (cvDto.getExperiences() != null) {
+            List<Experience> ex = cvDto.getExperiences().stream().map(exDto -> experienceMapper.toEntity(exDto))
                     .collect(Collectors.toList());
-            cv.setExperience(ex);
+            cv.setExperiences(ex);
         }
 
-        if (cvDto.getEducation() != null) {
-            List<Education> ed = cvDto.getEducation().stream().map(edDto -> educationMapper.toEntity(edDto))
+        if (cvDto.getEducations() != null) {
+            List<Education> ed = cvDto.getEducations().stream().map(edDto -> educationMapper.toEntity(edDto))
                     .collect(Collectors.toList());
-            cv.setEducation(ed);
+            cv.setEducations(ed);
         }
 
         cv.setSkills(cvDto.getSkills());

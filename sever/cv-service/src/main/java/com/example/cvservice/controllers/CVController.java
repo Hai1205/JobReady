@@ -24,8 +24,9 @@ public class CVController {
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> createCV(
             @PathVariable("userId") UUID userId,
-            @ModelAttribute CreateCVRequest request) {
-        Response response = cvService.createCV(userId, request);
+            @RequestPart("data") String dataJson,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+        Response response = cvService.createCV(userId, dataJson, avatar);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -57,8 +58,8 @@ public class CVController {
     @PostMapping("/improve/{cvId}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> improveCV(@PathVariable("cvId") UUID cvId,
-            @ModelAttribute ImproveCVRequest request) {
-        Response response = cvService.improveCV(cvId, request);
+            @RequestPart String dataJson) {
+        Response response = cvService.improveCV(cvId, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -67,8 +68,8 @@ public class CVController {
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<Response> analyzeCVWithJobDescription(
             @PathVariable("cvId") UUID cvId,
-            @ModelAttribute AnalyzeCVWithJDRequest request) {
-        Response response = cvService.analyzeCVWithJobDescription(cvId, request);
+            @RequestPart String dataJson) {
+        Response response = cvService.analyzeCVWithJobDescription(cvId, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -91,18 +92,20 @@ public class CVController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/tittle/{tittle}")
+    @GetMapping("/title/{title}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<Response> getCVByTitle(@PathVariable("tittle") String tittle) {
-        Response response = cvService.getCVByTitle(tittle);
+    public ResponseEntity<Response> getCVByTitle(@PathVariable("title") String title) {
+        Response response = cvService.getCVByTitle(title);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PatchMapping("/{cvId}")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<Response> updateCV(@PathVariable("cvId") UUID cvId, @ModelAttribute UpdateCVRequest request) {
-        Response response = cvService.updateCV(cvId, request);
+    public ResponseEntity<Response> updateCV(@PathVariable("cvId") UUID cvId,
+            @RequestPart("data") String dataJson,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+        Response response = cvService.updateCV(cvId, dataJson, avatar);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

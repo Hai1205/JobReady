@@ -12,11 +12,12 @@ public class CVDto {
     private UUID userId;
     private String title;
     private PersonalInfoDto personalInfo;
-    private List<ExperienceDto> experience;
-    private List<EducationDto> education;
+    private List<ExperienceDto> experiences;
+    private List<EducationDto> educations;
     private List<String> skills;
     private String createdAt;
     private String updatedAt;
+
     public void orElseThrow(Object object) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");

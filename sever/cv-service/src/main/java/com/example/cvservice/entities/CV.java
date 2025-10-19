@@ -18,7 +18,7 @@ public class CV {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    
+
     private String title;
 
     private UUID userId;
@@ -35,11 +35,11 @@ public class CV {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cv_id")
-    private List<Experience> experience = new ArrayList<>();
+    private List<Experience> experiences = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cv_id")
-    private List<Education> education = new ArrayList<>();
+    private List<Education> educations = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "cv_skills", joinColumns = @JoinColumn(name = "cv_id"))

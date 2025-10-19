@@ -71,25 +71,15 @@ public class CVService extends BaseService {
 
     public CVDto handleCreateCV(
             UUID userId,
-            String tittle,
+            String title,
             PersonalInfoDto personalInfoDto,
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
             List<String> skills) {
-
         UserDto user = userProducer.findUserById(userId);
         if (user == null) {
             throw new OurException("User not found", 404);
         }
-
-        System.out.println("========== CREATE CV DEBUG ==========");
-        System.out.println(">>> userId: " + userId);
-        System.out.println(">>> tittle: " + tittle);
-        System.out.println(">>> personalInfoDto: " + personalInfoDto);
-        System.out.println(">>> experiencesDto: " + experiencesDto);
-        System.out.println(">>> educationsDto: " + educationsDto);
-        System.out.println(">>> skills: " + skills);
-        System.out.println("=====================================");
 
         if (personalInfoDto == null) {
             throw new OurException("Personal info is required", 400);
@@ -103,11 +93,9 @@ public class CVService extends BaseService {
             throw new OurException("At least one education is required", 400);
         }
 
-        CV cv = new CV(userId, tittle, skills);
+        CV cv = new CV(userId, title, skills);
 
-        PersonalInfo personalInfo = new PersonalInfo(personalInfoDto.getEmail(), personalInfoDto.getFullname(),
-                personalInfoDto.getPhone(), personalInfoDto.getLocation(), personalInfoDto.getSummary());
-
+        PersonalInfo personalInfo = new PersonalInfo(personalInfoDto);
         if (personalInfoDto.getAvatar() != null && !personalInfoDto.getAvatar().isEmpty()) {
             var uploadResult = cloudinaryService.uploadImage(personalInfoDto.getAvatar());
             if (uploadResult.containsKey("error")) {
@@ -118,68 +106,55 @@ public class CVService extends BaseService {
             personalInfo.setAvatarPublicId((String) uploadResult.get("publicId"));
         }
         personalInfoRepository.save(personalInfo);
-
         cv.setPersonalInfo(personalInfo);
 
         List<Experience> experiences = experiencesDto.stream()
-                .map(e -> {
-                    Experience ex = new Experience(e.getCompany(), e.getPosition(), e.getStartDate(), e.getEndDate(),
-                            e.getDescription());
-                    experienceRepository.save(ex);
-                    return ex;
-                })
+                .map(Experience::new)
+                .peek(experienceRepository::save)
                 .collect(Collectors.toList());
 
         List<Education> educations = educationsDto.stream()
-                .map(e -> {
-                    Education ed = new Education(e.getSchool(), e.getDegree(), e.getField(), e.getStartDate(),
-                            e.getEndDate());
-                    educationRepository.save(ed);
-                    return ed;
-                })
+                .map(Education::new)
+                .peek(educationRepository::save)
                 .collect(Collectors.toList());
 
-        cv.setExperience(experiences);
-        cv.setEducation(educations);
+        cv.setExperiences(experiences);
+        cv.setEducations(educations);
 
         CV savedCV = cvRepository.save(cv);
 
         return cvMapper.toDto(savedCV);
     }
 
-    public Response createCV(UUID userId, CreateCVRequest request) {
+    public Response createCV(UUID userId, String dataJson, MultipartFile avatar) {
         Response response = new Response();
 
         try {
-            // Parse JSON strings to DTOs
-            PersonalInfoDto personalInfoDto = objectMapper.readValue(request.getPersonalInfo(), PersonalInfoDto.class);
-            if (request.getAvatar() != null) {
-                personalInfoDto.setAvatar(request.getAvatar());
-            }
+            CreateCVRequest request = objectMapper.readValue(dataJson, CreateCVRequest.class);
+            String title = request.getTitle();
+            PersonalInfoDto personalInfo = request.getPersonalInfo();
+            personalInfo.setAvatar(avatar);
+            List<ExperienceDto> experiences = request.getExperiences();
+            List<EducationDto> educations = request.getEducations();
+            List<String> skills = request.getSkills();
 
-            List<ExperienceDto> experiencesDto = objectMapper.readValue(request.getExperiences(),
-                objectMapper.getTypeFactory().constructCollectionType(List.class, ExperienceDto.class));
-
-            List<EducationDto> educationsDto = objectMapper.readValue(request.getEducations(),
-                objectMapper.getTypeFactory().constructCollectionType(List.class, EducationDto.class));
-
-            List<String> skills = objectMapper.readValue(request.getSkills(),
-                objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
-
-            CVDto cvDto = handleCreateCV(userId, tittle, personalInfoDto, experiencesDto, educationsDto, skills);
-
-            ResponseData data = new ResponseData();
-            data.setCv(cvDto);
+            CVDto cvDto = handleCreateCV(
+                    userId,
+                    title,
+                    personalInfo,
+                    experiences,
+                    educations,
+                    skills);
 
             response.setStatusCode(201);
             response.setMessage("CV created successfully");
-            response.setData(data);
+            response.setCv(cvDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            return buildErrorResponse(500, e.getMessage());
+            return buildErrorResponse(500, "Error creating CV: " + e.getMessage());
         }
     }
 
@@ -195,11 +170,8 @@ public class CVService extends BaseService {
         try {
             List<CVDto> cvDtos = handleGetAllCVs();
 
-            ResponseData data = new ResponseData();
-            data.setCvs(cvDtos);
-
             response.setMessage("Get all cvs successfully");
-            response.setData(data);
+            response.setCvs(cvDtos);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -215,11 +187,8 @@ public class CVService extends BaseService {
         try {
             CVDto cvDto = handleGetCVById(cvId);
 
-            ResponseData data = new ResponseData();
-            data.setCv(cvDto);
-
             response.setMessage("Get cv successfully");
-            response.setData(data);
+            response.setCv(cvDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -242,18 +211,12 @@ public class CVService extends BaseService {
 
             String cvContent = handleFormatCVForAnalysis(cvDto);
             String prompt = "Analyze this CV:\n\n" + cvContent;
-
             String result = openRouterConfig.callModelWithSystemPrompt(systemPrompt, prompt);
-
-            // Parse suggestions from result
             List<AISuggestionDto> suggestions = handleParseSuggestionsFromAIResponse(result);
 
-            ResponseData data = new ResponseData();
-            data.setAnalyze(result);
-            data.setSuggestions(suggestions);
-
             response.setMessage("CV analyzed successfully");
-            response.setData(data);
+            response.setAnalyze(result);
+            response.setSuggestions(suggestions);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -263,29 +226,27 @@ public class CVService extends BaseService {
         }
     }
 
-    public Response improveCV(UUID cvId, ImproveCVRequest request) {
+    public Response improveCV(UUID cvId, String dataJson) {
         Response response = new Response();
 
         try {
+            ImproveCVRequest request = objectMapper.readValue(dataJson, ImproveCVRequest.class);
+            String section = request.getSection();
+            String content = request.getContent();
+
             CVDto cvDto = handleGetCVById(cvId);
             if (cvDto == null) {
                 throw new OurException("CV not found", 404);
             }
 
             String systemPrompt = "You are an expert resume writer and career coach. Your task is to improve specific sections of a CV to make them more professional, impactful, and effective. Use action verbs, quantify achievements where possible, and ensure clarity and conciseness.";
-
             String prompt = String.format(
                     "Improve the following %s section of a CV:\n\n%s\n\nProvide only the improved version without explanations.",
-                    request.getSection(),
-                    request.getContent());
-
+                    section, content);
             String improved = openRouterConfig.callModelWithSystemPrompt(systemPrompt, prompt);
 
-            ResponseData data = new ResponseData();
-            data.setImprovedSection(improved);
-
             response.setMessage("CV section improved successfully");
-            response.setData(data);
+            response.setImprovedSection(improved);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -311,11 +272,8 @@ public class CVService extends BaseService {
         try {
             List<CVDto> userCVs = handleGetUserCVs(userId);
 
-            ResponseData data = new ResponseData();
-            data.setCvs(userCVs);
-
             response.setMessage("Get user's CVs successfully");
-            response.setData(data);
+            response.setCvs(userCVs);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -338,22 +296,16 @@ public class CVService extends BaseService {
             String extractedText = fileParserService.extractTextFromFile(file);
 
             // Use AI to parse the CV content into structured data
-            String systemPrompt = "You are an expert CV parser. Extract structured information from the CV text and return it as JSON with this exact structure: {\"tittle\": \"<job tittle or 'My CV'>\", \"personalInfo\": {\"fullname\": \"<name>\", \"email\": \"<email>\", \"phone\": \"<phone>\", \"location\": \"<location>\", \"summary\": \"<professional summary>\"}, \"experience\": [{\"company\": \"<company>\", \"position\": \"<position>\", \"startDate\": \"<YYYY-MM>\", \"endDate\": \"<YYYY-MM or Present>\", \"description\": \"<description>\"}], \"education\": [{\"school\": \"<school>\", \"degree\": \"<degree>\", \"field\": \"<field>\", \"startDate\": \"<YYYY-MM>\", \"endDate\": \"<YYYY-MM>\"}], \"skills\": [\"<skill1>\", \"<skill2>\"]}";
-
+            String systemPrompt = "You are an expert CV parser. Extract structured information from the CV text and return it as JSON with this exact structure: {\"title\": \"<job title or 'My CV'>\", \"personalInfo\": {\"fullname\": \"<name>\", \"email\": \"<email>\", \"phone\": \"<phone>\", \"location\": \"<location>\", \"summary\": \"<professional summary>\"}, \"experience\": [{\"company\": \"<company>\", \"position\": \"<position>\", \"startDate\": \"<YYYY-MM>\", \"endDate\": \"<YYYY-MM or Present>\", \"description\": \"<description>\"}], \"education\": [{\"school\": \"<school>\", \"degree\": \"<degree>\", \"field\": \"<field>\", \"startDate\": \"<YYYY-MM>\", \"endDate\": \"<YYYY-MM>\"}], \"skills\": [\"<skill1>\", \"<skill2>\"]}";
             String prompt = "Parse this CV text into structured JSON format:\n\n" + extractedText;
-
             String aiResponse = openRouterConfig.callModelWithSystemPrompt(systemPrompt, prompt);
-
             // Parse AI response and create CV
             CVDto cvDto = handleParseAndCreateCVFromAIResponse(userId, aiResponse);
 
-            ResponseData data = new ResponseData();
-            data.setCv(cvDto);
-            data.setExtractedText(extractedText);
-
             response.setStatusCode(201);
             response.setMessage("CV imported successfully");
-            response.setData(data);
+            response.setCv(cvDto);
+            response.setExtractedText(extractedText);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -363,25 +315,21 @@ public class CVService extends BaseService {
         }
     }
 
-    public Response getCVByTitle(String tittle) {
+    public Response getCVByTitle(String title) {
         Response response = new Response();
 
         try {
-            Optional<CV> cvOpt = cvRepository.findByTitle(tittle);
+            Optional<CV> cvOpt = cvRepository.findByTitle(title);
 
             if (!cvOpt.isPresent()) {
-                throw new OurException("CV not found with tittle: " + tittle, 404);
+                throw new OurException("CV not found with title: " + title, 404);
             }
 
             CV cv = cvOpt.get();
-
             CVDto cvDto = cvMapper.toDto(cv);
 
-            ResponseData data = new ResponseData();
-            data.setCv(cvDto);
-
             response.setMessage("Get cv successfully");
-            response.setData(data);
+            response.setCv(cvDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -392,7 +340,7 @@ public class CVService extends BaseService {
     }
 
     public CVDto handleUpdateCV(UUID cvId,
-            String tittle,
+            String title,
             PersonalInfoDto personalInfoDto,
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
@@ -400,7 +348,7 @@ public class CVService extends BaseService {
         CV existing = cvRepository.findById(cvId)
                 .orElseThrow(() -> new OurException("CV not found", 404));
 
-        existing.setTitle(tittle);
+        existing.setTitle(title);
 
         if (personalInfoDto != null) {
             PersonalInfo pi = existing.getPersonalInfo();
@@ -415,13 +363,11 @@ public class CVService extends BaseService {
             pi.setSummary(personalInfoDto.getSummary());
 
             if (personalInfoDto.getAvatar() != null && !personalInfoDto.getAvatar().isEmpty()) {
-                // Delete old avatar if exists
                 String oldAvatarPublicId = pi.getAvatarPublicId();
                 if (oldAvatarPublicId != null && !oldAvatarPublicId.isEmpty()) {
                     cloudinaryService.deleteImage(oldAvatarPublicId);
                 }
 
-                // Upload new avatar
                 var uploadResult = cloudinaryService.uploadImage(personalInfoDto.getAvatar());
                 if (uploadResult.containsKey("error")) {
                     throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
@@ -434,21 +380,19 @@ public class CVService extends BaseService {
             existing.setPersonalInfo(pi);
         }
 
-        existing.getExperience().clear();
+        existing.getExperiences().clear();
         if (experiencesDto != null) {
             for (ExperienceDto e : experiencesDto) {
-                Experience ex = new Experience(e.getCompany(), e.getPosition(), e.getStartDate(), e.getEndDate(),
-                        e.getDescription());
-                existing.getExperience().add(ex);
+                Experience ex = new Experience(e);
+                existing.getExperiences().add(ex);
             }
         }
 
-        existing.getEducation().clear();
+        existing.getEducations().clear();
         if (educationsDto != null) {
             for (EducationDto ed : educationsDto) {
-                Education e = new Education(ed.getSchool(), ed.getDegree(), ed.getField(), ed.getStartDate(),
-                        ed.getEndDate());
-                existing.getEducation().add(e);
+                Education e = new Education(ed);
+                existing.getEducations().add(e);
             }
         }
 
@@ -462,18 +406,28 @@ public class CVService extends BaseService {
         return cvMapper.toDto(saved);
     }
 
-    public Response updateCV(UUID cvId, UpdateCVRequest request) {
+    public Response updateCV(UUID cvId, String dataJson, MultipartFile avatar) {
         Response response = new Response();
 
         try {
-            CVDto updatedDto = handleUpdateCV(cvId, request.getTitle(), request.getPersonalInfo(),
-                    request.getExperience(), request.getEducation(), request.getSkills());
+            UpdateCVRequest request = objectMapper.readValue(dataJson, UpdateCVRequest.class);
+            String title = request.getTitle();
+            PersonalInfoDto personalInfo = request.getPersonalInfo();
+            personalInfo.setAvatar(avatar);
+            List<ExperienceDto> experiences = request.getExperiences();
+            List<EducationDto> educations = request.getEducations();
+            List<String> skills = request.getSkills();
 
-            ResponseData data = new ResponseData();
-            data.setCv(updatedDto);
+            CVDto cvDto = handleUpdateCV(
+                    cvId,
+                    title,
+                    personalInfo,
+                    experiences,
+                    educations,
+                    skills);
 
             response.setMessage("CV updated successfully");
-            response.setData(data);
+            response.setCv(cvDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -506,16 +460,20 @@ public class CVService extends BaseService {
         }
     }
 
-    public Response analyzeCVWithJobDescription(UUID cvId, AnalyzeCVWithJDRequest request) {
+    public Response analyzeCVWithJobDescription(UUID cvId, String dataJson) {
         Response response = new Response();
 
         try {
+            AnalyzeCVWithJDRequest request = objectMapper.readValue(dataJson, AnalyzeCVWithJDRequest.class);
+            String language = request.getLanguage();
+            MultipartFile jdFile = request.getJdFile();
+            String jobDescription = request.getJobDescription();
+
             CVDto cvDto = handleGetCVById(cvId);
 
-            String jdText = handleExtractJobDescriptionText(request);
+            String jdText = handleExtractJobDescriptionText(jdFile, jobDescription);
 
             String cvContent = handleFormatCVForAnalysis(cvDto);
-            String language = Optional.ofNullable(request.getLanguage()).orElse("English");
 
             String systemPrompt = handleBuildSystemPrompt(language);
             String userPrompt = handleBuildUserPrompt(jdText, cvContent);
@@ -523,10 +481,25 @@ public class CVService extends BaseService {
             String aiResponse = openRouterConfig.callModelWithSystemPrompt(systemPrompt, userPrompt);
             String jsonContent = handleExtractJsonFromResponse(aiResponse);
 
-            ResponseData data = handleParseAIResponse(jsonContent, aiResponse);
+            JobDescriptionResult jdResult = handleTryParseJobDescription(jsonContent);
+            Double matchScore = null;
+            List<String> missingKeywords = new ArrayList<>();
+
+            JsonNode root = objectMapper.readTree(jsonContent);
+            if (root.has("matchScore")) {
+                matchScore = root.get("matchScore").asDouble();
+            }
+            if (root.has("missingKeywords") && root.get("missingKeywords").isArray()) {
+                for (JsonNode n : root.get("missingKeywords")) {
+                    missingKeywords.add(n.asText());
+                }
+            }
 
             response.setMessage("CV analyzed with job description successfully");
-            response.setData(data);
+            response.setParsedJobDescription(jdResult);
+            response.setAnalyze(aiResponse);
+            response.setMatchScore(matchScore);
+            response.setMissingKeywords(missingKeywords);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -536,16 +509,16 @@ public class CVService extends BaseService {
         }
     }
 
-    private String handleExtractJobDescriptionText(AnalyzeCVWithJDRequest request) {
-        if (request.getJdFile() == null || request.getJdFile().isEmpty()) {
-            return request.getJobDescription();
+    private String handleExtractJobDescriptionText(MultipartFile jdFile, String jobDescription) {
+        if (jdFile == null || jdFile.isEmpty()) {
+            return jobDescription;
         }
 
         try {
-            return jobDescriptionParserService.extractTextFromFile(request.getJdFile());
+            return jobDescriptionParserService.extractTextFromFile(jdFile);
         } catch (Exception ex) {
             System.err.println("Error extracting JD file: " + ex.getMessage());
-            return request.getJobDescription(); // fallback
+            return jobDescription;
         }
     }
 
@@ -564,32 +537,6 @@ public class CVService extends BaseService {
         return String.format(
                 "Job Description:\n%s\n\nCV Content:\n%s\n\nReturn the parsed JD JSON and the analyze JSON.",
                 jdText, cvContent);
-    }
-
-    private ResponseData handleParseAIResponse(String jsonContent, String rawAIResponse) {
-        JobDescriptionResult jdResult = handleTryParseJobDescription(jsonContent);
-        Double matchScore = null;
-        List<String> missingKeywords = new ArrayList<>();
-
-        try {
-            JsonNode root = objectMapper.readTree(jsonContent);
-            if (root.has("matchScore")) {
-                matchScore = root.get("matchScore").asDouble();
-            }
-            if (root.has("missingKeywords") && root.get("missingKeywords").isArray()) {
-                for (JsonNode n : root.get("missingKeywords")) {
-                    missingKeywords.add(n.asText());
-                }
-            }
-        } catch (Exception ignored) {
-        }
-
-        ResponseData data = new ResponseData();
-        data.setParsedJobDescription(jdResult);
-        data.setAnalyze(rawAIResponse);
-        data.setMatchScore(matchScore);
-        data.setMissingKeywords(missingKeywords);
-        return data;
     }
 
     private JobDescriptionResult handleTryParseJobDescription(String jsonContent) {
@@ -625,9 +572,9 @@ public class CVService extends BaseService {
         }
 
         // Experience
-        if (cvDto.getExperience() != null && !cvDto.getExperience().isEmpty()) {
+        if (cvDto.getExperiences() != null && !cvDto.getExperiences().isEmpty()) {
             sb.append("\nWork Experience:\n");
-            for (ExperienceDto exp : cvDto.getExperience()) {
+            for (ExperienceDto exp : cvDto.getExperiences()) {
                 sb.append("- ").append(exp.getPosition()).append(" at ").append(exp.getCompany())
                         .append(" (").append(exp.getStartDate()).append(" - ").append(exp.getEndDate()).append(")\n");
                 sb.append("  ").append(exp.getDescription()).append("\n");
@@ -635,9 +582,9 @@ public class CVService extends BaseService {
         }
 
         // Education
-        if (cvDto.getEducation() != null && !cvDto.getEducation().isEmpty()) {
+        if (cvDto.getEducations() != null && !cvDto.getEducations().isEmpty()) {
             sb.append("\nEducation:\n");
-            for (EducationDto edu : cvDto.getEducation()) {
+            for (EducationDto edu : cvDto.getEducations()) {
                 sb.append("- ").append(edu.getDegree()).append(" in ").append(edu.getField())
                         .append(" from ").append(edu.getSchool())
                         .append(" (").append(edu.getStartDate()).append(" - ").append(edu.getEndDate()).append(")\n");
@@ -712,7 +659,7 @@ public class CVService extends BaseService {
             JsonNode rootNode = objectMapper.readTree(jsonContent);
 
             // Extract data from JSON
-            String tittle = rootNode.has("tittle") ? rootNode.get("tittle").asText() : "Imported CV";
+            String title = rootNode.has("title") ? rootNode.get("title").asText() : "Imported CV";
 
             // Personal Info
             PersonalInfoDto personalInfo = new PersonalInfoDto();
@@ -771,7 +718,7 @@ public class CVService extends BaseService {
             }
 
             // Create CV
-            return handleCreateCV(userId, tittle, personalInfo, experiences, educations, skills);
+            return handleCreateCV(userId, title, personalInfo, experiences, educations, skills);
 
         } catch (Exception e) {
             throw new OurException("Error parsing AI response: " + e.getMessage(), 500);

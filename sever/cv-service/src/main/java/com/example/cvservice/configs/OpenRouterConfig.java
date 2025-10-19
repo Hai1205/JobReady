@@ -34,7 +34,7 @@ public class OpenRouterConfig {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(apiKey);
             headers.set("HTTP-Referer", "https://jobready.app");
-            headers.set("X-Title", "JobReady CV Builder");
+            headers.set("X-title", "JobReady CV Builder");
 
             Map<String, Object> message = new HashMap<>();
             message.put("role", "user");
@@ -66,7 +66,7 @@ public class OpenRouterConfig {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(apiKey);
             headers.set("HTTP-Referer", "https://jobready.app");
-            headers.set("X-Title", "JobReady CV Builder");
+            headers.set("X-title", "JobReady CV Builder");
 
             List<Map<String, Object>> messages = new ArrayList<>();
 

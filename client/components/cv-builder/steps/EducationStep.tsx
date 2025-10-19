@@ -14,8 +14,8 @@ export function EducationStep() {
 
   const addEducation = () => {
     handleUpdateCV({
-      education: [
-        ...currentCV.education,
+      educations: [
+        ...currentCV.educations,
         {
           id: crypto.randomUUID(),
           school: "",
@@ -30,13 +30,13 @@ export function EducationStep() {
 
   const removeEducation = (id: string) => {
     handleUpdateCV({
-      education: currentCV.education.filter((edu) => edu.id !== id),
+      educations: currentCV.educations.filter((edu) => edu.id !== id),
     })
   }
 
   const updateEducation = (id: string, field: string, value: string) => {
     handleUpdateCV({
-      education: currentCV.education.map((edu) => (edu.id === id ? { ...edu, [field]: value } : edu)),
+      educations: currentCV.educations.map((edu) => (edu.id === id ? { ...edu, [field]: value } : edu)),
     })
   }
 
@@ -53,18 +53,18 @@ export function EducationStep() {
         </Button>
       </div>
 
-      {currentCV.education.length === 0 ? (
+      {currentCV.educations.length === 0 ? (
         <Card className="p-8 text-center">
-          <p className="text-muted-foreground">No education added yet. Click "Add Education" to get started.</p>
+          <p className="text-muted-foreground">No educations added yet. Click "Add Education" to get started.</p>
         </Card>
       ) : (
         <div className="flex flex-col gap-4">
-          {currentCV.education.map((edu, index) => (
+          {currentCV.educations.map((edu, index) => (
             <Card key={edu.id} className="p-6">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">Education {index + 1}</h3>
-                  <Button variant="ghost" size="sm" onClick={() => removeEducation(edu.id)}>
+                  <Button variant="ghost" size="sm" onClick={() => removeEducation(edu.id || "")}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
@@ -74,7 +74,7 @@ export function EducationStep() {
                     <Label>School/University *</Label>
                     <Input
                       value={edu.school}
-                      onChange={(e) => updateEducation(edu.id, "school", e.target.value)}
+                      onChange={(e) => updateEducation(edu.id || "", "school", e.target.value)}
                       placeholder="University Name"
                     />
                   </div>
@@ -83,7 +83,7 @@ export function EducationStep() {
                     <Label>Degree *</Label>
                     <Input
                       value={edu.degree}
-                      onChange={(e) => updateEducation(edu.id, "degree", e.target.value)}
+                      onChange={(e) => updateEducation(edu.id || "", "degree", e.target.value)}
                       placeholder="Bachelor's, Master's, etc."
                     />
                   </div>
@@ -92,7 +92,7 @@ export function EducationStep() {
                     <Label>Field of Study</Label>
                     <Input
                       value={edu.field}
-                      onChange={(e) => updateEducation(edu.id, "field", e.target.value)}
+                      onChange={(e) => updateEducation(edu.id || "", "field", e.target.value)}
                       placeholder="Computer Science, Business, etc."
                     />
                   </div>
@@ -102,7 +102,7 @@ export function EducationStep() {
                     <Input
                       type="month"
                       value={edu.startDate}
-                      onChange={(e) => updateEducation(edu.id, "startDate", e.target.value)}
+                      onChange={(e) => updateEducation(edu.id || "", "startDate", e.target.value)}
                     />
                   </div>
 
@@ -111,7 +111,7 @@ export function EducationStep() {
                     <Input
                       type="month"
                       value={edu.endDate}
-                      onChange={(e) => updateEducation(edu.id, "endDate", e.target.value)}
+                      onChange={(e) => updateEducation(edu.id || "", "endDate", e.target.value)}
                       placeholder="Leave empty if current"
                     />
                   </div>

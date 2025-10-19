@@ -91,7 +91,7 @@ export default function MyCVsPage() {
     // const duplicatedCV: ICV = {
     //   ...cv,
     //   id: crypto.randomUUID(),
-    //   tittle: `${cv.tittle} (Copy)`,
+    //   title: `${cv.title} (Copy)`,
     //   createdAt: new Date().toISOString(),
     //   updatedAt: new Date().toISOString(),
     // };
@@ -154,12 +154,10 @@ export default function MyCVsPage() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="line-clamp-1">
-                        {cv.tittle}
-                      </CardTitle>
+                      <CardTitle className="line-clamp-1">{cv.title}</CardTitle>
                       <CardDescription className="mt-2 flex items-center gap-2">
                         <Calendar className="h-3 w-3" />
-                        Updated {formatDateAgo(cv.updatedAt)}
+                        Updated {formatDateAgo(cv.updatedAt || "")}
                       </CardDescription>
                     </div>
                     <FileText className="h-5 w-5 text-muted-foreground" />
@@ -177,14 +175,14 @@ export default function MyCVsPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {cv.experience.length > 0 && (
+                      {cv.experiences.length > 0 && (
                         <Badge variant="secondary" className="text-xs">
-                          {cv.experience.length} Experience
+                          {cv.experiences.length} Experience
                         </Badge>
                       )}
-                      {cv.education.length > 0 && (
+                      {cv.educations.length > 0 && (
                         <Badge variant="secondary" className="text-xs">
-                          {cv.education.length} Education
+                          {cv.educations.length} Education
                         </Badge>
                       )}
                       {cv.skills.length > 0 && (

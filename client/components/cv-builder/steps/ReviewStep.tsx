@@ -56,13 +56,13 @@ export function ReviewStep() {
         <Separator className="my-8" />
 
         {/* Experience */}
-        {currentCV.experience.length > 0 && (
+        {currentCV.experiences.length > 0 && (
           <>
             <div className="mb-6">
               <h2 className="text-xl font-bold">Work Experience</h2>
             </div>
             <div className="flex flex-col gap-6">
-              {currentCV.experience.map((exp) => (
+              {currentCV.experiences.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex items-start justify-between">
                     <div>
@@ -87,13 +87,13 @@ export function ReviewStep() {
         )}
 
         {/* Education */}
-        {currentCV.education.length > 0 && (
+        {currentCV.educations.length > 0 && (
           <>
             <div className="mb-6">
               <h2 className="text-xl font-bold">Education</h2>
             </div>
             <div className="flex flex-col gap-6">
-              {currentCV.education.map((edu) => (
+              {currentCV.educations.map((edu) => (
                 <div key={edu.id}>
                   <div className="flex items-start justify-between">
                     <div>

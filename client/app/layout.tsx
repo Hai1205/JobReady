@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
 import { TokenRefresher } from "@/components/TokenRefresher";
+import { CookieMonitor } from "@/components/CookieMonitor";
 import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -18,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  tittle: "JobReady - AI-Powered CV Builder",
+  title: "JobReady - AI-Powered CV Builder",
   description: "Create professional CVs with AI assistance",
   icons: {
     icon: "/images/logo.png",
@@ -43,8 +44,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <CookieMonitor />
           <TokenRefresher />
-          
+
           <Navbar />
           <main className="min-h-screen">{children}</main>
 

@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // If not in header, try to get from cookie
         if (token == null && request.getCookies() != null) {
             for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
-                if ("ACCESS_TOKEN".equals(cookie.getName())) {
+                if ("access_token".equals(cookie.getName())) {
                     token = cookie.getValue();
                     break;
                 }

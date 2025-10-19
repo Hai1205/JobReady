@@ -8,6 +8,7 @@ import com.example.authservice.exceptions.OurException;
 import com.example.authservice.services.OtpService;
 import com.example.authservice.services.producers.UserProducer;
 import com.example.authservice.utils.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,24 +23,29 @@ import java.util.Map;
 public class AuthService extends BaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
-
     private JwtUtil jwtUtil;
     private MailConfig mailConfig;
     private UserProducer userProducer;
     private OtpService otpService;
+    private final ObjectMapper objectMapper;
 
     public AuthService(JwtUtil jwtUtil, MailConfig mailConfig, UserProducer userProducer, OtpService otpService) {
         this.jwtUtil = jwtUtil;
         this.mailConfig = mailConfig;
         this.userProducer = userProducer;
         this.otpService = otpService;
+        this.objectMapper = new ObjectMapper();
     }
 
-    public Response login(LoginRequest request, HttpServletResponse httpServletResponse) {
+    public Response login(String dataJson, HttpServletResponse httpServletResponse) {
         Response response = new Response();
 
         try {
-            UserDto userDto = userProducer.authenticateUser(request.getEmail(), request.getPassword());
+            LoginRequest request = objectMapper.readValue(dataJson, LoginRequest.class);
+            String email = request.getEmail();
+            String password = request.getPassword();
+
+            UserDto userDto = userProducer.authenticateUser(email, password);
 
             if (userDto == null) {
                 throw new OurException("Invalid credentials", 404);
@@ -57,7 +63,6 @@ public class AuthService extends BaseService {
 
             String userId = userDto.getId().toString();
             String username = userDto.getUsername();
-            String email = userDto.getEmail();
             String role = userDto.getRole();
 
             String accessToken = jwtUtil.generateAccessToken(userId, email, role, username);
@@ -71,11 +76,8 @@ public class AuthService extends BaseService {
             httpServletResponse.setHeader("X-Access-Token", accessToken);
             httpServletResponse.setHeader("X-Refresh-Token", refreshToken);
 
-            ResponseData data = new ResponseData();
-            data.setUser(userDto);
-
             response.setMessage("Login successful");
-            response.setData(data);
+            response.setUser(userDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -102,13 +104,11 @@ public class AuthService extends BaseService {
         try {
             boolean isValid = jwtUtil.validateToken(token, username);
 
-            ResponseData data = new ResponseData();
             Map<String, Object> additionalData = new HashMap<>();
             additionalData.put("valid", isValid);
-            data.setAdditionalData(additionalData);
 
             response.setMessage("Token validation successful");
-            response.setData(data);
+            response.setAdditionalData(additionalData);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -118,18 +118,19 @@ public class AuthService extends BaseService {
         }
     }
 
-    public Response register(RegisterRequest request) {
+    public Response register(String dataJson) {
         Response response = new Response();
 
         try {
-            UserDto userDto = userProducer.createUser(request.getEmail(), request.getPassword(),
-                    request.getFullname());
+            RegisterRequest request = objectMapper.readValue(dataJson, RegisterRequest.class);
+            String email = request.getEmail();
+            String password = request.getPassword();
+            String fullname = request.getFullname();
 
-            ResponseData data = new ResponseData();
-            data.setUser(userDto);
+            UserDto userDto = userProducer.createUser(email, password, fullname);
 
             response.setMessage("Registration successful");
-            response.setData(data);
+            response.setUser(userDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -139,11 +140,14 @@ public class AuthService extends BaseService {
         }
     }
 
-    public Response verifyOTP(String email, VerifyOtpRequest request) {
+    public Response verifyOTP(String email, String dataJson) {
         Response response = new Response();
 
         try {
-            boolean isValid = otpService.validateOtp(email, request.getOtp());
+            VerifyOtpRequest request = objectMapper.readValue(dataJson, VerifyOtpRequest.class);
+            String otp = request.getOtp();
+
+            boolean isValid = otpService.validateOtp(email, otp);
 
             if (!isValid) {
                 throw new OurException("Invalid OTP.");
@@ -193,10 +197,11 @@ public class AuthService extends BaseService {
         }
     }
 
-    public Response changePassword(String email, ChangePasswordRequest request) {
+    public Response changePassword(String email, String dataJson) {
         Response response = new Response();
 
         try {
+            ChangePasswordRequest request = objectMapper.readValue(dataJson, ChangePasswordRequest.class);
             String currentPassword = request.getCurrentPassword();
             String newPassword = request.getNewPassword();
             String rePassword = request.getRePassword();
@@ -243,10 +248,11 @@ public class AuthService extends BaseService {
         }
     }
 
-    public Response forgotPassword(String email, ChangePasswordRequest request) {
+    public Response forgotPassword(String email, String dataJson) {
         Response response = new Response();
 
         try {
+            ChangePasswordRequest request = objectMapper.readValue(dataJson, ChangePasswordRequest.class);
             String newPassword = request.getNewPassword();
             String rePassword = request.getRePassword();
 
@@ -305,11 +311,8 @@ public class AuthService extends BaseService {
             httpServletResponse.addCookie(accessTokenCookie);
             httpServletResponse.setHeader("X-Access-Token", newAccessToken);
 
-            ResponseData data = new ResponseData();
-            data.setUser(userDto);
-
             response.setMessage("Token refreshed successfully!");
-            response.setData(data);
+            response.setUser(userDto);
 
             logger.info("Token refreshed successfully for user: {}", userDto.getUsername());
             return response;

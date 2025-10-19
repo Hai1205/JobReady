@@ -12,7 +12,8 @@ declare global {
     interface ICV {
         id: string
         userId?: string
-        tittle: string
+        avatar?: File | null  // For upload
+        title: string
         personalInfo: IPersonalInfo
         experiences: IExperience[]
         educations: IEducation[]
@@ -28,7 +29,7 @@ declare global {
         phone: string
         location: string
         summary: string
-        avatar?: File | null  // For upload
+        // avatar?: File | null  // For upload
         avatarUrl?: string    // From backend
         avatarPublicId?: string // Cloudinary ID
     }

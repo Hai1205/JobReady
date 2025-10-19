@@ -80,6 +80,16 @@ export function createStore<T extends IBaseStore, U = TVariables>(
       {
         name: `${storeName}-storage`,
         storage,
+        // Skip hydration for certain keys to prevent unnecessary re-renders
+        partialize: (state) => {
+          const { isLoading, error, status, message, ...rest } = state as T & {
+            isLoading: boolean;
+            error: string | null;
+            status: number;
+            message: string | null;
+          };
+          return rest as T;
+        },
         ...options?.persistOptions,
       }
     )

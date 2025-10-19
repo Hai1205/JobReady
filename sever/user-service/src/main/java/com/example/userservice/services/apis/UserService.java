@@ -1,19 +1,17 @@
 package com.example.userservice.services.apis;
 
 import com.example.userservice.dtos.UserDto;
-import com.example.userservice.dtos.requests.CreateUserRequest;
-import com.example.userservice.dtos.requests.UpdateUserRequest;
+import com.example.userservice.dtos.requests.*;
 import com.example.userservice.dtos.response.Response;
-import com.example.userservice.dtos.response.ResponseData;
-import com.example.userservice.entities.User;
+import com.example.userservice.entities.*;
 import com.example.userservice.entities.User.UserRole;
 import com.example.userservice.entities.User.UserStatus;
 import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
 import com.example.userservice.repositories.UserRepository;
-import com.example.userservice.securities.AuthenticatedUser;
-import com.example.userservice.securities.SecurityUtils;
+import com.example.userservice.securities.*;
 import com.example.userservice.services.CloudinaryService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +29,12 @@ import java.util.stream.Collectors;
 public class UserService extends BaseService {
 
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final CloudinaryService cloudinaryService;
     private final SecureRandom random = new SecureRandom();
+    private final ObjectMapper objectMapper;
 
     @Value("${PRIVATE_CHARS}")
     private String privateChars;
@@ -50,36 +48,16 @@ public class UserService extends BaseService {
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.cloudinaryService = cloudinaryService;
+        this.objectMapper = new ObjectMapper();
     }
 
-    private AuthenticatedUser handleRequireAuthenticatedUser() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new OurException("Unauthorized", 401));
-    }
-
-    private boolean handleIsAdmin(AuthenticatedUser user) {
-        return user.hasRole("ADMIN");
-    }
-
-    private void handleEnsureAdmin() {
-        AuthenticatedUser user = handleRequireAuthenticatedUser();
-        if (!handleIsAdmin(user)) {
-            throw new OurException("Forbidden", 403);
-        }
-    }
-
-    private void handleEnsureCanAccessUser(UUID userId) {
-        AuthenticatedUser user = handleRequireAuthenticatedUser();
-        if (handleIsAdmin(user)) {
-            return;
-        }
-        if (!user.hasRole("USER") || !user.getUserId().equals(userId)) {
-            throw new OurException("Forbidden", 403);
-        }
-    }
-
-    public UserDto handleCreateUser(String username, String email, String password, String fullname, String role,
-            String status, MultipartFile avatar) {
+    public UserDto handleCreateUser(String username,
+            String email,
+            String password,
+            String fullname,
+            String role,
+            String status,
+            MultipartFile avatar) {
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email already exists");
         }
@@ -177,22 +155,24 @@ public class UserService extends BaseService {
         return userDto;
     }
 
-    public Response createUser(CreateUserRequest createUserRequest) {
+    public Response createUser(String dataJson) {
         Response response = new Response();
 
         try {
-            handleEnsureAdmin();
+            CreateUserRequest request = objectMapper.readValue(dataJson, CreateUserRequest.class);
+            String username = request.getUsername();
+            String email = request.getEmail();
+            String password = request.getPassword();
+            String fullname = request.getFullname();
+            String role = request.getRole();
+            String status = request.getStatus();
+            MultipartFile avatar = request.getAvatar();
 
-            UserDto savedUserDto = handleCreateUser(createUserRequest.getUsername(), createUserRequest.getEmail(),
-                    createUserRequest.getPassword(), createUserRequest.getFullname(), createUserRequest.getRole(),
-                    createUserRequest.getStatus(), createUserRequest.getAvatar());
-
-            ResponseData data = new ResponseData();
-            data.setUser(savedUserDto);
+            UserDto savedUserDto = handleCreateUser(username, email, password, fullname, role, status, avatar);
 
             response.setStatusCode(201);
             response.setMessage("User created successfully");
-            response.setData(data);
+            response.setUser(savedUserDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -212,15 +192,10 @@ public class UserService extends BaseService {
         Response response = new Response();
 
         try {
-            handleEnsureAdmin();
-
             List<UserDto> userDtos = handleGetAllUsers();
 
-            ResponseData data = new ResponseData();
-            data.setUsers(userDtos);
-
             response.setMessage("Users retrieved successfully");
-            response.setData(data);
+            response.setUsers(userDtos);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -230,25 +205,20 @@ public class UserService extends BaseService {
         }
     }
 
-    public UserDto handleGetUserById(UUID id) {
-        User user = userRepository.findById(id)
+    public UserDto handleGetUserById(UUID userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new OurException("User not found", 404));
         return userMapper.toDto(user);
     }
 
-    public Response getUserById(UUID id) {
+    public Response getUserById(UUID userId) {
         Response response = new Response();
 
         try {
-            handleEnsureCanAccessUser(id);
-
-            UserDto userDto = handleGetUserById(id);
-
-            ResponseData data = new ResponseData();
-            data.setUser(userDto);
+            UserDto userDto = handleGetUserById(userId);
 
             response.setMessage("User retrieved successfully");
-            response.setData(data);
+            response.setUser(userDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -258,8 +228,8 @@ public class UserService extends BaseService {
         }
     }
 
-    public UserDto handleUpdateUser(UUID id, String fullname, String role, String status, MultipartFile avatar) {
-        User existingUser = userRepository.findById(id)
+    public UserDto handleUpdateUser(UUID userId, String fullname, String role, String status, MultipartFile avatar) {
+        User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         AuthenticatedUser currentUser = SecurityUtils.getCurrentUser().orElse(null);
@@ -306,20 +276,20 @@ public class UserService extends BaseService {
         return userMapper.toDto(updatedUser);
     }
 
-    public Response updateUser(UUID id, UpdateUserRequest request) {
+    public Response updateUser(UUID userId, String dataJson) {
         Response response = new Response();
 
         try {
-            handleEnsureCanAccessUser(id);
+            UpdateUserRequest request = objectMapper.readValue(dataJson, UpdateUserRequest.class);
+            String fullname = request.getFullname();
+            String role = request.getRole();
+            String status = request.getStatus();
+            MultipartFile avatar = request.getAvatar();
 
-            UserDto updatedUserDto = handleUpdateUser(id, request.getFullname(), request.getRole(), request.getStatus(),
-                    request.getAvatar());
-
-            ResponseData data = new ResponseData();
-            data.setUser(updatedUserDto);
+            UserDto updatedUserDto = handleUpdateUser(userId, fullname, role, status, avatar);
 
             response.setMessage("User updated successfully");
-            response.setData(data);
+            response.setUser(updatedUserDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -329,25 +299,23 @@ public class UserService extends BaseService {
         }
     }
 
-    public boolean handleDeleteUser(UUID id) {
-        UserDto user = handleGetUserById(id);
+    public boolean handleDeleteUser(UUID userId) {
+        UserDto user = handleGetUserById(userId);
 
         String avatarPublicId = user.getAvatarPublicId();
         if (avatarPublicId != null && !avatarPublicId.isEmpty()) {
             cloudinaryService.deleteImage(avatarPublicId);
         }
 
-        userRepository.deleteById(id);
+        userRepository.deleteById(userId);
         return true;
     }
 
-    public Response deleteUser(UUID id) {
+    public Response deleteUser(UUID userId) {
         Response response = new Response();
 
         try {
-            handleEnsureAdmin();
-
-            handleDeleteUser(id);
+            handleDeleteUser(userId);
 
             response.setMessage("User deleted successfully");
             return response;

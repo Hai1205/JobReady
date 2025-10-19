@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.util.UUID;
 
+import com.example.cvservice.dtos.ExperienceDto;
+
 @Entity
 @Table(name = "experiences")
 @Data
@@ -30,5 +32,13 @@ public class Experience {
         this.startDate = startDate;
         this.endDate = endDate;
         this.description = description;
+    }
+    
+    public Experience(ExperienceDto experienceDto) {
+        this.company = experienceDto.getCompany();
+        this.position = experienceDto.getPosition();
+        this.startDate = experienceDto.getStartDate();
+        this.endDate = experienceDto.getEndDate();
+        this.description = experienceDto.getDescription();
     }
 }

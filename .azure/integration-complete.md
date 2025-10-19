@@ -33,7 +33,7 @@
 
 ### 1.4. Response Parsing Fixes
 
-- ✅ Flexible response parsing: handle cả `response.data` và `response.data.data`
+- ✅ Flexible response parsing: handle cả `response.data` và `response.data`
 - ✅ Cập nhật TypeScript interfaces:
   - `IJobDescriptionResult` - parsed JD structure
   - `IResponseData` - backend ResponseData
@@ -65,7 +65,7 @@
 - Progress bar cho match score
 - Missing keywords hiển thị dưới dạng destructive badges
 - Comprehensive parsed JD display:
-  - Job tittle & company
+  - Job title & company
   - Location, salary, experience required
   - Required skills & preferred skills (separate badges)
   - Responsibilities, requirements, benefits sections

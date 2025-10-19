@@ -144,8 +144,8 @@ docker-compose up -d
 mvn spring-boot:run -pl discovery-service
 mvn spring-boot:run -pl gateway-service
 mvn spring-boot:run -pl user-service
-mvn spring-boot:run -pl cv-service
 mvn spring-boot:run -pl auth-service
+mvn spring-boot:run -pl cv-service
 ```
 
 ### 5. Kiểm tra Services

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,6 +11,20 @@ import { toast } from "react-toastify";
 
 export function PreviewStep() {
   const { currentCV } = useCVStore();
+  const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+
+  // Convert File to base64 URL for display
+  React.useEffect(() => {
+    if (currentCV?.avatar && currentCV.avatar instanceof File) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(currentCV.avatar);
+    } else {
+      setAvatarUrl(null);
+    }
+  }, [currentCV?.avatar]);
 
   if (!currentCV) return null;
 
@@ -52,20 +67,13 @@ export function PreviewStep() {
       let textStartX = M;
 
       // ========== AVATAR (CIRCULAR) ==========
-      if (currentCV.personalInfo.avatar) {
+      if (avatarUrl) {
         try {
           const AV_SIZE = 40;
           const AV_X = M;
           const AV_Y = Y + 3;
 
-          doc.addImage(
-            currentCV.personalInfo.avatar,
-            "JPEG",
-            AV_X,
-            AV_Y,
-            AV_SIZE,
-            AV_SIZE
-          );
+          doc.addImage(avatarUrl, "JPEG", AV_X, AV_Y, AV_SIZE, AV_SIZE);
 
           doc.setDrawColor(0, 51, 153);
           doc.setLineWidth(2);
@@ -73,11 +81,12 @@ export function PreviewStep() {
 
           textStartX = M + AV_SIZE + 10;
         } catch (err) {
+          console.error("Error adding avatar to PDF:", err);
           textStartX = M;
         }
       }
 
-      // ========== NAME & JOB tittle ==========
+      // ========== NAME & JOB title ==========
       doc.setFont("helvetica", "bold");
       doc.setFontSize(24);
       doc.setTextColor(0, 51, 153);
@@ -126,13 +135,13 @@ export function PreviewStep() {
 
       Y = 78;
 
-      // ========== SECTION tittle HELPER ==========
-      const addSectionTitle = (tittle: string) => {
+      // ========== SECTION title HELPER ==========
+      const addSectionTitle = (title: string) => {
         needSpace(15);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(13);
         doc.setTextColor(0, 51, 153);
-        doc.text(plain(tittle), M, Y);
+        doc.text(plain(title), M, Y);
         doc.setDrawColor(0, 51, 153);
         doc.setLineWidth(0.8);
         doc.line(M, Y + 1.5, W - M, Y + 1.5);
@@ -158,9 +167,9 @@ export function PreviewStep() {
       }
 
       // ========== EDUCATION ==========
-      if (currentCV.education.length > 0) {
+      if (currentCV.educations.length > 0) {
         addSectionTitle("HOC VAN");
-        currentCV.education.forEach((edu) => {
+        currentCV.educations.forEach((edu) => {
           needSpace(20);
           doc.setFont("helvetica", "italic");
           doc.setFontSize(9);
@@ -206,9 +215,9 @@ export function PreviewStep() {
       }
 
       // ========== EXPERIENCE ==========
-      if (currentCV.experience.length > 0) {
+      if (currentCV.experiences.length > 0) {
         addSectionTitle("KINH NGHIEM LAM VIEC");
-        currentCV.experience.forEach((exp) => {
+        currentCV.experiences.forEach((exp) => {
           needSpace(25);
           doc.setFont("helvetica", "italic");
           doc.setFontSize(9);
@@ -338,10 +347,9 @@ export function PreviewStep() {
               {/* Avatar */}
               <div className="flex-shrink-0">
                 <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-                  <AvatarImage
-                    src={currentCV.personalInfo.avatar}
-                    className="object-cover"
-                  />
+                  {avatarUrl && (
+                    <AvatarImage src={avatarUrl} className="object-cover" />
+                  )}
                   <AvatarFallback className="text-2xl font-bold bg-blue-900 text-white">
                     {currentCV.personalInfo.fullname
                       ? currentCV.personalInfo.fullname
@@ -409,13 +417,13 @@ export function PreviewStep() {
             )}
 
             {/* Education */}
-            {currentCV.education.length > 0 && (
+            {currentCV.educations.length > 0 && (
               <div>
                 <h2 className="border-b-2 border-blue-900 pb-1 text-xl font-bold text-blue-900 mb-3">
                   HỌC VẤN
                 </h2>
                 <div className="space-y-4">
-                  {currentCV.education.map((edu) => (
+                  {currentCV.educations.map((edu) => (
                     <div key={edu.id} className="pl-0">
                       <div className="text-xs text-gray-500 mb-1 font-medium">
                         {edu.startDate} - {edu.endDate || "Hiện tại"}
@@ -442,13 +450,13 @@ export function PreviewStep() {
             )}
 
             {/* Work Experience */}
-            {currentCV.experience.length > 0 && (
+            {currentCV.experiences.length > 0 && (
               <div>
                 <h2 className="border-b-2 border-blue-900 pb-1 text-xl font-bold text-blue-900 mb-3">
                   KINH NGHIỆM LÀM VIỆC
                 </h2>
                 <div className="space-y-4">
-                  {currentCV.experience.map((exp) => (
+                  {currentCV.experiences.map((exp) => (
                     <div key={exp.id} className="pl-0">
                       <div className="text-xs text-gray-500 mb-1 font-medium">
                         {exp.startDate} - {exp.endDate || "Hiện tại"}

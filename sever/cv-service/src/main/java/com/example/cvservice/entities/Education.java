@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.util.UUID;
 
+import com.example.cvservice.dtos.EducationDto;
+
 @Entity
 @Table(name = "educations")
 @Data
@@ -28,5 +30,12 @@ public class Education {
         this.field = field;
         this.startDate = startDate;
         this.endDate = endDate;
+    }
+    public Education(EducationDto educationDto) {
+        this.school = educationDto.getSchool();
+        this.degree = educationDto.getDegree();
+        this.field = educationDto.getField();
+        this.startDate = educationDto.getStartDate();
+        this.endDate = educationDto.getEndDate();
     }
 }

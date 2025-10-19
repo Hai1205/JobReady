@@ -56,7 +56,11 @@ const LoginPage: React.FC = () => {
       return;
     }
 
+    console.log("🔐 Starting login process...");
+
     const response = await login(formData.email, formData.password);
+
+    console.log("📥 Login response:", response);
 
     if (response?.status && response.status > 401) {
       return;
@@ -74,8 +78,7 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    console.log("Login successful:", response);
-    router.push("/");
+    router.replace("/");
   };
 
   return (

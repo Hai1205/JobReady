@@ -45,9 +45,9 @@ export function PersonalInfoStep() {
       const reader = new FileReader();
       reader.onload = (e) => {
         handleUpdateCV({
+          avatar: file, // Store File object for backend
           personalInfo: {
             ...currentCV.personalInfo,
-            avatar: file, // Store File object for backend
             avatarUrl: e.target?.result as string, // Store base64 for preview
           },
         });
@@ -58,9 +58,9 @@ export function PersonalInfoStep() {
 
   const removeAvatar = () => {
     handleUpdateCV({
+      avatar: null,
       personalInfo: {
         ...currentCV.personalInfo,
-        avatar: null,
         avatarUrl: undefined,
       },
     });
@@ -114,7 +114,7 @@ export function PersonalInfoStep() {
                 <Upload className="h-4 w-4 mr-2" />
                 Tải ảnh lên
               </Button>
-              {currentCV.personalInfo.avatar && (
+              {currentCV.avatar && (
                 <Button
                   type="button"
                   variant="outline"

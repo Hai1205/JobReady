@@ -48,7 +48,7 @@ export default function CVDashboardPage() {
         results = results.filter((cv) =>
           // cv.question.toLowerCase().includes(searchTerms) ||
           // cv.answer.toLowerCase().includes(searchTerms) ||
-          cv.tittle.toLowerCase().includes(searchTerms)
+          cv.title.toLowerCase().includes(searchTerms)
         );
       }
 
@@ -117,7 +117,7 @@ export default function CVDashboardPage() {
     //   if (!prev) {
     //     const defaultData = {
     //       _id: "",
-    //       tittle: "",
+    //       title: "",
     //       answer: "",
     //       category: CVCategory[0].value,
     //     };
@@ -164,7 +164,7 @@ export default function CVDashboardPage() {
   return (
     <div className="space-y-4">
       <DashboardHeader
-        tittle="CV Dashboard"
+        title="CV Dashboard"
         onCreateClick={() => setIsCreateCVOpen(true)}
         createButtonText="Create CV"
       />

@@ -14,7 +14,7 @@ import lombok.*;
 public class UpdateCVRequest {
     private String title;
     private PersonalInfoDto personalInfo;
-    private List<ExperienceDto> experience;
-    private List<EducationDto> education;
+    private List<ExperienceDto> experiences;
+    private List<EducationDto> educations;
     private List<String> skills;
 }

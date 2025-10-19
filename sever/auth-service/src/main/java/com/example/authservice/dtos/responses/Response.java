@@ -1,5 +1,8 @@
 package com.example.authservice.dtos.responses;
 
+import java.util.Map;
+
+import com.example.authservice.dtos.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.*;
@@ -11,7 +14,9 @@ import lombok.*;
 public class Response {
     private int statusCode;
     private String message;
-    private ResponseData data;
+
+    private UserDto user;
+    private Map<String, Object> additionalData;
 
     public Response(int statusCode, String message) {
         this.statusCode = statusCode;

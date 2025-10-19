@@ -65,15 +65,17 @@ export const useUserStore = createStore<IUserStore>(
 			status: string,
 			avatar: File,
 		): Promise<IApiResponse<IUserDataResponse>> => {
-			return await get().handleRequest(async () => {
-				const formData = new FormData();
-				formData.append("email", email);
-				formData.append("password", password);
-				formData.append("fullname", fullname);
-				formData.append("role", role);
-				formData.append("status", status);
-				formData.append("avatar", avatar);
+			const formData = new FormData();
+			formData.append("data", JSON.stringify({
+				email,
+				password,
+				fullname,
+				role,
+				status,
+			}));
+			if (avatar) formData.append("avatar", avatar);
 
+			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.POST, `/users`, formData);
 			});
 		},
@@ -85,13 +87,15 @@ export const useUserStore = createStore<IUserStore>(
 			status: string,
 			avatar: File,
 		): Promise<IApiResponse<IUserDataResponse>> => {
-			return await get().handleRequest(async () => {
-				const formData = new FormData();
-				formData.append("status", status);
-				formData.append("avatar", avatar);
-				formData.append("fullname", fullname);
-				formData.append("role", role);
+			const formData = new FormData();
+			formData.append("data", JSON.stringify({
+				fullname,
+				role,
+				status,
+			}));
+			if (avatar) formData.append("avatar", avatar);
 
+			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.PATCH, `/users/${userId}`, formData);
 			});
 		},

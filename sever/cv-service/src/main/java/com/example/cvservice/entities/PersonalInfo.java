@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.util.UUID;
 
+import com.example.cvservice.dtos.PersonalInfoDto;
+
 @Entity
 @Table(name = "personal-infos")
 @Data
@@ -30,5 +32,13 @@ public class PersonalInfo {
         this.phone = phone;
         this.location = location;
         this.summary = summary;
+    }
+    
+    public PersonalInfo(PersonalInfoDto personalInfoDto) {
+        this.fullname = personalInfoDto.getFullname();
+        this.email = personalInfoDto.getEmail();
+        this.phone = personalInfoDto.getPhone();
+        this.location = personalInfoDto.getLocation();
+        this.summary = personalInfoDto.getSummary();
     }
 }

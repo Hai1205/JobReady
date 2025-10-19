@@ -30,14 +30,14 @@ function Command({
 }
 
 function CommandDialog({
-  tittle = "Command Palette",
+  title = "Command Palette",
   description = "Search for a command to run...",
   children,
   className,
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
-  tittle?: string;
+  title?: string;
   description?: string;
   className?: string;
   showCloseButton?: boolean;
@@ -45,7 +45,7 @@ function CommandDialog({
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
-        <DialogTitle>{tittle}</DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <DialogContent

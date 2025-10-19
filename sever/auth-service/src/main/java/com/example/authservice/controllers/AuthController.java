@@ -20,17 +20,17 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(
-            @ModelAttribute LoginRequest request,
+            @RequestPart("data") String dataJson,
             HttpServletResponse httpServletResponse) {
-        Response response = authService.login(request, httpServletResponse);
+        Response response = authService.login(dataJson, httpServletResponse);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(
-            @ModelAttribute RegisterRequest request) {
-        Response response = authService.register(request);
+            @RequestPart("data") String dataJson) {
+        Response response = authService.register(dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -45,8 +45,8 @@ public class AuthController {
     @PostMapping("/verify-otp/{email}")
     public ResponseEntity<Response> verifyOTP(
             @PathVariable("email") String email,
-            @ModelAttribute VerifyOtpRequest request) {
-        Response response = authService.verifyOTP(email, request);
+            @RequestPart("data") String dataJson) {
+        Response response = authService.verifyOTP(email, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -54,9 +54,9 @@ public class AuthController {
     @PutMapping("/change-password/{email}")
     public ResponseEntity<Response> changePassword(
             @PathVariable("email") String email,
-            @ModelAttribute ChangePasswordRequest changePasswordRequest) {
+            @RequestPart("data") String dataJson) {
         Response response = authService.changePassword(email,
-                changePasswordRequest);
+                dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -73,9 +73,9 @@ public class AuthController {
     @PutMapping("/forgot-password/{email}")
     public ResponseEntity<Response> forgotPassword(
             @PathVariable("email") String email,
-            @ModelAttribute ChangePasswordRequest changePasswordRequest) {
+            @RequestPart("data") String dataJson) {
         Response response = authService.forgotPassword(email,
-                changePasswordRequest);
+                dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -101,7 +101,7 @@ public class AuthController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> health() {
         Response response = new Response(200, "Auth Service is running");
-        
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

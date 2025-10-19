@@ -18,7 +18,7 @@ export default function CVBuilderPage() {
     if (!currentCV) {
       handleSetCurrentCV({
         id: crypto.randomUUID(),
-        tittle: "Untitled CV",
+        title: "Untitled CV",
         personalInfo: {
           fullname: "",
           email: "",

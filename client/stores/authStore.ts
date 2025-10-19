@@ -6,10 +6,8 @@ import { useCVStore } from "./cvStore";
 import { useUserStore } from "./userStore";
 
 interface IAuthDataResponse {
-	data: {
-		user: IUser;
-		isActive: boolean;
-	}
+	user: IUser;
+	isActive: boolean;
 }
 
 export interface IAuthStore extends IBaseStore {
@@ -47,9 +45,11 @@ export const useAuthStore = createStore<IAuthStore>(
 
 		register: async (fullname: string, email: string, password: string): Promise<IApiResponse<IAuthDataResponse>> => {
 			const formData = new FormData();
-			formData.append("fullname", fullname);
-			formData.append("email", email);
-			formData.append("password", password);
+			formData.append("data", JSON.stringify({
+				fullname,
+				email,
+				password,
+			}));
 
 			return await get().handleRequest(async () => {
 				return await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/register`, formData);
@@ -58,13 +58,16 @@ export const useAuthStore = createStore<IAuthStore>(
 
 		login: async (email: string, password: string): Promise<IApiResponse<IAuthDataResponse>> => {
 			const formData = new FormData();
-			formData.append("email", email);
-			formData.append("password", password);
+			formData.append("data", JSON.stringify({
+				email,
+				password,
+			}));
 
 			return await get().handleRequest(async () => {
 				const response = await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/login`, formData);
-				if (response && response?.data?.data) {
-					const user = response.data.data.user;
+				if (response && response?.data) {
+					const user = response.data.user;
+
 					set({
 						userAuth: user,
 						isAdmin: user.role === EUserRole.ADMIN,
@@ -97,7 +100,9 @@ export const useAuthStore = createStore<IAuthStore>(
 
 		verifyOTP: async (email: string, otp: string): Promise<IApiResponse> => {
 			const formData = new FormData();
-			formData.append("otp", otp);
+			formData.append("data", JSON.stringify({
+				otp,
+			}));
 
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.POST, `/auth/verify-otp/${email}`, formData);
@@ -114,19 +119,23 @@ export const useAuthStore = createStore<IAuthStore>(
 
 		forgotPassword: async (email: string, password: string, confirmPassword: string): Promise<IApiResponse> => {
 			const formData = new FormData();
-			formData.append("password", password);
-			formData.append("confirmPassword", confirmPassword);
+			formData.append("data", JSON.stringify({
+				password,
+				confirmPassword,
+			}));
 
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.PATCH, `/auth/forgot-password/${email}`, formData);
 			});
 		},
 
-		changePassword: async (email: string, oldPassword: string, password: string, confirmPassword: string): Promise<IApiResponse> => {
+		changePassword: async (email: string, oldPassword: string, newPassword: string, confirmPassword: string): Promise<IApiResponse> => {
 			const formData = new FormData();
-			formData.append("oldPassword", oldPassword);
-			formData.append("newPassword", password);
-			formData.append("confirmPassword", confirmPassword);
+			formData.append("data", JSON.stringify({
+				oldPassword,
+				newPassword,
+				confirmPassword
+			}));
 
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.PATCH, `/auth/change-password/${email}`, formData);
@@ -148,5 +157,5 @@ export const useAuthStore = createStore<IAuthStore>(
 			useUserStore.getState().reset();
 		},
 	}),
-	{ storageType: EStorageType.COOKIE }
+	{ storageType: EStorageType.LOCAL }
 );

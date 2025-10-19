@@ -35,12 +35,7 @@ export const getRefreshToken = (): string | null => {
 
 const axiosInstance = axios.create({
   baseURL: `${SERVER_URL}`,
-  // baseURL: `${SERVER_URL}/api/v1`,
   withCredentials: true,
-  headers: {
-    accept: "application/json",
-    "Content-Type": "application/json",
-  },
   timeout: 10000, // Add a timeout to prevent hanging requests
 });
 
@@ -210,9 +205,9 @@ export const handleRequest = async <T = unknown>(
     }
 
     // Set Content-Type based on data type (only for non-FormData)
-    if (data && !(data instanceof FormData)) {
-      headers['Content-Type'] = 'application/json';
-    }
+    // if (data && !(data instanceof FormData)) {
+    //   headers['Content-Type'] = 'application/json';
+    // }
     // For FormData, let axios set Content-Type automatically with boundary
 
     switch (type) {

@@ -43,7 +43,7 @@ function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader tittle="Dashboard" />
+      <DashboardHeader title="Dashboard" />
 
       <p className="text-muted-foreground">
         Welcome to your admin dashboard. Here&apos;s what&apos;s happening

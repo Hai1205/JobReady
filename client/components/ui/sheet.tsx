@@ -104,10 +104,10 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
 function SheetTitle({
   className,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.tittle>) {
+}: React.ComponentProps<typeof SheetPrimitive.Title>) {
   return (
-    <SheetPrimitive.tittle
-      data-slot="sheet-tittle"
+    <SheetPrimitive.Title
+      data-slot="sheet-title"
       className={cn("text-foreground font-semibold", className)}
       {...props}
     />
