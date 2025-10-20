@@ -1,38 +1,24 @@
 import { saveAs } from "file-saver";
 
-/**
- * Service để export CV sang PDF qua Puppeteer API (Chrome-based)
- */
 export class PDFExportService {
-    /**
-     * Export HTML element sang PDF
-     * 
-     * @param elementId - ID của element HTML cần export (vd: 'cv-content')
-     * @param filename - Tên file PDF output
-     */
+
     static async exportToPDF(elementId: string, filename: string = "CV.pdf"): Promise<void> {
         try {
-            // 1. Lấy HTML element
             const element = document.getElementById(elementId);
             if (!element) {
                 throw new Error(`Element with ID "${elementId}" not found`);
             }
 
-            // 2. Clone element để xử lý riêng
             const clonedElement = element.cloneNode(true) as HTMLElement;
 
-            // 3. Apply inline styles to all elements for better PDF rendering
             this.applyInlineStyles(clonedElement);
 
-            // 3.5. Transform HTML structure for PDF-optimized CSS
             this.transformHTMLForPDF(clonedElement);
 
-            // 4. Convert images to base64 để embed trong PDF
             const images = clonedElement.querySelectorAll("img");
             for (const img of Array.from(images)) {
                 if (img.src && !img.src.startsWith("data:")) {
                     try {
-                        // Nếu là URL, convert sang base64
                         const response = await fetch(img.src);
                         const blob = await response.blob();
                         const base64 = await this.blobToBase64(blob);
@@ -43,14 +29,11 @@ export class PDFExportService {
                 }
             }
 
-            // 5. Tạo wrapper với full styles
             const wrapper = document.createElement("div");
             wrapper.appendChild(clonedElement);
 
-            // 6. Lấy tất cả computed styles
             const styles = this.getComputedStyles();
 
-            // 7. Tạo HTML hoàn chỉnh với styles inline
             const htmlContent = `
         <!DOCTYPE html>
         <html lang="vi">
@@ -261,7 +244,6 @@ export class PDFExportService {
         </html>
       `;
 
-            // 8. Gọi API export
             const response = await fetch("/api/export-cv", {
                 method: "POST",
                 headers: {
@@ -273,14 +255,12 @@ export class PDFExportService {
                 }),
             });
 
-            // 9. Kiểm tra response
             if (!response.ok) {
                 const error = await response.json().catch(() => ({ error: response.statusText }));
                 console.error("API Error Details:", error);
                 throw new Error(error.error || error.message || `Failed to export PDF (${response.status})`);
             }
 
-            // 10. Download PDF
             const blob = await response.blob();
             saveAs(blob, filename);
 
@@ -291,18 +271,13 @@ export class PDFExportService {
         }
     }
 
-    /**
-     * Lấy tất cả CSS styles từ document
-     */
     private static getComputedStyles(): string {
         let styles = "";
 
-        // Lấy tất cả stylesheets
         const styleSheets = Array.from(document.styleSheets);
 
         styleSheets.forEach((styleSheet) => {
             try {
-                // Chỉ lấy styles từ same origin
                 const rules = styleSheet.cssRules || styleSheet.rules;
                 if (rules) {
                     Array.from(rules).forEach((rule) => {
@@ -310,12 +285,10 @@ export class PDFExportService {
                     });
                 }
             } catch (e) {
-                // Cross-origin stylesheets sẽ throw error, bỏ qua
                 console.warn("Cannot access stylesheet:", styleSheet.href);
             }
         });
 
-        // Lấy inline styles
         const inlineStyles = Array.from(document.querySelectorAll("style"));
         inlineStyles.forEach((style) => {
             styles += style.textContent + "\n";
@@ -324,9 +297,6 @@ export class PDFExportService {
         return styles;
     }
 
-    /**
-     * Export với custom HTML content
-     */
     static async exportCustomHTML(html: string, filename: string = "document.pdf"): Promise<void> {
         try {
             const response = await fetch("/api/export-cv", {
@@ -354,9 +324,6 @@ export class PDFExportService {
         }
     }
 
-    /**
-     * Convert Blob to base64 string
-     */
     private static blobToBase64(blob: Blob): Promise<string> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -366,18 +333,12 @@ export class PDFExportService {
         });
     }
 
-    /**
-     * Apply inline styles to elements for PDF rendering
-     * This ensures Tailwind classes are converted to actual CSS
-     */
     private static applyInlineStyles(element: HTMLElement): void {
-        // Get all elements
         const allElements = [element, ...Array.from(element.querySelectorAll("*"))];
 
         allElements.forEach((el) => {
             if (!(el instanceof HTMLElement)) return;
 
-            // Get computed styles
             const computedStyle = window.getComputedStyle(el);
 
             // Critical styles to preserve

@@ -1,4 +1,5 @@
 import { DataTable } from "@/components/admin/DataTable";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface UserTableProps {
   Users: IUser[];
@@ -20,6 +21,17 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getRoleColor = (role: string) => {
+  switch (role) {
+    case "admin":
+      return "bg-blue-500";
+    case "user":
+      return "bg-gray-500";
+    default:
+      return "bg-gray-500";
+  }
+};
+
 export const UserTable = ({
   Users,
   isLoading,
@@ -28,23 +40,46 @@ export const UserTable = ({
 }: UserTableProps) => {
   const columns = [
     {
-      header: "STT",
+      header: "No",
       accessor: (_: IUser, index: number) => index + 1,
     },
     {
-      header: "Tên Quản trị viên",
-      accessor: (user: IUser) => user.name,
+      header: "User",
+      accessor: (user: IUser) => (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={user?.avatarUrl} alt={user?.fullname || "User"} />
+            <AvatarFallback>
+              {user?.fullname ? user.fullname.substring(0, 2) : "User"}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex flex-col">
+            <span className="font-medium hover:underline">
+              {user?.fullname || "Unknown Artist"}
+            </span>
+
+            <span className="text-sm text-muted-foreground hover:underline">
+              @{user?.username || "unknown"}
+            </span>
+            <span className="text-sm text-muted-foreground hover:underline">
+              {user?.email || "unknown"}
+            </span>
+          </div>
+        </div>
+      ),
     },
     {
-      header: "Email",
-      accessor: (user: IUser) => user.email,
+      header: "Role",
+      accessor: (user: IUser) => (
+        <div className="inline-flex items-center justify-center gap-2">
+          <span className={`h-2 w-2 rounded-full ${getRoleColor(user.role)}`} />
+          <span className="capitalize">{user.role}</span>
+        </div>
+      ),
     },
-    // {
-    //   header: "Số điện thoại",
-    //   accessor: (user: IUser) => user.phone,
-    // },
     {
-      header: "Trạng thái",
+      header: "Status",
       accessor: (user: IUser) => (
         <div className="inline-flex items-center justify-center gap-2">
           <span

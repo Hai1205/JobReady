@@ -13,14 +13,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Save } from "lucide-react";
-import { EUserStatus } from "@/types/enum";
+import { Save, UserIcon } from "lucide-react";
+import { EUserRole, EUserStatus } from "@/types/enum";
+import { capitalizeEnumValue } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface CreateUserDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onChange: (field: keyof IUser, value: string | boolean) => void;
   data: IUser | null;
+  previewAvatar: string;
+  handleAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onUserCreated: () => void;
   isLoading: boolean;
 }
@@ -30,6 +34,8 @@ const CreateUserDialog = ({
   onOpenChange,
   onChange,
   data,
+  previewAvatar,
+  handleAvatarChange,
   onUserCreated,
   isLoading,
 }: CreateUserDialogProps) => {
@@ -64,81 +70,122 @@ const CreateUserDialog = ({
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.title
+                <Dialog.Title
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
                 >
                   Tạo quản trị viên
-                </Dialog.title>
+                </Dialog.Title>
 
                 <ScrollArea className="h-[42vh] pr-4 mt-4">
                   <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="create-name">Tên Quản trị viên</Label>
+                      <Label htmlFor="update-fullname">Fullname</Label>
                       <Input
-                        id="create-name"
-                        value={data?.name || ""}
-                        onChange={(e) => onChange("name", e.target.value)}
+                        id="update-fullname"
+                        value={data?.fullname || ""}
+                        onChange={(e) => onChange("fullname", e.target.value)}
                       />
                     </div>
                   </div>
 
                   <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="create-email">Email</Label>
+                      <Label htmlFor="update-email">Email</Label>
                       <Input
-                        id="create-email"
-                        type="email"
+                        id="update-email"
                         value={data?.email || ""}
                         onChange={(e) => onChange("email", e.target.value)}
                       />
                     </div>
                   </div>
 
-                  {/* <div className="grid gap-4">
+                  <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="create-password">Mật khẩu</Label>
+                      <Label htmlFor="update-username">Username</Label>
                       <Input
-                        id="create-password"
-                        type="password"
-                        value={data?.password || ""}
-                        onChange={(e) =>
-                          onChange("password" as keyof IUser, e.target.value)
-                        }
+                        id="update-username"
+                        value={data?.username || ""}
+                        onChange={(e) => onChange("username", e.target.value)}
                       />
                     </div>
                   </div>
 
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="create-phone">Số điện thoại</Label>
-                      <Input
-                        id="create-phone"
-                        value={data?.phone || ""}
-                        onChange={(e) => onChange("phone", e.target.value)}
-                      />
+                  <div className="flex items-center justify-center col-span-1 row-span-3">
+                    <div className="relative w-40 h-40 border border-gray-700 rounded-full overflow-hidden flex items-center justify-center bg-[#282828]">
+                      <Avatar className="rounded-full object-cover w-full h-full">
+                        <AvatarImage
+                          src={
+                            previewAvatar ? previewAvatar : "/placeholder.svg"
+                          }
+                          alt={data?.fullname}
+                        />
+                        <AvatarFallback>
+                          <UserIcon />
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="bg-[#1DB954] text-white hover:bg-[#1ed760]"
+                          onClick={() =>
+                            document.getElementById("avatar-input")?.click()
+                          }
+                        >
+                          Change
+                        </Button>
+
+                        <input
+                          id="avatar-input"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarChange}
+                        />
+                      </div>
                     </div>
-                  </div> */}
+                  </div>
 
                   <div className="grid gap-2 mt-3">
-                    <Label htmlFor="create-status">Trạng thái</Label>
+                    <Label htmlFor="update-role">Role</Label>
+                    <Select
+                      value={data?.role || EUserRole.USER}
+                      onValueChange={(value) =>
+                        onChange("role", value as EUserRole)
+                      }
+                    >
+                      <SelectTrigger id="update-role">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(EUserRole).map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {capitalizeEnumValue(role)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2 mt-3">
+                    <Label htmlFor="update-status">Status</Label>
                     <Select
                       value={data?.status || EUserStatus.PENDING}
                       onValueChange={(value) =>
                         onChange("status", value as EUserStatus)
                       }
                     >
-                      <SelectTrigger id="create-status">
-                        <SelectValue placeholder="Chọn trạng thái" />
+                      <SelectTrigger id="update-status">
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="active">Hoạt động</SelectItem>
-                        <SelectItem value="inactive">
-                          Ngừng hoạt động
-                        </SelectItem>
-                        <SelectItem value={EUserStatus.PENDING}>
-                          Đang chờ
-                        </SelectItem>
+                        {Object.values(EUserStatus).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {capitalizeEnumValue(status)}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

@@ -152,14 +152,14 @@ function AdminDashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {stats.recentActivity.map((activity) => (
-                <div key={activity._id} className="flex items-start">
+                <div key={activity.id} className="flex items-start">
                   <div className="bg-secondary p-2 rounded-full mr-3">
-                    {activity._id === 1 && <Users className="h-4 w-4" />}
-                    {activity._id === 2 && <Briefcase className="h-4 w-4" />}
-                    {activity._id === 3 && (
+                    {activity.id === 1 && <Users className="h-4 w-4" />}
+                    {activity.id === 2 && <Briefcase className="h-4 w-4" />}
+                    {activity.id === 3 && (
                       <MessageSquare className="h-4 w-4" />
                     )}
-                    {activity._id === 4 && <FileText className="h-4 w-4" />}
+                    {activity.id === 4 && <FileText className="h-4 w-4" />}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{activity.action}</p>

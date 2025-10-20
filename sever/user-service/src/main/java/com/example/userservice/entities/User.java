@@ -28,11 +28,11 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole role = UserRole.USER;
+    private UserRole role = UserRole.user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserStatus status = UserStatus.PENDING;
+    private UserStatus status = UserStatus.pending;
 
     // OAuth2 Provider Information
     private String oauthProvider; // google, facebook, github
@@ -82,13 +82,13 @@ public class User {
     }
 
     public enum UserRole {
-        USER,
-        ADMIN
+        user,
+        admin
     }
 
     public enum UserStatus {
-        ACTIVE,
-        BANNED,
-        PENDING
+        active,
+        banned,
+        pending
     }
 }

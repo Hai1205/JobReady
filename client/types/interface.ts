@@ -3,8 +3,10 @@ import { EAISuggestionType, EUserRole, EUserStatus } from "./enum";
 declare global {
     interface IUser {
         id: string
+        username: string
         email: string
         fullname: string
+        avatarUrl?: string
         role: EUserRole
         status: EUserStatus
     }
@@ -12,7 +14,7 @@ declare global {
     interface ICV {
         id: string
         userId?: string
-        avatar?: File | null  // For upload
+        avatar?: File | null
         title: string
         personalInfo: IPersonalInfo
         experiences: IExperience[]

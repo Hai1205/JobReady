@@ -17,7 +17,7 @@ interface SharedFilterProps {
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;
-  filterOptions: {
+  filterOptions?: {
     status?: { label: string; value: string }[];
     contentType?: { label: string; value: string }[];
   };
@@ -57,7 +57,7 @@ export const SharedFilter = ({
 
         <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-600" />
 
-        {filterOptions.status && (
+        {filterOptions?.status && (
           <div className="p-2">
             <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
               Status
@@ -85,7 +85,7 @@ export const SharedFilter = ({
           </div>
         )}
 
-        {filterOptions.status && filterOptions.contentType && (
+        {filterOptions?.status && filterOptions?.contentType && (
           <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-600" />
         )}
 

@@ -84,10 +84,10 @@ public class UserService extends BaseService {
         user.setPassword(passwordEncoder.encode(password));
 
         if (!role.isEmpty()) {
-            user.setRole(UserRole.valueOf(role.toUpperCase()));
+            user.setRole(UserRole.valueOf(role));
         }
         if (!status.isEmpty()) {
-            user.setStatus(UserStatus.valueOf(status.toUpperCase()));
+            user.setStatus(UserStatus.valueOf(status));
         }
 
         User savedUser = userRepository.save(user);
@@ -98,7 +98,7 @@ public class UserService extends BaseService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setStatus(UserStatus.ACTIVE);
+        user.setStatus(UserStatus.active);
         userRepository.save(user);
 
         return userMapper.toDto(user);
@@ -262,14 +262,14 @@ public class UserService extends BaseService {
             if (!privilegedChangeAllowed) {
                 throw new OurException("Forbidden", 403);
             }
-            existingUser.setRole(UserRole.valueOf(role.toUpperCase()));
+            existingUser.setRole(UserRole.valueOf(role));
         }
 
         if (status != null && !status.isEmpty()) {
             if (!privilegedChangeAllowed) {
                 throw new OurException("Forbidden", 403);
             }
-            existingUser.setStatus(UserStatus.valueOf(status.toUpperCase()));
+            existingUser.setStatus(UserStatus.valueOf(status));
         }
 
         User updatedUser = userRepository.save(existingUser);

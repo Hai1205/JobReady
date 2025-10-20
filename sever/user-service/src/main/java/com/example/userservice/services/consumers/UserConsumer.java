@@ -111,11 +111,12 @@ public class UserConsumer extends BaseConsumer {
                                         });
 
                         Map<String, Object> payload = (Map<String, Object>) params.get("payload");
+                        String username = (String) payload.get("username");
                         String email = (String) payload.get("email");
                         String password = (String) payload.get("password");
                         String fullname = (String) payload.get("fullname");
 
-                        UserDto user = userService.handleCreateUser("", email, password, fullname, "", "", null);
+                        UserDto user = userService.handleCreateUser(username, email, password, fullname, "", "", null);
 
                         var response = RabbitResponse.<UserDto>builder()
                                         .code(200)

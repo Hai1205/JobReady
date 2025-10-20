@@ -51,12 +51,12 @@ public class AuthService extends BaseService {
                 throw new OurException("Invalid credentials", 404);
             }
 
-            boolean isPending = userDto.getStatus().equals("PENDING");
+            boolean isPending = userDto.getStatus().equals("pending");
             if (isPending) {
                 throw new OurException("Account not verified. Please verify your account before logging in.", 403);
             }
 
-            boolean isBanned = userDto.getStatus().equals("BANNED");
+            boolean isBanned = userDto.getStatus().equals("banned");
             if (isBanned) {
                 throw new OurException("Account is banned. Please contact support.", 403);
             }
@@ -123,11 +123,12 @@ public class AuthService extends BaseService {
 
         try {
             RegisterRequest request = objectMapper.readValue(dataJson, RegisterRequest.class);
+            String username = request.getUsername();
             String email = request.getEmail();
             String password = request.getPassword();
             String fullname = request.getFullname();
 
-            UserDto userDto = userProducer.createUser(email, password, fullname);
+            UserDto userDto = userProducer.createUser(username, email, password, fullname);
 
             response.setMessage("Registration successful");
             response.setUser(userDto);

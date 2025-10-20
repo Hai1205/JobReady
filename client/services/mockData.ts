@@ -12,9 +12,9 @@ export const mockStats = {
         { name: "FAQ", views: 3210 },
     ],
     recentActivity: [
-        { _id: 1, action: "New user registered", time: "2 min ago" },
-        { _id: 2, action: "Job application submitted", time: "15 min ago" },
-        { _id: 3, action: "Contact form submitted", time: "1 hour ago" },
-        { _id: 4, action: "New blog post published", time: "3 hours ago" },
+        { id: 1, action: "New user registered", time: "2 min ago" },
+        { id: 2, action: "Job application submitted", time: "15 min ago" },
+        { id: 3, action: "Contact form submitted", time: "1 hour ago" },
+        { id: 4, action: "New blog post published", time: "3 hours ago" },
     ],
 };

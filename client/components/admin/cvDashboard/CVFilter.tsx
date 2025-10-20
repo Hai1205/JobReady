@@ -19,21 +19,6 @@ export const CVFilter = ({
   applyFilters,
   closeMenuMenuFilters,
 }: CVFilterProps) => {
-  const filterOptions = {
-    status: [
-      { label: "Hoạt động", value: "active" },
-      { label: "Không hoạt động", value: "inactive" },
-    ],
-    contentType: [
-      { label: "Hồ sơ du học", value: "Hồ sơ du học" },
-      { label: "Chi phí", value: "Chi phí" },
-      { label: "Visa", value: "Visa" },
-      { label: "Ngôn ngữ", value: "Ngôn ngữ" },
-      { label: "Định cư", value: "Định cư" },
-      { label: "Dịch vụ", value: "Dịch vụ" },
-    ],
-  };
-
   return (
     <SharedFilter
       openMenuFilters={openMenuFilters}
@@ -43,7 +28,6 @@ export const CVFilter = ({
       clearFilters={clearFilters}
       applyFilters={applyFilters}
       closeMenuMenuFilters={closeMenuMenuFilters}
-      filterOptions={filterOptions}
     />
   );
 };

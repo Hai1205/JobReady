@@ -1,13 +1,14 @@
 "use client";
 
 import { SharedFilter } from "@/components/admin/SharedFilter";
-import { EUserStatus } from "@/types/enum";
+import { capitalizeEnumValue } from "@/lib/utils";
+import { EUserRole, EUserStatus } from "@/types/enum";
 
 interface UserFilterProps {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
-  activeFilters: { status: string[] };
-  toggleFilter: (value: string, type: "status") => void;
+  activeFilters: { status: string[]; role: string[] };
+  toggleFilter: (value: string, type: "status" | "role") => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;
@@ -22,21 +23,24 @@ export const UserFilter = ({
   applyFilters,
   closeMenuMenuFilters,
 }: UserFilterProps) => {
-  const handleToggleFilter = (
-    value: string,
-    type: "status"
-  ) => {
+  const handleToggleFilter = (value: string, type: "status" | "role") => {
     if (type === "status") {
       toggleFilter(value, "status");
+    }
+    if (type === "role") {
+      toggleFilter(value, "role");
     }
   };
 
   const filterOptions = {
-    status: [
-      { label: "Hoạt động", value: EUserStatus.ACTIVE },
-      { label: "Ngừng hoạt động", value: EUserStatus.INACTIVE },
-      { label: "Đang chờ", value: EUserStatus.PENDING },
-    ],
+    status: Object.values(EUserStatus).map((status) => ({
+      label: capitalizeEnumValue(status),
+      value: status,
+    })),
+    role: Object.values(EUserRole).map((role) => ({
+      label: capitalizeEnumValue(role),
+      value: role,
+    })),
   };
 
   return (

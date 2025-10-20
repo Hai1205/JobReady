@@ -52,7 +52,7 @@ public class UserMapper {
             try {
                 user.setRole(UserRole.valueOf(dto.getRole()));
             } catch (IllegalArgumentException e) {
-                user.setRole(UserRole.USER);
+                user.setRole(UserRole.user);
             }
         }
 
@@ -60,7 +60,7 @@ public class UserMapper {
             try {
                 user.setStatus(UserStatus.valueOf(dto.getStatus()));
             } catch (IllegalArgumentException e) {
-                user.setStatus(UserStatus.PENDING);
+                user.setStatus(UserStatus.pending);
             }
         }
 

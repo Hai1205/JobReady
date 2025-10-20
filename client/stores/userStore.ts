@@ -19,16 +19,16 @@ export interface IUserStore extends IBaseStore {
 		email: string,
 		password: string,
 		fullname: string,
+		avatar: File | null,
 		role: string,
 		status: string,
-		avatar: File,
 	) => Promise<IApiResponse<IUserDataResponse>>;
 	updateUser: (
 		userId: string,
 		fullname: string,
+		avatar: File | null,
 		role: string,
 		status: string,
-		avatar: File,
 	) => Promise<IApiResponse<IUserDataResponse>>;
 	deleteUser: (
 		userId: string
@@ -61,9 +61,9 @@ export const useUserStore = createStore<IUserStore>(
 			email: string,
 			password: string,
 			fullname: string,
+			avatar: File | null,
 			role: string,
 			status: string,
-			avatar: File,
 		): Promise<IApiResponse<IUserDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
@@ -83,9 +83,9 @@ export const useUserStore = createStore<IUserStore>(
 		updateUser: async (
 			userId: string,
 			fullname: string,
+			avatar: File | null,
 			role: string,
 			status: string,
-			avatar: File,
 		): Promise<IApiResponse<IUserDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({

@@ -14,10 +14,10 @@ import { UserTable } from "@/components/admin/userDashboard/UserTable";
 import { toast } from "react-toastify";
 import { useUserStore } from "@/stores/userStore";
 import { useAuthStore } from "@/stores/authStore";
-import { EUserStatus } from "@/types/enum";
+import { EUserRole, EUserStatus } from "@/types/enum";
 
 // Initialize empty filters
-const initialFilters = { status: [] as string[] };
+const initialFilters = { status: [] as string[], role: [] as string[] };
 
 function UserDashboardPage() {
   const { isLoading, getAllUsers, createUser, updateUser } = useUserStore();
@@ -31,19 +31,41 @@ function UserDashboardPage() {
 
   const [activeFilters, setActiveFilters] = useState<{
     status: string[];
+    role: string[];
   }>(initialFilters);
-  const [allUsers, setAllUsers] = useState<IUser[] | []>([]);
-  const [filteredUsers, setFilteredUsers] = useState<IUser[] | []>([]);
+  const [allUsers, setAllUsers] = useState<IUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [previewAvatar, setPreviewAvatar] = useState<string>("");
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const defaultUser: ExtendedUserData = {
+    id: "",
+    username: "",
+    email: "",
+    password: "",
+    fullname: "",
+    role: EUserRole.USER,
+    status: EUserStatus.PENDING,
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setPreviewAvatar(URL.createObjectURL(file));
+    }
+  };
+
+  const fetchData = useCallback(() => {
+    return async () => {
       const res = await getAllUsers();
       const data = res?.data?.users || [];
       setAllUsers(data);
       setFilteredUsers(data);
     };
+  }, []);
 
-    // Skip window check to avoid hydration error
+  useEffect(() => {
     fetchData();
   }, [getAllUsers]);
 
@@ -57,9 +79,8 @@ function UserDashboardPage() {
         const searchTerms = query.toLowerCase().trim();
         results = results.filter(
           (user) =>
-            user.name.toLowerCase().includes(searchTerms) ||
+            user.fullname.toLowerCase().includes(searchTerms) ||
             user.email.toLowerCase().includes(searchTerms)
-          // user.phone.toLowerCase().includes(searchTerms)
         );
       }
 
@@ -78,16 +99,13 @@ function UserDashboardPage() {
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-
-      // Filter data based on current searchQuery and activeFilters
-      // Only filter when Search button is clicked
       filterData(searchQuery, activeFilters);
     },
     [searchQuery, activeFilters, filterData]
   );
 
   // Toggle filter without auto-filtering
-  const toggleFilter = (value: string, type: "status") => {
+  const toggleFilter = (value: string, type: "status" | "role") => {
     setActiveFilters((prev) => {
       const updated = { ...prev };
       if (updated[type]?.includes(value)) {
@@ -97,11 +115,7 @@ function UserDashboardPage() {
       }
       return updated;
     });
-    // Removed auto-filtering when filter changes
   };
-
-  // Removed useEffect that auto-filtered when activeFilters changed
-  // to only filter when Apply button is clicked
 
   const clearFilters = () => {
     setActiveFilters(initialFilters);
@@ -111,8 +125,6 @@ function UserDashboardPage() {
   };
 
   const applyFilters = () => {
-    // Filter data based on current activeFilters and searchQuery
-    // Only filter when Apply button is clicked
     filterData(searchQuery, activeFilters);
     closeMenuMenuFilters();
   };
@@ -120,49 +132,35 @@ function UserDashboardPage() {
   const [openMenuFilters, setOpenMenuFilters] = useState(false);
   const closeMenuMenuFilters = () => setOpenMenuFilters(false);
 
-  // Use a key to reset the dialog data completely between opens
   const [dialogKey, setDialogKey] = useState(0);
-  // Use extended type for user data to include password field
-  // Ensure correct typing to avoid hydration error
   type ExtendedUserData = Omit<IUser, "status"> & {
     status: EUserStatus;
+    role: EUserRole;
     password?: string;
   };
 
-  // Use useState with consistent initialization for client and server
   const [data, setData] = useState<ExtendedUserData | null>(null);
 
   const handleChange = (
     field: keyof ExtendedUserData,
     value: string | string[] | boolean
   ) => {
-    // setData((prev) => {
-    //   // If prev is null, create a new object with default values
-    //   if (!prev) {
-    //     const defaultData = {
-    //       _id: "",
-    //       email: "",
-    //       password: "",
-    //       name: "",
-    //       phone: "",
-    //       role: "user",
-    //       status: EUserStatus.PENDING,
-    //     };
-    //     return { ...defaultData, [field]: value } as ExtendedUserData;
-    //   }
-    //   // If prev is not null, update the current value
-    //   return { ...prev, [field]: value };
-    // });
+    setData((prev) => {
+      if (!prev) {
+        return { ...defaultUser, [field]: value } as ExtendedUserData;
+      }
+
+      return { ...prev, [field]: value };
+    });
   };
 
   const handleUpdate = async () => {
     if (data) {
       await updateUser(
         data.id,
-        data.email,
-        data.password || "",
-        data.name,
-        // data.phone,
+        data.fullname,
+        avatarFile || null,
+        data.role,
         data.status
       );
 
@@ -186,8 +184,9 @@ function UserDashboardPage() {
       await createUser(
         data.email,
         data.password || "",
-        data.name,
-        // data.phone,
+        data.fullname,
+        avatarFile || null,
+        data.role,
         data.status
       );
 
@@ -195,21 +194,18 @@ function UserDashboardPage() {
     }
   };
 
+  const handleRefresh = () => {
+    setActiveFilters(initialFilters);
+    setSearchQuery("");
+    fetchData();
+  };
+
   return (
     <div className="space-y-4">
       <DashboardHeader
         title="User Dashboard"
         onCreateClick={() => {
-          // Initialize an empty object instead of null when creating new
-          // const defaultUser: ExtendedUserData = {
-          //   id: "",
-          //   email: "",
-          //   password: "",
-          //   name: "",
-          // phone: "",
-          // status: EUserStatus.PENDING,
-          // };
-          // setData(defaultUser);
+          setData(defaultUser);
           setIsCreateUserOpen(true);
         }}
         createButtonText="Create User"
@@ -230,6 +226,8 @@ function UserDashboardPage() {
         onChange={handleChange}
         onUserCreated={handleCreate}
         data={data}
+        previewAvatar={previewAvatar}
+        handleAvatarChange={handleAvatarChange}
         isLoading={isLoading}
       />
 
@@ -245,6 +243,8 @@ function UserDashboardPage() {
         }}
         onChange={handleChange}
         data={data}
+        previewAvatar={previewAvatar}
+        handleAvatarChange={handleAvatarChange}
         onUserUpdated={handleUpdate}
         isLoading={isLoading}
       />
@@ -268,15 +268,7 @@ function UserDashboardPage() {
                   size="sm"
                   className="h-8 gap-1"
                   onClick={async () => {
-                    // Reset filters
-                    setActiveFilters(initialFilters);
-                    setSearchQuery("");
-
-                    // Refresh data from API
-                    const res = await getAllUsers();
-                    const data = res?.data?.users || [];
-                    setAllUsers(data);
-                    setFilteredUsers(data);
+                    handleRefresh();
                   }}
                 >
                   <RefreshCw className="h-4 w-4" />

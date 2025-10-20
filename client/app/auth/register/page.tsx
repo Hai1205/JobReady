@@ -17,6 +17,7 @@ const RegisterPage: React.FC = () => {
 
   const [formData, setFormData] = useState({
     fullname: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -39,6 +40,10 @@ const RegisterPage: React.FC = () => {
 
     if (!formData.fullname) {
       newErrors.fullname = "Họ và tên là bắt buộc";
+    }
+    
+    if (!formData.username) {
+      newErrors.username = "Username là bắt buộc";
     }
 
     if (!formData.email.trim()) {
@@ -72,6 +77,7 @@ const RegisterPage: React.FC = () => {
 
     const response = await register(
       formData.fullname,
+      formData.username,
       formData.email,
       formData.password
     );
@@ -112,6 +118,27 @@ const RegisterPage: React.FC = () => {
           {errors.fullname && (
             <Alert variant="destructive">
               <AlertDescription>{errors.fullname}</AlertDescription>
+            </Alert>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="username"
+              name="username"
+              type="text"
+              placeholder="Nhập username của bạn"
+              value={formData.username}
+              onChange={handleChange}
+              className="pl-10"
+            />
+          </div>
+          {errors.username && (
+            <Alert variant="destructive">
+              <AlertDescription>{errors.username}</AlertDescription>
             </Alert>
           )}
         </div>

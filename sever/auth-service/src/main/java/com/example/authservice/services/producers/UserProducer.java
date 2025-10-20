@@ -12,13 +12,11 @@ import com.example.authservice.dtos.UserDto;
 import com.example.rabbitmq.constants.RabbitConstants;
 import com.example.rabbitmq.dtos.RabbitHeader;
 import com.example.rabbitmq.services.RabbitRPCService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
 public class UserProducer {
         private final RabbitRPCService rpcService;
-        private final ObjectMapper objectMapper = new ObjectMapper();
 
         public UserDto findUserByEmail(String email) {
                 RabbitHeader header = RabbitHeader.builder()
@@ -47,7 +45,7 @@ public class UserProducer {
                 return userDto;
         }
 
-        public UserDto createUser(String email, String password, String fullname) {
+        public UserDto createUser(String username, String email, String password, String fullname) {
                 RabbitHeader header = RabbitHeader.builder()
                                 .correlationId(UUID.randomUUID().toString())
                                 .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
@@ -58,6 +56,7 @@ public class UserProducer {
                                 .build();
 
                 Map<String, Object> params = new HashMap<>();
+                params.put("username", username);
                 params.put("email", email);
                 params.put("password", password);
                 params.put("fullname", fullname);

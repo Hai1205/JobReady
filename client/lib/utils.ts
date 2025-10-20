@@ -131,3 +131,8 @@ export const cleanString = (input: string): string => {
     .filter(Boolean)
     .join(",");
 }
+
+export const capitalizeEnumValue = (value: string | number): string => {
+  const str = value.toString();
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
