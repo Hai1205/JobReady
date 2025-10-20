@@ -63,16 +63,16 @@ export function FileImport() {
           <Upload className="h-8 w-8 text-primary" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">Import Existing CV</h3>
+          <h3 className="text-lg font-semibold">Nhập CV Hiện Có</h3>
           <p className="text-sm text-muted-foreground">
-            Upload a PDF or DOCX file to edit your existing CV
+            Đăng tải file PDF hoặc DOCX để chỉnh sửa CV hiện có của bạn
           </p>
         </div>
         <label htmlFor="file-upload">
           <Button variant="outline" disabled={isUploading} asChild>
             <span>
               <FileText className="mr-2 h-4 w-4" />
-              {isUploading ? "Uploading..." : "Choose File"}
+              {isUploading ? "Uploading..." : "Chọn File"}
             </span>
           </Button>
           <input

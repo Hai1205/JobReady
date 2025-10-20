@@ -63,7 +63,7 @@ export function AISuggestionsList({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>AI Suggestions</CardTitle>
+          <CardTitle>Gợi Ý AI</CardTitle>
           <CardDescription>No suggestions available yet</CardDescription>
         </CardHeader>
         <CardContent className="text-center text-muted-foreground py-8">
@@ -79,7 +79,7 @@ export function AISuggestionsList({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lightbulb className="h-5 w-5" />
-          AI Suggestions ({aiSuggestions.length})
+          Gợi Ý AI ({aiSuggestions.length})
         </CardTitle>
         <CardDescription>
           Review and apply suggestions to improve your CV

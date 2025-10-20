@@ -382,7 +382,7 @@ export const mockEducations: IEducation[] = [
     },
 ];
 
-// Mock AI Suggestions Data
+// Mock Gợi Ý AI Data
 export const mockAISuggestions: IAISuggestion[] = [
     {
         id: "suggestion-1",

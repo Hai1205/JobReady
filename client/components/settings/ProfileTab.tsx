@@ -79,7 +79,7 @@ export default function ProfileTab({
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="username">Username</Label>
+          <Label htmlFor="username">Tên đăng nhập</Label>
           <Input
             id="username"
             type="username"

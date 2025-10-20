@@ -76,7 +76,7 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
         );
         setActiveTab("suggestions");
       } else {
-        toast.error((response as any)?.message || "Failed to analyze CV");
+        toast.error((response as any)?.message || "Failed to Phân Tích");
       }
     } catch (error) {
       console.error("Error analyzing CV:", error);
@@ -100,11 +100,11 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
         case "summary":
           content = currentCV.personalInfo?.summary || "";
           break;
-        case "experience":
-          content = JSON.stringify(currentCV.experience);
+        case "experiences":
+          content = JSON.stringify(currentCV.experiences);
           break;
-        case "education":
-          content = JSON.stringify(currentCV.education);
+        case "educations":
+          content = JSON.stringify(currentCV.educations);
           break;
         case "skills":
           content = currentCV.skills?.join(", ") || "";
@@ -159,23 +159,23 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
         });
         applied = true;
         break;
-      case "experience":
+      case "experiences":
         try {
           const parsedExperience = JSON.parse(content);
-          handleUpdateCV({ experience: parsedExperience });
+          handleUpdateCV({ experiences: parsedExperience });
           applied = true;
         } catch (error) {
-          toast.error("Failed to parse experience data");
+          toast.error("Failed to parse experiences data");
           return;
         }
         break;
-      case "education":
+      case "educations":
         try {
           const parsedEducation = JSON.parse(content);
-          handleUpdateCV({ education: parsedEducation });
+          handleUpdateCV({ educations: parsedEducation });
           applied = true;
         } catch (error) {
-          toast.error("Failed to parse education data");
+          toast.error("Failed to parse educations data");
           return;
         }
         break;
@@ -268,7 +268,7 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="analyze">Job Match Analysis</TabsTrigger>
-          <TabsTrigger value="suggestions">AI Suggestions</TabsTrigger>
+          <TabsTrigger value="suggestions">Gợi Ý AI</TabsTrigger>
         </TabsList>
 
         <TabsContent value="analyze" className="space-y-4">

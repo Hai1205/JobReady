@@ -34,17 +34,13 @@ export default function CVBuilderPage() {
     }
   }, [userAuth, currentCV, router, handleSetCurrentCV, handleSetCurrentStep]);
 
-  // if (!userAuth) {
-  //   return null;
-  // }
-
   return (
     <div className="container mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-8">
         <div>
-          <h1 className="text-3xl font-bold">CV Builder</h1>
+          <h1 className="text-3xl font-bold">Tạo CV</h1>
           <p className="text-muted-foreground">
-            Create your professional CV step by step
+            Tạo CV chuyên nghiệp của bạn từng bước một
           </p>
         </div>
 

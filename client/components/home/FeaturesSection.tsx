@@ -10,10 +10,10 @@ export default function FeaturesSection() {
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
-          <h3 className="text-xl font-semibold">AI-Powered Suggestions</h3>
+          <h3 className="text-xl font-semibold">Gợi Ý Từ AI</h3>
           <p className="text-muted-foreground leading-relaxed">
-            Get real-time AI suggestions to improve your CV content, highlight
-            key achievements, and optimize for ATS systems.
+            Nhận gợi ý thời gian thực từ AI để cải thiện nội dung CV, làm nổi
+            bật thành tích quan trọng và tối ưu hóa cho hệ thống ATS.
           </p>
         </div>
 
@@ -21,10 +21,10 @@ export default function FeaturesSection() {
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10">
             <Zap className="h-6 w-6 text-secondary" />
           </div>
-          <h3 className="text-xl font-semibold">Step-by-Step Builder</h3>
+          <h3 className="text-xl font-semibold">Trình Tạo Theo Bước</h3>
           <p className="text-muted-foreground leading-relaxed">
-            Easy-to-use multi-step form guides you through creating a complete
-            CV. Import existing CVs or start from scratch.
+            Form đa bước dễ sử dụng hướng dẫn bạn tạo CV hoàn chỉnh. Có thể nhập
+            CV hiện có hoặc bắt đầu từ đầu.
           </p>
         </div>
 
@@ -32,10 +32,10 @@ export default function FeaturesSection() {
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10">
             <CheckCircle className="h-6 w-6 text-accent" />
           </div>
-          <h3 className="text-xl font-semibold">Multiple CV Management</h3>
+          <h3 className="text-xl font-semibold">Quản Lý Nhiều CV</h3>
           <p className="text-muted-foreground leading-relaxed">
-            Create and manage multiple CVs for different job applications. Keep
-            everything organized in one place.
+            Tạo và quản lý nhiều CV cho các ứng tuyển việc làm khác nhau. Giữ
+            mọi thứ có tổ chức ở một nơi.
           </p>
         </div>
       </div>

@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "JobReady - AI-Powered CV Builder",
-  description: "Create professional CVs with AI assistance",
+  title: "JobReady - Trình Tạo CV Bằng AI",
+  description: "Tạo CV chuyên nghiệp với sự trợ giúp của AI",
   icons: {
     icon: "/images/logo1.png",
     shortcut: "/images/logo1.png",

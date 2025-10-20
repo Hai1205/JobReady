@@ -65,10 +65,10 @@ export function CVBuilderWizard() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* CV title */}
+      {/* Tiêu đề */}
       {currentCV && (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="cv-title">CV title</Label>
+          <Label htmlFor="cv-title">Tiêu đề</Label>
           <Input
             id="cv-title"
             value={currentCV.title}

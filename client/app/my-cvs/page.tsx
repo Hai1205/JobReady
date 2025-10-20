@@ -81,7 +81,7 @@ export default function MyCVsPage() {
   if (loading) {
     return (
       <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-12">
-        <p className="text-muted-foreground">Loading your CVs...</p>
+        <p className="text-muted-foreground">Đang tải CV của bạn...</p>
       </div>
     );
   }

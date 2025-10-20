@@ -74,13 +74,13 @@ const CreateUserDialog = ({
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
                 >
-                  Tạo quản trị viên
+                  Tạo người dùng mới
                 </Dialog.Title>
 
                 <ScrollArea className="h-[42vh] pr-4 mt-4">
                   <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="update-fullname">Fullname</Label>
+                      <Label htmlFor="update-fullname">Họ và tên</Label>
                       <Input
                         id="update-fullname"
                         value={data?.fullname || ""}
@@ -134,7 +134,7 @@ const CreateUserDialog = ({
                             document.getElementById("avatar-input")?.click()
                           }
                         >
-                          Change
+                          Thay đổi
                         </Button>
 
                         <input
@@ -149,7 +149,7 @@ const CreateUserDialog = ({
                   </div>
 
                   <div className="grid gap-2 mt-3">
-                    <Label htmlFor="update-role">Role</Label>
+                    <Label htmlFor="update-role">Vai trò</Label>
                     <Select
                       value={data?.role || EUserRole.USER}
                       onValueChange={(value) =>
@@ -170,7 +170,7 @@ const CreateUserDialog = ({
                   </div>
 
                   <div className="grid gap-2 mt-3">
-                    <Label htmlFor="update-status">Status</Label>
+                    <Label htmlFor="update-status">Trạng thái</Label>
                     <Select
                       value={data?.status || EUserStatus.PENDING}
                       onValueChange={(value) =>

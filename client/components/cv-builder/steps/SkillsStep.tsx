@@ -37,12 +37,22 @@ export function SkillsStep() {
     }
   };
 
+  const skillSuggestions = [
+    "JavaScript",
+    "React",
+    "Node.js",
+    "Python",
+    "Communication",
+    "Leadership",
+    "Problem Solving",
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-bold">Skills</h2>
+        <h2 className="text-2xl font-bold">Kỹ năng</h2>
         <p className="text-muted-foreground">
-          Add your technical and soft skills
+          Thêm kỹ năng kỹ thuật và mềm của bạn
         </p>
       </div>
 
@@ -51,7 +61,7 @@ export function SkillsStep() {
           value={skillInput}
           onChange={(e) => setSkillInput(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="Type a skill and press Enter or click Add"
+          placeholder="Nhập kỹ năng và nhấn Enter hoặc nhấn Thêm"
         />
 
         <Button
@@ -60,7 +70,7 @@ export function SkillsStep() {
           className="bg-primary text-primary-foreground shadow-md hover:shadow-lg transform hover:-translate-y-[1px] transition-all"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add
+          Thêm
         </Button>
       </div>
 
@@ -85,23 +95,15 @@ export function SkillsStep() {
       ) : (
         <div className="rounded-lg border border-dashed border-border p-8 text-center">
           <p className="text-muted-foreground">
-            No skills added yet. Start typing to add your skills.
+            Chưa có kỹ năng nào được thêm. Bắt đầu gõ để thêm kỹ năng của bạn.
           </p>
         </div>
       )}
 
       <div className="rounded-lg bg-muted p-4">
-        <h3 className="mb-2 font-semibold">Suggestions:</h3>
+        <h3 className="mb-2 font-semibold">Gợi ý:</h3>
         <div className="flex flex-wrap gap-2">
-          {[
-            "JavaScript",
-            "React",
-            "Node.js",
-            "Python",
-            "Communication",
-            "Leadership",
-            "Problem Solving",
-          ].map((suggestion) => (
+          {skillSuggestions.map((suggestion) => (
             <Button
               key={suggestion}
               size="sm"

@@ -70,9 +70,9 @@ export function Navbar() {
   }
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/cv-builder", label: "CV Builder" },
-    { href: "/my-cvs", label: "My CVs" },
+    { href: "/", label: "Trang Chủ" },
+    { href: "/cv-builder", label: "Tạo CV" },
+    { href: "/my-cvs", label: "CV Của Tôi" },
   ];
 
   const allNavLinks = isAdmin
@@ -157,7 +157,7 @@ export function Navbar() {
                 onClick={handleLogout}
                 className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
               >
-                Logout
+                Đăng xuất
               </Button>
             </div>
           ) : (
@@ -168,7 +168,7 @@ export function Navbar() {
                   size="sm"
                   className="hover:bg-primary/10 hover:text-primary transition-all duration-200"
                 >
-                  Login
+                  Đăng nhập
                 </Button>
               </Link>
               <Link href="/auth/register">
@@ -176,7 +176,7 @@ export function Navbar() {
                   size="sm"
                   className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200"
                 >
-                  Register
+                  Đăng ký
                 </Button>
               </Link>
             </div>
@@ -266,7 +266,7 @@ export function Navbar() {
                     onClick={handleLogout}
                     className="w-full bg-gradient-to-r from-destructive/10 to-destructive/5 hover:from-destructive/20 hover:to-destructive/10 text-destructive hover:text-destructive border-destructive/30 hover:border-destructive/50 transition-all duration-200"
                   >
-                    Logout
+                    Đăng xuất
                   </Button>
                 </div>
               ) : (
@@ -279,7 +279,7 @@ export function Navbar() {
                       variant="outline"
                       className="w-full hover:bg-accent/50 transition-all duration-200"
                     >
-                      Login
+                      Đăng nhập
                     </Button>
                   </Link>
                   <Link
@@ -287,7 +287,7 @@ export function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-200">
-                      Register
+                      Đăng ký
                     </Button>
                   </Link>
                 </div>

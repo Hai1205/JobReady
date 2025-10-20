@@ -54,22 +54,21 @@ export function ExperienceStep() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Work Experience</h2>
+          <h2 className="text-2xl font-bold">Kinh nghiệm làm việc</h2>
           <p className="text-muted-foreground">
-            Add your professional work history
+            Thêm thông tin kinh nghiệm làm việc của bạn
           </p>
         </div>
         <Button onClick={addExperience} size="sm">
           <Plus className="mr-2 h-4 w-4" />
-          Add Experience
+          Thêm Kinh nghiệm
         </Button>
       </div>
 
       {currentCV.experiences.length === 0 ? (
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">
-            No work experiences added yet. Click "Add Experience" to get
-            started.
+            Chưa có kinh nghiệm làm việc nào được thêm. Nhấn "Thêm Kinh nghiệm" để bắt đầu.
           </p>
         </Card>
       ) : (
@@ -78,7 +77,7 @@ export function ExperienceStep() {
             <Card key={exp.id} className="p-6">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">Experience {index + 1}</h3>
+                  <h3 className="font-semibold">Kinh nghiệm {index + 1}</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -90,7 +89,7 @@ export function ExperienceStep() {
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="flex flex-col gap-2">
-                    <Label>Company *</Label>
+                    <Label>Công ty *</Label>
                     <Input
                       value={exp.company}
                       onChange={(e) =>
@@ -105,7 +104,7 @@ export function ExperienceStep() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <Label>Position *</Label>
+                    <Label>Chức vụ *</Label>
                     <Input
                       value={exp.position}
                       onChange={(e) =>
@@ -120,7 +119,7 @@ export function ExperienceStep() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <Label>Start Date</Label>
+                    <Label>Ngày bắt đầu</Label>
                     <Input
                       type="month"
                       value={exp.startDate}
@@ -135,7 +134,7 @@ export function ExperienceStep() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <Label>End Date</Label>
+                    <Label>Ngày kết thúc</Label>
                     <Input
                       type="month"
                       value={exp.endDate}
@@ -152,7 +151,7 @@ export function ExperienceStep() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label>Description</Label>
+                  <Label>Mô tả</Label>
                   <HighlightableTextarea
                     value={exp.description}
                     onChange={(value) =>

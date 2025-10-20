@@ -58,7 +58,7 @@ export interface IJobDescriptionResult {
 }
 
 /**
- * Analyze CV with AI to get strengths, weaknesses, and suggestions
+ * Phân Tích with AI to get strengths, weaknesses, and suggestions
  * @param cvId - UUID of the CV to analyze
  */
 export const analyzeCV = async (
@@ -93,7 +93,7 @@ export const improveCV = async (
 };
 
 /**
- * Analyze CV against a job description
+ * Phân Tích against a job description
  * @param cvId - UUID of the CV
  * @param jobDescription - Job description text (optional if file is provided)
  * @param jdFile - Job description file (PDF/DOCX) (optional if text is provided)

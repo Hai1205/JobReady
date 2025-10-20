@@ -43,10 +43,10 @@ export function JobDescriptionMatchResult({
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 80) return "Excellent Match";
-    if (score >= 60) return "Good Match";
-    if (score >= 40) return "Fair Match";
-    return "Poor Match";
+    if (score >= 80) return "Khớp Xuất Sắc";
+    if (score >= 60) return "Khớp Tốt";
+    if (score >= 40) return "Khớp Khá";
+    return "Khớp Kém";
   };
 
   return (
@@ -57,10 +57,10 @@ export function JobDescriptionMatchResult({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Match Score
+              Điểm Khớp
             </CardTitle>
             <CardDescription>
-              How well your CV matches this job description
+              Mức độ CV của bạn khớp với mô tả công việc
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -94,10 +94,10 @@ export function JobDescriptionMatchResult({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-yellow-600" />
-              Missing Keywords
+              Từ Khóa Thiếu
             </CardTitle>
             <CardDescription>
-              Important skills or keywords not found in your CV
+              Kỹ năng hoặc từ khóa quan trọng không tìm thấy trong CV của bạn
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -118,10 +118,10 @@ export function JobDescriptionMatchResult({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Briefcase className="h-5 w-5" />
-              Job Details
+              Chi Tiết Công Việc
             </CardTitle>
             <CardDescription>
-              Parsed information from the job description
+              Thông tin được phân tích từ mô tả công việc
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -152,7 +152,7 @@ export function JobDescriptionMatchResult({
                 <div className="grid grid-cols-2 gap-3">
                   {parsedJobDescription.jobLevel && (
                     <div>
-                      <p className="text-sm font-medium">Level</p>
+                      <p className="text-sm font-medium">Cấp Độ</p>
                       <p className="text-sm text-muted-foreground">
                         {parsedJobDescription.jobLevel}
                       </p>
@@ -160,7 +160,7 @@ export function JobDescriptionMatchResult({
                   )}
                   {parsedJobDescription.jobType && (
                     <div>
-                      <p className="text-sm font-medium">Type</p>
+                      <p className="text-sm font-medium">Loại</p>
                       <p className="text-sm text-muted-foreground">
                         {parsedJobDescription.jobType}
                       </p>
@@ -168,7 +168,7 @@ export function JobDescriptionMatchResult({
                   )}
                   {parsedJobDescription.location && (
                     <div>
-                      <p className="text-sm font-medium">Location</p>
+                      <p className="text-sm font-medium">Địa Điểm</p>
                       <p className="text-sm text-muted-foreground">
                         {parsedJobDescription.location}
                       </p>
@@ -176,7 +176,7 @@ export function JobDescriptionMatchResult({
                   )}
                   {parsedJobDescription.salary && (
                     <div>
-                      <p className="text-sm font-medium">Salary</p>
+                      <p className="text-sm font-medium">Lương</p>
                       <p className="text-sm text-muted-foreground">
                         {parsedJobDescription.salary}
                       </p>
@@ -192,7 +192,7 @@ export function JobDescriptionMatchResult({
                 <>
                   <Separator />
                   <div>
-                    <p className="text-sm font-medium mb-2">Required Skills</p>
+                    <p className="text-sm font-medium mb-2">Kỹ Năng Bắt Buộc</p>
                     <div className="flex flex-wrap gap-2">
                       {parsedJobDescription.requiredSkills.map(
                         (skill, index) => (
@@ -212,7 +212,7 @@ export function JobDescriptionMatchResult({
                 <>
                   <Separator />
                   <div>
-                    <p className="text-sm font-medium mb-2">Preferred Skills</p>
+                    <p className="text-sm font-medium mb-2">Kỹ Năng Ưu Tiên</p>
                     <div className="flex flex-wrap gap-2">
                       {parsedJobDescription.preferredSkills.map(
                         (skill, index) => (
@@ -232,7 +232,7 @@ export function JobDescriptionMatchResult({
                 <>
                   <Separator />
                   <div>
-                    <p className="text-sm font-medium mb-2">Responsibilities</p>
+                    <p className="text-sm font-medium mb-2">Trách Nhiệm</p>
                     <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                       {parsedJobDescription.responsibilities.map(
                         (resp, index) => (
@@ -250,7 +250,7 @@ export function JobDescriptionMatchResult({
                 <>
                   <Separator />
                   <div>
-                    <p className="text-sm font-medium mb-2">Requirements</p>
+                    <p className="text-sm font-medium mb-2">Yêu Cầu</p>
                     <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                       {parsedJobDescription.requirements.map((req, index) => (
                         <li key={index}>{req}</li>
@@ -266,7 +266,7 @@ export function JobDescriptionMatchResult({
                 <>
                   <Separator />
                   <div>
-                    <p className="text-sm font-medium mb-2">Benefits</p>
+                    <p className="text-sm font-medium mb-2">Phúc Lợi</p>
                     <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                       {parsedJobDescription.benefits.map((benefit, index) => (
                         <li key={index}>{benefit}</li>
@@ -283,9 +283,9 @@ export function JobDescriptionMatchResult({
       {analyzeSummary && (
         <Card>
           <CardHeader>
-            <CardTitle>AI Analysis Summary</CardTitle>
+            <CardTitle>Tóm Tắt Phân Tích AI</CardTitle>
             <CardDescription>
-              Detailed analysis from AI about your CV match
+              Phân tích chi tiết từ AI về mức độ khớp CV của bạn
             </CardDescription>
           </CardHeader>
           <CardContent>

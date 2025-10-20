@@ -16,9 +16,9 @@ export default function EmptyState({ onCreateNew }: EmptyStateProps) {
           <FileText className="h-10 w-10 text-primary" />
         </div>
         <div>
-          <h3 className="text-xl font-semibold">No CVs yet</h3>
+          <h3 className="text-xl font-semibold">Chưa có CV nào</h3>
           <p className="text-muted-foreground mt-2">
-            Create your first CV to get started
+            Tạo CV đầu tiên của bạn để bắt đầu
           </p>
         </div>
         <Button
@@ -27,7 +27,7 @@ export default function EmptyState({ onCreateNew }: EmptyStateProps) {
           className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-200 hover:scale-105"
         >
           <Plus className="mr-2 h-5 w-5" />
-          Create Your First CV
+          Tạo CV Đầu Tiên Của Bạn
         </Button>
       </div>
     </Card>

@@ -16,12 +16,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCVStore } from "@/stores/cvStore";
 
 export function AISuggestionsSidebar() {
-  const {
-    currentCV,
-    aiSuggestions,
-    handleApplySuggestion,
-    analyzeCV,
-  } = useCVStore();
+  const { currentCV, aiSuggestions, handleApplySuggestion, analyzeCV } =
+    useCVStore();
   const [analyzing, setAnalyzing] = useState(false);
 
   const handleAnalyze = async () => {
@@ -63,7 +59,7 @@ export function AISuggestionsSidebar() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold">AI Suggestions</h3>
+          <h3 className="font-semibold">Gợi Ý AI</h3>
         </div>
         {aiSuggestions.length > 0 && (
           <Badge variant="secondary">
@@ -85,7 +81,7 @@ export function AISuggestionsSidebar() {
         ) : (
           <>
             <Sparkles className="mr-2 h-4 w-4" />
-            Analyze CV
+            Phân Tích
           </>
         )}
       </Button>
@@ -146,7 +142,7 @@ export function AISuggestionsSidebar() {
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
           <Sparkles className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            Click "Analyze CV" to get AI-powered suggestions for improving your
+            Click "Phân Tích" to get AI-powered suggestions for improving your
             resume
           </p>
         </div>

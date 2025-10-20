@@ -1,4 +1,5 @@
 import { DataTable } from "@/components/admin/DataTable";
+import { formatDateAgo } from "@/lib/utils";
 
 interface ICVTableProps {
   CVs: ICV[];
@@ -9,20 +10,20 @@ interface ICVTableProps {
 export const CVTable = ({ CVs, isLoading, onDownload }: ICVTableProps) => {
   const columns = [
     {
-      header: "No",
+      header: "STT",
       accessor: (_: ICV, index: number) => index + 1,
     },
     {
-      header: "Title",
+      header: "Tiêu đề",
       accessor: (cv: ICV) => cv.title,
     },
     {
-      header: "Created At",
-      accessor: (cv: ICV) => cv.createdAt,
+      header: "Ngày tạo",
+      accessor: (cv: ICV) => formatDateAgo(cv.createdAt || ""),
     },
     {
-      header: "Updated At",
-      accessor: (cv: ICV) => cv.updatedAt,
+      header: "Ngày cập nhật",
+      accessor: (cv: ICV) => formatDateAgo(cv.updatedAt || ""),
     },
   ];
 

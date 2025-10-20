@@ -66,10 +66,10 @@ export function JobDescriptionImport({
       reader.onload = (event) => {
         const text = event.target?.result as string;
         setJobDescription(text);
-        toast.success("Job description loaded from file");
+        toast.success("Đã tải mô tả công việc từ file");
       };
       reader.onerror = () => {
-        toast.error("Error reading file");
+        toast.error("Lỗi đọc file");
       };
       reader.readAsText(selectedFile);
     } else {
@@ -82,7 +82,7 @@ export function JobDescriptionImport({
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
       if (!file) {
-        toast.error("Please enter or upload a job description");
+        toast.error("Vui lòng nhập hoặc tải lên mô tả công việc");
         return;
       }
     }
@@ -126,7 +126,7 @@ export function JobDescriptionImport({
       }
     } catch (error) {
       console.error("Error analyzing CV:", error);
-      toast.error("An error occurred during analyze");
+      toast.error("Đã xảy ra lỗi trong quá trình phân tích");
     } finally {
       setIsAnalyzing(false);
     }
@@ -138,11 +138,11 @@ export function JobDescriptionImport({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
-            AI Job Match Analyze
+            Phân Tích Khớp Việc Bằng AI
           </CardTitle>
           <CardDescription>
-            Upload or paste a job description to analyze how well your CV
-            matches the requirements
+            Tải lên hoặc dán mô tả công việc để phân tích mức độ CV của bạn khớp
+            với yêu cầu
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -151,7 +151,7 @@ export function JobDescriptionImport({
               htmlFor="jd-file-upload"
               className="block text-sm font-medium mb-2"
             >
-              Upload Job Description (Optional)
+              Tải Lên Mô Tả Công Việc (Tùy Chọn)
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -170,7 +170,7 @@ export function JobDescriptionImport({
                 className="w-full"
               >
                 <Upload className="mr-2 h-4 w-4" />
-                {file ? file.name : "Choose File"}
+                {file ? file.name : "Chọn File"}
               </Button>
             </div>
           </div>
@@ -180,22 +180,22 @@ export function JobDescriptionImport({
               htmlFor="jd-textarea"
               className="block text-sm font-medium mb-2"
             >
-              Job Description
+              Mô Tả Công Việc
             </label>
             <div className="mb-2 flex items-center gap-2">
-              <label className="text-sm">Output Language:</label>
+              <label className="text-sm">Ngôn Ngữ Xuất:</label>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
                 className="rounded-md border px-2 py-1"
               >
                 <option value="vi">Vietnamese</option>
-                <option value="en">English</option>
+                <option value="en">Tiếng Anh</option>
               </select>
             </div>
             <Textarea
               id="jd-textarea"
-              placeholder="Paste the job description here..."
+              placeholder="Dán mô tả công việc vào đây..."
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               className="min-h-[200px] resize-y"
@@ -210,12 +210,12 @@ export function JobDescriptionImport({
             {isAnalyzing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
+                Đang Phân Tích...
               </>
             ) : (
               <>
                 <Sparkles className="mr-2 h-4 w-4" />
-                Analyze Match
+                Phân Tích Độ Khớp
               </>
             )}
           </Button>

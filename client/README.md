@@ -160,13 +160,13 @@ client/
 #### `AIFeaturesTab.tsx`
 
 - Tab chính cho AI features
-- Tích hợp Job Description Import và AI Suggestions
+- Tích hợp Job Description Import và Gợi Ý AI
 - Quản lý state cho CV analyze
 
 #### `JobDescriptionImport.tsx`
 
 - Upload/paste job description
-- Tích hợp với backend API để analyze CV vs JD
+- Tích hợp với backend API để Phân Tích vs JD
 - Hiển thị matching results
 
 #### `AISuggestionsList.tsx`

@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { Textarea } from "@/components/ui/textarea"
-import { cn } from "@/lib/utils"
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface HighlightableTextareaProps {
-  id?: string
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
-  rows?: number
-  highlighted?: boolean
-  className?: string
+  id?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  rows?: number;
+  highlighted?: boolean;
+  className?: string;
 }
 
 export function HighlightableTextarea({
@@ -32,8 +32,9 @@ export function HighlightableTextarea({
         rows={rows}
         className={cn(
           "resize-none transition-all",
-          highlighted && "border-yellow-500 bg-yellow-500/5 ring-2 ring-yellow-500/20",
-          className,
+          highlighted &&
+            "border-yellow-500 bg-yellow-500/5 ring-2 ring-yellow-500/20",
+          className
         )}
       />
       {highlighted && (
@@ -43,10 +44,10 @@ export function HighlightableTextarea({
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75"></span>
               <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-500"></span>
             </span>
-            AI Suggestion
+            AI Gợi Ý
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

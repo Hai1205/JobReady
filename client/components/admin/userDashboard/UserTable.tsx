@@ -40,11 +40,11 @@ export const UserTable = ({
 }: UserTableProps) => {
   const columns = [
     {
-      header: "No",
+      header: "STT",
       accessor: (_: IUser, index: number) => index + 1,
     },
     {
-      header: "User",
+      header: "Người dùng",
       accessor: (user: IUser) => (
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
@@ -70,7 +70,7 @@ export const UserTable = ({
       ),
     },
     {
-      header: "Role",
+      header: "Vai trò",
       accessor: (user: IUser) => (
         <div className="inline-flex items-center justify-center gap-2">
           <span className={`h-2 w-2 rounded-full ${getRoleColor(user.role)}`} />
@@ -79,7 +79,7 @@ export const UserTable = ({
       ),
     },
     {
-      header: "Status",
+      header: "Trạng thái",
       accessor: (user: IUser) => (
         <div className="inline-flex items-center justify-center gap-2">
           <span
