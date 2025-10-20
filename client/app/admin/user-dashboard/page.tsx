@@ -249,13 +249,13 @@ function UserDashboardPage() {
         isLoading={isLoading}
       />
 
-      <div className="space-y-4">
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader className="pb-3">
+      <div className="space-y-6">
+        <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+          <CardHeader className="pb-4 border-b border-border/30">
             <div className="flex items-center justify-between">
               <CardTitle />
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <TableSearch
                   handleSearch={handleSearch}
                   searchQuery={searchQuery}
@@ -266,7 +266,7 @@ function UserDashboardPage() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="h-8 gap-1"
+                  className="h-9 gap-2 px-4 bg-gradient-to-r from-secondary/80 to-secondary hover:from-secondary hover:to-secondary/90 shadow-md hover:shadow-lg hover:shadow-secondary/20 transition-all duration-200 hover:scale-105"
                   onClick={async () => {
                     handleRefresh();
                   }}

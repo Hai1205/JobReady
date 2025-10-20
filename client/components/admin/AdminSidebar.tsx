@@ -46,17 +46,6 @@ export default function AdminSidebar({
 
   const menuItems = [
     { icon: Home, label: "Dashboard", href: "/admin" },
-    {
-      icon: FileText,
-      label: "Program Dashboard",
-      href: "/admin/program-dashboard",
-    },
-    { icon: Briefcase, label: "Job Dashboard", href: "/admin/job-dashboard" },
-    {
-      icon: MessageSquare,
-      label: "Contact Dashboard",
-      href: "/admin/contact-dashboard",
-    },
     { icon: FileText, label: "CV Dashboard", href: "/admin/cv-dashboard" },
     { icon: Users, label: "User Dashboard", href: "/admin/user-dashboard" },
   ];
@@ -64,38 +53,43 @@ export default function AdminSidebar({
   return (
     <aside
       className={cn(
-        "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out z-30 rounded-tr-3xl rounded-br-3xl",
-        collapsed ? "shadow-md" : "shadow-lg"
+        "bg-gradient-to-b from-card via-card to-muted/30 dark:from-card dark:via-card dark:to-card/80 border border-border/50 flex flex-col transition-all duration-300 ease-in-out z-30 rounded-tr-2xl rounded-br-2xl backdrop-blur-sm",
+        collapsed ? "shadow-lg shadow-primary/5" : "shadow-xl shadow-primary/10"
       )}
       style={{ width: collapsed ? 80 : width, height: "100%" }}
     >
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between p-4 border-b-2 border-gray-300 dark:border-gray-700">
+      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10">
         {!collapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="bg-primary w-8 h-8 rounded-lg flex items-center justify-center">
-              <Home className="h-5 w-5 text-white" />
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-to-br from-primary to-secondary w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+              <Home className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-gray-800 dark:text-white">
-              Admin
-            </span>
+            <div>
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Admin
+              </span>
+              <p className="text-[10px] text-muted-foreground font-medium">
+                Dashboard
+              </p>
+            </div>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="ml-auto p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="ml-auto p-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-200 group"
         >
           {collapsed ? (
-            <Menu className="h-5 w-5 text-gray-800 dark:text-white" />
+            <Menu className="h-5 w-5 text-foreground group-hover:text-primary transition-colors" />
           ) : (
-            <X className="h-5 w-5 text-gray-800 dark:text-white" />
+            <X className="h-5 w-5 text-foreground group-hover:text-primary transition-colors" />
           )}
         </button>
       </div>
 
       {/* Sidebar Menu */}
-      <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1 px-2">
+      <nav className="flex-1 overflow-y-auto py-6 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+        <ul className="space-y-2 px-3">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -105,14 +99,27 @@ export default function AdminSidebar({
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group relative overflow-hidden",
                     isActive
-                      ? "bg-primary text-white"
-                      : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                      ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/30"
+                      : "text-foreground/70 hover:text-foreground hover:bg-accent/50 dark:hover:bg-accent/30"
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  {!collapsed && <span className="ml-3">{item.label}</span>}
+                  {isActive && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 animate-pulse" />
+                  )}
+                  <Icon
+                    className={cn(
+                      "h-5 w-5 relative z-10 transition-transform duration-200",
+                      isActive ? "scale-110" : "group-hover:scale-110"
+                    )}
+                  />
+                  {!collapsed && (
+                    <span className="ml-3 relative z-10">{item.label}</span>
+                  )}
+                  {isActive && !collapsed && (
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary-foreground animate-ping" />
+                  )}
                 </Link>
               </li>
             );
@@ -121,22 +128,22 @@ export default function AdminSidebar({
       </nav>
 
       {/* Logout Button */}
-      <div className="mt-auto px-2 pb-4">
+      <div className="mt-auto px-3 pb-4 border-t border-border/50 pt-4">
         <button
           onClick={handleLogout}
           className={cn(
-            "flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+            "flex w-full items-center rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group",
+            "text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20 hover:shadow-lg hover:shadow-destructive/20"
           )}
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 group-hover:-translate-x-1" />
           {!collapsed && <span className="ml-3">Đăng xuất</span>}
         </button>
       </div>
 
       {/* Resize Handle */}
       <div
-        className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-primary transition-colors"
+        className="absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-gradient-to-b hover:from-primary hover:to-secondary transition-all duration-200 hover:w-1.5"
         onMouseDown={onStartResizing}
       />
     </aside>

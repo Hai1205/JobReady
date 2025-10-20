@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { HighlightableTextarea } from "@/components/cv-builder/highlightable-textarea";
+import { HighlightableTextarea } from "@/components/cv-builder/HighlightableTextarea";
 import { Upload, X } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";
 import { useRef } from "react";

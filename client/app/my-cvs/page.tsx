@@ -2,37 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Plus,
-  FileText,
-  Calendar,
-  Edit,
-  Trash2,
-  Download,
-  Copy,
-} from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
-import { formatDateAgo } from "@/lib/utils";
+// Import my-cvs components
+import PageHeader from "@/components/my-cvs/PageHeader";
+import CVCard from "@/components/my-cvs/CVCard";
+import EmptyState from "@/components/my-cvs/EmptyState";
+import DeleteConfirmationDialog from "@/components/my-cvs/DeleteConfirmationDialog";
 
 export default function MyCVsPage() {
   const { userAuth } = useAuthStore();
@@ -111,143 +87,34 @@ export default function MyCVsPage() {
   }
 
   return (
-    <div className="container py-12">
-      <div className="flex flex-col gap-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">My CVs</h1>
-            <p className="text-muted-foreground">
-              Manage all your CVs in one place
-            </p>
-          </div>
-          <Button onClick={handleCreateNew}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create New CV
-          </Button>
-        </div>
+    <div className="min-h-screen flex items-center justify-center py-12">
+      <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-8">
+          <PageHeader onCreateNew={handleCreateNew} />
 
-        {cvList.length === 0 ? (
-          <Card className="p-12 text-center">
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                <FileText className="h-10 w-10 text-muted-foreground" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold">No CVs yet</h3>
-                <p className="text-muted-foreground mt-2">
-                  Create your first CV to get started
-                </p>
-              </div>
-              <Button onClick={handleCreateNew} size="lg">
-                <Plus className="mr-2 h-5 w-5" />
-                Create Your First CV
-              </Button>
+          {cvList.length === 0 ? (
+            <EmptyState onCreateNew={handleCreateNew} />
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {cvList.map((cv) => (
+                <CVCard
+                  key={cv.id}
+                  cv={cv}
+                  onEdit={handleEdit}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDeleteClick}
+                />
+              ))}
             </div>
-          </Card>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {cvList.map((cv) => (
-              <Card
-                key={cv.id}
-                className="group relative overflow-hidden transition-all hover:shadow-lg"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="line-clamp-1">{cv.title}</CardTitle>
-                      <CardDescription className="mt-2 flex items-center gap-2">
-                        <Calendar className="h-3 w-3" />
-                        Updated {formatDateAgo(cv.updatedAt || "")}
-                      </CardDescription>
-                    </div>
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                      <p className="text-sm font-medium">
-                        {cv.personalInfo.fullname || "Untitled"}
-                      </p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {cv.personalInfo.summary || "No summary added"}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {cv.experiences.length > 0 && (
-                        <Badge variant="secondary" className="text-xs">
-                          {cv.experiences.length} Experience
-                        </Badge>
-                      )}
-                      {cv.educations.length > 0 && (
-                        <Badge variant="secondary" className="text-xs">
-                          {cv.educations.length} Education
-                        </Badge>
-                      )}
-                      {cv.skills.length > 0 && (
-                        <Badge variant="secondary" className="text-xs">
-                          {cv.skills.length} Skills
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2 pt-2 border-t border-border">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(cv)}
-                        className="flex-1"
-                      >
-                        <Edit className="mr-2 h-3 w-3" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDuplicate(cv)}
-                      >
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteClick(cv.id)}
-                      >
-                        <Trash2 className="h-3 w-3 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your CV
-              and remove it from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              className="bg-destructive text-destructive-foreground"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

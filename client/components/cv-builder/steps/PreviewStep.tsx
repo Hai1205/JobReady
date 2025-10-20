@@ -4,14 +4,14 @@ import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mail, Phone, Download, FileText } from "lucide-react";
+import { Mail, Phone, Download, Loader2 } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";
-import { toast } from "react-toastify";
-import { PDFExportService } from "@/services/pdfExportService";
 
 export function PreviewStep() {
-  const { currentCV } = useCVStore();
+  const { currentCV, handleGeneratePDF } = useCVStore();
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // Convert File to base64 URL for display
   useEffect(() => {
@@ -29,39 +29,9 @@ export function PreviewStep() {
   if (!currentCV) return null;
 
   const generatePDF = async () => {
-    if (!currentCV.personalInfo?.fullname) {
-      toast.error("⚠️ Vui lòng điền TÊN trong Step 1!");
-      return;
-    }
-
-    try {
-      // Show loading toast
-      const toastId = toast.loading("🔄 Đang tạo PDF...");
-
-      // Generate filename
-      const filename = `CV_${currentCV.personalInfo.fullname.replace(
-        /\s+/g,
-        "_"
-      )}.pdf`;
-
-      // Export using PDFShift API
-      await PDFExportService.exportToPDF("cv-preview-content", filename);
-
-      // Update toast
-      toast.update(toastId, {
-        render: "✅ Tải xuống CV thành công!",
-        type: "success",
-        isLoading: false,
-        autoClose: 3000,
-      });
-    } catch (error) {
-      console.error("PDF generation error:", error);
-      toast.error(
-        `❌ Lỗi tạo PDF: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
+    setIsLoading(true);
+    await handleGeneratePDF(currentCV);
+    setIsLoading(false);
   };
 
   return (
@@ -74,32 +44,83 @@ export function PreviewStep() {
           </p>
         </div>
         <Button onClick={generatePDF} size="lg" className="gap-2">
-          <Download className="h-5 w-5" />
-          Tải CV (PDF)
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Đang tải...
+            </>
+          ) : (
+            <>
+              <Download className="h-5 w-5" />
+              Tải CV (PDF)
+            </>
+          )}
         </Button>
       </div>
 
       {/* PDF Preview */}
-      <Card className="overflow-hidden bg-white shadow-2xl">
+      <Card className="overflow-hidden bg-white shadow-2xl border-border/50">
         {/* A4 Preview Container */}
         <div
           id="cv-preview-content"
-          className="mx-auto max-w-[210mm] bg-white p-8"
+          className="mx-auto max-w-[210mm] bg-white"
           style={{
             minHeight: "297mm",
+            padding: "32px",
             boxShadow: "0 0 20px rgba(0,0,0,0.1)",
+            fontFamily: "Arial, sans-serif",
+            fontSize: "14px",
+            lineHeight: "1.6",
+            color: "#333",
           }}
         >
           {/* Header with Background */}
-          <div className="mb-8 -mx-8 -mt-8 bg-gray-100 px-8 py-6 border-b-2 border-gray-200">
-            <div className="flex items-start gap-6">
+          <div
+            style={{
+              marginBottom: "32px",
+              marginLeft: "-32px",
+              marginRight: "-32px",
+              marginTop: "-32px",
+              backgroundColor: "#f3f4f6",
+              padding: "24px 32px",
+              borderBottom: "2px solid #e5e7eb",
+            }}
+          >
+            <div
+              style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}
+            >
               {/* Avatar */}
-              <div className="flex-shrink-0">
-                <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-                  {avatarUrl && (
-                    <AvatarImage src={avatarUrl} className="object-cover" />
-                  )}
-                  <AvatarFallback className="text-2xl font-bold bg-blue-900 text-white">
+              <div style={{ flexShrink: 0 }}>
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Avatar"
+                    style={{
+                      width: "96px",
+                      height: "96px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "4px solid white",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "96px",
+                      height: "96px",
+                      borderRadius: "50%",
+                      backgroundColor: "#1e3a8a",
+                      color: "white",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "32px",
+                      fontWeight: "bold",
+                      border: "4px solid white",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    }}
+                  >
                     {currentCV.personalInfo.fullname
                       ? currentCV.personalInfo.fullname
                           .split(" ")
@@ -108,41 +129,95 @@ export function PreviewStep() {
                           .toUpperCase()
                           .slice(0, 2)
                       : "CV"}
-                  </AvatarFallback>
-                </Avatar>
+                  </div>
+                )}
               </div>
 
               {/* Name and Info */}
-              <div className="flex-1">
-                <h1 className="text-4xl font-bold text-blue-900 mb-2">
+              <div style={{ flex: 1 }}>
+                <h1
+                  style={{
+                    fontSize: "36px",
+                    fontWeight: "bold",
+                    color: "#1e3a8a",
+                    marginBottom: "8px",
+                    marginTop: 0,
+                  }}
+                >
                   {currentCV.personalInfo.fullname || "Tên của bạn"}
                 </h1>
-                <p className="text-lg text-gray-600 font-medium mb-4">
+                <p
+                  style={{
+                    fontSize: "18px",
+                    color: "#4b5563",
+                    fontWeight: "500",
+                    marginBottom: "16px",
+                    marginTop: 0,
+                  }}
+                >
                   Business Development Executive
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "8px",
+                    fontSize: "13px",
+                    color: "#374151",
+                  }}
+                >
                   {currentCV.personalInfo.phone && (
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">Ngày sinh:</span>{" "}
-                      {currentCV.personalInfo.phone}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "600" }}>Ngày sinh:</span>
+                      <span>{currentCV.personalInfo.phone}</span>
                     </div>
                   )}
                   {currentCV.personalInfo.location && (
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">Giới tính:</span>{" "}
-                      {currentCV.personalInfo.location}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "600" }}>Giới tính:</span>
+                      <span>{currentCV.personalInfo.location}</span>
                     </div>
                   )}
                   {currentCV.personalInfo.phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-blue-900" />
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span>📞</span>
                       <span>{currentCV.personalInfo.phone}</span>
                     </div>
                   )}
                   {currentCV.personalInfo.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-blue-900" />
-                      <span className="truncate">
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span>✉️</span>
+                      <span
+                        style={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         {currentCV.personalInfo.email}
                       </span>
                     </div>
@@ -152,14 +227,32 @@ export function PreviewStep() {
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div style={{ marginTop: "24px" }}>
             {/* Career Objective */}
             {currentCV.personalInfo.summary && (
-              <div>
-                <h2 className="border-b-2 border-blue-900 pb-1 text-xl font-bold text-blue-900 mb-3">
+              <div style={{ marginBottom: "24px" }}>
+                <h2
+                  style={{
+                    borderBottom: "2px solid #1e3a8a",
+                    paddingBottom: "4px",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    color: "#1e3a8a",
+                    marginBottom: "12px",
+                    marginTop: 0,
+                  }}
+                >
                   MỤC TIÊU NGHỀ NGHIỆP
                 </h2>
-                <p className="text-sm leading-relaxed text-gray-700 text-justify">
+                <p
+                  style={{
+                    fontSize: "13px",
+                    lineHeight: "1.8",
+                    color: "#374151",
+                    textAlign: "justify",
+                    margin: 0,
+                  }}
+                >
                   {currentCV.personalInfo.summary}
                 </p>
               </div>
@@ -167,31 +260,61 @@ export function PreviewStep() {
 
             {/* Education */}
             {currentCV.educations.length > 0 && (
-              <div>
-                <h2 className="border-b-2 border-blue-900 pb-1 text-xl font-bold text-blue-900 mb-3">
+              <div style={{ marginBottom: "24px" }}>
+                <h2
+                  style={{
+                    borderBottom: "2px solid #1e3a8a",
+                    paddingBottom: "4px",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    color: "#1e3a8a",
+                    marginBottom: "12px",
+                    marginTop: 0,
+                  }}
+                >
                   HỌC VẤN
                 </h2>
-                <div className="space-y-4">
-                  {currentCV.educations.map((edu) => (
-                    <div key={edu.id} className="pl-0">
-                      <div className="text-xs text-gray-500 mb-1 font-medium">
+                <div>
+                  {currentCV.educations.map((edu, index) => (
+                    <div
+                      key={edu.id}
+                      style={{
+                        marginBottom:
+                          index < currentCV.educations.length - 1 ? "16px" : 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "#6b7280",
+                          marginBottom: "4px",
+                          fontWeight: "500",
+                        }}
+                      >
                         {edu.startDate} - {edu.endDate || "Hiện tại"}
                       </div>
-                      <h3 className="font-bold text-gray-900 text-base mb-1">
+                      <h3
+                        style={{
+                          fontWeight: "bold",
+                          color: "#111827",
+                          fontSize: "15px",
+                          marginBottom: "4px",
+                          marginTop: 0,
+                        }}
+                      >
                         {edu.school}
                       </h3>
-                      <p className="text-sm text-gray-700">
-                        <span className="font-semibold">Chuyên ngành:</span>{" "}
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          color: "#374151",
+                          margin: 0,
+                        }}
+                      >
+                        <span style={{ fontWeight: "600" }}>Chuyên ngành:</span>{" "}
                         {edu.degree}
                         {edu.field && ` - ${edu.field}`}
                       </p>
-                      {/* <div className="mt-2 text-sm text-gray-700">
-                        <p className="font-semibold">Thành tích nổi bật:</p>
-                        <ul className="ml-5 mt-1 list-disc space-y-1">
-                          <li>Xếp loại: Xuất sắc (GPA: 3.7/4.0)</li>
-                          <li>Giải nhì Business Case Competition 2022</li>
-                        </ul>
-                      </div> */}
                     </div>
                   ))}
                 </div>
@@ -200,39 +323,74 @@ export function PreviewStep() {
 
             {/* Work Experience */}
             {currentCV.experiences.length > 0 && (
-              <div>
-                <h2 className="border-b-2 border-blue-900 pb-1 text-xl font-bold text-blue-900 mb-3">
+              <div style={{ marginBottom: "24px" }}>
+                <h2
+                  style={{
+                    borderBottom: "2px solid #1e3a8a",
+                    paddingBottom: "4px",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    color: "#1e3a8a",
+                    marginBottom: "12px",
+                    marginTop: 0,
+                  }}
+                >
                   KINH NGHIỆM LÀM VIỆC
                 </h2>
-                <div className="space-y-4">
-                  {currentCV.experiences.map((exp) => (
-                    <div key={exp.id} className="pl-0">
-                      <div className="text-xs text-gray-500 mb-1 font-medium">
+                <div>
+                  {currentCV.experiences.map((exp, index) => (
+                    <div
+                      key={exp.id}
+                      style={{
+                        marginBottom:
+                          index < currentCV.experiences.length - 1 ? "16px" : 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "#6b7280",
+                          marginBottom: "4px",
+                          fontWeight: "500",
+                        }}
+                      >
                         {exp.startDate} - {exp.endDate || "Hiện tại"}
                       </div>
-                      <h3 className="font-bold text-gray-900 text-base mb-1">
+                      <h3
+                        style={{
+                          fontWeight: "bold",
+                          color: "#111827",
+                          fontSize: "15px",
+                          marginBottom: "4px",
+                          marginTop: 0,
+                        }}
+                      >
                         {exp.company}
                       </h3>
-                      <p className="font-semibold text-gray-700 mb-2">
+                      <p
+                        style={{
+                          fontWeight: "600",
+                          color: "#374151",
+                          marginBottom: "8px",
+                          marginTop: 0,
+                          fontSize: "13px",
+                        }}
+                      >
                         {exp.position}
                       </p>
                       {exp.description && (
-                        <div className="text-sm text-gray-700 mb-2">
-                          <p className="leading-relaxed text-justify">
-                            {exp.description}
-                          </p>
-                        </div>
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#374151",
+                            lineHeight: "1.8",
+                            textAlign: "justify",
+                            margin: 0,
+                          }}
+                        >
+                          {exp.description}
+                        </p>
                       )}
-                      {/* <div className="mt-2 text-sm text-gray-700">
-                        <p className="font-semibold">Thành tích nổi bật:</p>
-                        <ul className="ml-5 mt-1 list-disc space-y-1">
-                          <li>Đạt hoặc vượt chỉ tiêu kinh doanh hàng tháng</li>
-                          <li>Tăng doanh thu 20% trong 3 tháng liên tiếp</li>
-                          <li>
-                            Quản lý pipeline bán hàng trị giá 80.000.000 VNĐ
-                          </li>
-                        </ul>
-                      </div> */}
                     </div>
                   ))}
                 </div>
@@ -241,28 +399,43 @@ export function PreviewStep() {
 
             {/* Skills */}
             {currentCV.skills.length > 0 && (
-              <div>
-                <h2 className="border-b-2 border-blue-900 pb-1 text-xl font-bold text-blue-900 mb-3">
+              <div style={{ marginBottom: "24px" }}>
+                <h2
+                  style={{
+                    borderBottom: "2px solid #1e3a8a",
+                    paddingBottom: "4px",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    color: "#1e3a8a",
+                    marginBottom: "12px",
+                    marginTop: 0,
+                  }}
+                >
                   KỸ NĂNG
                 </h2>
-                <ul className="ml-5 list-disc space-y-1.5 text-sm text-gray-700">
+                <ul
+                  style={{
+                    marginLeft: "20px",
+                    paddingLeft: 0,
+                    margin: 0,
+                  }}
+                >
                   {currentCV.skills.map((skill, index) => (
-                    <li key={index}>{skill}</li>
+                    <li
+                      key={index}
+                      style={{
+                        fontSize: "13px",
+                        color: "#374151",
+                        marginBottom:
+                          index < currentCV.skills.length - 1 ? "6px" : 0,
+                      }}
+                    >
+                      {skill}
+                    </li>
                   ))}
                 </ul>
               </div>
             )}
-
-            {/* Activities (Optional Section) */}
-            {/* <div>
-              <h2 className="border-b-2 border-blue-900 pb-1 text-xl font-bold text-blue-900 mb-3">
-                HOẠT ĐỘNG
-              </h2>
-              <ul className="ml-5 list-disc space-y-1.5 text-sm text-gray-700">
-                <li>Tình nguyện viên tại chương trình XYZ</li>
-                <li>Thành viên CLB ABC</li>
-              </ul>
-            </div> */}
           </div>
         </div>
       </Card>

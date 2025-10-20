@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { PersonalInfoStep } from "./steps/PersonalInfoStep";
 import { ExperienceStep } from "./steps/ExperienceStep";
 import { SkillsStep } from "./steps/SkillsStep";
-import { ReviewStep } from "./steps/ReviewStep";
 import { PreviewStep } from "./steps/PreviewStep";
 import { FileImport } from "./FileImport";
 import { ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
@@ -21,12 +20,10 @@ const steps = [
   { id: 1, title: "Experience", component: ExperienceStep },
   { id: 2, title: "Education", component: EducationStep },
   { id: 3, title: "Skills", component: SkillsStep },
-  { id: 4, title: "Review", component: ReviewStep },
-  { id: 5, title: "Preview & Export", component: PreviewStep },
+  { id: 4, title: "Preview & Export", component: PreviewStep },
 ];
 
 export function CVBuilderWizard() {
-  const router = useRouter();
   const { userAuth } = useAuthStore();
   const {
     isLoading,
@@ -55,17 +52,8 @@ export function CVBuilderWizard() {
   const handleSave = async () => {
     if (!currentCV) return;
 
-    // Prepare data for API
-    const userId = userAuth?.id || "";
-
-    console.log("========== HANDLE SAVE DEBUG ==========");
-    console.log("currentCV.avatar:", currentCV.avatar);
-    console.log("avatar instanceof File:", currentCV.avatar instanceof File);
-    console.log("avatar type:", typeof currentCV.avatar);
-    console.log("=======================================");
-
     createCV(
-      userId,
+      userAuth?.id || "",
       currentCV.title,
       currentCV.avatar as File,
       currentCV.personalInfo,
@@ -158,11 +146,6 @@ export function CVBuilderWizard() {
         </Button>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Draft
-          </Button>
-
           {currentStep < steps.length - 1 ? (
             <Button onClick={handleNext}>
               Next

@@ -3,10 +3,10 @@ import { DataTable } from "@/components/admin/DataTable";
 interface ICVTableProps {
   CVs: ICV[];
   isLoading: boolean;
-  onView?: (cv: ICV) => void;
+  onDownload?: (cv: ICV) => void;
 }
 
-export const CVTable = ({ CVs, isLoading, onView }: ICVTableProps) => {
+export const CVTable = ({ CVs, isLoading, onDownload }: ICVTableProps) => {
   const columns = [
     {
       header: "No",
@@ -32,11 +32,11 @@ export const CVTable = ({ CVs, isLoading, onView }: ICVTableProps) => {
       isLoading={isLoading}
       columns={columns}
       actions={
-        onView
+        onDownload
           ? [
               {
-                label: "View",
-                onClick: onView,
+                label: "Download",
+                onClick: onDownload,
               },
             ]
           : []

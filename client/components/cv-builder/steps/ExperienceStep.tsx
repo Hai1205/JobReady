@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { HighlightableTextarea } from "@/components/cv-builder/highlightable-textarea";
+import { HighlightableTextarea } from "@/components/cv-builder/HighlightableTextarea";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";
@@ -68,7 +68,8 @@ export function ExperienceStep() {
       {currentCV.experiences.length === 0 ? (
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">
-            No work experiences added yet. Click "Add Experience" to get started.
+            No work experiences added yet. Click "Add Experience" to get
+            started.
           </p>
         </Card>
       ) : (
@@ -93,7 +94,11 @@ export function ExperienceStep() {
                     <Input
                       value={exp.company}
                       onChange={(e) =>
-                        updateExperience(exp.id || "", "company", e.target.value)
+                        updateExperience(
+                          exp.id || "",
+                          "company",
+                          e.target.value
+                        )
                       }
                       placeholder="Company Name"
                     />
@@ -104,7 +109,11 @@ export function ExperienceStep() {
                     <Input
                       value={exp.position}
                       onChange={(e) =>
-                        updateExperience(exp.id || "", "position", e.target.value)
+                        updateExperience(
+                          exp.id || "",
+                          "position",
+                          e.target.value
+                        )
                       }
                       placeholder="Job title"
                     />
@@ -116,7 +125,11 @@ export function ExperienceStep() {
                       type="month"
                       value={exp.startDate}
                       onChange={(e) =>
-                        updateExperience(exp.id || "", "startDate", e.target.value)
+                        updateExperience(
+                          exp.id || "",
+                          "startDate",
+                          e.target.value
+                        )
                       }
                     />
                   </div>
@@ -127,7 +140,11 @@ export function ExperienceStep() {
                       type="month"
                       value={exp.endDate}
                       onChange={(e) =>
-                        updateExperience(exp.id || "", "endDate", e.target.value)
+                        updateExperience(
+                          exp.id || "",
+                          "endDate",
+                          e.target.value
+                        )
                       }
                       placeholder="Leave empty if current"
                     />

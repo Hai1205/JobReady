@@ -39,43 +39,46 @@ export const SharedFilter = ({
         <Button
           variant="secondary"
           size="sm"
-          className="h-8 gap-1 text-gray-800 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700"
+          className="h-9 gap-2 px-4 bg-gradient-to-r from-secondary/80 to-secondary hover:from-secondary hover:to-secondary/90 shadow-md hover:shadow-lg hover:shadow-secondary/20 transition-all duration-200 hover:scale-105"
           onClick={() => setOpenMenuFilters(!openMenuFilters)}
         >
-          <Filter className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+          <Filter className="h-4 w-4" />
           Bộ lọc
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
         align="end"
-        className="w-[250px] bg-white dark:bg-[#1e2735] border border-gray-200 dark:border-gray-700"
+        className="w-[250px] bg-card/95 backdrop-blur-sm border border-border/50 shadow-xl"
       >
-        <DropdownMenuLabel className="text-gray-900 dark:text-gray-100">
+        <DropdownMenuLabel className="text-foreground font-semibold bg-gradient-to-r from-primary/10 to-secondary/10">
           Bộ lọc theo
         </DropdownMenuLabel>
 
-        <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-600" />
+        <DropdownMenuSeparator className="bg-border/50" />
 
         {filterOptions?.status && (
-          <div className="p-2">
-            <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+          <div className="p-3">
+            <h4 className="mb-3 text-sm font-semibold text-foreground">
               Status
             </h4>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {filterOptions.status.map((status) => (
-                <div key={status.value} className="flex items-center">
+                <div
+                  key={status.value}
+                  className="flex items-center hover:bg-primary/5 p-1.5 rounded-lg transition-colors"
+                >
                   <Checkbox
                     id={`status-${status.value}`}
                     checked={activeFilters.status.includes(status.value)}
                     onCheckedChange={() => toggleFilter(status.value, "status")}
-                    className="mr-2"
+                    className="mr-2 border-primary/50"
                   />
 
                   <label
                     htmlFor={`status-${status.value}`}
-                    className="text-gray-900 dark:text-gray-100"
+                    className="text-foreground text-sm cursor-pointer flex-1"
                   >
                     {status.label}
                   </label>
@@ -86,17 +89,17 @@ export const SharedFilter = ({
         )}
 
         {filterOptions?.status && filterOptions?.contentType && (
-          <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-600" />
+          <DropdownMenuSeparator className="bg-border/50" />
         )}
 
-        <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-600" />
+        <DropdownMenuSeparator className="bg-border/50" />
 
-        <div className="p-2 flex justify-between">
+        <div className="p-3 flex justify-between gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={clearFilters}
-            className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="flex-1 border-border/50 hover:bg-muted/50 transition-all"
           >
             Xóa bộ lọc
           </Button>
@@ -104,8 +107,7 @@ export const SharedFilter = ({
           <Button
             size="sm"
             onClick={applyFilters}
-            variant="secondary"
-            className="text-gray-800 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700"
+            className="flex-1 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-md hover:shadow-lg transition-all"
           >
             Lọc
           </Button>

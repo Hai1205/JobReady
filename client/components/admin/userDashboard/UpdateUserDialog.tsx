@@ -94,7 +94,7 @@ const UpdateUserDialog = ({
                       <Avatar className="rounded-full object-cover w-full h-full">
                         <AvatarImage
                           src={
-                            previewAvatar ? previewAvatar : "/placeholder.svg"
+                            previewAvatar ? previewAvatar : "/svgs/placeholder.svg"
                           }
                           alt={data?.fullname}
                         />

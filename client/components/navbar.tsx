@@ -6,9 +6,15 @@ import { Moon, Sun, FileText, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/authStore";
 
 export function Navbar() {
@@ -17,7 +23,7 @@ export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -120,88 +126,172 @@ export function Navbar() {
           </Button>
 
           {userAuth ? (
-            <div className="hidden md:flex items-center gap-2">
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-medium">{userAuth.fullname}</span>
-                {isAdmin && (
-                  <span className="text-xs text-muted-foreground">Admin</span>
-                )}
-              </div>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+            <div className="hidden md:flex items-center gap-3">
+              <Link href="/settings">
+                <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 border border-border/50">
+                  <Avatar className="h-8 w-8 border-2 border-primary/20 shadow-md">
+                    <AvatarImage
+                      src={userAuth.avatarUrl}
+                      alt={userAuth.fullname || "User"}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold text-sm">
+                      {userAuth.fullname?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-semibold">
+                      {userAuth.fullname}
+                    </span>
+                    {isAdmin && (
+                      <span className="text-xs text-primary font-medium">
+                        Admin
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
+              >
                 Logout
               </Button>
             </div>
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                >
                   Login
                 </Button>
               </Link>
               <Link href="/auth/register">
-                <Button size="sm">Register</Button>
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200"
+                >
+                  Register
+                </Button>
               </Link>
             </div>
           )}
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-primary/10"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="w-[300px] sm:w-[400px] bg-gradient-to-br from-card to-card/80 backdrop-blur-xl border-border/50">
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <div className="flex flex-col gap-6 mt-8">
+
+              {/* Mobile Header */}
+              <div className="flex items-center gap-2 mb-8 pb-6 border-b border-border/50">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-lg">
+                  <FileText className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  JobReady
+                </span>
+              </div>
+
+              {/* User Info Section (if logged in) */}
+              {userAuth && (
+                <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border border-border/50">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-lg">
+                      <AvatarImage
+                        src={userAuth.avatarUrl}
+                        alt={userAuth.fullname || "User"}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold text-lg">
+                        {userAuth.fullname?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        {userAuth.fullname}
+                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">
+                        {userAuth.email}
+                      </p>
+                      {isAdmin && (
+                        <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-primary/20 text-primary text-xs font-medium">
+                          Admin
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation Links */}
+              <div className="flex flex-col gap-2 mb-6">
                 {allNavLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "text-lg font-medium transition-colors hover:text-primary",
+                      "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200",
                       pathname === link.href
-                        ? "text-foreground"
-                        : "text-muted-foreground"
+                        ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/30"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                     )}
                   >
+                    {pathname === link.href && (
+                      <div className="h-2 w-2 rounded-full bg-primary-foreground animate-pulse" />
+                    )}
                     {link.label}
                   </Link>
                 ))}
-                {userAuth ? (
-                  <div className="flex flex-col gap-4 pt-4 border-t">
-                    <div>
-                      <p className="text-sm font-medium">{userAuth.fullname}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {userAuth.email}
-                      </p>
-                      {isAdmin && (
-                        <p className="text-xs text-primary mt-1">Admin</p>
-                      )}
-                    </div>
-                    <Button variant="outline" onClick={handleLogout}>
-                      Logout
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2 pt-4 border-t">
-                    <Link
-                      href="/auth/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Button variant="ghost" className="w-full">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link
-                      href="/auth/register"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Button className="w-full">Register</Button>
-                    </Link>
-                  </div>
-                )}
               </div>
+
+              {/* Auth Buttons */}
+              {userAuth ? (
+                <div className="mt-auto pt-6 border-t border-border/50">
+                  <Button
+                    variant="outline"
+                    onClick={handleLogout}
+                    className="w-full bg-gradient-to-r from-destructive/10 to-destructive/5 hover:from-destructive/20 hover:to-destructive/10 text-destructive hover:text-destructive border-destructive/30 hover:border-destructive/50 transition-all duration-200"
+                  >
+                    Logout
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-auto pt-6 border-t border-border/50 flex flex-col gap-3">
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full hover:bg-accent/50 transition-all duration-200"
+                    >
+                      Login
+                    </Button>
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-200">
+                      Register
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </SheetContent>
           </Sheet>
         </div>

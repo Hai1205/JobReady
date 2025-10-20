@@ -4,16 +4,14 @@ import { useCallback, useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { CVFilter } from "@/components/admin/cvDashboard/CVFilter";
 import { CVTable } from "@/components/admin/cvDashboard/CVTable";
 import { TableSearch } from "@/components/admin/TableSearch";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { useCVStore } from "@/stores/cvStore";
 
 export default function CVDashboardPage() {
-  const { isLoading, getAllCVs } = useCVStore();
+  const { isLoading, getAllCVs, handleGeneratePDF } = useCVStore();
 
-  const [isViewCVOpen, setIsViewCVOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [allCVs, setAllCVs] = useState<ICV[]>([]);
   const [filteredCVs, setFilteredCVs] = useState<ICV[]>([]);
@@ -78,16 +76,16 @@ export default function CVDashboardPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <DashboardHeader title="CV Dashboard" />
 
-      <div className="space-y-4">
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader className="pb-3">
+      <div className="space-y-6">
+        <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+          <CardHeader className="pb-4 border-b border-border/30">
             <div className="flex items-center justify-between">
               <CardTitle />
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <TableSearch
                   handleSearch={handleSearch}
                   searchQuery={searchQuery}
@@ -98,7 +96,7 @@ export default function CVDashboardPage() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="h-8 gap-1"
+                  className="h-9 gap-2 px-4 bg-gradient-to-r from-secondary/80 to-secondary hover:from-secondary hover:to-secondary/90 shadow-md hover:shadow-lg hover:shadow-secondary/20 transition-all duration-200 hover:scale-105"
                   onClick={async () => {
                     handleRefresh();
                   }}
@@ -121,9 +119,8 @@ export default function CVDashboardPage() {
           <CVTable
             CVs={filteredCVs}
             isLoading={isLoading}
-            onView={(cv) => {
-              setData(cv);
-              setIsViewCVOpen(true);
+            onDownload={(cv) => {
+              handleGeneratePDF(cv);
             }}
           />
         </Card>

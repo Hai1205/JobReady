@@ -1,5 +1,7 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, IBaseStore } from "@/lib/initialStore";
+import { PDFExportService } from "@/services/pdfExportService";
+import { toast } from "react-toastify";
 
 interface ICVDataResponse {
 	cv: ICV,
@@ -63,6 +65,7 @@ export interface ICVStore extends IBaseStore {
 	handleSetJobDescription: (jd: string) => void;
 	handleApplySuggestion: (id: string) => void;
 	handleClearCVList: () => void;
+	handleGeneratePDF: (cv: ICV) => void;
 }
 
 const storeName = "cv";
@@ -230,6 +233,25 @@ export const useCVStore = createStore<ICVStore>(
 			set({ cvList: [] });
 		},
 
+		handleGeneratePDF: async (currentCV: ICV): Promise<void> => {
+			try {
+				const filename = `CV_${currentCV.title.replace(
+					/\s+/g,
+					"_"
+				)}.pdf`;
+
+				// Export using PDFShift API
+				await PDFExportService.exportToPDF("cv-preview-content", filename);
+
+				toast.success("Tải xuống CV thành công!");
+			} catch (error) {
+				console.error("PDF generation error:", error);
+				toast.error(
+					`❌ Lỗi tạo PDF: ${error instanceof Error ? error.message : "Unknown error"
+					}`
+				);
+			};
+		},
 
 		reset: () => {
 			set({ ...initialState });
