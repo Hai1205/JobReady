@@ -6,7 +6,6 @@ import com.example.userservice.services.apis.UserService;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,7 +14,6 @@ public class RootUserInitializer implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(RootUserInitializer.class);
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     @Value("${ROOT_EMAIL}")
     private String rootEmail;
@@ -35,9 +33,8 @@ public class RootUserInitializer implements CommandLineRunner {
     @Value("${ROOT_STATUS}")
     private String rootStatus;
 
-    public RootUserInitializer(UserService userService, PasswordEncoder passwordEncoder) {
+    public RootUserInitializer(UserService userService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override

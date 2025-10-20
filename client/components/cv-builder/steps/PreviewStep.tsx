@@ -1,20 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mail, Phone, Download, FileText } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";
-import jsPDF from "jspdf";
 import { toast } from "react-toastify";
+import { PDFExportService } from "@/services/pdfExportService";
 
 export function PreviewStep() {
   const { currentCV } = useCVStore();
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
 
   // Convert File to base64 URL for display
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentCV?.avatar && currentCV.avatar instanceof File) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -28,287 +28,34 @@ export function PreviewStep() {
 
   if (!currentCV) return null;
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     if (!currentCV.personalInfo?.fullname) {
       toast.error("⚠️ Vui lòng điền TÊN trong Step 1!");
       return;
     }
 
     try {
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
+      // Show loading toast
+      const toastId = toast.loading("🔄 Đang tạo PDF...");
 
-      const W = doc.internal.pageSize.getWidth();
-      const H = doc.internal.pageSize.getHeight();
-      const M = 15;
-      let Y = M;
-
-      const plain = (text: string) =>
-        text
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/đ/g, "d")
-          .replace(/Đ/g, "D");
-
-      const needSpace = (space: number) => {
-        if (Y + space > H - M) {
-          doc.addPage();
-          Y = M;
-        }
-      };
-
-      // ========== HEADER BACKGROUND ==========
-      doc.setFillColor(245, 245, 245);
-      doc.rect(0, 0, W, 70, "F");
-
-      let textStartX = M;
-
-      // ========== AVATAR (CIRCULAR) ==========
-      if (avatarUrl) {
-        try {
-          const AV_SIZE = 40;
-          const AV_X = M;
-          const AV_Y = Y + 3;
-
-          doc.addImage(avatarUrl, "JPEG", AV_X, AV_Y, AV_SIZE, AV_SIZE);
-
-          doc.setDrawColor(0, 51, 153);
-          doc.setLineWidth(2);
-          doc.circle(AV_X + AV_SIZE / 2, AV_Y + AV_SIZE / 2, AV_SIZE / 2, "S");
-
-          textStartX = M + AV_SIZE + 10;
-        } catch (err) {
-          console.error("Error adding avatar to PDF:", err);
-          textStartX = M;
-        }
-      }
-
-      // ========== NAME & JOB title ==========
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(24);
-      doc.setTextColor(0, 51, 153);
-      doc.text(plain(currentCV.personalInfo.fullname), textStartX, Y + 15);
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(13);
-      doc.setTextColor(100, 100, 100);
-      doc.text("Business Development Executive", textStartX, Y + 24);
-
-      // ========== CONTACT INFO (2 COLUMNS) ==========
-      doc.setFontSize(9);
-      doc.setTextColor(70, 70, 70);
-      let cy = Y + 34;
-
-      // Row 1
-      if (currentCV.personalInfo.phone) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Ngay sinh:", textStartX, cy);
-        doc.setFont("helvetica", "normal");
-        doc.text(currentCV.personalInfo.phone, textStartX + 22, cy);
-      }
-
-      if (currentCV.personalInfo.location) {
-        const col2X = textStartX + 80;
-        doc.setFont("helvetica", "bold");
-        doc.text("Gioi tinh:", col2X, cy);
-        doc.setFont("helvetica", "normal");
-        doc.text(plain(currentCV.personalInfo.location), col2X + 20, cy);
-      }
-
-      // Row 2
-      cy += 5.5;
-      if (currentCV.personalInfo.phone) {
-        doc.text("0782748863", textStartX, cy);
-      }
-
-      if (currentCV.personalInfo.email) {
-        const col2X = textStartX + 80;
-        const emailLines = doc.splitTextToSize(
-          currentCV.personalInfo.email,
-          75
-        );
-        doc.text(emailLines[0], col2X, cy);
-      }
-
-      Y = 78;
-
-      // ========== SECTION title HELPER ==========
-      const addSectionTitle = (title: string) => {
-        needSpace(15);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(13);
-        doc.setTextColor(0, 51, 153);
-        doc.text(plain(title), M, Y);
-        doc.setDrawColor(0, 51, 153);
-        doc.setLineWidth(0.8);
-        doc.line(M, Y + 1.5, W - M, Y + 1.5);
-        Y += 8;
-      };
-
-      // ========== CAREER OBJECTIVE ==========
-      if (currentCV.personalInfo.summary) {
-        addSectionTitle("MUC TIEU NGHE NGHIEP");
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(60, 60, 60);
-        const lines = doc.splitTextToSize(
-          plain(currentCV.personalInfo.summary),
-          W - 2 * M
-        );
-        lines.forEach((line: string) => {
-          needSpace(5);
-          doc.text(line, M, Y);
-          Y += 5;
-        });
-        Y += 6;
-      }
-
-      // ========== EDUCATION ==========
-      if (currentCV.educations.length > 0) {
-        addSectionTitle("HOC VAN");
-        currentCV.educations.forEach((edu) => {
-          needSpace(20);
-          doc.setFont("helvetica", "italic");
-          doc.setFontSize(9);
-          doc.setTextColor(130, 130, 130);
-          doc.text(`${edu.startDate} - ${edu.endDate || "Hien tai"}`, M, Y);
-          Y += 5;
-
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          doc.text(plain(edu.school), M, Y);
-          Y += 5.5;
-
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(10);
-          doc.setTextColor(60, 60, 60);
-          doc.text(
-            plain(
-              `Chuyen nganh: ${edu.degree}${edu.field ? ` - ${edu.field}` : ""}`
-            ),
-            M + 2,
-            Y
-          );
-          Y += 5;
-
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(9);
-          doc.text("Thanh tich noi bat:", M, Y);
-          Y += 4.5;
-
-          doc.setFont("helvetica", "normal");
-          const achievements = [
-            "Xep loai: Xuat sac (GPA: 3.7/4.0)",
-            "Giai nhi Business Case Competition 2022",
-          ];
-          achievements.forEach((item) => {
-            needSpace(4.5);
-            doc.text(`• ${item}`, M + 2, Y);
-            Y += 4.5;
-          });
-          Y += 4;
-        });
-      }
-
-      // ========== EXPERIENCE ==========
-      if (currentCV.experiences.length > 0) {
-        addSectionTitle("KINH NGHIEM LAM VIEC");
-        currentCV.experiences.forEach((exp) => {
-          needSpace(25);
-          doc.setFont("helvetica", "italic");
-          doc.setFontSize(9);
-          doc.setTextColor(130, 130, 130);
-          doc.text(`${exp.startDate} - ${exp.endDate || "Hien tai"}`, M, Y);
-          Y += 5;
-
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          doc.text(plain(exp.company), M, Y);
-          Y += 5.5;
-
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(10);
-          doc.setTextColor(60, 60, 60);
-          doc.text(plain(exp.position), M, Y);
-          Y += 6;
-
-          if (exp.description) {
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            const descLines = doc.splitTextToSize(
-              plain(exp.description),
-              W - 2 * M - 4
-            );
-            descLines.forEach((line: string) => {
-              needSpace(4.5);
-              doc.text(line, M + 2, Y);
-              Y += 4.5;
-            });
-            Y += 2;
-          }
-
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(9);
-          doc.text("Thanh tich noi bat:", M, Y);
-          Y += 4.5;
-
-          doc.setFont("helvetica", "normal");
-          const achievements = [
-            "Dat hoac vuot chi tieu kinh doanh hang thang",
-            "Tang doanh thu 20% trong 3 thang lien tiep",
-            "Quan ly pipeline ban hang tri gia 80.000.000 VND",
-          ];
-          achievements.forEach((item) => {
-            needSpace(4.5);
-            doc.text(`• ${item}`, M + 2, Y);
-            Y += 4.5;
-          });
-          Y += 6;
-        });
-      }
-
-      // ========== SKILLS ==========
-      if (currentCV.skills.length > 0) {
-        addSectionTitle("KY NANG");
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(60, 60, 60);
-        currentCV.skills.forEach((skill) => {
-          needSpace(5);
-          doc.text(`• ${plain(skill)}`, M + 2, Y);
-          Y += 5;
-        });
-        Y += 6;
-      }
-
-      // ========== ACTIVITIES ==========
-      addSectionTitle("HOAT DONG");
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-      const activities = [
-        "Tinh nguyen vien tai chuong trinh XYZ",
-        "Thanh vien CLB ABC",
-      ];
-      activities.forEach((item) => {
-        needSpace(5);
-        doc.text(`• ${item}`, M + 2, Y);
-        Y += 5;
-      });
-
-      // ========== SAVE PDF ==========
-      const filename = `CV_${plain(currentCV.personalInfo.fullname).replace(
+      // Generate filename
+      const filename = `CV_${currentCV.personalInfo.fullname.replace(
         /\s+/g,
         "_"
       )}.pdf`;
-      doc.save(filename);
-      toast.success("✅ Tải xuống CV thành công!");
+
+      // Export using PDFShift API
+      await PDFExportService.exportToPDF("cv-preview-content", filename);
+
+      // Update toast
+      toast.update(toastId, {
+        render: "✅ Tải xuống CV thành công!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
     } catch (error) {
+      console.error("PDF generation error:", error);
       toast.error(
         `❌ Lỗi tạo PDF: ${
           error instanceof Error ? error.message : "Unknown error"
@@ -316,6 +63,7 @@ export function PreviewStep() {
       );
     }
   };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -335,6 +83,7 @@ export function PreviewStep() {
       <Card className="overflow-hidden bg-white shadow-2xl">
         {/* A4 Preview Container */}
         <div
+          id="cv-preview-content"
           className="mx-auto max-w-[210mm] bg-white p-8"
           style={{
             minHeight: "297mm",

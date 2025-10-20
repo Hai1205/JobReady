@@ -22,10 +22,12 @@ public class PersonalInfo {
     private String email;
     private String phone;
     private String location;
-    private String summary;
     private String avatarUrl;
     private String avatarPublicId;
 
+    @Column(length = 2000)
+    private String summary;
+    
     public PersonalInfo(String fullname, String email, String phone, String location, String summary) {
         this.fullname = fullname;
         this.email = email;

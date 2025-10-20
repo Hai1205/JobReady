@@ -8,7 +8,7 @@ import { SkillsStep } from "./steps/SkillsStep";
 import { ReviewStep } from "./steps/ReviewStep";
 import { PreviewStep } from "./steps/PreviewStep";
 import { FileImport } from "./FileImport";
-import { ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,7 @@ export function CVBuilderWizard() {
   const router = useRouter();
   const { userAuth } = useAuthStore();
   const {
+    isLoading,
     currentStep,
     handleSetCurrentStep,
     currentCV,
@@ -169,8 +170,17 @@ export function CVBuilderWizard() {
             </Button>
           ) : (
             <Button onClick={handleSave}>
-              <Save className="mr-2 h-4 w-4" />
-              Save & Finish
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang lưu...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Lưu
+                </>
+              )}
             </Button>
           )}
         </div>

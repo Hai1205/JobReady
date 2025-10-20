@@ -98,9 +98,9 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
 function DrawerTitle({
   className,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.title>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Title>) {
   return (
-    <DrawerPrimitive.title
+    <DrawerPrimitive.Title
       data-slot="drawer-title"
       className={cn("text-foreground font-semibold", className)}
       {...props}

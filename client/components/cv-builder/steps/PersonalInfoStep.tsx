@@ -89,9 +89,10 @@ export function PersonalInfoStep() {
             <Avatar className="h-24 w-24">
               <AvatarImage
                 src={
-                  `${currentCV.personalInfo.avatarUrl ||
-                  currentCV.personalInfo.avatarPublicId}` ||
-                  ""
+                  `${
+                    currentCV.personalInfo.avatarUrl ||
+                    currentCV.personalInfo.avatarPublicId
+                  }` || ""
                 }
               />
               <AvatarFallback className="text-lg">
@@ -155,7 +156,7 @@ export function PersonalInfoStep() {
             id="fullname"
             value={currentCV.personalInfo.fullname}
             onChange={(e) => handleChange("fullname", e.target.value)}
-            placeholder="Lê Quang Dũng"
+            placeholder="Nguyễn Hoàng Hải"
           />
         </div>
 
@@ -166,7 +167,7 @@ export function PersonalInfoStep() {
             type="email"
             value={currentCV.personalInfo.email}
             onChange={(e) => handleChange("email", e.target.value)}
-            placeholder="email@example.com"
+            placeholder="hainguyenhoang1205@gmail.com"
           />
         </div>
 
@@ -177,7 +178,7 @@ export function PersonalInfoStep() {
             type="tel"
             value={currentCV.personalInfo.phone}
             onChange={(e) => handleChange("phone", e.target.value)}
-            placeholder="0123456789"
+            placeholder="0782748863"
           />
         </div>
 

@@ -20,7 +20,7 @@ public class Experience {
 
     private String company;
     private String position;
-    private String startDate; // store as String to match interface
+    private String startDate;
     private String endDate;
 
     @Column(length = 2000)
