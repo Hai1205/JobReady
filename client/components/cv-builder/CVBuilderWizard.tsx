@@ -6,9 +6,12 @@ import { PersonalInfoStep } from "./steps/PersonalInfoStep";
 import { ExperienceStep } from "./steps/ExperienceStep";
 import { SkillsStep } from "./steps/SkillsStep";
 import { PreviewStep } from "./steps/PreviewStep";
-import { FileImport } from "./FileImport";
-import { ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Save,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCVStore } from "@/stores/cvStore";

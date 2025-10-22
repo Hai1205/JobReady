@@ -201,13 +201,13 @@ export const useCVStore = createStore<ICVStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/analyze`, undefined);
+				return await handleRequest(EHttpType.POST, `/cvs/analyze`, formData);
 			});
 		},
 
 		analyzeCVWithJD: async (
 			jobDescription: string,
-			jdFile: File,
+			jdFile: File | null,
 			language: string = "vi",
 			title: string,
 			personalInfo: IPersonalInfo,
@@ -244,11 +244,6 @@ export const useCVStore = createStore<ICVStore>(
 			formData.append("data", JSON.stringify({
 				section,
 				content,
-				title,
-				personalInfo,
-				experiences,
-				educations,
-				skills,
 			}));
 
 			return await get().handleRequest(async () => {

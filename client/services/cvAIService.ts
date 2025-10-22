@@ -43,83 +43,104 @@ export interface CVImportResponse {
     };
 }
 
-export interface IJobDescriptionResult {
-    jobTitle: string;
-    company: string;
-    jobLevel: string;
-    jobType: string;
-    salary: string;
-    location: string;
-    responsibilities: string[];
-    requirements: string[];
-    requiredSkills: string[];
-    preferredSkills: string[];
-    benefits: string[];
-}
-
 /**
  * Phân Tích with AI to get strengths, weaknesses, and suggestions
- * @param cvId - UUID of the CV to analyze
+ * @param title - CV title
+ * @param personalInfo - Personal information
+ * @param experiences - Work experiences
+ * @param educations - Education history
+ * @param skills - Skills list
  */
 export const analyzeCV = async (
-    cvId: string
+    title: string,
+    personalInfo: IPersonalInfo,
+    experiences: IExperience[],
+    educations: IEducation[],
+    skills: string[]
 ): Promise<IApiResponse<AIAnalyzeResponse>> => {
+    const cvData = {
+        title,
+        personalInfo,
+        experiences,
+        educations,
+        skills
+    };
+
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(cvData));
+
     return await handleRequest<AIAnalyzeResponse>(
         EHttpType.POST,
-        `/cvs/analyze/${cvId}`
+        `/cvs/analyze`,
+        formData
     );
 };
 
 /**
  * Improve a specific section of CV using AI
- * @param cvId - UUID of the CV
  * @param section - Section name (e.g., "summary", "experience", "education", "skills")
  * @param content - Current content of the section
  */
 export const improveCV = async (
-    cvId: string,
     section: string,
     content: string
 ): Promise<IApiResponse<AIImproveResponse>> => {
+    const improveCVData = {
+        section,
+        content
+    };
+
     const formData = new FormData();
-    formData.append("section", section);
-    formData.append("content", content);
+    formData.append("data", JSON.stringify(improveCVData));
 
     return await handleRequest<AIImproveResponse>(
         EHttpType.POST,
-        `/cvs/improve/${cvId}`,
+        `/cvs/improve`,
         formData
     );
 };
 
 /**
  * Phân Tích against a job description
- * @param cvId - UUID of the CV
+ * @param title - CV title
+ * @param personalInfo - Personal information
+ * @param experiences - Work experiences
+ * @param educations - Education history
+ * @param skills - Skills list
  * @param jobDescription - Job description text (optional if file is provided)
  * @param jdFile - Job description file (PDF/DOCX) (optional if text is provided)
  * @param language - Output language: 'en' or 'vi' (default: 'vi')
  */
 export const analyzeCVWithJobDescription = async (
-    cvId: string,
+    title: string,
+    personalInfo: IPersonalInfo,
+    experiences: IExperience[],
+    educations: IEducation[],
+    skills: string[],
     jobDescription?: string,
     jdFile?: File,
     language: string = "vi"
 ): Promise<IApiResponse<AIAnalyzeWithJDResponse>> => {
-    const formData = new FormData();
+    const cvData = {
+        title,
+        personalInfo,
+        experiences,
+        educations,
+        skills,
+        jobDescription,
+        language
+    };
 
-    if (jobDescription) {
-        formData.append("jobDescription", jobDescription);
-    }
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(cvData));
 
     if (jdFile) {
         formData.append("jdFile", jdFile);
     }
 
-    formData.append("language", language);
-
     return await handleRequest<AIAnalyzeWithJDResponse>(
         EHttpType.POST,
-        `/cvs/analyze-with-jd/${cvId}`,
+        `/cvs/analyze-with-jd`,
         formData
     );
 };

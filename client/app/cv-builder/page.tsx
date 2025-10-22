@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
 import { CVBuilderWizard } from "@/components/cv-builder/CVBuilderWizard";
-import { AISuggestionsSidebar } from "@/components/cv-builder/AI-powered/AISuggestionsSidebar";
+import { AIPanel } from "@/components/cv-builder/AI-powered/AIPanel";
 
 export default function CVBuilderPage() {
   const router = useRouter();
@@ -44,12 +44,12 @@ export default function CVBuilderPage() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
           <Card className="p-6">
             <CVBuilderWizard />
           </Card>
 
-          <AISuggestionsSidebar />
+          <AIPanel />
         </div>
       </div>
     </div>

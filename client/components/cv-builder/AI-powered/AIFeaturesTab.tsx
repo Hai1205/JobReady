@@ -48,7 +48,13 @@ export function AIFeaturesTab() {
 
     setIsAnalyzing(true);
     try {
-      const response = await analyzeCV(currentCV?.title, currentCV?.personalInfo, currentCV?.experiences, currentCV?.educations, currentCV?.skills);
+      const response = await analyzeCV(
+        currentCV?.title,
+        currentCV?.personalInfo,
+        currentCV?.experiences,
+        currentCV?.educations,
+        currentCV?.skills
+      );
 
       // Support both shapes: response.data may be the backend Response object
       // or the backend Response.data object directly depending on typings.
@@ -94,14 +100,18 @@ export function AIFeaturesTab() {
       let content = "";
       switch (suggestion.section.toLowerCase()) {
         case "summary":
+        case "personal info":
           content = currentCV.personalInfo?.summary || "";
           break;
+        case "experience":
         case "experiences":
           content = JSON.stringify(currentCV.experiences);
           break;
+        case "education":
         case "educations":
           content = JSON.stringify(currentCV.educations);
           break;
+        case "skill":
         case "skills":
           content = currentCV.skills?.join(", ") || "";
           break;
@@ -109,7 +119,15 @@ export function AIFeaturesTab() {
           content = suggestion.suggestion;
       }
 
-      const response = await improveCV(suggestion.section, content, currentCV?.title, currentCV?.personalInfo, currentCV?.experiences, currentCV?.educations, currentCV?.skills);
+      const response = await improveCV(
+        suggestion.section,
+        content,
+        currentCV?.title,
+        currentCV?.personalInfo,
+        currentCV?.experiences,
+        currentCV?.educations,
+        currentCV?.skills
+      );
 
       const maybeResponse = (response as any).data;
       const responseData: any = maybeResponse?.data
@@ -145,8 +163,11 @@ export function AIFeaturesTab() {
     const { section, content } = improvedContent;
     let applied = false;
 
-    switch (section.toLowerCase()) {
-      case "summary":
+    const sectionLower = section.toLowerCase();
+
+    switch (true) {
+      case sectionLower.includes("summary") ||
+        sectionLower.includes("personal"):
         handleUpdateCV({
           personalInfo: {
             ...currentCV.personalInfo,
@@ -155,7 +176,7 @@ export function AIFeaturesTab() {
         });
         applied = true;
         break;
-      case "experiences":
+      case sectionLower.includes("experience"):
         try {
           const parsedExperience = JSON.parse(content);
           handleUpdateCV({ experiences: parsedExperience });
@@ -165,7 +186,7 @@ export function AIFeaturesTab() {
           return;
         }
         break;
-      case "educations":
+      case sectionLower.includes("education"):
         try {
           const parsedEducation = JSON.parse(content);
           handleUpdateCV({ educations: parsedEducation });
@@ -175,7 +196,7 @@ export function AIFeaturesTab() {
           return;
         }
         break;
-      case "skills":
+      case sectionLower.includes("skill"):
         const skillsArray = content
           .split(",")
           .map((s) => s.trim())
