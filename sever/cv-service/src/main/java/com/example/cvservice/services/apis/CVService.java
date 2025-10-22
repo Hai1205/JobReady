@@ -17,6 +17,7 @@ import com.example.cvservice.services.CloudinaryService;
 import com.example.cvservice.services.FileParserService;
 import com.example.cvservice.services.JobDescriptionParserService;
 import com.example.cvservice.services.producers.UserProducer;
+import com.example.cvservice.services.utils.PromptBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -39,6 +40,7 @@ public class CVService extends BaseService {
     private final FileParserService fileParserService;
     private final JobDescriptionParserService jobDescriptionParserService;
     private final OpenRouterConfig openRouterConfig;
+    private final PromptBuilder promptBuilder;
     private final CVMapper cvMapper;
     private final ObjectMapper objectMapper;
     private final CloudinaryService cloudinaryService;
@@ -52,6 +54,7 @@ public class CVService extends BaseService {
             FileParserService fileParserService,
             JobDescriptionParserService jobDescriptionParserService,
             OpenRouterConfig openRouterConfig,
+            PromptBuilder promptBuilder,
             CloudinaryService cloudinaryService,
             CVMapper cvMapper,
             UserProducer userProducer) {
@@ -62,6 +65,7 @@ public class CVService extends BaseService {
         this.fileParserService = fileParserService;
         this.jobDescriptionParserService = jobDescriptionParserService;
         this.openRouterConfig = openRouterConfig;
+        this.promptBuilder = promptBuilder;
         this.cvMapper = cvMapper;
         this.cloudinaryService = cloudinaryService;
         this.userProducer = userProducer;
@@ -231,7 +235,8 @@ public class CVService extends BaseService {
 
             log.info("Analyzing CV with title={}", title);
 
-            String systemPrompt = "You are an expert CV/resume analyzer. Analyze the CV and provide detailed insights on strengths, weaknesses, and suggestions for improvement. Format your response as JSON with the following structure: {\"overallScore\": <number 0-100>, \"strengths\": [<array of strings>], \"weaknesses\": [<array of strings>], \"suggestions\": [{\"id\": \"<uuid>\", \"type\": \"improvement|warning|error\", \"section\": \"<section name>\", \"message\": \"<description>\", \"suggestion\": \"<specific improvement>\", \"applied\": false}]}";
+            // Use optimized GPT-5 prompt from PromptBuilder
+            String systemPrompt = promptBuilder.buildCVAnalysisPrompt();
 
             String cvContent = handleFormatCVForAnalysis(cvDto);
             String prompt = "Analyze this CV:\n\n" + cvContent;
@@ -260,7 +265,14 @@ public class CVService extends BaseService {
             String section = request.getSection();
             String content = request.getContent();
 
-            String systemPrompt = "You are an expert resume writer and career coach. Your task is to improve specific sections of a CV to make them more professional, impactful, and effective. Use action verbs, quantify achievements where possible, and ensure clarity and conciseness.";
+            // Use optimized GPT-5 prompt from PromptBuilder
+            // For now, we use "General position" as default. Future: extract from request
+            String systemPrompt = promptBuilder.buildCVImprovementPrompt(
+                    section,
+                    "General position",
+                    List.of() // Empty requirements - can be enhanced later
+            );
+
             String prompt = String.format(
                     "Improve the following %s section of a CV:\n\n%s\n\nProvide only the improved version without explanations.",
                     section, content);
@@ -548,7 +560,8 @@ public class CVService extends BaseService {
 
             String cvContent = handleFormatCVForAnalysis(cvDto);
 
-            String systemPrompt = handleBuildSystemPrompt(language);
+            // Use optimized GPT-5 prompt from PromptBuilder
+            String systemPrompt = promptBuilder.buildJobMatchPrompt(language != null ? language : "vi");
             String userPrompt = handleBuildUserPrompt(jdText, cvContent);
 
             String aiResponse = openRouterConfig.callModelWithSystemPrompt(systemPrompt, userPrompt);
@@ -593,17 +606,6 @@ public class CVService extends BaseService {
             System.err.println("Error extracting JD file: " + ex.getMessage());
             return jobDescription;
         }
-    }
-
-    private String handleBuildSystemPrompt(String language) {
-        return "You are an expert job description parser and ATS analyst. " +
-                "Given a Job Description and a CV, return two JSON objects: " +
-                "(1) the parsed Job Description with fields " +
-                "{\"jobTitle\",\"company\",\"jobLevel\",\"jobType\",\"salary\",\"location\",\"responsibilities\":[],\"requirements\":[],\"requiredSkills\":[],\"preferredSkills\":[],\"benefits\":[]} "
-                +
-                "and (2) an analyze of how well the CV matches the JD with fields " +
-                "{\"matchScore\":<0-100>, \"missingKeywords\":[], \"strengths\":[], \"suggestions\":[] }. " +
-                "Return ONLY valid JSON. Language for output: " + language + ".";
     }
 
     private String handleBuildUserPrompt(String jdText, String cvContent) {

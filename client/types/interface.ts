@@ -79,8 +79,11 @@ declare global {
         benefits: string[]
     }
 
-    // Backend Response Structure
-    interface IResponseData {
+    // Backend Response Structure (matches Response.java)
+    interface IBackendResponse {
+        statusCode: number
+        message: string
+
         // CV related data
         cv?: ICV
         cvs?: ICV[]
@@ -100,15 +103,32 @@ declare global {
         missingKeywords?: string[]
 
         // Pagination and stats
-        pagination?: unknown
-        stats?: Record<string, unknown>
+        pagination?: IPagination
+        stats?: IStats
         additionalData?: Record<string, unknown>
     }
 
-    interface IAPIResponse {
-        statusCode: number
-        message: string
-        data?: IResponseData
+    // Axios Response wrapper
+    interface IAPIResponse<T = IBackendResponse> {
+        data: T
+        status: number
+        statusText: string
+        headers: Record<string, string>
+    }
+
+    // Pagination structure
+    interface IPagination {
+        currentPage: number
+        pageSize: number
+        totalPages: number
+        totalItems: number
+    }
+
+    // Stats structure
+    interface IStats {
+        totalCVs?: number
+        totalUsers?: number
+        [key: string]: number | undefined
     }
 }
 export { };

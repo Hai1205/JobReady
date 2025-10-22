@@ -56,15 +56,10 @@ export function AIFeaturesTab() {
         currentCV?.skills
       );
 
-      // Support both shapes: response.data may be the backend Response object
-      // or the backend Response.data object directly depending on typings.
-      const maybeResponse = (response as any).data;
-      const responseData: any = maybeResponse?.data
-        ? maybeResponse.data
-        : maybeResponse;
-
-      const suggestions = responseData?.suggestions || [];
-      const analyzeText = responseData?.analyze || "";
+      // Response.data contains IBackendResponse from server
+      const backendData = response.data as unknown as IBackendResponse;
+      const suggestions = backendData?.suggestions || [];
+      const analyzeText = backendData?.analyze || "";
 
       // Store raw analyze text
       if (analyzeText) {
@@ -78,7 +73,7 @@ export function AIFeaturesTab() {
         );
         setActiveTab("suggestions");
       } else {
-        toast.error((response as any)?.message || "Failed to Phân Tích");
+        toast.error(backendData?.message || "Failed to Phân Tích");
       }
     } catch (error) {
       console.error("Error analyzing CV:", error);
@@ -88,7 +83,7 @@ export function AIFeaturesTab() {
     }
   };
 
-  const handleApplySuggestion = async (suggestion: any) => {
+  const handleApplySuggestion = async (suggestion: IAISuggestion) => {
     if (!currentCV) {
       toast.error("No CV loaded");
       return;
@@ -129,12 +124,8 @@ export function AIFeaturesTab() {
         currentCV?.skills
       );
 
-      const maybeResponse = (response as any).data;
-      const responseData: any = maybeResponse?.data
-        ? maybeResponse.data
-        : maybeResponse;
-
-      const improvedSection = responseData?.improvedSection;
+      const backendData = response.data as unknown as IBackendResponse;
+      const improvedSection = backendData?.improvedSection;
 
       if (improvedSection) {
         // Store improved content for manual review
@@ -147,7 +138,7 @@ export function AIFeaturesTab() {
         );
         console.log("Improved section:", improvedSection);
       } else {
-        toast.error((response as any)?.message || "Failed to apply suggestion");
+        toast.error(backendData?.message || "Failed to apply suggestion");
       }
     } catch (error) {
       console.error("Error applying suggestion:", error);

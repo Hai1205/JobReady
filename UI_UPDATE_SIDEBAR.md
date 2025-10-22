@@ -5,11 +5,14 @@
 Đã thêm **AI Panel** vào sidebar bên phải với 2 tabs:
 
 ### 1️⃣ Tab "Công Cụ"
+
 Chứa các công cụ AI:
+
 - ✅ **Phân Tích CV Nhanh** - Nút lớn, dễ thấy
 - ✅ **So Sánh Với Công Việc** - Trong accordion (có thể mở/đóng)
 
-### 2️⃣ Tab "Gợi Ý" 
+### 2️⃣ Tab "Gợi Ý"
+
 Hiển thị danh sách gợi ý AI sau khi phân tích
 
 ---
@@ -25,18 +28,21 @@ Hiển thị danh sách gợi ý AI sau khi phân tích
 ## 🎯 Cách Sử dụng
 
 ### Bước 1: Mở CV Builder
+
 ```
 http://localhost:3000/cv-builder
 ```
 
 ### Bước 2: Xem Sidebar Bên Phải
+
 Bạn sẽ thấy panel "Công Cụ AI" với 2 tabs
 
 ### Bước 3: Sử Dụng Các Tính Năng
 
 #### Tab "Công Cụ":
+
 ```
-1. Click "Phân Tích CV Nhanh" 
+1. Click "Phân Tích CV Nhanh"
    → AI sẽ phân tích và đưa ra gợi ý
 
 2. Click "So Sánh Với Công Việc" để mở ra
@@ -45,6 +51,7 @@ Bạn sẽ thấy panel "Công Cụ AI" với 2 tabs
 ```
 
 #### Tab "Gợi Ý":
+
 ```
 - Xem danh sách gợi ý từ AI
 - Click "Apply" để áp dụng
@@ -56,6 +63,7 @@ Bạn sẽ thấy panel "Công Cụ AI" với 2 tabs
 ## 🔄 So Sánh Trước & Sau
 
 ### ❌ Trước
+
 ```
 Sidebar bên phải:
 ├─ Gợi Ý AI
@@ -63,6 +71,7 @@ Sidebar bên phải:
 ```
 
 ### ✅ Sau
+
 ```
 Sidebar bên phải:
 ├─ Công Cụ AI
@@ -119,18 +128,20 @@ Sidebar bên phải:
 ## 💡 Features
 
 ### Phân Tích CV Nhanh
+
 ```typescript
 // Click button
-onClick={handleQuickAnalyze}
+onClick = { handleQuickAnalyze };
 
 // AI analyze full CV
-analyzeCV(title, personalInfo, experiences, educations, skills)
+analyzeCV(title, personalInfo, experiences, educations, skills);
 
 // Show suggestions in Gợi Ý tab
-handleSetAISuggestions(suggestions)
+handleSetAISuggestions(suggestions);
 ```
 
 ### So Sánh Với Công Việc
+
 ```typescript
 // Upload file OR paste text
 jdFile || jobDescription
@@ -157,6 +168,7 @@ suggestions: [...]
 ## 🚀 Next Steps
 
 Người dùng bây giờ có thể:
+
 1. ✅ Phân tích CV bất cứ lúc nào
 2. ✅ So sánh với job description ngay lập tức
 3. ✅ Xem và apply suggestions dễ dàng
@@ -167,6 +179,7 @@ Người dùng bây giờ có thể:
 ## 🔧 Technical Details
 
 ### Components Structure
+
 ```
 AIPanel
 ├── Tabs
@@ -180,6 +193,7 @@ AIPanel
 ```
 
 ### Props Flow
+
 ```
 page.tsx
   → AIPanel
@@ -193,6 +207,7 @@ page.tsx
 ## ✨ Kết Luận
 
 **Giờ bạn sẽ thấy cả 2 công cụ AI:**
+
 1. ✅ Phân Tích CV Nhanh (button lớn)
 2. ✅ So Sánh Với Công Việc (trong accordion)
 

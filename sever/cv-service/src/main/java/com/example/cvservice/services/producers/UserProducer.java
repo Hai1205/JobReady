@@ -12,13 +12,11 @@ import com.example.cvservice.dtos.UserDto;
 import com.example.rabbitmq.constants.RabbitConstants;
 import com.example.rabbitmq.dtos.RabbitHeader;
 import com.example.rabbitmq.services.RabbitRPCService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
 public class UserProducer {
         private final RabbitRPCService rpcService;
-        private final ObjectMapper objectMapper = new ObjectMapper();
 
         public UserDto findUserById(UUID userId) {
                 RabbitHeader header = RabbitHeader.builder()

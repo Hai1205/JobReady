@@ -5,43 +5,8 @@ import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
  * Centralizes API calls for analyze, improve, and job description matching
  */
 
-// Response types matching backend ResponseData structure
-export interface AIAnalyzeResponse {
-    statusCode: number;
-    message: string;
-    data: {
-        analyze: string;
-        suggestions: IAISuggestion[];
-    };
-}
-
-export interface AIImproveResponse {
-    statusCode: number;
-    message: string;
-    data: {
-        improvedSection: string;
-    };
-}
-
-export interface AIAnalyzeWithJDResponse {
-    statusCode: number;
-    message: string;
-    data: {
-        analyze: string;
-        matchScore: number;
-        parsedJobDescription: IJobDescriptionResult;
-        missingKeywords: string[];
-    };
-}
-
-export interface CVImportResponse {
-    statusCode: number;
-    message: string;
-    data: {
-        cv: ICV;
-        extractedText: string;
-    };
-}
+// Backend Response type matching Response.java from cv-service
+interface ICVDataResponse extends IBackendResponse { }
 
 /**
  * Phân Tích with AI to get strengths, weaknesses, and suggestions
@@ -57,7 +22,7 @@ export const analyzeCV = async (
     experiences: IExperience[],
     educations: IEducation[],
     skills: string[]
-): Promise<IApiResponse<AIAnalyzeResponse>> => {
+): Promise<IApiResponse<ICVDataResponse>> => {
     const cvData = {
         title,
         personalInfo,
@@ -69,7 +34,7 @@ export const analyzeCV = async (
     const formData = new FormData();
     formData.append("data", JSON.stringify(cvData));
 
-    return await handleRequest<AIAnalyzeResponse>(
+    return await handleRequest<ICVDataResponse>(
         EHttpType.POST,
         `/cvs/analyze`,
         formData
@@ -84,7 +49,7 @@ export const analyzeCV = async (
 export const improveCV = async (
     section: string,
     content: string
-): Promise<IApiResponse<AIImproveResponse>> => {
+): Promise<IApiResponse<ICVDataResponse>> => {
     const improveCVData = {
         section,
         content
@@ -93,7 +58,7 @@ export const improveCV = async (
     const formData = new FormData();
     formData.append("data", JSON.stringify(improveCVData));
 
-    return await handleRequest<AIImproveResponse>(
+    return await handleRequest<ICVDataResponse>(
         EHttpType.POST,
         `/cvs/improve`,
         formData
@@ -120,7 +85,7 @@ export const analyzeCVWithJobDescription = async (
     jobDescription?: string,
     jdFile?: File,
     language: string = "vi"
-): Promise<IApiResponse<AIAnalyzeWithJDResponse>> => {
+): Promise<IApiResponse<ICVDataResponse>> => {
     const cvData = {
         title,
         personalInfo,
@@ -138,7 +103,7 @@ export const analyzeCVWithJobDescription = async (
         formData.append("jdFile", jdFile);
     }
 
-    return await handleRequest<AIAnalyzeWithJDResponse>(
+    return await handleRequest<ICVDataResponse>(
         EHttpType.POST,
         `/cvs/analyze-with-jd`,
         formData
@@ -153,11 +118,11 @@ export const analyzeCVWithJobDescription = async (
 export const importCVFile = async (
     userId: string,
     file: File
-): Promise<IApiResponse<CVImportResponse>> => {
+): Promise<IApiResponse<ICVDataResponse>> => {
     const formData = new FormData();
     formData.append("file", file);
 
-    return await handleRequest<CVImportResponse>(
+    return await handleRequest<ICVDataResponse>(
         EHttpType.POST,
         `/cvs/users/${userId}/import`,
         formData

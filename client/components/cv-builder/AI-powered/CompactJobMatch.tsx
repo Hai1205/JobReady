@@ -10,13 +10,19 @@ import { useCVStore } from "@/stores/cvStore";
 
 interface CompactJobMatchProps {
   currentCV: ICV | null;
-  onAnalysisComplete?: (suggestions: IAISuggestion[], matchScore?: number) => void;
+  onAnalysisComplete?: (
+    suggestions: IAISuggestion[],
+    matchScore?: number
+  ) => void;
 }
 
 /**
  * CompactJobMatch - Compact version for sidebar
  */
-export function CompactJobMatch({ currentCV, onAnalysisComplete }: CompactJobMatchProps) {
+export function CompactJobMatch({
+  currentCV,
+  onAnalysisComplete,
+}: CompactJobMatchProps) {
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [jdFile, setJdFile] = useState<File | null>(null);
@@ -77,13 +83,9 @@ export function CompactJobMatch({ currentCV, onAnalysisComplete }: CompactJobMat
         currentCV.skills
       );
 
-      const maybeResponse = (response as any).data;
-      const responseData: IResponseData | undefined = maybeResponse?.data
-        ? maybeResponse.data
-        : maybeResponse;
-
-      const suggestions = responseData?.suggestions || [];
-      const score = responseData?.matchScore;
+      const backendData = response.data as unknown as IBackendResponse;
+      const suggestions = backendData?.suggestions || [];
+      const score = backendData?.matchScore;
 
       handleSetAISuggestions(suggestions);
 
