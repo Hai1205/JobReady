@@ -4,25 +4,25 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
-// Import my-cvs components
 import PageHeader from "@/components/my-cvs/PageHeader";
 import CVCard from "@/components/my-cvs/CVCard";
 import EmptyState from "@/components/my-cvs/EmptyState";
 import DeleteConfirmationDialog from "@/components/my-cvs/DeleteConfirmationDialog";
+import LoadingPage from "@/components/LoadingPage";
 
 export default function MyCVsPage() {
   const { userAuth } = useAuthStore();
   const {
-    cvList,
     handleSetCurrentCV,
     handleSetCurrentStep,
     deleteCV,
-    createCV,
+    duplicateCV,
     getUserCVs,
   } = useCVStore();
 
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [cvList, setCVlist] = useState<ICV[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<string | null>(null);
 
@@ -35,7 +35,10 @@ export default function MyCVsPage() {
 
     setLoading(true);
 
-    await getUserCVs(userAuth.id);
+    const response = await getUserCVs(userAuth.id);
+    if (response?.data) {
+      setCVlist(response?.data?.cvs || []);
+    }
 
     setLoading(false);
   };
@@ -52,8 +55,8 @@ export default function MyCVsPage() {
     router.push("/cv-builder");
   };
 
-  const handleDeleteClick = (id: string) => {
-    setCvToDelete(id);
+  const handleDeleteClick = (cvId: string) => {
+    setCvToDelete(cvId);
     setDeleteDialogOpen(true);
   };
 
@@ -63,15 +66,8 @@ export default function MyCVsPage() {
     deleteCV(cvToDelete);
   };
 
-  const handleDuplicate = (cv: ICV) => {
-    // const duplicatedCV: ICV = {
-    //   ...cv,
-    //   id: crypto.randomUUID(),
-    //   title: `${cv.title} (Copy)`,
-    //   createdAt: new Date().toISOString(),
-    //   updatedAt: new Date().toISOString(),
-    // };
-    // createCV(duplicatedCV);
+  const handleDuplicate = (cvId: string) => {
+    duplicateCV(cvId);
   };
 
   if (!userAuth) {
@@ -80,9 +76,7 @@ export default function MyCVsPage() {
 
   if (loading) {
     return (
-      <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-12">
-        <p className="text-muted-foreground">Đang tải CV của bạn...</p>
-      </div>
+      <LoadingPage />
     );
   }
 

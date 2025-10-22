@@ -15,8 +15,8 @@ import { formatDateAgo } from "@/lib/utils";
 interface CVCardProps {
   cv: ICV;
   onEdit: (cv: ICV) => void;
-  onDuplicate: (cv: ICV) => void;
-  onDelete: (id: string) => void;
+  onDuplicate: (cvId: string) => void;
+  onDelete: (cvId: string) => void;
 }
 
 export default function CVCard({
@@ -85,7 +85,7 @@ export default function CVCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onDuplicate(cv)}
+              onClick={() => onDuplicate(cv.id)}
               className="hover:bg-secondary/10 hover:text-secondary hover:border-secondary/50 transition-all duration-200"
             >
               <Copy className="h-3 w-3" />

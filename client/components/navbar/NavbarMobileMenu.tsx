@@ -50,31 +50,33 @@ export const NavbarMobileMenu = ({
 
       {userAuth && (
         <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border border-border/50">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-lg">
-              <AvatarImage
-                src={userAuth.avatarUrl}
-                alt={userAuth.fullname || "User"}
-                className="object-cover"
-              />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold text-lg">
-                {userAuth.fullname?.charAt(0).toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">
-                {userAuth.fullname}
-              </p>
-              <p className="text-xs text-muted-foreground line-clamp-1">
-                {userAuth.email}
-              </p>
-              {isAdmin && (
-                <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-primary/20 text-primary text-xs font-medium">
-                  Admin
-                </div>
-              )}
+          <Link href="/settings" onClick={() => onOpenChange(false)}>
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-lg">
+                <AvatarImage
+                  src={userAuth.avatarUrl}
+                  alt={userAuth.fullname || "User"}
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold text-lg">
+                  {userAuth.fullname?.charAt(0).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">
+                  {userAuth.fullname}
+                </p>
+                <p className="text-xs text-muted-foreground line-clamp-1">
+                  {userAuth.email}
+                </p>
+                {isAdmin && (
+                  <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-primary/20 text-primary text-xs font-medium">
+                    Admin
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
       )}
 

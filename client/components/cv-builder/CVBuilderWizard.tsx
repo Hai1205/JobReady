@@ -30,6 +30,7 @@ export function CVBuilderWizard() {
     currentStep,
     handleSetCurrentStep,
     currentCV,
+    updateCV,
     createCV,
     handleUpdateCV,
   } = useCVStore();
@@ -52,15 +53,29 @@ export function CVBuilderWizard() {
   const handleSave = async () => {
     if (!currentCV) return;
 
-    createCV(
-      userAuth?.id || "",
-      currentCV.title,
-      currentCV.avatar as File,
-      currentCV.personalInfo,
-      currentCV.experiences,
-      currentCV.educations,
-      currentCV.skills
-    );
+    if (currentCV.id) {
+      // Update existing CV
+      updateCV(
+        currentCV.id,
+        currentCV.title,
+        currentCV.avatar as File,
+        currentCV.personalInfo,
+        currentCV.experiences,
+        currentCV.educations,
+        currentCV.skills
+      );
+    } else {
+      // Create new CV
+      createCV(
+        userAuth?.id || "",
+        currentCV.title,
+        currentCV.avatar as File,
+        currentCV.personalInfo,
+        currentCV.experiences,
+        currentCV.educations,
+        currentCV.skills
+      );
+    }
   };
 
   return (

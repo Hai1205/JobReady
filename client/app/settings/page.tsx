@@ -8,17 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Lock, Bell, Shield } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUserStore } from "@/stores/userStore";
 import { toast } from "react-toastify";
 import { EUserRole, EUserStatus } from "@/types/enum";
-// Import settings components
 import ProfileTab from "@/components/settings/ProfileTab";
 import SecurityTab from "@/components/settings/SecurityTab";
 import NotificationsTab from "@/components/settings/NotificationsTab";
@@ -26,17 +21,10 @@ import PrivacyTab from "@/components/settings/PrivacyTab";
 
 export default function SettingsPage() {
   const { userAuth, changePassword } = useAuthStore();
-  const { updateUser, isLoading } = useUserStore();
+  const { updateUser } = useUserStore();
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string>("");
-
-  const tabs = [
-    { value: "profile", icon: User, label: "Hồ Sơ" },
-    { value: "security", icon: Lock, label: "Bảo Mật" },
-    { value: "notifications", icon: Bell, label: "Thông Báo" },
-    { value: "privacy", icon: Shield, label: "Quyền Riêng Tư" },
-  ];
 
   type ExtendedUserData = Omit<IUser, "status"> & {
     status: EUserStatus;
@@ -46,6 +34,7 @@ export default function SettingsPage() {
     currentPassword?: string;
     confirmPassword?: string;
   };
+
   const defaultUser: ExtendedUserData = {
     id: "",
     username: "",
@@ -64,13 +53,9 @@ export default function SettingsPage() {
     field: keyof ExtendedUserData,
     value: string | string[] | boolean
   ) => {
-    setData((prev) => {
-      if (!prev) {
-        return { ...defaultUser, [field]: value } as ExtendedUserData;
-      }
-
-      return { ...prev, [field]: value };
-    });
+    setData((prev) =>
+      prev ? { ...prev, [field]: value } : { ...defaultUser, [field]: value }
+    );
   };
 
   const handleUpdate = async () => {
@@ -100,7 +85,6 @@ export default function SettingsPage() {
       toast.error("New passwords do not match!");
       return;
     }
-
     if (data?.newPassword && data.newPassword.length < 6) {
       toast.error("Password must be at least 6 characters!");
       return;
@@ -118,14 +102,56 @@ export default function SettingsPage() {
         data.newPassword,
         data.confirmPassword
       );
-
       toast.info("Change password successfully!");
     }
   };
 
-  if (!userAuth) {
-    return null;
-  }
+  if (!userAuth) return null;
+
+  const tabContents = [
+    {
+      value: "profile",
+      icon: User,
+      title: "Thông Tin Cá Nhân",
+      description: "Cập nhật thông tin hồ sơ của bạn",
+      component: (
+        <ProfileTab
+          data={data}
+          onChange={handleChange}
+          onUpdate={handleUpdate}
+          previewAvatar={previewAvatar}
+          onAvatarChange={handleAvatarChange}
+        />
+      ),
+    },
+    {
+      value: "security",
+      icon: Lock,
+      title: "Bảo Mật",
+      description: "Thay đổi mật khẩu và cài đặt bảo mật",
+      component: (
+        <SecurityTab
+          data={data}
+          onChange={handleChange}
+          onChangePassword={handleChangePassword}
+        />
+      ),
+    },
+    {
+      value: "notifications",
+      icon: Bell,
+      title: "Thông Báo",
+      description: "Quản lý cách bạn nhận thông báo",
+      component: <NotificationsTab />,
+    },
+    {
+      value: "privacy",
+      icon: Shield,
+      title: "Quyền Riêng Tư",
+      description: "Kiểm soát quyền riêng tư và dữ liệu của bạn",
+      component: <PrivacyTab />,
+    },
+  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 bg-gradient-to-br from-background to-muted/20">
@@ -141,95 +167,31 @@ export default function SettingsPage() {
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-card border border-border/50">
-            {tabs.map(({ value, icon: Icon, label }) => (
+            {tabContents.map(({ value, icon: Icon, title }) => (
               <TabsTrigger
                 key={value}
                 value={value}
                 className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground"
               >
                 <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{label}</span>
+                <span className="hidden sm:inline">{title}</span>
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {/* Profile Tab */}
-          <TabsContent value="profile">
-            <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Thông Tin Cá Nhân
-                </CardTitle>
-                <CardDescription>
-                  Cập nhật thông tin hồ sơ của bạn
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ProfileTab
-                  data={data}
-                  onChange={handleChange}
-                  onUpdate={handleUpdate}
-                  previewAvatar={previewAvatar}
-                  onAvatarChange={handleAvatarChange}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Security Tab */}
-          <TabsContent value="security">
-            <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Bảo Mật
-                </CardTitle>
-                <CardDescription>
-                  Thay đổi mật khẩu và cài đặt bảo mật
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SecurityTab
-                  data={data}
-                  onChange={handleChange}
-                  onChangePassword={handleChangePassword}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Notifications Tab */}
-          <TabsContent value="notifications">
-            <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Thông Báo
-                </CardTitle>
-                <CardDescription>
-                  Quản lý cách bạn nhận thông báo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <NotificationsTab />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Privacy Tab */}
-          <TabsContent value="privacy">
-            <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Quyền Riêng Tư
-                </CardTitle>
-                <CardDescription>
-                  Kiểm soát quyền riêng tư và dữ liệu của bạn
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PrivacyTab />
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {tabContents.map(({ value, title, description, component }) => (
+            <TabsContent key={value} value={value}>
+              <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    {title}
+                  </CardTitle>
+                  <CardDescription>{description}</CardDescription>
+                </CardHeader>
+                <CardContent>{component}</CardContent>
+              </Card>
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
     </div>

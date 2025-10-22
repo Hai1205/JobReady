@@ -116,6 +116,14 @@ public class CVController {
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+    
+    @PostMapping("/{cvId}/duplicate")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
+    public ResponseEntity<Response> duplicateCV(@PathVariable("cvId") UUID cvId) {
+        Response response = cvService.duplicateCV(cvId);
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 
     @GetMapping("/health")
     @PreAuthorize("hasAuthority('ADMINA')")

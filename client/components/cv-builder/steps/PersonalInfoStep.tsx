@@ -143,7 +143,6 @@ export function PersonalInfoStep() {
             <ul className="text-xs text-muted-foreground space-y-1">
               <li>• Định dạng: JPG, PNG, GIF</li>
               <li>• Kích thước tối đa: 5MB</li>
-              <li>• Khuyến nghị: Ảnh vuông, nền trắng</li>
             </ul>
           </div>
         </div>

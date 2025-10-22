@@ -464,6 +464,22 @@ public class CVService extends BaseService {
         return true;
     }
 
+    public CVDto handleDuplicateCV(UUID cvId) {
+        log.info("Duplicating CV id={}", cvId);
+        CVDto existingCV = handleGetCVById(cvId);
+
+        CVDto newCV = handleCreateCV(
+                existingCV.getUserId(),
+                existingCV.getTitle() + " (Copy)",
+                existingCV.getPersonalInfo(),
+                existingCV.getExperiences(),
+                existingCV.getEducations(),
+                existingCV.getSkills());
+
+        log.info("Duplicated CV id={} created new CV id={}", cvId, newCV.getId());
+        return newCV;
+    }
+
     public Response deleteCV(UUID cvId) {
         Response response = new Response();
 
@@ -472,6 +488,24 @@ public class CVService extends BaseService {
 
             response.setMessage("CV deleted successfully");
             log.info("Deleted CV id={}", cvId);
+            return response;
+        } catch (OurException e) {
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response duplicateCV(UUID cvId) {
+        Response response = new Response();
+
+        try {
+            CVDto duplicatedCV = handleDuplicateCV(cvId);
+
+            response.setMessage("CV duplicated successfully");
+            response.setCv(duplicatedCV);
+            log.info("Duplicated CV id={}", cvId);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());

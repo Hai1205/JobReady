@@ -3,13 +3,12 @@
 import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mail, Phone, Download, Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";
 
 export function PreviewStep() {
   const { currentCV, handleGeneratePDF } = useCVStore();
-  const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+  // const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
 
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -18,12 +17,13 @@ export function PreviewStep() {
     if (currentCV?.avatar && currentCV.avatar instanceof File) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatarUrl(reader.result as string);
+        // setAvatarUrl(reader.result as string);
       };
       reader.readAsDataURL(currentCV.avatar);
-    } else {
-      setAvatarUrl(null);
     }
+    // else {
+    // setAvatarUrl(null);
+    // }
   }, [currentCV?.avatar]);
 
   if (!currentCV) return null;
@@ -91,9 +91,14 @@ export function PreviewStep() {
             >
               {/* Avatar */}
               <div style={{ flexShrink: 0 }}>
-                {avatarUrl ? (
+                {(currentCV.personalInfo.avatarUrl ||
+                  currentCV.personalInfo.avatarPublicId) && (
                   <img
-                    src={avatarUrl}
+                    src={
+                      currentCV.personalInfo.avatarUrl ||
+                      currentCV.personalInfo.avatarPublicId ||
+                      ""
+                    }
                     alt="Avatar"
                     style={{
                       width: "96px",
@@ -104,33 +109,35 @@ export function PreviewStep() {
                       boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                     }}
                   />
-                ) : (
-                  <div
-                    style={{
-                      width: "96px",
-                      height: "96px",
-                      borderRadius: "50%",
-                      backgroundColor: "#1e3a8a",
-                      color: "white",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "32px",
-                      fontWeight: "bold",
-                      border: "4px solid white",
-                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {currentCV.personalInfo.fullname
-                      ? currentCV.personalInfo.fullname
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)
-                      : "CV"}
-                  </div>
                 )}
+                {!currentCV.personalInfo.avatarUrl &&
+                  !currentCV.personalInfo.avatarPublicId && (
+                    <div
+                      style={{
+                        width: "96px",
+                        height: "96px",
+                        borderRadius: "50%",
+                        backgroundColor: "#1e3a8a",
+                        color: "white",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "32px",
+                        fontWeight: "bold",
+                        border: "4px solid white",
+                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      {currentCV.personalInfo.fullname
+                        ? currentCV.personalInfo.fullname
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2)
+                        : "CV"}
+                    </div>
+                  )}
               </div>
 
               {/* Name and Info */}

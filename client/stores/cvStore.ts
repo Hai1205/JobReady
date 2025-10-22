@@ -41,6 +41,9 @@ export interface ICVStore extends IBaseStore {
 	deleteCV: (
 		cvId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
+	duplicateCV: (
+		cvId: string
+	) => Promise<IApiResponse<ICVDataResponse>>;
 	importFile: (
 		userId: string,
 		file: File
@@ -150,6 +153,12 @@ export const useCVStore = createStore<ICVStore>(
 		deleteCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.DELETE, `/cvs/${cvId}`);
+			});
+		},
+		
+		duplicateCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
+			return await get().handleRequest(async () => {
+				return await handleRequest(EHttpType.POST, `/cvs/${cvId}/duplicate`);
 			});
 		},
 
