@@ -2,7 +2,7 @@ import type React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Navbar } from "@/components/Navbar";
+import { Navbar } from "@/components/navbar/Navbar";
 import { TokenRefresher } from "@/components/TokenRefresher";
 import { CookieMonitor } from "@/components/CookieMonitor";
 import { Slide, ToastContainer } from "react-toastify";

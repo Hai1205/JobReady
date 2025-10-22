@@ -23,7 +23,7 @@ public class Experience {
     private String startDate;
     private String endDate;
 
-    @Column(length = 2000)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     public Experience(String company, String position, String startDate, String endDate, String description) {

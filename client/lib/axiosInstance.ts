@@ -62,7 +62,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     console.log('🔄 Attempting to refresh token...');
     const response = await axios.post(
       `${SERVER_URL}/auth/refresh-token`,
-      {},
+      { refreshToken }, // Truyền refresh token trong body request
       { withCredentials: true }
     );
 
@@ -70,12 +70,19 @@ const refreshAccessToken = async (): Promise<string | null> => {
     return getCookie('access_token');
   } catch (error) {
     console.error('❌ Token refresh failed:', error);
-    // Clear auth state and redirect to login
-    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 
-    if (typeof window !== 'undefined') {
-      window.location.href = '/auth/login';
+    // Chỉ xóa cookie khi server trả về lỗi 401 (invalid/expired token)
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      console.log('🔒 Token invalid or expired - clearing auth state');
+      document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/login';
+      }
+    } else {
+      // Lỗi khác (500, lỗi mạng) - không xóa cookie
+      console.log('⚠️ Server or network error, keeping tokens');
     }
     return null;
   }

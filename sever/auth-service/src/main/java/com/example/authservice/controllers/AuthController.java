@@ -51,7 +51,7 @@ public class AuthController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/change-password/{email}")
+    @PatchMapping("/change-password/{email}")
     public ResponseEntity<Response> changePassword(
             @PathVariable("email") String email,
             @RequestPart("data") String dataJson) {
@@ -61,8 +61,8 @@ public class AuthController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/reset-password/{email}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PatchMapping("/reset-password/{email}")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> resetPassword(
             @PathVariable("email") String email) {
         Response response = authService.resetPassword(email);
@@ -70,7 +70,7 @@ public class AuthController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/forgot-password/{email}")
+    @PatchMapping("/forgot-password/{email}")
     public ResponseEntity<Response> forgotPassword(
             @PathVariable("email") String email,
             @RequestPart("data") String dataJson) {
@@ -84,8 +84,10 @@ public class AuthController {
     public ResponseEntity<Response> refreshToken(
             @RequestBody(required = false) RefreshTokenRequest refreshTokenRequest,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            jakarta.servlet.http.HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
-        Response response = authService.refreshToken(refreshTokenRequest, authorizationHeader, httpServletResponse);
+        Response response = authService.refreshToken(refreshTokenRequest, authorizationHeader, httpServletRequest,
+                httpServletResponse);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -98,7 +100,7 @@ public class AuthController {
     }
 
     @GetMapping("/health")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> health() {
         Response response = new Response(200, "Auth Service is running");
 

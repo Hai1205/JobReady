@@ -1,6 +1,8 @@
 package com.example.cvservice.services.apis;
 
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.cvservice.configs.OpenRouterConfig;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class CVService extends BaseService {
+
+    private static final Logger log = LoggerFactory.getLogger(CVService.class);
 
     private final CVRepository cvRepository;
     private final EducationRepository educationRepository;
@@ -65,7 +69,9 @@ public class CVService extends BaseService {
     }
 
     public CVDto handleGetCVById(UUID cvId) {
+        log.debug("Fetching CV by id={}", cvId);
         CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
+        log.debug("Found CV id={} userId={}", cv.getId(), cv.getUserId());
         return cvMapper.toDto(cv);
     }
 
@@ -76,8 +82,11 @@ public class CVService extends BaseService {
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
             List<String> skills) {
+        log.info("Creating CV for userId={} title='{}' experiencesCount={} educationsCount={}", userId, title,
+                experiencesDto == null ? 0 : experiencesDto.size(), educationsDto == null ? 0 : educationsDto.size());
         UserDto user = userProducer.findUserById(userId);
         if (user == null) {
+            log.warn("User not found when creating CV: userId={}", userId);
             throw new OurException("User not found", 404);
         }
 
@@ -106,6 +115,7 @@ public class CVService extends BaseService {
             personalInfo.setAvatarPublicId((String) uploadResult.get("publicId"));
         }
         personalInfoRepository.save(personalInfo);
+        log.debug("Saved personal info for CV (email={})", personalInfo.getEmail());
         cv.setPersonalInfo(personalInfo);
 
         List<Experience> experiences = experiencesDto.stream()
@@ -122,7 +132,7 @@ public class CVService extends BaseService {
         cv.setEducations(educations);
 
         CV savedCV = cvRepository.save(cv);
-
+        log.info("Created CV id={} for userId={}", savedCV.getId(), savedCV.getUserId());
         return cvMapper.toDto(savedCV);
     }
 
@@ -138,6 +148,7 @@ public class CVService extends BaseService {
             List<EducationDto> educations = request.getEducations();
             List<String> skills = request.getSkills();
 
+            log.info("Received createCV request for userId={}", userId);
             CVDto cvDto = handleCreateCV(
                     userId,
                     title,
@@ -149,6 +160,7 @@ public class CVService extends BaseService {
             response.setStatusCode(201);
             response.setMessage("CV created successfully");
             response.setCv(cvDto);
+            log.debug("createCV response prepared for userId={} cvId={}", userId, cvDto.getId());
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -206,6 +218,7 @@ public class CVService extends BaseService {
             if (cvDto == null) {
                 throw new OurException("CV not found", 404);
             }
+            log.info("Analyzing CV id={}", cvId);
 
             String systemPrompt = "You are an expert CV/resume analyzer. Analyze the CV and provide detailed insights on strengths, weaknesses, and suggestions for improvement. Format your response as JSON with the following structure: {\"overallScore\": <number 0-100>, \"strengths\": [<array of strings>], \"weaknesses\": [<array of strings>], \"suggestions\": [{\"id\": \"<uuid>\", \"type\": \"improvement|warning|error\", \"section\": \"<section name>\", \"message\": \"<description>\", \"suggestion\": \"<specific improvement>\", \"applied\": false}]}";
 
@@ -217,6 +230,8 @@ public class CVService extends BaseService {
             response.setMessage("CV analyzed successfully");
             response.setAnalyze(result);
             response.setSuggestions(suggestions);
+            log.debug("Analysis completed for CV id={} suggestionsCount={}", cvId,
+                    suggestions == null ? 0 : suggestions.size());
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -289,10 +304,13 @@ public class CVService extends BaseService {
         try {
             UserDto user = userProducer.findUserById(userId);
             if (user == null) {
+                log.warn("User not found while importing file: userId={}", userId);
                 throw new OurException("User not found", 404);
             }
 
             // Extract text from file
+            log.info("Importing CV file for userId={} filename={}", userId,
+                    file == null ? "<null>" : file.getOriginalFilename());
             String extractedText = fileParserService.extractTextFromFile(file);
 
             // Use AI to parse the CV content into structured data
@@ -306,6 +324,7 @@ public class CVService extends BaseService {
             response.setMessage("CV imported successfully");
             response.setCv(cvDto);
             response.setExtractedText(extractedText);
+            log.info("Imported CV for userId={} created cvId={}", userId, cvDto.getId());
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -428,6 +447,7 @@ public class CVService extends BaseService {
 
             response.setMessage("CV updated successfully");
             response.setCv(cvDto);
+            log.info("Updated CV id={} (userId={})", cvId, cvDto.getUserId());
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -451,6 +471,7 @@ public class CVService extends BaseService {
             handleDeleteCV(cvId);
 
             response.setMessage("CV deleted successfully");
+            log.info("Deleted CV id={}", cvId);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());

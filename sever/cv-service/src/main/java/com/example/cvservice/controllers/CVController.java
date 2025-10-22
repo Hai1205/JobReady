@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.cvservice.dtos.requests.*;
 import com.example.cvservice.dtos.responses.Response;
 import com.example.cvservice.services.apis.CVService;
 
@@ -21,7 +20,7 @@ public class CVController {
     private CVService cvService;
 
     @PostMapping("/users/{userId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> createCV(
             @PathVariable("userId") UUID userId,
             @RequestPart("data") String dataJson,
@@ -32,7 +31,7 @@ public class CVController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> getAllCVs() {
         Response response = cvService.getAllCVs();
 
@@ -40,7 +39,7 @@ public class CVController {
     }
 
     @GetMapping("/{cvId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> getCVById(@PathVariable("cvId") UUID cvId) {
         Response response = cvService.getCVById(cvId);
 
@@ -48,7 +47,7 @@ public class CVController {
     }
 
     @PostMapping("/analyze/{cvId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> analyzeCV(@PathVariable("cvId") UUID cvId) {
         Response response = cvService.analyzeCV(cvId);
 
@@ -56,7 +55,7 @@ public class CVController {
     }
 
     @PostMapping("/improve/{cvId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> improveCV(@PathVariable("cvId") UUID cvId,
             @RequestPart String dataJson) {
         Response response = cvService.improveCV(cvId, dataJson);
@@ -65,7 +64,7 @@ public class CVController {
     }
 
     @PostMapping("/analyze-with-jd/{cvId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> analyzeCVWithJobDescription(
             @PathVariable("cvId") UUID cvId,
             @RequestPart String dataJson) {
@@ -75,7 +74,7 @@ public class CVController {
     }
 
     @GetMapping("/users/{userId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> getUserCVs(@PathVariable("userId") UUID userId) {
         Response response = cvService.getUserCVs(userId);
 
@@ -83,7 +82,7 @@ public class CVController {
     }
 
     @PostMapping("/users/{userId}/import")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> importFile(
             @PathVariable("userId") UUID userId,
             @RequestParam("file") MultipartFile file) {
@@ -93,7 +92,7 @@ public class CVController {
     }
 
     @GetMapping("/title/{title}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> getCVByTitle(@PathVariable("title") String title) {
         Response response = cvService.getCVByTitle(title);
 
@@ -101,7 +100,7 @@ public class CVController {
     }
 
     @PatchMapping("/{cvId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> updateCV(@PathVariable("cvId") UUID cvId,
             @RequestPart("data") String dataJson,
             @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
@@ -111,7 +110,7 @@ public class CVController {
     }
 
     @DeleteMapping("/{cvId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> deleteCV(@PathVariable("cvId") UUID cvId) {
         Response response = cvService.deleteCV(cvId);
 

@@ -1,5 +1,7 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, EStorageType, IBaseStore } from "@/lib/initialStore";
+import { testFormData } from "@/lib/utils";
+import { useAuthStore } from "./authStore";
 
 interface IUserDataResponse {
 	user: IUser;
@@ -96,7 +98,11 @@ export const useUserStore = createStore<IUserStore>(
 			if (avatar) formData.append("avatar", avatar);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.PATCH, `/users/${userId}`, formData);
+				const response = await handleRequest<IUserDataResponse>(EHttpType.PATCH, `/users/${userId}`, formData);
+				if (response?.data?.user) {
+					useAuthStore.getState().handleSetUserAuth(response.data.user);
+				}
+				return response;
 			});
 		},
 

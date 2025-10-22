@@ -58,7 +58,10 @@ public class UserService extends BaseService {
             String role,
             String status,
             MultipartFile avatar) {
+        logger.info("Creating user with email: {}", email);
+
         if (userRepository.existsByEmail(email)) {
+            logger.warn("Attempted to create user with existing email: {}", email);
             throw new RuntimeException("Email already exists");
         }
 
@@ -72,8 +75,10 @@ public class UserService extends BaseService {
                 fullname);
 
         if (avatar != null && !avatar.isEmpty()) {
+            logger.debug("Uploading avatar for user: {}", email);
             var uploadResult = cloudinaryService.uploadImage(avatar);
             if (uploadResult.containsKey("error")) {
+                logger.error("Failed to upload avatar for user {}: {}", email, uploadResult.get("error"));
                 throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
             }
 
@@ -91,27 +96,32 @@ public class UserService extends BaseService {
         }
 
         User savedUser = userRepository.save(user);
+        logger.info("User created successfully with ID: {}", savedUser.getId());
         return userMapper.toDto(savedUser);
     }
 
     public UserDto handleActivateUser(String email) {
+        logger.info("Activating user with email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setStatus(UserStatus.active);
         userRepository.save(user);
-
+        logger.info("User activated successfully: {}", email);
         return userMapper.toDto(user);
     }
 
     public UserDto handleAuthenticateUser(String email, String currentPassword) {
+        logger.debug("Authenticating user: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new OurException("User not found", 404));
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            logger.warn("Invalid password attempt for user: {}", email);
             throw new OurException("Invalid credentials", 400);
         }
 
+        logger.debug("User authenticated successfully: {}", email);
         return userMapper.toDto(user);
     }
 
@@ -156,6 +166,7 @@ public class UserService extends BaseService {
     }
 
     public Response createUser(String dataJson) {
+        logger.info("Creating new user");
         Response response = new Response();
 
         try {
@@ -173,10 +184,13 @@ public class UserService extends BaseService {
             response.setStatusCode(201);
             response.setMessage("User created successfully");
             response.setUser(savedUserDto);
+            logger.info("User creation completed successfully for email: {}", email);
             return response;
         } catch (OurException e) {
+            logger.error("User creation failed with OurException: {}", e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
+            logger.error("User creation failed with unexpected error", e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }
@@ -229,6 +243,8 @@ public class UserService extends BaseService {
     }
 
     public UserDto handleUpdateUser(UUID userId, String fullname, String role, String status, MultipartFile avatar) {
+        logger.info("Updating user with ID: {}", userId);
+
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -237,6 +253,7 @@ public class UserService extends BaseService {
 
         // Handle avatar upload
         if (avatar != null && !avatar.isEmpty()) {
+            logger.debug("Updating avatar for user: {}", userId);
             // Delete old avatar if exists
             String oldAvatarPublicId = existingUser.getAvatarPublicId();
             if (oldAvatarPublicId != null && !oldAvatarPublicId.isEmpty()) {
@@ -246,6 +263,7 @@ public class UserService extends BaseService {
             // Upload new avatar
             var uploadResult = cloudinaryService.uploadImage(avatar);
             if (uploadResult.containsKey("error")) {
+                logger.error("Failed to upload avatar for user {}: {}", userId, uploadResult.get("error"));
                 throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
             }
 
@@ -260,6 +278,8 @@ public class UserService extends BaseService {
 
         if (role != null && !role.isEmpty()) {
             if (!privilegedChangeAllowed) {
+                logger.warn("Unauthorized attempt to change role for user {} by user: {}",
+                        userId, currentUser != null ? currentUser.getEmail() : "unknown");
                 throw new OurException("Forbidden", 403);
             }
             existingUser.setRole(UserRole.valueOf(role));
@@ -267,16 +287,20 @@ public class UserService extends BaseService {
 
         if (status != null && !status.isEmpty()) {
             if (!privilegedChangeAllowed) {
+                logger.warn("Unauthorized attempt to change status for user {} by user: {}",
+                        userId, currentUser != null ? currentUser.getEmail() : "unknown");
                 throw new OurException("Forbidden", 403);
             }
             existingUser.setStatus(UserStatus.valueOf(status));
         }
 
         User updatedUser = userRepository.save(existingUser);
+        logger.info("User updated successfully: {}", userId);
         return userMapper.toDto(updatedUser);
     }
 
-    public Response updateUser(UUID userId, String dataJson) {
+    public Response updateUser(UUID userId, String dataJson, MultipartFile avatar) {
+        logger.info("Updating user: {}", userId);
         Response response = new Response();
 
         try {
@@ -284,44 +308,53 @@ public class UserService extends BaseService {
             String fullname = request.getFullname();
             String role = request.getRole();
             String status = request.getStatus();
-            MultipartFile avatar = request.getAvatar();
 
             UserDto updatedUserDto = handleUpdateUser(userId, fullname, role, status, avatar);
 
             response.setMessage("User updated successfully");
             response.setUser(updatedUserDto);
+            logger.info("User update completed successfully: {}", userId);
             return response;
         } catch (OurException e) {
+            logger.error("User update failed with OurException for user {}: {}", userId, e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
+            logger.error("User update failed with unexpected error for user {}", userId, e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }
     }
 
     public boolean handleDeleteUser(UUID userId) {
+        logger.info("Deleting user with ID: {}", userId);
         UserDto user = handleGetUserById(userId);
 
         String avatarPublicId = user.getAvatarPublicId();
         if (avatarPublicId != null && !avatarPublicId.isEmpty()) {
+            logger.debug("Deleting avatar for user: {}", userId);
             cloudinaryService.deleteImage(avatarPublicId);
         }
 
         userRepository.deleteById(userId);
+        logger.info("User deleted successfully: {}", userId);
         return true;
     }
 
     public Response deleteUser(UUID userId) {
+        logger.info("Deleting user: {}", userId);
         Response response = new Response();
 
         try {
             handleDeleteUser(userId);
 
             response.setMessage("User deleted successfully");
+            logger.info("User deletion completed successfully: {}", userId);
             return response;
         } catch (OurException e) {
+            logger.error("User deletion failed with OurException for user {}: {}", userId, e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
+            logger.error("User deletion failed with unexpected error for user {}", userId, e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }

@@ -42,8 +42,6 @@ public class CV {
     private List<Education> educations = new ArrayList<>();
 
     @ElementCollection
-    @CollectionTable(name = "cv_skills", joinColumns = @JoinColumn(name = "cv_id"))
-    @Column(name = "skill")
     private List<String> skills = new ArrayList<>();
 
     private Instant createdAt;

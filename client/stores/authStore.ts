@@ -113,7 +113,7 @@ export const useAuthStore = createStore<IAuthStore>(
 
 		resetPassword: async (email: string): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/auth/reset-password/${email}`);
+				return await handleRequest(EHttpType.PATCH, `/auth/reset-password/${email}`);
 
 			});
 		},
