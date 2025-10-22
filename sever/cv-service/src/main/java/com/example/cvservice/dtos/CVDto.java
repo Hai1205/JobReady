@@ -7,6 +7,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CVDto {
     private UUID id;
     private UUID userId;
@@ -17,9 +18,4 @@ public class CVDto {
     private List<String> skills;
     private String createdAt;
     private String updatedAt;
-
-    public void orElseThrow(Object object) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
-    }
 }

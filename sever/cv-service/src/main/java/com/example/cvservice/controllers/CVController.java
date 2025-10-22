@@ -46,29 +46,26 @@ public class CVController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/analyze/{cvId}")
+    @PostMapping("/analyze")
     @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> analyzeCV(@PathVariable("cvId") UUID cvId) {
-        Response response = cvService.analyzeCV(cvId);
+    public ResponseEntity<Response> analyzeCV(@RequestPart("data") String dataJson) {
+        Response response = cvService.analyzeCV(dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/improve/{cvId}")
+    @PostMapping("/improve")
     @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> improveCV(@PathVariable("cvId") UUID cvId,
-            @RequestPart String dataJson) {
-        Response response = cvService.improveCV(cvId, dataJson);
+    public ResponseEntity<Response> improveCV(@RequestPart String dataJson) {
+        Response response = cvService.improveCV(dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/analyze-with-jd/{cvId}")
+    @PostMapping("/analyze-with-jd")
     @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> analyzeCVWithJobDescription(
-            @PathVariable("cvId") UUID cvId,
-            @RequestPart String dataJson) {
-        Response response = cvService.analyzeCVWithJobDescription(cvId, dataJson);
+    public ResponseEntity<Response> analyzeCVWithJobDescription(@RequestPart String dataJson) {
+        Response response = cvService.analyzeCVWithJobDescription(dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -116,7 +113,7 @@ public class CVController {
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-    
+
     @PostMapping("/{cvId}/duplicate")
     @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> duplicateCV(@PathVariable("cvId") UUID cvId) {

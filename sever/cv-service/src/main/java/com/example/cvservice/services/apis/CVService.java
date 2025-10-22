@@ -210,15 +210,26 @@ public class CVService extends BaseService {
         }
     }
 
-    public Response analyzeCV(UUID cvId) {
+    public Response analyzeCV(String dataJson) {
         Response response = new Response();
 
         try {
-            CVDto cvDto = handleGetCVById(cvId);
-            if (cvDto == null) {
-                throw new OurException("CV not found", 404);
-            }
-            log.info("Analyzing CV id={}", cvId);
+            CreateCVRequest request = objectMapper.readValue(dataJson, CreateCVRequest.class);
+            String title = request.getTitle();
+            PersonalInfoDto personalInfo = request.getPersonalInfo();
+            List<ExperienceDto> experiences = request.getExperiences();
+            List<EducationDto> educations = request.getEducations();
+            List<String> skills = request.getSkills();
+
+            CVDto cvDto = CVDto.builder()
+                    .title(title)
+                    .personalInfo(personalInfo)
+                    .experiences(experiences)
+                    .educations(educations)
+                    .skills(skills)
+                    .build();
+
+            log.info("Analyzing CV with title={}", title);
 
             String systemPrompt = "You are an expert CV/resume analyzer. Analyze the CV and provide detailed insights on strengths, weaknesses, and suggestions for improvement. Format your response as JSON with the following structure: {\"overallScore\": <number 0-100>, \"strengths\": [<array of strings>], \"weaknesses\": [<array of strings>], \"suggestions\": [{\"id\": \"<uuid>\", \"type\": \"improvement|warning|error\", \"section\": \"<section name>\", \"message\": \"<description>\", \"suggestion\": \"<specific improvement>\", \"applied\": false}]}";
 
@@ -230,7 +241,7 @@ public class CVService extends BaseService {
             response.setMessage("CV analyzed successfully");
             response.setAnalyze(result);
             response.setSuggestions(suggestions);
-            log.debug("Analysis completed for CV id={} suggestionsCount={}", cvId,
+            log.debug("Analysis completed for CV title={} suggestionsCount={}", title,
                     suggestions == null ? 0 : suggestions.size());
             return response;
         } catch (OurException e) {
@@ -241,18 +252,13 @@ public class CVService extends BaseService {
         }
     }
 
-    public Response improveCV(UUID cvId, String dataJson) {
+    public Response improveCV(String dataJson) {
         Response response = new Response();
 
         try {
             ImproveCVRequest request = objectMapper.readValue(dataJson, ImproveCVRequest.class);
             String section = request.getSection();
             String content = request.getContent();
-
-            CVDto cvDto = handleGetCVById(cvId);
-            if (cvDto == null) {
-                throw new OurException("CV not found", 404);
-            }
 
             String systemPrompt = "You are an expert resume writer and career coach. Your task is to improve specific sections of a CV to make them more professional, impactful, and effective. Use action verbs, quantify achievements where possible, and ensure clarity and conciseness.";
             String prompt = String.format(
@@ -515,7 +521,7 @@ public class CVService extends BaseService {
         }
     }
 
-    public Response analyzeCVWithJobDescription(UUID cvId, String dataJson) {
+    public Response analyzeCVWithJobDescription(String dataJson) {
         Response response = new Response();
 
         try {
@@ -524,7 +530,19 @@ public class CVService extends BaseService {
             MultipartFile jdFile = request.getJdFile();
             String jobDescription = request.getJobDescription();
 
-            CVDto cvDto = handleGetCVById(cvId);
+            String title = request.getTitle();
+            PersonalInfoDto personalInfo = request.getPersonalInfo();
+            List<ExperienceDto> experiences = request.getExperiences();
+            List<EducationDto> educations = request.getEducations();
+            List<String> skills = request.getSkills();
+
+            CVDto cvDto = CVDto.builder()
+                    .title(title)
+                    .personalInfo(personalInfo)
+                    .experiences(experiences)
+                    .educations(educations)
+                    .skills(skills)
+                    .build();
 
             String jdText = handleExtractJobDescriptionText(jdFile, jobDescription);
 
