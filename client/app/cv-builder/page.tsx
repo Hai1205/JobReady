@@ -2,11 +2,11 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CVBuilderWizard } from "@/components/cv-builder/CVBuilderWizard";
-import { AISuggestionsSidebar } from "@/components/cv-builder/AISuggestionsSidebar";
 import { Card } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
+import { CVBuilderWizard } from "@/components/cv-builder/CVBuilderWizard";
+import { AISuggestionsSidebar } from "@/components/cv-builder/AI-powered/AISuggestionsSidebar";
 
 export default function CVBuilderPage() {
   const router = useRouter();

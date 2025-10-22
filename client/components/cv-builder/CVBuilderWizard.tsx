@@ -95,11 +95,11 @@ export function CVBuilderWizard() {
       )}
 
       {/* File Import */}
-      {currentStep === 0 && (
+      {/* {currentStep === 0 && (
         <div className="mb-4">
           <FileImport />
         </div>
-      )}
+      )} */}
 
       {/* Progress Bar */}
       <div className="flex flex-col gap-2">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useCVStore } from "@/stores/cvStore";
-import { JobDescriptionImport } from "./JobDescriptionImport";
+import { JobDescriptionImport } from "../JobDescriptionImport";
 import { AISuggestionsList } from "./AISuggestionsList";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
