@@ -49,16 +49,30 @@ export interface ICVStore extends IBaseStore {
 		file: File
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	analyzeCV: (
-		cvId: string
+		title: string,
+		personalInfo: IPersonalInfo,
+		experiences: IExperience[],
+		educations: IEducation[],
+		skills: string[],
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	analyzeCVWithJD: (
-		cvId: string,
 		jobDescription: string,
-		jdFile?: File,
-		language?: string
+		jdFile: File | null,
+		language: string,
+		title: string,
+		personalInfo: IPersonalInfo,
+		experiences: IExperience[],
+		educations: IEducation[],
+		skills: string[],
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	improveCV: (
-		cvId: string, section: string, content: string
+		section: string,
+		content: string,
+		title: string,
+		personalInfo: IPersonalInfo,
+		experiences: IExperience[],
+		educations: IEducation[],
+		skills: string[],
 	) => Promise<IApiResponse<ICVDataResponse>>;
 
 	handleUpdateCV: (cvData: Partial<ICV>) => void;
@@ -155,7 +169,7 @@ export const useCVStore = createStore<ICVStore>(
 				return await handleRequest(EHttpType.DELETE, `/cvs/${cvId}`);
 			});
 		},
-		
+
 		duplicateCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.POST, `/cvs/${cvId}/duplicate`);
@@ -171,39 +185,74 @@ export const useCVStore = createStore<ICVStore>(
 			});
 		},
 
-		analyzeCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
+		analyzeCV: async (
+			title: string,
+			personalInfo: IPersonalInfo,
+			experiences: IExperience[],
+			educations: IEducation[],
+			skills: string[],): Promise<IApiResponse<ICVDataResponse>> => {
+			const formData = new FormData();
+			formData.append("data", JSON.stringify({
+				title,
+				personalInfo,
+				experiences,
+				educations,
+				skills,
+			}));
+
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/analyze/${cvId}`, undefined);
+				return await handleRequest(EHttpType.POST, `/cvs/analyze`, undefined);
 			});
 		},
 
 		analyzeCVWithJD: async (
-			cvId: string,
 			jobDescription: string,
-			jdFile?: File,
-			language: string = "vi"
+			jdFile: File,
+			language: string = "vi",
+			title: string,
+			personalInfo: IPersonalInfo,
+			experiences: IExperience[],
+			educations: IEducation[],
+			skills: string[],
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				jobDescription,
 				language,
+				title,
+				personalInfo,
+				experiences,
+				educations,
+				skills,
 			}));
 			if (jdFile) formData.append("jdFile", jdFile);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/analyze-with-jd/${cvId}`, formData);
+				return await handleRequest(EHttpType.POST, `/cvs/analyze-with-jd`, formData);
 			});
 		},
 
-		improveCV: async (cvId: string, section: string, content: string): Promise<IApiResponse<ICVDataResponse>> => {
+		improveCV: async (
+			section: string,
+			content: string,
+			title: string,
+			personalInfo: IPersonalInfo,
+			experiences: IExperience[],
+			educations: IEducation[],
+			skills: string[],): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				section,
 				content,
+				title,
+				personalInfo,
+				experiences,
+				educations,
+				skills,
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/improve/${cvId}`, formData);
+				return await handleRequest(EHttpType.POST, `/cvs/improve`, formData);
 			});
 		},
 

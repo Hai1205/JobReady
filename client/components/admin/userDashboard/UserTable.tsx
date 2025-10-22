@@ -1,5 +1,5 @@
-import { DataTable } from "@/components/admin/DataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DataTable } from "../adminTable/DataTable";
 
 interface UserTableProps {
   Users: IUser[];

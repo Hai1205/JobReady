@@ -5,9 +5,9 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { CVTable } from "@/components/admin/cvDashboard/CVTable";
-import { TableSearch } from "@/components/admin/TableSearch";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { useCVStore } from "@/stores/cvStore";
+import { TableSearch } from "@/components/admin/adminTable/TableSearch";
 
 export default function CVDashboardPage() {
   const { isLoading, getAllCVs, handleGeneratePDF } = useCVStore();

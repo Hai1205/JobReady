@@ -25,7 +25,7 @@ export function AISuggestionsSidebar() {
 
     setAnalyzing(true);
 
-    analyzeCV(currentCV.id);
+    analyzeCV(currentCV?.title, currentCV?.personalInfo, currentCV?.experiences, currentCV?.educations, currentCV?.skills);
   };
 
   const getSuggestionIcon = (type: string) => {

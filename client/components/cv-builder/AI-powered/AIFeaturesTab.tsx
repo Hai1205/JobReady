@@ -21,11 +21,7 @@ import {
 import { Sparkles, FileUp, Loader2, ChevronDown } from "lucide-react";
 import { toast } from "react-toastify";
 
-interface AIFeaturesTabProps {
-  cvId: string;
-}
-
-export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
+export function AIFeaturesTab() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   const [activeTab, setActiveTab] = useState("analyze");
@@ -45,14 +41,14 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
   } = useCVStore();
 
   const handleQuickAnalyze = async () => {
-    if (!cvId) {
+    if (!currentCV) {
       toast.error("No CV selected");
       return;
     }
 
     setIsAnalyzing(true);
     try {
-      const response = await analyzeCV(cvId);
+      const response = await analyzeCV(currentCV?.title, currentCV?.personalInfo, currentCV?.experiences, currentCV?.educations, currentCV?.skills);
 
       // Support both shapes: response.data may be the backend Response object
       // or the backend Response.data object directly depending on typings.
@@ -87,7 +83,7 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
   };
 
   const handleApplySuggestion = async (suggestion: any) => {
-    if (!currentCV || !cvId) {
+    if (!currentCV) {
       toast.error("No CV loaded");
       return;
     }
@@ -113,7 +109,7 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
           content = suggestion.suggestion;
       }
 
-      const response = await improveCV(cvId, suggestion.section, content);
+      const response = await improveCV(suggestion.section, content, currentCV?.title, currentCV?.personalInfo, currentCV?.experiences, currentCV?.educations, currentCV?.skills);
 
       const maybeResponse = (response as any).data;
       const responseData: any = maybeResponse?.data
@@ -273,7 +269,7 @@ export function AIFeaturesTab({ cvId }: AIFeaturesTabProps) {
 
         <TabsContent value="analyze" className="space-y-4">
           <JobDescriptionImport
-            cvId={cvId}
+            currentCV={currentCV}
             onAnalysisComplete={(suggestions) => {
               setActiveTab("suggestions");
             }}

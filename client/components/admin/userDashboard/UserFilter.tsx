@@ -1,8 +1,8 @@
 "use client";
 
-import { SharedFilter } from "@/components/admin/SharedFilter";
 import { capitalizeEnumValue } from "@/lib/utils";
 import { EUserRole, EUserStatus } from "@/types/enum";
+import { SharedFilter } from "../adminTable/SharedFilter";
 
 interface UserFilterProps {
   openMenuFilters: boolean;

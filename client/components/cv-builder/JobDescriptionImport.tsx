@@ -16,7 +16,7 @@ import { useCVStore } from "@/stores/cvStore";
 import { JobDescriptionMatchResult } from "./JobDescriptionMatchResult";
 
 interface JobDescriptionImportProps {
-  cvId: string;
+  currentCV: ICV | null;
   onAnalysisComplete?: (
     suggestions: IAISuggestion[],
     matchScore?: number
@@ -24,12 +24,12 @@ interface JobDescriptionImportProps {
 }
 
 export function JobDescriptionImport({
-  cvId,
+  currentCV,
   onAnalysisComplete,
 }: JobDescriptionImportProps) {
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const [jdFile, setJdFile] = useState<File | null>(null);
   const [language, setLanguage] = useState<string>("vi");
 
   // State for analysis results
@@ -58,7 +58,7 @@ export function JobDescriptionImport({
       return;
     }
 
-    setFile(selectedFile);
+    setJdFile(selectedFile);
 
     // For text files, preload content into textarea. For PDF/DOCX, backend will parse.
     if (selectedFile.type === "text/plain") {
@@ -81,7 +81,7 @@ export function JobDescriptionImport({
 
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
-      if (!file) {
+      if (!jdFile) {
         toast.error("Vui lòng nhập hoặc tải lên mô tả công việc");
         return;
       }
@@ -90,11 +90,20 @@ export function JobDescriptionImport({
     setIsAnalyzing(true);
 
     try {
+      if (!currentCV) {
+        toast.error("No CV available for analysis");
+        return;
+      }
+
       const response = await analyzeCVWithJD(
-        cvId,
         jobDescription,
-        file || undefined,
-        language
+        jdFile,
+        language,
+        currentCV.title,
+        currentCV.personalInfo,
+        currentCV.experiences,
+        currentCV.educations,
+        currentCV.skills
       );
 
       const maybeResponse = (response as any).data;
@@ -170,7 +179,7 @@ export function JobDescriptionImport({
                 className="w-full"
               >
                 <Upload className="mr-2 h-4 w-4" />
-                {file ? file.name : "Chọn File"}
+                {jdFile ? jdFile.name : "Chọn File"}
               </Button>
             </div>
           </div>
@@ -204,7 +213,7 @@ export function JobDescriptionImport({
 
           <Button
             onClick={handleAnalyze}
-            disabled={isAnalyzing || (!jobDescription.trim() && !file)}
+            disabled={isAnalyzing || (!jobDescription.trim() && !jdFile)}
             className="w-full"
           >
             {isAnalyzing ? (

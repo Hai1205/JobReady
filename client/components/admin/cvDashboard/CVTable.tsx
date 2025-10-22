@@ -1,5 +1,5 @@
-import { DataTable } from "@/components/admin/DataTable";
 import { formatDateAgo } from "@/lib/utils";
+import { DataTable } from "../adminTable/DataTable";
 
 interface ICVTableProps {
   CVs: ICV[];

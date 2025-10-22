@@ -8,13 +8,13 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import CreateUserDialog from "@/components/admin/userDashboard/CreateUserDialog";
 import UpdateUserDialog from "@/components/admin/userDashboard/UpdateUserDialog";
-import { TableSearch } from "@/components/admin/TableSearch";
 import { UserFilter } from "@/components/admin/userDashboard/UserFilter";
 import { UserTable } from "@/components/admin/userDashboard/UserTable";
 import { toast } from "react-toastify";
 import { useUserStore } from "@/stores/userStore";
 import { useAuthStore } from "@/stores/authStore";
 import { EUserRole, EUserStatus } from "@/types/enum";
+import { TableSearch } from "@/components/admin/adminTable/TableSearch";
 
 // Initialize empty filters
 const initialFilters = { status: [] as string[], role: [] as string[] };
