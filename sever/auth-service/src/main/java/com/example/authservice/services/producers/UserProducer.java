@@ -29,16 +29,12 @@ public class UserProducer {
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
 
-                System.out.println("Sending RabbitMQ request to find user by email: " + email);
                 UserDto userDto = rpcService.sendAndReceive(
                                 RabbitConstants.USER_EXCHANGE,
                                 RabbitConstants.USER_FIND_BY_EMAIL,
                                 header,
                                 params,
                                 UserDto.class);
-
-                System.out.println("Received RabbitMQ response for user: "
-                                + (userDto != null ? userDto.toString() : "null"));
 
                 return userDto;
         }

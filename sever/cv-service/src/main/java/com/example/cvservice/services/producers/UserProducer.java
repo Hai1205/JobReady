@@ -35,9 +35,6 @@ public class UserProducer {
                                 params,
                                 UserDto.class);
 
-                System.out.println("Received RabbitMQ response for user: "
-                                + (userDto != null ? userDto.toString() : "null"));
-
                 return userDto;
         }
 }

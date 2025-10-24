@@ -11,7 +11,7 @@ import com.example.rabbitmq.constants.RabbitConstants;
 import com.example.rabbitmq.dtos.ExchangeDef;
 
 @Configuration
-public class AuthRabbitConfig extends BaseRabbitConfig {
+public class CVRabbitConfig extends BaseRabbitConfig {
 
     @Bean
     public Declarables cvExchangeConfig() {

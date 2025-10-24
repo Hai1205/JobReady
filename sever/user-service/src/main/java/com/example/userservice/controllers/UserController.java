@@ -63,7 +63,6 @@ public class UserController {
     }
 
     @GetMapping("/health")
-    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> health() {
         Response response = new Response();
         response.setStatusCode(200);

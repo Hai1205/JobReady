@@ -123,7 +123,6 @@ public class CVController {
     }
 
     @GetMapping("/health")
-    @PreAuthorize("hasAuthority('ADMINA')")
     public ResponseEntity<Response> health() {
         Response response = new Response(200, "CV Service is running");
 

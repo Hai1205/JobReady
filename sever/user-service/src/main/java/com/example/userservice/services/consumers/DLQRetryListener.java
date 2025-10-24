@@ -1,6 +1,6 @@
 package com.example.userservice.services.consumers;
 
-import com.example.rabbitmq.config.DeadLetterQueueConfig;
+import com.example.rabbitmq.configs.DeadLetterQueueConfig;
 import com.example.rabbitmq.constants.RabbitConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +49,7 @@ public class DLQRetryListener {
                 message,
                 "UserCreate",
                 RabbitConstants.USER_EXCHANGE,
-                RabbitConstants.USER_CREATE
-        );
+                RabbitConstants.USER_CREATE);
     }
 
     /**
@@ -62,8 +61,7 @@ public class DLQRetryListener {
                 message,
                 "UserActivate",
                 RabbitConstants.USER_EXCHANGE,
-                RabbitConstants.USER_ACTIVATE
-        );
+                RabbitConstants.USER_ACTIVATE);
     }
 
     /**
@@ -91,7 +89,7 @@ public class DLQRetryListener {
 
             // Check if exceeded max retry
             if (currentRetryCount >= MAX_RETRY) {
-                log.error("🚨 [DLQ-{}] Max retry exceeded - correlationId: {}", 
+                log.error("🚨 [DLQ-{}] Max retry exceeded - correlationId: {}",
                         operationName, correlationId);
                 moveToPoisonQueue(message, operationName);
                 notifyAdmin(message, operationName, "Max retry exceeded");
@@ -118,8 +116,8 @@ public class DLQRetryListener {
 
             // Update retry count
             newProps.setHeader("x-retry-count", currentRetryCount + 1);
-            newProps.setHeader("x-first-death-time", 
-                    props.getHeader("x-first-death-time") != null 
+            newProps.setHeader("x-first-death-time",
+                    props.getHeader("x-first-death-time") != null
                             ? props.getHeader("x-first-death-time")
                             : System.currentTimeMillis());
 
@@ -188,8 +186,7 @@ public class DLQRetryListener {
             rabbitTemplate.send(
                     DeadLetterQueueConfig.POISON_EXCHANGE,
                     "poison." + operationName.toLowerCase(),
-                    poisonMessage
-            );
+                    poisonMessage);
 
             log.warn("☠️ [DLQ-{}] Message moved to poison queue - correlationId: {}",
                     operationName, correlationId);
@@ -218,8 +215,7 @@ public class DLQRetryListener {
                 correlationId,
                 reason,
                 props.getHeader("x-retry-count"),
-                body.substring(0, Math.min(200, body.length()))
-        );
+                body.substring(0, Math.min(200, body.length())));
 
         log.error(alert);
 

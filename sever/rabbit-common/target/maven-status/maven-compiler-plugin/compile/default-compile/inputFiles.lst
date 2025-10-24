@@ -5,11 +5,12 @@ C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\s
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\configs\BaseRabbitConfig.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\events\UserCreatedEvent.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\services\EventPublisher.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\configs\RabbitListenerConfig.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\services\IdempotencyService.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\events\DomainEvent.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\services\RabbitRPCService.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\events\UserActivatedEvent.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dtos\QueueDef.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\constants\RabbitConstants.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\config\DeadLetterQueueConfig.java
+C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\configs\DeadLetterQueueConfig.java
 C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Java\Springboot\projects\JobReady\sever\rabbit-common\src\main\java\com\example\rabbitmq\dtos\RabbitHeader.java

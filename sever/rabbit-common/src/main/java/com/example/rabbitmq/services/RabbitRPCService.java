@@ -11,10 +11,11 @@ import org.springframework.amqp.core.Address;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -37,25 +38,26 @@ public class RabbitRPCService {
     public final RabbitTemplate rabbitTemplate;
     public final ObjectMapper objectMapper;
 
-    // Cache để lưu pending requests với correlationId làm key
-    public final ConcurrentHashMap<String, CompletableFuture<Object>> pendingRequests = new ConcurrentHashMap<>();
-
-    // Executor cho timeout tasks
-    public final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-
     // Default timeout
     public static final long DEFAULT_TIMEOUT_SECONDS = 10;
 
     /**
+     * Initialize Direct Reply-to listener after bean construction
+     */
+    @PostConstruct
+    public void init() {
+        // Configure RabbitTemplate for Direct Reply-to
+        rabbitTemplate.setReplyAddress(Address.AMQ_RABBITMQ_REPLY_TO);
+        rabbitTemplate.setReplyTimeout(DEFAULT_TIMEOUT_SECONDS * 1000);
+
+        log.info("✅ RabbitRPCService initialized with Direct Reply-to (replyAddress: {})",
+                Address.AMQ_RABBITMQ_REPLY_TO);
+    }
+
+    /**
      * Non-blocking RPC call với CompletableFuture
-     * 
-     * @param exchange     Exchange name
-     * @param routingKey   Routing key
-     * @param header       RabbitHeader (nullable)
-     * @param payload      Request payload
-     * @param responseType Response class type
-     * @param <R>          Response type
-     * @return CompletableFuture<R>
+     * SIMPLIFIED: Dùng Spring AMQP's convertSendAndReceive() thay vì manual
+     * tracking
      */
     public <R> CompletableFuture<R> sendAndReceiveAsync(
             String exchange,
@@ -69,6 +71,7 @@ public class RabbitRPCService {
 
     /**
      * Non-blocking RPC call với custom timeout
+     * USES Spring AMQP's built-in Direct Reply-to support
      */
     public <R> CompletableFuture<R> sendAndReceiveAsync(
             String exchange,
@@ -78,68 +81,88 @@ public class RabbitRPCService {
             Class<R> responseType,
             long timeoutSeconds) {
 
-        CompletableFuture<R> future = new CompletableFuture<>();
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                // Generate correlation ID
+                final String correlationId = UUID.randomUUID().toString();
 
-        try {
-            // Generate unique correlation ID
-            String correlationId = UUID.randomUUID().toString();
-
-            // Build header
-            if (header == null) {
-                header = RabbitHeader.builder()
-                        .correlationId(correlationId)
-                        .timestamp(System.currentTimeMillis())
-                        .sourceService("current-service")
-                        .targetService("target-service")
-                        .build();
-            } else {
-                header.setCorrelationId(correlationId);
-            }
-
-            // Store future in cache
-            pendingRequests.put(correlationId, (CompletableFuture<Object>) future);
-
-            // Schedule timeout task
-            ScheduledFuture<?> timeoutTask = scheduler.schedule(() -> {
-                CompletableFuture<Object> removed = pendingRequests.remove(correlationId);
-                if (removed != null && !removed.isDone()) {
-                    log.warn("⏰ RPC timeout for correlationId: {}, routingKey: {}", correlationId, routingKey);
-                    removed.completeExceptionally(
-                            new TimeoutException(String.format(
-                                    "RPC timeout after %ds for correlationId: %s",
-                                    timeoutSeconds, correlationId)));
+                // Build header
+                final RabbitHeader finalHeader;
+                if (header == null) {
+                    finalHeader = RabbitHeader.builder()
+                            .correlationId(correlationId)
+                            .timestamp(System.currentTimeMillis())
+                            .build();
+                } else {
+                    header.setCorrelationId(correlationId);
+                    finalHeader = header;
                 }
-            }, timeoutSeconds, TimeUnit.SECONDS);
 
-            // Cancel timeout task khi future complete
-            future.whenComplete((result, error) -> timeoutTask.cancel(false));
+                // Create message wrapper
+                Map<String, Object> wrapper = Map.of(
+                        "header", finalHeader,
+                        "payload", payload);
 
-            // Create message wrapper
-            Map<String, Object> wrapper = Map.of(
-                    "header", header,
-                    "payload", payload);
-            String json = objectMapper.writeValueAsString(wrapper);
+                String json = objectMapper.writeValueAsString(wrapper);
 
-            // Build message với Direct Reply-To
-            Message message = MessageBuilder
-                    .withBody(json.getBytes())
-                    .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-                    .setCorrelationId(correlationId)
-                    .setReplyTo(Address.AMQ_RABBITMQ_REPLY_TO) // ✅ Direct Reply-To magic!
-                    .build();
+                log.debug("📤 RPC Request - correlationId: {}, routing: {}.{}", correlationId, exchange, routingKey);
 
-            // Send message
-            rabbitTemplate.send(exchange, routingKey, message);
+                // Create message manually to avoid double serialization
+                Message requestMessage = MessageBuilder
+                        .withBody(json.getBytes(StandardCharsets.UTF_8))
+                        .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+                        .setCorrelationId(correlationId)
+                        .setReplyTo(Address.AMQ_RABBITMQ_REPLY_TO)
+                        .build();
 
-            log.debug("📤 RPC Request sent - correlationId: {}, routing: {}.{}",
-                    correlationId, exchange, routingKey);
+                // Use sendAndReceive instead of convertSendAndReceive to avoid automatic
+                // conversion
+                Message responseMessage = rabbitTemplate.sendAndReceive(exchange, routingKey, requestMessage);
 
-        } catch (Exception e) {
-            log.error("❌ Failed to send RPC request: {}", e.getMessage(), e);
-            future.completeExceptionally(e);
-        }
+                if (responseMessage == null) {
+                    throw new TimeoutException(
+                            "RPC timeout after " + timeoutSeconds + "s for correlationId: " + correlationId);
+                }
 
-        return future;
+                Object response = new String(responseMessage.getBody(), StandardCharsets.UTF_8);
+
+                // Parse response
+                String responseJson;
+                if (response instanceof String) {
+                    responseJson = (String) response;
+                } else if (response instanceof byte[]) {
+                    responseJson = new String((byte[]) response, StandardCharsets.UTF_8);
+                } else {
+                    // If it's already an object, convert to JSON string
+                    responseJson = objectMapper.writeValueAsString(response);
+                }
+
+                log.debug("📥 RPC Response received - correlationId: {}, length: {}", correlationId,
+                        responseJson.length());
+
+                Map<String, Object> responseWrapper = objectMapper.readValue(responseJson, Map.class);
+                Object responsePayload = responseWrapper.get("payload");
+
+                // Check if it's a RabbitResponse with error
+                if (responsePayload instanceof Map) {
+                    Map<String, Object> payloadMap = (Map<String, Object>) responsePayload;
+                    Object code = payloadMap.get("code");
+                    if (code != null && !code.equals(200)) {
+                        String errorMsg = (String) payloadMap.getOrDefault("message", "Unknown error");
+                        throw new RuntimeException("Remote error: " + errorMsg);
+                    }
+                    Object data = payloadMap.get("data");
+                    return objectMapper.convertValue(data, responseType);
+                }
+
+                // Direct payload
+                return objectMapper.convertValue(responsePayload, responseType);
+
+            } catch (Exception e) {
+                log.error("❌ RPC call failed: {}", e.getMessage());
+                throw new RuntimeException("RPC call failed", e);
+            }
+        });
     }
 
     /**
@@ -174,70 +197,12 @@ public class RabbitRPCService {
 
     /**
      * Xử lý reply từ Direct Reply-To queue
-     * Spring AMQP tự động route replies về đây dựa vào correlationId
      * 
-     * Note: Queue name "amq.rabbitmq.reply-to" là pseudo-queue của RabbitMQ
-     */
-    @RabbitListener(queues = "#{T(org.springframework.amqp.core.Address).AMQ_RABBITMQ_REPLY_TO}")
-    public void handleReply(Message message) {
-        String correlationId = null;
-        try {
-            correlationId = message.getMessageProperties().getCorrelationId();
-
-            if (correlationId == null) {
-                log.warn("⚠️ Received reply without correlationId");
-                return;
-            }
-
-            // Lấy future từ cache
-            CompletableFuture<Object> future = pendingRequests.remove(correlationId);
-
-            if (future == null) {
-                log.warn("⚠️ Received reply for unknown or expired correlationId: {}", correlationId);
-                return;
-            }
-
-            // Parse response
-            String body = new String(message.getBody());
-            Map<String, Object> wrapper = objectMapper.readValue(body, Map.class);
-            Object responsePayload = wrapper.get("payload");
-
-            // Check if it's a RabbitResponse
-            if (responsePayload instanceof Map) {
-                Map<String, Object> payloadMap = (Map<String, Object>) responsePayload;
-
-                // Check for error
-                Object code = payloadMap.get("code");
-                if (code != null && !code.equals(200)) {
-                    String errorMsg = (String) payloadMap.getOrDefault("message", "Unknown error");
-                    log.warn("⚠️ RPC error response - correlationId: {}, error: {}", correlationId, errorMsg);
-                    future.completeExceptionally(new RuntimeException("Remote error: " + errorMsg));
-                    return;
-                }
-
-                // Extract data
-                Object data = payloadMap.get("data");
-                future.complete(data);
-                log.debug("✅ RPC Response received - correlationId: {}", correlationId);
-            } else {
-                // Direct payload
-                future.complete(responsePayload);
-                log.debug("✅ RPC Response received - correlationId: {}", correlationId);
-            }
-
-        } catch (Exception e) {
-            log.error("❌ Error handling reply for correlationId: {}", correlationId, e);
-
-            if (correlationId != null) {
-                CompletableFuture<Object> future = pendingRequests.remove(correlationId);
-                if (future != null) {
-                    future.completeExceptionally(e);
-                }
-            }
-        }
-    }
-
-    /**
+     * NOTE: KHÔNG DÙNG @RabbitListener cho Direct Reply-to!
+     * Spring AMQP tự động tạo temporary consumer thông qua
+     * DirectReplyToMessageListenerContainer
+     * 
+     * /**
      * Send reply cho RPC request (dùng trong Consumer)
      * 
      * @param replyTo       Reply queue/address
@@ -275,25 +240,42 @@ public class RabbitRPCService {
     }
 
     /**
-     * Get metrics về pending requests (for monitoring)
+     * Helper: Send success reply (using replyTo from RabbitMQ Message Properties)
      */
-    public int getPendingRequestsCount() {
-        return pendingRequests.size();
+    public void sendSuccessReply(Message message, RabbitHeader header, RabbitResponse<?> response) {
+        // Use replyTo and correlationId from RabbitMQ MessageProperties (Direct
+        // Reply-To pattern)
+        String replyTo = message.getMessageProperties().getReplyTo();
+        String correlationId = message.getMessageProperties().getCorrelationId();
+
+        log.debug("📨 Sending success reply to: {}, correlationId: {}", replyTo, correlationId);
+        sendReply(replyTo, correlationId, response);
     }
 
     /**
-     * Cleanup khi shutdown
+     * Helper: Send error reply (using replyTo from RabbitMQ Message Properties)
      */
-    public void shutdown() {
-        scheduler.shutdown();
-        pendingRequests.values()
-                .forEach(future -> future.completeExceptionally(new RuntimeException("Service shutting down")));
-        pendingRequests.clear();
+    public void sendErrorReply(Message message, RabbitHeader header, String errorMessage) {
+        var errorResponse = RabbitResponse.builder()
+                .code(500)
+                .message(errorMessage)
+                .data(null)
+                .build();
+
+        // Use replyTo and correlationId from RabbitMQ MessageProperties (Direct
+        // Reply-To pattern)
+        String replyTo = message.getMessageProperties().getReplyTo();
+        String correlationId = message.getMessageProperties().getCorrelationId();
+
+        log.debug("📨 Sending error reply to: {}, correlationId: {}", replyTo, correlationId);
+        sendReply(replyTo, correlationId, errorResponse);
     }
 
     /**
-     * Helper: Send success reply
+     * @deprecated Use sendSuccessReply(Message, RabbitHeader, RabbitResponse)
+     *             instead
      */
+    @Deprecated
     public void sendSuccessReply(RabbitHeader header, RabbitResponse<?> response) {
         String replyTo = header.getReplyTo();
         String correlationId = header.getCorrelationId();
@@ -302,8 +284,9 @@ public class RabbitRPCService {
     }
 
     /**
-     * Helper: Send error reply
+     * @deprecated Use sendErrorReply(Message, RabbitHeader, String) instead
      */
+    @Deprecated
     public void sendErrorReply(RabbitHeader header, String errorMessage) {
         var errorResponse = RabbitResponse.builder()
                 .code(500)
@@ -340,10 +323,31 @@ public class RabbitRPCService {
      */
     public <T> T extractPayload(Message message, TypeReference<T> typeRef) {
         try {
-            JsonNode root = objectMapper.readTree(message.getBody());
-            return objectMapper.readValue(root.get("payload").toString(), typeRef);
+            String body = new String(message.getBody(), StandardCharsets.UTF_8);
+            log.debug("📩 Extracting payload from message body (length={})", body.length());
+
+            JsonNode root = objectMapper.readTree(body);
+
+            // Handle double-wrapped JSON (string containing JSON)
+            if (root.isTextual()) {
+                log.debug("� Detected double-wrapped JSON in payload, parsing inner JSON...");
+                root = objectMapper.readTree(root.asText());
+            }
+
+            JsonNode payloadNode = root.get("payload");
+
+            if (payloadNode == null) {
+                log.error("❌ No 'payload' field found in message body");
+                log.error("📄 Root node type: {}", root.getNodeType());
+                log.error("📄 Full message body: {}", body);
+                throw new RuntimeException("No 'payload' field found in message");
+            }
+
+            T payload = objectMapper.readValue(payloadNode.toString(), typeRef);
+            return payload;
         } catch (Exception e) {
-            throw new RuntimeException("❌ [BaseConsumer] Error extracting payload: " + e.getMessage());
+            log.error("❌ Error extracting payload: {}", e.getMessage(), e);
+            throw new RuntimeException("❌ [BaseConsumer] Error extracting payload: " + e.getMessage(), e);
         }
     }
 
@@ -355,14 +359,39 @@ public class RabbitRPCService {
      */
     public RabbitHeader extractHeader(Message message) {
         try {
-            JsonNode root = objectMapper.readTree(message.getBody());
-            return objectMapper.treeToValue(root.get("header"), RabbitHeader.class);
+            String body = new String(message.getBody());
+            log.debug("📩 Extracting header from message body (length={})", body.length());
+
+            JsonNode root = objectMapper.readTree(body);
+
+            // Check if root is a String (double-wrapped JSON)
+            if (root.isTextual()) {
+                log.debug("� Detected double-wrapped JSON, parsing again...");
+                String innerJson = root.asText();
+                root = objectMapper.readTree(innerJson);
+            }
+
+            JsonNode headerNode = root.get("header");
+
+            if (headerNode == null) {
+                log.error("❌ No 'header' field found in message body");
+                log.error("📄 Root node type: {}", root.getNodeType());
+                log.error("📄 Full message body: {}", body);
+                throw new RuntimeException("No 'header' field found in message");
+            }
+
+            RabbitHeader header = objectMapper.treeToValue(headerNode, RabbitHeader.class);
+            log.debug("✅ Header extracted: correlationId={}", header != null ? header.getCorrelationId() : "null");
+
+            return header;
         } catch (Exception e) {
-            throw new RuntimeException("❌ [BaseConsumer] Error extracting header: " + e.getMessage());
+            log.error("❌ Error extracting header: {}", e.getMessage(), e);
+            throw new RuntimeException("❌ [BaseConsumer] Error extracting header: " + e.getMessage(), e);
         }
     }
 
-    public RabbitHeader generateHeader(String replyTo, String replyExchange, String sourceService, String targetService) {
+    public RabbitHeader generateHeader(String replyTo, String replyExchange, String sourceService,
+            String targetService) {
         return RabbitHeader.builder()
                 .correlationId(UUID.randomUUID().toString())
                 .replyTo(replyTo)

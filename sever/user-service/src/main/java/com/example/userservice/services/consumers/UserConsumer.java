@@ -43,9 +43,8 @@ public class UserConsumer {
                 log.info("📨 [FindByEmail] Received request - correlationId: {}", correlationId);
 
                 try {
-                        Map<String, Object> params = rpcService.extractPayload(message, new TypeReference<>() {
+                        Map<String, Object> payload = rpcService.extractPayload(message, new TypeReference<>() {
                         });
-                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
                         String email = (String) payload.get("email");
 
                         log.debug("🔍 [FindByEmail] Looking up email: {}", email);
@@ -58,14 +57,14 @@ public class UserConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendSuccessReply(header, response);
+                        rpcService.sendSuccessReply(message, header, response);
 
                         log.info("✅ [FindByEmail] Success - email: {}, userId: {}",
                                         email, user != null ? user.getId() : null);
 
                 } catch (Exception e) {
                         log.error("❌ [FindByEmail] Error - correlationId: {}", correlationId, e);
-                        rpcService.sendErrorReply(header, e.getMessage());
+                        rpcService.sendErrorReply(message, header, e.getMessage());
                 }
         }
 
@@ -77,9 +76,8 @@ public class UserConsumer {
                 log.info("📨 [FindById] Received request - correlationId: {}", correlationId);
 
                 try {
-                        Map<String, Object> params = rpcService.extractPayload(message, new TypeReference<>() {
+                        Map<String, Object> payload = rpcService.extractPayload(message, new TypeReference<>() {
                         });
-                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
                         UUID userId = UUID.fromString((String) payload.get("userId"));
 
                         log.debug("🔍 [FindById] Looking up userId: {}", userId);
@@ -92,14 +90,14 @@ public class UserConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendSuccessReply(header, response);
+                        rpcService.sendSuccessReply(message, header, response);
 
                         log.info("✅ [FindById] Success - userId: {}",
                                         userId, user != null ? user.getId() : null);
 
                 } catch (Exception e) {
                         log.error("❌ [FindById] Error - correlationId: {}", correlationId, e);
-                        rpcService.sendErrorReply(header, e.getMessage());
+                        rpcService.sendErrorReply(message, header, e.getMessage());
                 }
         }
 
@@ -119,7 +117,7 @@ public class UserConsumer {
                         if (errorMsg.isPresent()) {
                                 log.warn("♻️ [CreateUser] Request previously failed - correlationId: {}",
                                                 correlationId);
-                                rpcService.sendErrorReply(header, errorMsg.get());
+                                rpcService.sendErrorReply(message, header, errorMsg.get());
                                 return;
                         }
 
@@ -142,9 +140,8 @@ public class UserConsumer {
                         }
 
                         // Extract payload
-                        Map<String, Object> params = rpcService.extractPayload(message, new TypeReference<>() {
+                        Map<String, Object> payload = rpcService.extractPayload(message, new TypeReference<>() {
                         });
-                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
 
                         String username = (String) payload.get("username");
                         String email = (String) payload.get("email");
@@ -167,7 +164,7 @@ public class UserConsumer {
                         idempotencyService.updateResult(idempotencyKey, resultJson);
 
                         // Send reply
-                        rpcService.sendSuccessReply(header, response);
+                        rpcService.sendSuccessReply(message, header, response);
 
                         log.info("✅ [CreateUser] Success - userId: {}, email: {}", user.getId(), email);
 
@@ -178,7 +175,7 @@ public class UserConsumer {
                         String idempotencyKey = "user:create:" + correlationId;
                         idempotencyService.markAsFailed(idempotencyKey, e.getMessage());
 
-                        rpcService.sendErrorReply(header, e.getMessage());
+                        rpcService.sendErrorReply(message, header, e.getMessage());
                 }
         }
 
@@ -208,9 +205,8 @@ public class UserConsumer {
                         }
 
                         // Extract payload
-                        Map<String, Object> params = rpcService.extractPayload(message, new TypeReference<>() {
+                        Map<String, Object> payload = rpcService.extractPayload(message, new TypeReference<>() {
                         });
-                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
                         String email = (String) payload.get("email");
 
                         log.debug("✓ [Activate] Activating user - email: {}", email);
@@ -227,13 +223,13 @@ public class UserConsumer {
                         String resultJson = objectMapper.writeValueAsString(response);
                         idempotencyService.updateResult(idempotencyKey, resultJson);
 
-                        rpcService.sendSuccessReply(header, response);
+                        rpcService.sendSuccessReply(message, header, response);
 
                         log.info("✅ [Activate] Success - email: {}, userId: {}", email, user.getId());
 
                 } catch (Exception e) {
                         log.error("❌ [Activate] Error - correlationId: {}", correlationId, e);
-                        rpcService.sendErrorReply(header, e.getMessage());
+                        rpcService.sendErrorReply(message, header, e.getMessage());
                 }
         }
 
@@ -245,9 +241,8 @@ public class UserConsumer {
                 log.info("📨 [ChangePassword] Received request - correlationId: {}", correlationId);
 
                 try {
-                        Map<String, Object> params = rpcService.extractPayload(message, new TypeReference<>() {
+                        Map<String, Object> payload = rpcService.extractPayload(message, new TypeReference<>() {
                         });
-                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
 
                         String email = (String) payload.get("email");
                         String currentPassword = (String) payload.get("currentPassword");
@@ -263,13 +258,13 @@ public class UserConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendSuccessReply(header, response);
+                        rpcService.sendSuccessReply(message, header, response);
 
                         log.info("✅ [ChangePassword] Success - email: {}", email);
 
                 } catch (Exception e) {
                         log.error("❌ [ChangePassword] Error - correlationId: {}", correlationId, e);
-                        rpcService.sendErrorReply(header, e.getMessage());
+                        rpcService.sendErrorReply(message, header, e.getMessage());
                 }
         }
 
@@ -281,9 +276,8 @@ public class UserConsumer {
                 log.info("📨 [ForgotPassword] Received request - correlationId: {}", correlationId);
 
                 try {
-                        Map<String, Object> params = rpcService.extractPayload(message, new TypeReference<>() {
+                        Map<String, Object> payload = rpcService.extractPayload(message, new TypeReference<>() {
                         });
-                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
 
                         String email = (String) payload.get("email");
                         String newPassword = (String) payload.get("newPassword");
@@ -298,32 +292,35 @@ public class UserConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendSuccessReply(header, response);
+                        rpcService.sendSuccessReply(message, header, response);
 
                         log.info("✅ [Authenticate] Success - email: {}, userId: {}", email, user.getId());
 
                 } catch (Exception e) {
                         log.error("❌ [Authenticate] Failed - correlationId: {}, reason: {}",
                                         correlationId, e.getMessage());
-                        rpcService.sendErrorReply(header, e.getMessage());
+                        rpcService.sendErrorReply(message, header, e.getMessage());
                 }
         }
 
         @RabbitListener(queues = RabbitConstants.USER_AUTHENTICATE_QUEUE)
         public void handleAuthenticateUser(Message message) {
-                RabbitHeader header = rpcService.extractHeader(message);
-                String correlationId = header.getCorrelationId();
-
-                log.info("📨 [Authenticate] Received request - correlationId: {}", correlationId);
+                RabbitHeader header = null;
+                String correlationId = "unknown";
 
                 try {
-                        Map<String, Object> params = rpcService.extractPayload(message, new TypeReference<>() {
+                        header = rpcService.extractHeader(message);
+                        correlationId = header.getCorrelationId();
+
+                        log.info("📨 [Authenticate] Received request - correlationId: {}", correlationId);
+
+                        // extractPayload() already returns the payload object directly, no need for
+                        // nested access
+                        Map<String, Object> payload = rpcService.extractPayload(message, new TypeReference<>() {
                         });
-                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
 
                         String email = (String) payload.get("email");
                         String currentPassword = (String) payload.get("currentPassword");
-
                         log.debug("🔐 [Authenticate] Authenticating user - email: {}", email);
 
                         UserDto user = userService.handleAuthenticateUser(email, currentPassword);
@@ -334,14 +331,16 @@ public class UserConsumer {
                                         .data(user)
                                         .build();
 
-                        rpcService.sendSuccessReply(header, response);
+                        rpcService.sendSuccessReply(message, header, response);
 
                         log.info("✅ [Authenticate] Success - email: {}, userId: {}", email, user.getId());
 
                 } catch (Exception e) {
                         log.error("❌ [Authenticate] Failed - correlationId: {}, reason: {}",
-                                        correlationId, e.getMessage());
-                        rpcService.sendErrorReply(header, e.getMessage());
+                                        correlationId, e.getMessage(), e);
+                        if (header != null) {
+                                rpcService.sendErrorReply(message, header, e.getMessage());
+                        }
                 }
         }
 
@@ -353,9 +352,8 @@ public class UserConsumer {
                 log.info("📨 [ResetPassword] Received request - correlationId: {}", correlationId);
 
                 try {
-                        Map<String, Object> params = rpcService.extractPayload(message, new TypeReference<>() {
+                        Map<String, Object> payload = rpcService.extractPayload(message, new TypeReference<>() {
                         });
-                        Map<String, Object> payload = (Map<String, Object>) params.get("payload");
                         String email = (String) payload.get("email");
 
                         log.debug("🔄 [ResetPassword] Resetting password - email: {}", email);
@@ -368,13 +366,13 @@ public class UserConsumer {
                                         .data(newPassword)
                                         .build();
 
-                        rpcService.sendSuccessReply(header, response);
+                        rpcService.sendSuccessReply(message, header, response);
 
                         log.info("✅ [ResetPassword] Success - email: {}", email);
 
                 } catch (Exception e) {
                         log.error("❌ [ResetPassword] Error - correlationId: {}", correlationId, e);
-                        rpcService.sendErrorReply(header, e.getMessage());
+                        rpcService.sendErrorReply(message, header, e.getMessage());
                 }
         }
 }

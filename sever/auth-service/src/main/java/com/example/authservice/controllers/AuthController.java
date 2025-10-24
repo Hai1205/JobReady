@@ -100,7 +100,6 @@ public class AuthController {
     }
 
     @GetMapping("/health")
-    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> health() {
         Response response = new Response(200, "Auth Service is running");
 
