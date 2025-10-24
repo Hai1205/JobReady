@@ -1,56 +1,83 @@
-version: "3.8"
+version: '3.9'
 
 services:
-  # MySQL Database
   mysql:
     image: mysql:8.0
-    container_name: jobready-db
+    container_name: jobready
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: jobready
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - microservices-network
+      - app-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
 
-  # RabbitMQ Message Broker
-  rabbitmq:
-    image: rabbitmq:3.11-management
-    container_name: rabbitmq-server
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: discovery-service
+    env_file:
+      - ./discovery-service/.env
     ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - "8761:8761"
     networks:
-      - microservices-network
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      timeout: 20s
-      retries: 10
+      - app-network
 
-    # Redis Cache
-    redis:
-      image: redis:latest
-      ports:
-        - "6379:6379"
-      volumes:
-        - redis_data:/data
-      restart: always
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: gateway-service
+    env_file:
+      - ./gateway-service/.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-service
+    networks:
+      - app-network
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    env_file:
+      - ./auth-service/.env
+    ports:
+      - "8082:8082"
+    depends_on:
+      - discovery-service
+    networks:
+      - app-network
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    env_file:
+      - ./user-service/.env
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    networks:
+      - app-network
 
 volumes:
   mysql_data:
-  rabbitmq_data:
 
 networks:
-  microservices-network:
+  app-network:
     driver: bridge

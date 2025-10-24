@@ -1,4 +1,4 @@
-com\example\rabbitmq\consumers\BaseConsumer.class
+com\example\rabbitmq\services\IdempotencyService.class
 com\example\rabbitmq\dtos\ExchangeDef.class
 com\example\rabbitmq\dtos\QueueDef.class
 com\example\rabbitmq\dtos\RabbitResponse$RabbitResponseBuilder.class
@@ -6,5 +6,6 @@ com\example\rabbitmq\dtos\RabbitHeader.class
 com\example\rabbitmq\dtos\RabbitResponse.class
 com\example\rabbitmq\constants\RabbitConstants.class
 com\example\rabbitmq\services\RabbitRPCService.class
+com\example\rabbitmq\config\DeadLetterQueueConfig.class
 com\example\rabbitmq\configs\BaseRabbitConfig.class
 com\example\rabbitmq\dtos\RabbitHeader$RabbitHeaderBuilder.class

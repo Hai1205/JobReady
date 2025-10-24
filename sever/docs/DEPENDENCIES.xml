@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Dependencies cần thêm vào pom.xml của các modules
+    Để implement RabbitMQ Architecture Improvements
+-->
+
+<!-- =============================================== -->
+<!-- RABBIT-COMMON MODULE -->
+<!-- =============================================== -->
+<dependencies>
+    <!-- Existing RabbitMQ -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
+    
+    <!-- ✅ NEW: Redis for Idempotency -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    
+    <!-- ✅ NEW: Lettuce (Redis client với connection pool) -->
+    <dependency>
+        <groupId>io.lettuce</groupId>
+        <artifactId>lettuce-core</artifactId>
+    </dependency>
+    
+    <!-- ✅ NEW: Resilience4j Circuit Breaker -->
+    <dependency>
+        <groupId>io.github.resilience4j</groupId>
+        <artifactId>resilience4j-spring-boot3</artifactId>
+        <version>2.1.0</version>
+    </dependency>
+    
+    <!-- ✅ NEW: Resilience4j Reactor (for CompletableFuture support) -->
+    <dependency>
+        <groupId>io.github.resilience4j</groupId>
+        <artifactId>resilience4j-reactor</artifactId>
+        <version>2.1.0</version>
+    </dependency>
+    
+    <!-- ✅ NEW: Micrometer for metrics -->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-core</artifactId>
+    </dependency>
+    
+    <!-- ✅ NEW: Prometheus metrics -->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    
+    <!-- Jackson for JSON -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+    </dependency>
+    
+    <!-- Lombok -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <optional>true</optional>
+    </dependency>
+</dependencies>
+
+<!-- =============================================== -->
+<!-- AUTH-SERVICE MODULE -->
+<!-- =============================================== -->
+<dependencies>
+    <!-- Inherit từ rabbit-common -->
+    <dependency>
+        <groupId>com.example</groupId>
+        <artifactId>rabbit-common</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+    
+    <!-- ✅ NEW: Actuator cho monitoring -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    
+    <!-- ✅ NEW: Spring AOP (required for @CircuitBreaker) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
+    
+    <!-- Other existing dependencies -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+</dependencies>
+
+<!-- =============================================== -->
+<!-- USER-SERVICE MODULE -->
+<!-- =============================================== -->
+<dependencies>
+    <!-- Inherit từ rabbit-common -->
+    <dependency>
+        <groupId>com.example</groupId>
+        <artifactId>rabbit-common</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+    
+    <!-- ✅ NEW: Actuator -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    
+    <!-- ✅ NEW: Spring AOP -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
+    
+    <!-- ✅ NEW: Spring JPA (cho Outbox Pattern) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    
+    <!-- Database driver -->
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+</dependencies>
+
+<!-- =============================================== -->
+<!-- CV-SERVICE MODULE -->
+<!-- =============================================== -->
+<dependencies>
+    <!-- Inherit từ rabbit-common -->
+    <dependency>
+        <groupId>com.example</groupId>
+        <artifactId>rabbit-common</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+    
+    <!-- ✅ NEW: Actuator -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    
+    <!-- Other existing dependencies -->
+</dependencies>
+
+<!-- =============================================== -->
+<!-- BUILD PLUGINS (All modules) -->
+<!-- =============================================== -->
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <excludes>
+                    <exclude>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+<!-- =============================================== -->
+<!-- DEPENDENCY MANAGEMENT (Parent pom.xml) -->
+<!-- =============================================== -->
+<dependencyManagement>
+    <dependencies>
+        <!-- Spring Boot BOM -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>3.2.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        
+        <!-- Resilience4j BOM -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-bom</artifactId>
+            <version>2.1.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<!-- =============================================== -->
+<!-- NOTES -->
+<!-- =============================================== -->
+<!--
+    Installation Steps:
+
+    1. Add dependencies to respective pom.xml files
+    2. Run: mvn clean install
+    3. Verify no conflicts:
+       mvn dependency:tree
+    
+    4. Start Redis:
+       docker run -d -p 6379:6379 --name redis redis:alpine
+    
+    5. Update application.yml with Redis config
+    
+    6. Restart services
+    
+    Expected Sizes:
+    - rabbit-common.jar: ~2MB
+    - auth-service.jar: ~50MB
+    - user-service.jar: ~55MB (includes JPA)
+    - cv-service.jar: ~45MB
+    
+    Memory Usage:
+    - With new deps: +50-100MB per service
+    - Redis: ~10MB
+    
+    Total additional RAM: ~200-300MB
+-->

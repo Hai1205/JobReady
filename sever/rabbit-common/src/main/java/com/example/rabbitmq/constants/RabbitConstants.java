@@ -5,6 +5,11 @@ package com.example.rabbitmq.constants;
  * All services can refer to these constants to ensure consistency
  */
 public class RabbitConstants {
+
+    // -- Services --
+    public static final String USER_SERVICE = "user-service";
+    public static final String AUTH_SERVICE = "auth-service";
+    public static final String CV_SERVICE = "cv-service";
     
     // --- Exchanges ---
     public static final String USER_EXCHANGE = "user.exchange";

@@ -19,14 +19,12 @@ public class UserProducer {
         private final RabbitRPCService rpcService;
 
         public UserDto findUserByEmail(String email) {
-                RabbitHeader header = RabbitHeader.builder()
-                                .correlationId(UUID.randomUUID().toString())
-                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
-                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
-                                .timestamp(System.currentTimeMillis())
-                                .sourceService("auth-service")
-                                .targetService("user-service")
-                                .build();
+                RabbitHeader header = rpcService.generateHeader(
+                                RabbitConstants.AUTH_REPLY_QUEUE,
+                                RabbitConstants.AUTH_EXCHANGE,
+                                RabbitConstants.AUTH_SERVICE,
+                                RabbitConstants.USER_SERVICE
+                );
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -46,14 +44,12 @@ public class UserProducer {
         }
 
         public UserDto createUser(String username, String email, String password, String fullname) {
-                RabbitHeader header = RabbitHeader.builder()
-                                .correlationId(UUID.randomUUID().toString())
-                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
-                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
-                                .timestamp(System.currentTimeMillis())
-                                .sourceService("auth-service")
-                                .targetService("user-service")
-                                .build();
+                RabbitHeader header = rpcService.generateHeader(
+                                RabbitConstants.AUTH_REPLY_QUEUE,
+                                RabbitConstants.AUTH_EXCHANGE,
+                                RabbitConstants.AUTH_SERVICE,
+                                RabbitConstants.USER_SERVICE
+                );
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("username", username);
@@ -72,14 +68,12 @@ public class UserProducer {
         }
         
         public UserDto activateUser(String email) {
-                RabbitHeader header = RabbitHeader.builder()
-                                .correlationId(UUID.randomUUID().toString())
-                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
-                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
-                                .timestamp(System.currentTimeMillis())
-                                .sourceService("auth-service")
-                                .targetService("user-service")
-                                .build();
+                RabbitHeader header = rpcService.generateHeader(
+                                RabbitConstants.AUTH_REPLY_QUEUE,
+                                RabbitConstants.AUTH_EXCHANGE,
+                                RabbitConstants.AUTH_SERVICE,
+                                RabbitConstants.USER_SERVICE
+                );
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -95,14 +89,12 @@ public class UserProducer {
         }
 
         public UserDto changePasswordUser(String email, String currentPassword, String newPassword) {
-                RabbitHeader header = RabbitHeader.builder()
-                                .correlationId(UUID.randomUUID().toString())
-                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
-                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
-                                .timestamp(System.currentTimeMillis())
-                                .sourceService("auth-service")
-                                .targetService("user-service")
-                                .build();
+                RabbitHeader header = rpcService.generateHeader(
+                                RabbitConstants.AUTH_REPLY_QUEUE,
+                                RabbitConstants.AUTH_EXCHANGE,
+                                RabbitConstants.AUTH_SERVICE,
+                                RabbitConstants.USER_SERVICE
+                );
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -120,14 +112,12 @@ public class UserProducer {
         }
 
         public UserDto forgotPasswordUser(String email, String newPassword) {
-                RabbitHeader header = RabbitHeader.builder()
-                                .correlationId(UUID.randomUUID().toString())
-                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
-                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
-                                .timestamp(System.currentTimeMillis())
-                                .sourceService("auth-service")
-                                .targetService("user-service")
-                                .build();
+                RabbitHeader header = rpcService.generateHeader(
+                                RabbitConstants.AUTH_REPLY_QUEUE,
+                                RabbitConstants.AUTH_EXCHANGE,
+                                RabbitConstants.AUTH_SERVICE,
+                                RabbitConstants.USER_SERVICE
+                );
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -144,14 +134,12 @@ public class UserProducer {
         }
 
         public UserDto authenticateUser(String email, String currentPassword) {
-                RabbitHeader header = RabbitHeader.builder()
-                                .correlationId(UUID.randomUUID().toString())
-                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
-                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
-                                .timestamp(System.currentTimeMillis())
-                                .sourceService("auth-service")
-                                .targetService("user-service")
-                                .build();
+                RabbitHeader header = rpcService.generateHeader(
+                                RabbitConstants.AUTH_REPLY_QUEUE,
+                                RabbitConstants.AUTH_EXCHANGE,
+                                RabbitConstants.AUTH_SERVICE,
+                                RabbitConstants.USER_SERVICE
+                );
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -168,14 +156,12 @@ public class UserProducer {
         }
 
         public String resetPasswordUser(String email) {
-                RabbitHeader header = RabbitHeader.builder()
-                                .correlationId(UUID.randomUUID().toString())
-                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
-                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
-                                .timestamp(System.currentTimeMillis())
-                                .sourceService("auth-service")
-                                .targetService("user-service")
-                                .build();
+                RabbitHeader header = rpcService.generateHeader(
+                                RabbitConstants.AUTH_REPLY_QUEUE,
+                                RabbitConstants.AUTH_EXCHANGE,
+                                RabbitConstants.AUTH_SERVICE,
+                                RabbitConstants.USER_SERVICE
+                );
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);

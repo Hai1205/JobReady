@@ -38,7 +38,12 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 return onError(exchange, "No Authorization header", HttpStatus.UNAUTHORIZED);
             }
 
-            String authHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
+            var authHeaders = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
+            if (authHeaders == null || authHeaders.isEmpty()) {
+                return onError(exchange, "No Authorization header", HttpStatus.UNAUTHORIZED);
+            }
+
+            String authHeader = authHeaders.get(0);
             String token = null;
 
             if (authHeader != null && authHeader.startsWith("Bearer ")) {

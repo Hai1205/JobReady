@@ -19,14 +19,11 @@ public class UserProducer {
         private final RabbitRPCService rpcService;
 
         public UserDto findUserById(UUID userId) {
-                RabbitHeader header = RabbitHeader.builder()
-                                .correlationId(UUID.randomUUID().toString())
-                                .replyTo(RabbitConstants.AUTH_REPLY_QUEUE)
-                                .replyExchange(RabbitConstants.AUTH_EXCHANGE)
-                                .timestamp(System.currentTimeMillis())
-                                .sourceService("auth-service")
-                                .targetService("user-service")
-                                .build();
+                RabbitHeader header = rpcService.generateHeader(
+                                RabbitConstants.AUTH_REPLY_QUEUE,
+                                RabbitConstants.AUTH_EXCHANGE,
+                                RabbitConstants.AUTH_SERVICE,
+                                RabbitConstants.USER_SERVICE);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("userId", userId);
