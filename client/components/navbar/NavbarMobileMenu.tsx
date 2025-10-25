@@ -83,7 +83,7 @@ export const NavbarMobileMenu = ({
       <div className="flex flex-col gap-2 mb-6">
         {links.map((link) => (
           <Link
-            key={link.href}
+            key={`${link.href}-${link.label}`}
             href={link.href}
             onClick={() => onOpenChange(false)}
             className={cn(

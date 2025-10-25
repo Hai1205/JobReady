@@ -10,9 +10,10 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import Link from "next/link";
 import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
 
 const RegisterPage: React.FC = () => {
-  const { isLoading, register } = useAuthStore();
+  const { isLoading, register, sendOTP } = useAuthStore();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -82,12 +83,18 @@ const RegisterPage: React.FC = () => {
       formData.password
     );
 
-    if (response?.success) {
+    console.log("📥 Register response:", response);
+
+    if (response?.status === 200) {
+      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.");
+
       router.push(
         `/auth/verification?email=${encodeURIComponent(
           formData.email
-        )}&isPasswordReset=false`
+        )}&isActivation=true`
       );
+
+      await sendOTP(formData.email);
     }
   };
 

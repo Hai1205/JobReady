@@ -338,8 +338,27 @@ public class UserConsumer {
                 } catch (Exception e) {
                         log.error("❌ [Authenticate] Failed - correlationId: {}, reason: {}",
                                         correlationId, e.getMessage(), e);
+
                         if (header != null) {
-                                rpcService.sendErrorReply(message, header, e.getMessage());
+                                // If the service threw OurException, propagate its status code in the reply
+                                int code = 500;
+                                if (e instanceof com.example.userservice.exceptions.OurException) {
+                                        try {
+                                                code = ((com.example.userservice.exceptions.OurException) e)
+                                                                .getStatusCode();
+                                        } catch (Exception ex) {
+                                                // ignore and use 500
+                                        }
+                                }
+
+                                var errorResponse = RabbitResponse.builder()
+                                                .code(code)
+                                                .message(e.getMessage())
+                                                .data(null)
+                                                .build();
+
+                                // Use direct send so reply contains proper code and message
+                                rpcService.sendReply(header.getReplyTo(), header.getCorrelationId(), errorResponse);
                         }
                 }
         }

@@ -53,7 +53,7 @@ const ForgotPasswordPage: React.FC = () => {
     router.push(
       `/auth/verification?email=${encodeURIComponent(
         email
-      )}&isPasswordReset=true`
+      )}&isActivation=false`
     );
   };
 

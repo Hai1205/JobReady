@@ -10,7 +10,7 @@ export enum EUserRole {
 
 export enum EUserStatus {
     PENDING = "pending",
-    INACTIVE = "inactive",
+    BANNED = "banned",
     ACTIVE = "active"
 }
 
@@ -18,4 +18,9 @@ export enum EAISuggestionType {
     IMPROVEMENT = "improvement",
     WARNING = "warning",
     TIP = "tip",
+}
+
+export enum EPrivacy {
+    PUBLIC = "PUBLIC",
+    PRIVATE = "PRIVATE"
 }

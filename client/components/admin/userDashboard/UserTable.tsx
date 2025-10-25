@@ -12,7 +12,7 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case "active":
       return "bg-green-500";
-    case "inactive":
+    case "banned":
       return "bg-red-500";
     case "pending":
       return "bg-yellow-500";
@@ -55,14 +55,14 @@ export const UserTable = ({
           </Avatar>
 
           <div className="flex flex-col">
-            <span className="font-medium hover:underline">
+            <span className="font-medium">
               {user?.fullname || "Unknown Artist"}
             </span>
 
-            <span className="text-sm text-muted-foreground hover:underline">
+            <span className="text-sm text-muted-foreground">
               @{user?.username || "unknown"}
             </span>
-            <span className="text-sm text-muted-foreground hover:underline">
+            <span className="text-sm text-muted-foreground">
               {user?.email || "unknown"}
             </span>
           </div>

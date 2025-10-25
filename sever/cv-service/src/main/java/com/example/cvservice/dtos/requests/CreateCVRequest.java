@@ -17,4 +17,5 @@ public class CreateCVRequest {
     private List<ExperienceDto> experiences;
     private List<EducationDto> educations;
     private List<String> skills;
+    private String privacy;
 }

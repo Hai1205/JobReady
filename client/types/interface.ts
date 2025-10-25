@@ -1,4 +1,4 @@
-import { EAISuggestionType, EUserRole, EUserStatus } from "./enum";
+import { EAISuggestionType, EPrivacy, EUserRole, EUserStatus } from "./enum";
 
 declare global {
     interface IUser {
@@ -20,6 +20,7 @@ declare global {
         experiences: IExperience[]
         educations: IEducation[]
         skills: string[]
+        privacy: EPrivacy
         createdAt?: string
         updatedAt?: string
     }

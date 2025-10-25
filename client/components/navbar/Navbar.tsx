@@ -32,7 +32,7 @@ export function Navbar() {
     { href: "/my-cvs", label: "CV Của Tôi" },
   ];
   const allNavLinks = isAdmin
-    ? [...navLinks, { href: "/admin/dashboard", label: "Admin Dashboard" }]
+    ? [...navLinks, { href: "/admin", label: "Admin Dashboard" }]
     : navLinks;
 
   const handleLogout = () => {

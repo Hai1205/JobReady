@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -12,6 +11,7 @@ import com.example.authservice.dtos.UserDto;
 import com.example.rabbitmq.constants.RabbitConstants;
 import com.example.rabbitmq.dtos.RabbitHeader;
 import com.example.rabbitmq.services.RabbitRPCService;
+import com.example.rabbitmq.exceptions.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +23,7 @@ public class UserProducer {
                                 RabbitConstants.AUTH_REPLY_QUEUE,
                                 RabbitConstants.AUTH_EXCHANGE,
                                 RabbitConstants.AUTH_SERVICE,
-                                RabbitConstants.USER_SERVICE
-                );
+                                RabbitConstants.USER_SERVICE);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -44,8 +43,7 @@ public class UserProducer {
                                 RabbitConstants.AUTH_REPLY_QUEUE,
                                 RabbitConstants.AUTH_EXCHANGE,
                                 RabbitConstants.AUTH_SERVICE,
-                                RabbitConstants.USER_SERVICE
-                );
+                                RabbitConstants.USER_SERVICE);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("username", username);
@@ -62,14 +60,13 @@ public class UserProducer {
 
                 return userDto;
         }
-        
+
         public UserDto activateUser(String email) {
                 RabbitHeader header = rpcService.generateHeader(
                                 RabbitConstants.AUTH_REPLY_QUEUE,
                                 RabbitConstants.AUTH_EXCHANGE,
                                 RabbitConstants.AUTH_SERVICE,
-                                RabbitConstants.USER_SERVICE
-                );
+                                RabbitConstants.USER_SERVICE);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -89,8 +86,7 @@ public class UserProducer {
                                 RabbitConstants.AUTH_REPLY_QUEUE,
                                 RabbitConstants.AUTH_EXCHANGE,
                                 RabbitConstants.AUTH_SERVICE,
-                                RabbitConstants.USER_SERVICE
-                );
+                                RabbitConstants.USER_SERVICE);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -112,8 +108,7 @@ public class UserProducer {
                                 RabbitConstants.AUTH_REPLY_QUEUE,
                                 RabbitConstants.AUTH_EXCHANGE,
                                 RabbitConstants.AUTH_SERVICE,
-                                RabbitConstants.USER_SERVICE
-                );
+                                RabbitConstants.USER_SERVICE);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
@@ -134,21 +129,26 @@ public class UserProducer {
                                 RabbitConstants.AUTH_REPLY_QUEUE,
                                 RabbitConstants.AUTH_EXCHANGE,
                                 RabbitConstants.AUTH_SERVICE,
-                                RabbitConstants.USER_SERVICE
-                );
+                                RabbitConstants.USER_SERVICE);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);
                 params.put("currentPassword", currentPassword);
 
-                UserDto userDto = rpcService.sendAndReceive(
-                                RabbitConstants.USER_EXCHANGE,
-                                RabbitConstants.USER_AUTHENTICATE,
-                                header,
-                                params,
-                                UserDto.class);
+                try {
+                        UserDto userDto = rpcService.sendAndReceive(
+                                        RabbitConstants.USER_EXCHANGE,
+                                        RabbitConstants.USER_AUTHENTICATE,
+                                        header,
+                                        params,
+                                        UserDto.class);
 
-                return userDto;
+                        return userDto;
+                } catch (RemoteRpcException rre) {
+                        // Convert remote RPC exception into local OurException so AuthService can
+                        // handle status codes
+                        throw new com.example.authservice.exceptions.OurException(rre.getMessage(), rre.getCode());
+                }
         }
 
         public String resetPasswordUser(String email) {
@@ -156,8 +156,7 @@ public class UserProducer {
                                 RabbitConstants.AUTH_REPLY_QUEUE,
                                 RabbitConstants.AUTH_EXCHANGE,
                                 RabbitConstants.AUTH_SERVICE,
-                                RabbitConstants.USER_SERVICE
-                );
+                                RabbitConstants.USER_SERVICE);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", email);

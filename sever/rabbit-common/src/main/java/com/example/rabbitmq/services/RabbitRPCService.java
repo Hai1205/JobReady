@@ -2,6 +2,7 @@ package com.example.rabbitmq.services;
 
 import com.example.rabbitmq.dtos.RabbitHeader;
 import com.example.rabbitmq.dtos.RabbitResponse;
+import com.example.rabbitmq.exceptions.RemoteRpcException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -149,7 +150,18 @@ public class RabbitRPCService {
                     Object code = payloadMap.get("code");
                     if (code != null && !code.equals(200)) {
                         String errorMsg = (String) payloadMap.getOrDefault("message", "Unknown error");
-                        throw new RuntimeException("Remote error: " + errorMsg);
+                        // Attempt to parse code as int
+                        int codeInt = 500;
+                        try {
+                            if (code instanceof Number) {
+                                codeInt = ((Number) code).intValue();
+                            } else {
+                                codeInt = Integer.parseInt(code.toString());
+                            }
+                        } catch (Exception ex) {
+                            // fallback
+                        }
+                        throw new RemoteRpcException(errorMsg, codeInt);
                     }
                     Object data = payloadMap.get("data");
                     return objectMapper.convertValue(data, responseType);

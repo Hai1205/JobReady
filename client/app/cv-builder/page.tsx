@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
 import { CVBuilderWizard } from "@/components/cv-builder/CVBuilderWizard";
 import { AIPanel } from "@/components/cv-builder/AI-powered/AIPanel";
+import { EPrivacy } from "@/types/enum";
 
 export default function CVBuilderPage() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function CVBuilderPage() {
         experiences: [],
         educations: [],
         skills: [],
+        privacy: EPrivacy.PRIVATE,
       });
       handleSetCurrentStep(0);
     }

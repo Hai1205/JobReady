@@ -8,7 +8,6 @@ import { useCVStore } from "@/stores/cvStore";
 
 export function PreviewStep() {
   const { currentCV, handleGeneratePDF } = useCVStore();
-  // const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
 
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -16,14 +15,9 @@ export function PreviewStep() {
   useEffect(() => {
     if (currentCV?.avatar && currentCV.avatar instanceof File) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        // setAvatarUrl(reader.result as string);
-      };
+      reader.onloadend = () => {};
       reader.readAsDataURL(currentCV.avatar);
     }
-    // else {
-    // setAvatarUrl(null);
-    // }
   }, [currentCV?.avatar]);
 
   if (!currentCV) return null;
@@ -63,199 +57,155 @@ export function PreviewStep() {
         {/* A4 Preview Container */}
         <div
           id="cv-preview-content"
-          className="mx-auto max-w-[210mm] bg-white"
+          className="mx-auto bg-white"
           style={{
+            width: "210mm",
             minHeight: "297mm",
-            padding: "32px",
+            padding: "40px",
             boxShadow: "0 0 20px rgba(0,0,0,0.1)",
-            fontFamily: "Arial, sans-serif",
-            fontSize: "14px",
-            lineHeight: "1.6",
-            color: "#333",
+            fontFamily: "'Times New Roman', Times, serif",
+            fontSize: "13px",
+            lineHeight: "1.5",
+            color: "#000",
           }}
         >
-          {/* Header with Background */}
+          {/* Header Section */}
           <div
             style={{
-              marginBottom: "32px",
-              marginLeft: "-32px",
-              marginRight: "-32px",
-              marginTop: "-32px",
-              backgroundColor: "#f3f4f6",
-              padding: "24px 32px",
-              borderBottom: "2px solid #e5e7eb",
+              display: "flex",
+              gap: "30px",
+              alignItems: "flex-start",
+              marginBottom: "30px",
+              paddingBottom: "20px",
+              borderBottom: "1px solid #ddd",
             }}
           >
-            <div
-              style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}
-            >
-              {/* Avatar */}
-              <div style={{ flexShrink: 0 }}>
-                {(currentCV.personalInfo.avatarUrl ||
-                  currentCV.personalInfo.avatarPublicId) && (
-                  <img
-                    src={
-                      currentCV.personalInfo.avatarUrl ||
-                      currentCV.personalInfo.avatarPublicId ||
-                      ""
-                    }
-                    alt="Avatar"
+            {/* Avatar */}
+            <div style={{ flexShrink: 0 }}>
+              {(currentCV.personalInfo.avatarUrl ||
+                currentCV.personalInfo.avatarPublicId) && (
+                <img
+                  src={
+                    currentCV.personalInfo.avatarUrl ||
+                    currentCV.personalInfo.avatarPublicId ||
+                    ""
+                  }
+                  alt="Avatar"
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "3px solid #4A90E2",
+                  }}
+                />
+              )}
+              {!currentCV.personalInfo.avatarUrl &&
+                !currentCV.personalInfo.avatarPublicId && (
+                  <div
                     style={{
-                      width: "96px",
-                      height: "96px",
+                      width: "120px",
+                      height: "120px",
                       borderRadius: "50%",
-                      objectFit: "cover",
-                      border: "4px solid white",
-                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                      backgroundColor: "#4A90E2",
+                      color: "white",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "40px",
+                      fontWeight: "bold",
+                      border: "3px solid #4A90E2",
                     }}
-                  />
+                  >
+                    {currentCV.personalInfo.fullname
+                      ? currentCV.personalInfo.fullname
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : "CV"}
+                  </div>
                 )}
-                {!currentCV.personalInfo.avatarUrl &&
-                  !currentCV.personalInfo.avatarPublicId && (
-                    <div
-                      style={{
-                        width: "96px",
-                        height: "96px",
-                        borderRadius: "50%",
-                        backgroundColor: "#1e3a8a",
-                        color: "white",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "32px",
-                        fontWeight: "bold",
-                        border: "4px solid white",
-                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                      }}
-                    >
-                      {currentCV.personalInfo.fullname
-                        ? currentCV.personalInfo.fullname
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .toUpperCase()
-                            .slice(0, 2)
-                        : "CV"}
-                    </div>
-                  )}
-              </div>
+            </div>
 
-              {/* Name and Info */}
-              <div style={{ flex: 1 }}>
-                <h1
-                  style={{
-                    fontSize: "36px",
-                    fontWeight: "bold",
-                    color: "#1e3a8a",
-                    marginBottom: "8px",
-                    marginTop: 0,
-                  }}
-                >
-                  {currentCV.personalInfo.fullname || "Tên của bạn"}
-                </h1>
-                <p
-                  style={{
-                    fontSize: "18px",
-                    color: "#4b5563",
-                    fontWeight: "500",
-                    marginBottom: "16px",
-                    marginTop: 0,
-                  }}
-                >
-                  Business Development Executive
-                </p>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "8px",
-                    fontSize: "13px",
-                    color: "#374151",
-                  }}
-                >
-                  {currentCV.personalInfo.phone && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <span style={{ fontWeight: "600" }}>Ngày sinh:</span>
-                      <span>{currentCV.personalInfo.phone}</span>
-                    </div>
-                  )}
-                  {currentCV.personalInfo.location && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <span style={{ fontWeight: "600" }}>Giới tính:</span>
-                      <span>{currentCV.personalInfo.location}</span>
-                    </div>
-                  )}
-                  {currentCV.personalInfo.phone && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <span>📞</span>
-                      <span>{currentCV.personalInfo.phone}</span>
-                    </div>
-                  )}
-                  {currentCV.personalInfo.email && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <span>✉️</span>
-                      <span
-                        style={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {currentCV.personalInfo.email}
-                      </span>
-                    </div>
-                  )}
-                </div>
+            {/* Personal Info */}
+            <div style={{ flex: 1 }}>
+              <h1
+                style={{
+                  fontSize: "32px",
+                  fontWeight: "bold",
+                  color: "#000",
+                  marginBottom: "8px",
+                  marginTop: 0,
+                  textTransform: "uppercase",
+                }}
+              >
+                {currentCV.personalInfo.fullname || "Họ và tên"}
+              </h1>
+              <p
+                style={{
+                  fontSize: "15px",
+                  color: "#666",
+                  fontStyle: "italic",
+                  marginBottom: "15px",
+                  marginTop: 0,
+                }}
+              >
+                {currentCV.title || "Vị trí ứng tuyển"}
+              </p>
+              <div
+                style={{
+                  fontSize: "13px",
+                  color: "#333",
+                  lineHeight: "1.8",
+                }}
+              >
+                {currentCV.personalInfo.email && (
+                  <div style={{ marginBottom: "5px" }}>
+                    <span style={{ fontWeight: "600" }}>Email: </span>
+                    <span>{currentCV.personalInfo.email}</span>
+                  </div>
+                )}
+                {currentCV.personalInfo.phone && (
+                  <div style={{ marginBottom: "5px" }}>
+                    <span style={{ fontWeight: "600" }}>Phone: </span>
+                    <span>{currentCV.personalInfo.phone}</span>
+                  </div>
+                )}
+                {currentCV.personalInfo.location && (
+                  <div style={{ marginBottom: "5px" }}>
+                    <span style={{ fontWeight: "600" }}>Location: </span>
+                    <span>{currentCV.personalInfo.location}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          <div style={{ marginTop: "24px" }}>
+          <div style={{ marginTop: "0" }}>
             {/* Career Objective */}
             {currentCV.personalInfo.summary && (
-              <div style={{ marginBottom: "24px" }}>
+              <div style={{ marginBottom: "25px" }}>
                 <h2
                   style={{
-                    borderBottom: "2px solid #1e3a8a",
-                    paddingBottom: "4px",
-                    fontSize: "20px",
+                    fontSize: "16px",
                     fontWeight: "bold",
-                    color: "#1e3a8a",
-                    marginBottom: "12px",
+                    color: "#000",
+                    marginBottom: "10px",
                     marginTop: 0,
+                    textTransform: "uppercase",
+                    borderBottom: "2px solid #4A90E2",
+                    paddingBottom: "5px",
                   }}
                 >
-                  MỤC TIÊU NGHỀ NGHIỆP
+                  Giới thiệu
                 </h2>
                 <p
                   style={{
                     fontSize: "13px",
-                    lineHeight: "1.8",
-                    color: "#374151",
+                    lineHeight: "1.6",
+                    color: "#333",
                     textAlign: "justify",
                     margin: 0,
                   }}
@@ -265,84 +215,22 @@ export function PreviewStep() {
               </div>
             )}
 
-            {/* Education */}
-            {currentCV.educations.length > 0 && (
-              <div style={{ marginBottom: "24px" }}>
-                <h2
-                  style={{
-                    borderBottom: "2px solid #1e3a8a",
-                    paddingBottom: "4px",
-                    fontSize: "20px",
-                    fontWeight: "bold",
-                    color: "#1e3a8a",
-                    marginBottom: "12px",
-                    marginTop: 0,
-                  }}
-                >
-                  HỌC VẤN
-                </h2>
-                <div>
-                  {currentCV.educations.map((edu, index) => (
-                    <div
-                      key={edu.id}
-                      style={{
-                        marginBottom:
-                          index < currentCV.educations.length - 1 ? "16px" : 0,
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#6b7280",
-                          marginBottom: "4px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        {edu.startDate} - {edu.endDate || "Hiện tại"}
-                      </div>
-                      <h3
-                        style={{
-                          fontWeight: "bold",
-                          color: "#111827",
-                          fontSize: "15px",
-                          marginBottom: "4px",
-                          marginTop: 0,
-                        }}
-                      >
-                        {edu.school}
-                      </h3>
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          color: "#374151",
-                          margin: 0,
-                        }}
-                      >
-                        <span style={{ fontWeight: "600" }}>Chuyên ngành:</span>{" "}
-                        {edu.degree}
-                        {edu.field && ` - ${edu.field}`}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Work Experience */}
             {currentCV.experiences.length > 0 && (
-              <div style={{ marginBottom: "24px" }}>
+              <div style={{ marginBottom: "25px" }}>
                 <h2
                   style={{
-                    borderBottom: "2px solid #1e3a8a",
-                    paddingBottom: "4px",
-                    fontSize: "20px",
+                    fontSize: "16px",
                     fontWeight: "bold",
-                    color: "#1e3a8a",
-                    marginBottom: "12px",
+                    color: "#000",
+                    marginBottom: "10px",
                     marginTop: 0,
+                    textTransform: "uppercase",
+                    borderBottom: "2px solid #4A90E2",
+                    paddingBottom: "5px",
                   }}
                 >
-                  KINH NGHIỆM LÀM VIỆC
+                  Kinh nghiệm làm việc
                 </h2>
                 <div>
                   {currentCV.experiences.map((exp, index) => (
@@ -350,47 +238,50 @@ export function PreviewStep() {
                       key={exp.id}
                       style={{
                         marginBottom:
-                          index < currentCV.experiences.length - 1 ? "16px" : 0,
+                          index < currentCV.experiences.length - 1 ? "15px" : 0,
+                        backgroundColor: "#f8f9fa",
+                        padding: "12px 15px",
+                        borderLeft: "3px solid #4A90E2",
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#6b7280",
-                          marginBottom: "4px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        {exp.startDate} - {exp.endDate || "Hiện tại"}
-                      </div>
                       <h3
                         style={{
                           fontWeight: "bold",
-                          color: "#111827",
-                          fontSize: "15px",
-                          marginBottom: "4px",
+                          color: "#000",
+                          fontSize: "14px",
+                          marginBottom: "5px",
                           marginTop: 0,
-                        }}
-                      >
-                        {exp.company}
-                      </h3>
-                      <p
-                        style={{
-                          fontWeight: "600",
-                          color: "#374151",
-                          marginBottom: "8px",
-                          marginTop: 0,
-                          fontSize: "13px",
                         }}
                       >
                         {exp.position}
+                      </h3>
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          color: "#666",
+                          marginBottom: "5px",
+                          marginTop: 0,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {exp.company}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          color: "#999",
+                          marginBottom: "8px",
+                          marginTop: 0,
+                        }}
+                      >
+                        {exp.startDate} - {exp.endDate || "Present"}
                       </p>
                       {exp.description && (
                         <p
                           style={{
                             fontSize: "13px",
-                            color: "#374151",
-                            lineHeight: "1.8",
+                            color: "#333",
+                            lineHeight: "1.6",
                             textAlign: "justify",
                             margin: 0,
                           }}
@@ -404,43 +295,119 @@ export function PreviewStep() {
               </div>
             )}
 
-            {/* Skills */}
-            {currentCV.skills.length > 0 && (
-              <div style={{ marginBottom: "24px" }}>
+            {/* Education */}
+            {currentCV.educations.length > 0 && (
+              <div style={{ marginBottom: "25px" }}>
                 <h2
                   style={{
-                    borderBottom: "2px solid #1e3a8a",
-                    paddingBottom: "4px",
-                    fontSize: "20px",
+                    fontSize: "16px",
                     fontWeight: "bold",
-                    color: "#1e3a8a",
-                    marginBottom: "12px",
+                    color: "#000",
+                    marginBottom: "10px",
                     marginTop: 0,
+                    textTransform: "uppercase",
+                    borderBottom: "2px solid #4A90E2",
+                    paddingBottom: "5px",
                   }}
                 >
-                  KỸ NĂNG
+                  Học vấn
                 </h2>
-                <ul
+                <div>
+                  {currentCV.educations.map((edu, index) => (
+                    <div
+                      key={edu.id}
+                      style={{
+                        marginBottom:
+                          index < currentCV.educations.length - 1 ? "15px" : 0,
+                        backgroundColor: "#f8f9fa",
+                        padding: "12px 15px",
+                        borderLeft: "3px solid #4A90E2",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          fontWeight: "bold",
+                          color: "#000",
+                          fontSize: "14px",
+                          marginBottom: "5px",
+                          marginTop: 0,
+                        }}
+                      >
+                        {edu.degree}
+                      </h3>
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          color: "#666",
+                          marginBottom: "5px",
+                          marginTop: 0,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {edu.school}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          color: "#999",
+                          margin: 0,
+                        }}
+                      >
+                        {edu.field && (
+                          <span>
+                            {edu.field}
+                            {" • "}
+                          </span>
+                        )}
+                        {edu.startDate} - {edu.endDate || "Present"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Skills */}
+            {currentCV.skills.length > 0 && (
+              <div style={{ marginBottom: "25px" }}>
+                <h2
                   style={{
-                    marginLeft: "20px",
-                    paddingLeft: 0,
-                    margin: 0,
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    color: "#000",
+                    marginBottom: "10px",
+                    marginTop: 0,
+                    textTransform: "uppercase",
+                    borderBottom: "2px solid #4A90E2",
+                    paddingBottom: "5px",
+                  }}
+                >
+                  Kỹ năng
+                </h2>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "8px",
                   }}
                 >
                   {currentCV.skills.map((skill, index) => (
-                    <li
+                    <span
                       key={index}
                       style={{
-                        fontSize: "13px",
-                        color: "#374151",
-                        marginBottom:
-                          index < currentCV.skills.length - 1 ? "6px" : 0,
+                        display: "inline-block",
+                        padding: "6px 12px",
+                        backgroundColor: "#E3F2FD",
+                        color: "#1976D2",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        fontWeight: "500",
                       }}
                     >
                       {skill}
-                    </li>
+                    </span>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
           </div>

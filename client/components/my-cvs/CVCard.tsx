@@ -14,9 +14,10 @@ import { formatDateAgo } from "@/lib/utils";
 
 interface CVCardProps {
   cv: ICV;
-  onEdit: (cv: ICV) => void;
+  onEdit?: (cv: ICV) => void;
   onDuplicate: (cvId: string) => void;
-  onDelete: (cvId: string) => void;
+  onDelete?: (cvId: string) => void;
+  onDownload?: () => void;
 }
 
 export default function CVCard({
@@ -24,6 +25,7 @@ export default function CVCard({
   onEdit,
   onDuplicate,
   onDelete,
+  onDownload,
 }: CVCardProps) {
   return (
     <Card className="group relative overflow-hidden border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm transition-all duration-200 hover:shadow-xl hover:shadow-primary/20 hover:scale-[1.02]">
@@ -73,15 +75,17 @@ export default function CVCard({
           </div>
 
           <div className="flex gap-2 pt-2 border-t border-border/50">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(cv)}
-              className="flex-1 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200"
-            >
-              <Edit className="mr-2 h-3 w-3" />
-              Chỉnh sửa
-            </Button>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(cv)}
+                className="flex-1 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200"
+              >
+                <Edit className="mr-2 h-3 w-3" />
+                Chỉnh sửa
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -90,21 +94,26 @@ export default function CVCard({
             >
               <Copy className="h-3 w-3" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200"
-            >
-              <Download className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(cv.id)}
-              className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+            {onDownload && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onDownload}
+                className="hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200"
+              >
+                <Download className="h-3 w-3" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete(cv.id)}
+                className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>

@@ -10,6 +10,7 @@ import com.example.cvservice.dtos.*;
 import com.example.cvservice.dtos.requests.*;
 import com.example.cvservice.dtos.responses.*;
 import com.example.cvservice.entities.*;
+import com.example.cvservice.entities.CV.CVPrivacy;
 import com.example.cvservice.exceptions.OurException;
 import com.example.cvservice.mappers.*;
 import com.example.cvservice.repositoryies.*;
@@ -85,7 +86,8 @@ public class CVService extends BaseService {
             PersonalInfoDto personalInfoDto,
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
-            List<String> skills) {
+            List<String> skills,
+            String privacy) {
         log.info("Creating CV for userId={} title='{}' experiencesCount={} educationsCount={}", userId, title,
                 experiencesDto == null ? 0 : experiencesDto.size(), educationsDto == null ? 0 : educationsDto.size());
         UserDto user = userProducer.findUserById(userId);
@@ -106,7 +108,11 @@ public class CVService extends BaseService {
             throw new OurException("At least one education is required", 400);
         }
 
-        CV cv = new CV(userId, title, skills);
+        if (privacy == null || privacy.isEmpty()) {
+            privacy = "PRIVATE";
+        }
+
+        CV cv = new CV(userId, title, skills, privacy);
 
         PersonalInfo personalInfo = new PersonalInfo(personalInfoDto);
         if (personalInfoDto.getAvatar() != null && !personalInfoDto.getAvatar().isEmpty()) {
@@ -151,6 +157,7 @@ public class CVService extends BaseService {
             List<ExperienceDto> experiences = request.getExperiences();
             List<EducationDto> educations = request.getEducations();
             List<String> skills = request.getSkills();
+            String privacy = request.getPrivacy();
 
             log.info("Received createCV request for userId={}", userId);
             CVDto cvDto = handleCreateCV(
@@ -159,7 +166,8 @@ public class CVService extends BaseService {
                     personalInfo,
                     experiences,
                     educations,
-                    skills);
+                    skills,
+                    privacy);
 
             response.setStatusCode(201);
             response.setMessage("CV created successfully");
@@ -381,7 +389,8 @@ public class CVService extends BaseService {
             PersonalInfoDto personalInfoDto,
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
-            List<String> skills) {
+            List<String> skills,
+            String privacy) {
         CV existing = cvRepository.findById(cvId)
                 .orElseThrow(() -> new OurException("CV not found", 404));
 
@@ -437,6 +446,8 @@ public class CVService extends BaseService {
         if (skills != null)
             existing.getSkills().addAll(skills);
 
+        existing.setPrivacy(CVPrivacy.valueOf(privacy));
+
         existing.setUpdatedAt(Instant.now());
 
         CV saved = cvRepository.save(existing);
@@ -454,6 +465,7 @@ public class CVService extends BaseService {
             List<ExperienceDto> experiences = request.getExperiences();
             List<EducationDto> educations = request.getEducations();
             List<String> skills = request.getSkills();
+            String privacy = request.getPrivacy();
 
             CVDto cvDto = handleUpdateCV(
                     cvId,
@@ -461,7 +473,8 @@ public class CVService extends BaseService {
                     personalInfo,
                     experiences,
                     educations,
-                    skills);
+                    skills,
+                    privacy);
 
             response.setMessage("CV updated successfully");
             response.setCv(cvDto);
@@ -492,7 +505,8 @@ public class CVService extends BaseService {
                 existingCV.getPersonalInfo(),
                 existingCV.getExperiences(),
                 existingCV.getEducations(),
-                existingCV.getSkills());
+                existingCV.getSkills(),
+                existingCV.getPrivacy());
 
         log.info("Duplicated CV id={} created new CV id={}", cvId, newCV.getId());
         return newCV;
@@ -793,7 +807,7 @@ public class CVService extends BaseService {
             }
 
             // Create CV
-            return handleCreateCV(userId, title, personalInfo, experiences, educations, skills);
+            return handleCreateCV(userId, title, personalInfo, experiences, educations, skills, "PRIVATE");
 
         } catch (Exception e) {
             throw new OurException("Error parsing AI response: " + e.getMessage(), 500);

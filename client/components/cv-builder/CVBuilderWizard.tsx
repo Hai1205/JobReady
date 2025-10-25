@@ -6,17 +6,14 @@ import { PersonalInfoStep } from "./steps/PersonalInfoStep";
 import { ExperienceStep } from "./steps/ExperienceStep";
 import { SkillsStep } from "./steps/SkillsStep";
 import { PreviewStep } from "./steps/PreviewStep";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Save,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useCVStore } from "@/stores/cvStore";
 import { useAuthStore } from "@/stores/authStore";
 import { EducationStep } from "./steps/EducationStep";
+import { EPrivacy } from "@/types/enum";
 
 const steps = [
   { id: 0, title: "Personal Info", component: PersonalInfoStep },
@@ -65,7 +62,8 @@ export function CVBuilderWizard() {
         currentCV.personalInfo,
         currentCV.experiences,
         currentCV.educations,
-        currentCV.skills
+        currentCV.skills,
+        currentCV.privacy
       );
     } else {
       // Create new CV
@@ -76,24 +74,51 @@ export function CVBuilderWizard() {
         currentCV.personalInfo,
         currentCV.experiences,
         currentCV.educations,
-        currentCV.skills
+        currentCV.skills,
+        currentCV.privacy
       );
     }
   };
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Tiêu đề */}
+      {/* Privacy & Tiêu đề */}
       {currentCV && (
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="cv-title">Tiêu đề</Label>
-          <Input
-            id="cv-title"
-            value={currentCV.title}
-            onChange={(e) => handleUpdateCV({ title: e.target.value })}
-            placeholder="e.g., Software Engineer CV"
-            className="text-lg font-semibold"
-          />
+        <div className="flex flex-col gap-4">
+          {/* Privacy Toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="privacy-toggle" className="text-base">
+                Chế độ riêng tư
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {currentCV.privacy === EPrivacy.PUBLIC
+                  ? "CV của bạn hiện công khai và có thể được tìm thấy bởi nhà tuyển dụng"
+                  : "CV của bạn ở chế độ riêng tư, chỉ bạn mới có thể xem"}
+              </p>
+            </div>
+            <Switch
+              id="privacy-toggle"
+              checked={currentCV.privacy === EPrivacy.PUBLIC}
+              onCheckedChange={(checked) =>
+                handleUpdateCV({
+                  privacy: checked ? EPrivacy.PUBLIC : EPrivacy.PRIVATE,
+                })
+              }
+            />
+          </div>
+
+          {/* Tiêu đề */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cv-title">Tiêu đề</Label>
+            <Input
+              id="cv-title"
+              value={currentCV.title}
+              onChange={(e) => handleUpdateCV({ title: e.target.value })}
+              placeholder="e.g., Software Engineer CV"
+              className="text-lg font-semibold"
+            />
+          </div>
         </div>
       )}
 

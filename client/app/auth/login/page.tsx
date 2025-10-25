@@ -62,15 +62,11 @@ const LoginPage: React.FC = () => {
 
     console.log("📥 Login response:", response);
 
-    if (response?.status && response.status > 401) {
-      return;
-    }
-
-    if (response?.status && response.status === 401) {
+    if (response?.status === 403) {
       router.push(
         `/auth/verification?email=${encodeURIComponent(
           formData.email
-        )}&isPasswordReset=false`
+        )}&isActivation=true`
       );
 
       await sendOTP(formData.email);
@@ -78,7 +74,17 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    router.replace("/");
+    if (response?.status && response?.status > 403 && response?.status < 500) {
+      router.push(`/auth/banned`);
+
+      return;
+    }
+
+    if (response?.status && response?.status === 200) {
+      router.push(`/`);
+
+      return;
+    }
   };
 
   return (

@@ -64,7 +64,7 @@ public class AuthService extends BaseService {
             boolean isBanned = userDto.getStatus().equals("banned");
             if (isBanned) {
                 logger.warn("Login blocked: Account banned for email: {}", email);
-                throw new OurException("Account is banned. Please contact support.", 403);
+                throw new OurException("Account is banned. Please contact support.", 405);
             }
 
             String userId = userDto.getId().toString();

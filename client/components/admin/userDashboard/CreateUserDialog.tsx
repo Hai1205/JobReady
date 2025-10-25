@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface CreateUserDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onChange: (field: keyof IUser, value: string | boolean) => void;
+  onChange: (field: keyof IUser | "password", value: string | boolean) => void;
   data: IUser | null;
   previewAvatar: string;
   handleAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -69,76 +69,47 @@ const CreateUserDialog = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 shadow-2xl p-6 text-left align-middle transition-all">
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
+                  className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent pb-4 border-b border-border/30"
                 >
                   Tạo người dùng mới
                 </Dialog.Title>
 
-                <ScrollArea className="h-[42vh] pr-4 mt-4">
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="update-fullname">Họ và tên</Label>
-                      <Input
-                        id="update-fullname"
-                        value={data?.fullname || ""}
-                        onChange={(e) => onChange("fullname", e.target.value)}
-                      />
-                    </div>
-                  </div>
+                <ScrollArea className="h-[55vh] pr-4 mt-6">
+                  <div className="space-y-6">
+                    {/* Avatar Section */}
+                    <div className="flex items-center justify-center">
+                      <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg hover:border-primary/40 transition-all duration-300">
+                        <Avatar className="w-full h-full">
+                          <AvatarImage
+                            src={previewAvatar || "/svgs/placeholder.svg"}
+                            alt={data?.fullname || "User"}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20">
+                            <UserIcon className="w-12 h-12 text-muted-foreground" />
+                          </AvatarFallback>
+                        </Avatar>
 
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="update-email">Email</Label>
-                      <Input
-                        id="update-email"
-                        value={data?.email || ""}
-                        onChange={(e) => onChange("email", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="update-username">Username</Label>
-                      <Input
-                        id="update-username"
-                        value={data?.username || ""}
-                        onChange={(e) => onChange("username", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center col-span-1 row-span-3">
-                    <div className="relative w-40 h-40 border border-gray-700 rounded-full overflow-hidden flex items-center justify-center bg-[#282828]">
-                      <Avatar className="rounded-full object-cover w-full h-full">
-                        <AvatarImage
-                          src={
-                            previewAvatar ? previewAvatar : "/svgs/placeholder.svg"
-                          }
-                          alt={data?.fullname}
-                        />
-                        <AvatarFallback>
-                          <UserIcon />
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="bg-[#1DB954] text-white hover:bg-[#1ed760]"
-                          onClick={() =>
-                            document.getElementById("avatar-input")?.click()
-                          }
-                        >
-                          Thay đổi
-                        </Button>
+                        <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex items-center justify-center transition-all duration-300 cursor-pointer">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground shadow-lg"
+                            onClick={() =>
+                              document
+                                .getElementById("avatar-input-create")
+                                ?.click()
+                            }
+                          >
+                            Chọn ảnh
+                          </Button>
+                        </div>
 
                         <input
-                          id="avatar-input"
+                          id="avatar-input-create"
                           type="file"
                           accept="image/*"
                           className="hidden"
@@ -146,68 +117,157 @@ const CreateUserDialog = ({
                         />
                       </div>
                     </div>
-                  </div>
 
-                  <div className="grid gap-2 mt-3">
-                    <Label htmlFor="update-role">Vai trò</Label>
-                    <Select
-                      value={data?.role || EUserRole.USER}
-                      onValueChange={(value) =>
-                        onChange("role", value as EUserRole)
-                      }
-                    >
-                      <SelectTrigger id="update-role">
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.values(EUserRole).map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {capitalizeEnumValue(role)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                    {/* Form Fields */}
+                    <div className="grid gap-4">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="create-fullname"
+                          className="text-sm font-medium"
+                        >
+                          Họ và tên <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="create-fullname"
+                          value={data?.fullname || ""}
+                          onChange={(e) => onChange("fullname", e.target.value)}
+                          placeholder="Nhập họ và tên"
+                          className="bg-background/50 border-border/50 focus:border-primary transition-colors"
+                        />
+                      </div>
 
-                  <div className="grid gap-2 mt-3">
-                    <Label htmlFor="update-status">Trạng thái</Label>
-                    <Select
-                      value={data?.status || EUserStatus.PENDING}
-                      onValueChange={(value) =>
-                        onChange("status", value as EUserStatus)
-                      }
-                    >
-                      <SelectTrigger id="update-status">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.values(EUserStatus).map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {capitalizeEnumValue(status)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="create-email"
+                          className="text-sm font-medium"
+                        >
+                          Email <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="create-email"
+                          type="email"
+                          value={data?.email || ""}
+                          onChange={(e) => onChange("email", e.target.value)}
+                          placeholder="example@email.com"
+                          className="bg-background/50 border-border/50 focus:border-primary transition-colors"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="create-username"
+                          className="text-sm font-medium"
+                        >
+                          Username <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="create-username"
+                          value={data?.username || ""}
+                          onChange={(e) => onChange("username", e.target.value)}
+                          placeholder="Nhập username"
+                          className="bg-background/50 border-border/50 focus:border-primary transition-colors"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="create-password"
+                          className="text-sm font-medium"
+                        >
+                          Mật khẩu <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="create-password"
+                          type="password"
+                          value={(data as any)?.password || ""}
+                          onChange={(e) => onChange("password", e.target.value)}
+                          placeholder="Nhập mật khẩu"
+                          className="bg-background/50 border-border/50 focus:border-primary transition-colors"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="create-role"
+                          className="text-sm font-medium"
+                        >
+                          Vai trò
+                        </Label>
+                        <Select
+                          value={data?.role || EUserRole.USER}
+                          onValueChange={(value) =>
+                            onChange("role", value as EUserRole)
+                          }
+                        >
+                          <SelectTrigger
+                            id="create-role"
+                            className="bg-background/50 border-border/50"
+                          >
+                            <SelectValue placeholder="Chọn vai trò" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.values(EUserRole).map((role) => (
+                              <SelectItem key={role} value={role}>
+                                {capitalizeEnumValue(role)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="create-status"
+                          className="text-sm font-medium"
+                        >
+                          Trạng thái
+                        </Label>
+                        <Select
+                          value={data?.status || EUserStatus.PENDING}
+                          onValueChange={(value) =>
+                            onChange("status", value as EUserStatus)
+                          }
+                        >
+                          <SelectTrigger
+                            id="create-status"
+                            className="bg-background/50 border-border/50"
+                          >
+                            <SelectValue placeholder="Chọn trạng thái" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.values(EUserStatus).map((status) => (
+                              <SelectItem key={status} value={status}>
+                                {capitalizeEnumValue(status)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
                 </ScrollArea>
 
                 {/* Footer */}
-                <div className="mt-4 flex justify-end gap-2 pt-4 border-t border-gray-800">
+                <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-border/30">
                   <Button
                     variant="outline"
                     onClick={handleClose}
-                    className="bg-gray-200 border-gray-300 text-gray-700 hover:bg-red-200 hover:text-red-600 hover:border-red-200 dark:bg-transparent dark:border-gray-700 dark:text-white dark:hover:bg-red-900 dark:hover:text-white"
+                    className="border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
                   >
                     Hủy
                   </Button>
 
-                  <Button onClick={onUserCreated} disabled={isLoading}>
+                  <Button
+                    onClick={onUserCreated}
+                    disabled={isLoading}
+                    className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg hover:shadow-xl hover:shadow-primary/30 transition-all duration-200"
+                  >
                     {isLoading ? (
-                      <>Đang lưu...</>
+                      <>Đang tạo...</>
                     ) : (
                       <>
-                        <Save className="h-4 w-4" />
-                        Lưu
+                        <Save className="h-4 w-4 mr-2" />
+                        Tạo người dùng
                       </>
                     )}
                   </Button>

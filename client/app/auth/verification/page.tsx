@@ -16,7 +16,7 @@ const VerificationPage: React.FC = () => {
 
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [isActivation, setIsActivation] = useState(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
 
   const [isExpired, setIsExpired] = useState(false);
@@ -28,7 +28,7 @@ const VerificationPage: React.FC = () => {
   useEffect(() => {
     setIsClient(true);
     const urlParams = new URLSearchParams(window.location.search);
-    const isPasswordResetParam = urlParams.get("isPasswordReset") === "true";
+    const isActivationParam = urlParams.get("isActivation") === "true";
     const emailParam = urlParams.get("email");
 
     if (emailParam) {
@@ -36,7 +36,7 @@ const VerificationPage: React.FC = () => {
     }
 
     if (emailParam) {
-      setIsPasswordReset(isPasswordResetParam);
+      setIsActivation(isActivationParam);
     }
   }, []);
 
@@ -102,7 +102,7 @@ const VerificationPage: React.FC = () => {
       return;
     }
 
-    const res = await verifyOTP(email, otp.join(""));
+    const res = await verifyOTP(email, otp.join(""), isActivation);
 
     if (!res) {
       setOtp(Array(6).fill(""));
@@ -118,7 +118,7 @@ const VerificationPage: React.FC = () => {
       return;
     }
 
-    if (isPasswordReset) {
+    if (!isActivation) {
       router.push(`/auth/reset-password/?email=${encodeURIComponent(email)}`);
     } else {
       toast.success("Xác thực tài khoản thành công");
@@ -132,7 +132,8 @@ const VerificationPage: React.FC = () => {
 
     if (result) {
       toast.success("Mã OTP đã được gửi lại");
-      setTimeLeft(300); // Reset timer
+      setOtp(Array(6).fill(""));
+      setTimeLeft(300);
       setIsExpired(false);
     }
   };
@@ -162,7 +163,7 @@ const VerificationPage: React.FC = () => {
         </p>
         <p className="text-sm text-muted-foreground">
           Vui lòng nhập mã để{" "}
-          {isPasswordReset ? "đặt lại mật khẩu" : "xác thực tài khoản"}
+          {isActivation ? "đặt lại mật khẩu" : "xác thực tài khoản"}
         </p>
       </div>
 

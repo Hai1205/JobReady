@@ -4,10 +4,16 @@ import { DataTable } from "../adminTable/DataTable";
 interface ICVTableProps {
   CVs: ICV[];
   isLoading: boolean;
+  onEdit?: (cv: ICV) => void;
   onDownload?: (cv: ICV) => void;
 }
 
-export const CVTable = ({ CVs, isLoading, onDownload }: ICVTableProps) => {
+export const CVTable = ({
+  CVs,
+  isLoading,
+  onEdit,
+  onDownload,
+}: ICVTableProps) => {
   const columns = [
     {
       header: "STT",
@@ -27,21 +33,28 @@ export const CVTable = ({ CVs, isLoading, onDownload }: ICVTableProps) => {
     },
   ];
 
+  const actions = [];
+
+  if (onEdit) {
+    actions.push({
+      label: "Edit",
+      onClick: onEdit,
+    });
+  }
+
+  if (onDownload) {
+    actions.push({
+      label: "Download",
+      onClick: onDownload,
+    });
+  }
+
   return (
     <DataTable
       data={CVs}
       isLoading={isLoading}
       columns={columns}
-      actions={
-        onDownload
-          ? [
-              {
-                label: "Download",
-                onClick: onDownload,
-              },
-            ]
-          : []
-      }
+      actions={actions}
       emptyMessage="No CVs found"
     />
   );

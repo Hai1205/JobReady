@@ -23,7 +23,8 @@ public class CV {
 
     private UUID userId;
 
-    public CV(UUID userId, String title, List<String> skills) {
+    public CV(UUID userId, String title, List<String> skills, String privacy) {
+        this.privacy = CVPrivacy.valueOf(privacy);
         this.title = title;
         this.userId = userId;
         this.skills = skills;
@@ -44,6 +45,10 @@ public class CV {
     @ElementCollection
     private List<String> skills = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CVPrivacy privacy = CVPrivacy.PRIVATE;
+
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -56,5 +61,10 @@ public class CV {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = Instant.now();
+    }
+
+    public enum CVPrivacy {
+        PUBLIC,
+        PRIVATE
     }
 }

@@ -19,7 +19,7 @@ export interface IAuthStore extends IBaseStore {
 	logout: () => Promise<IApiResponse>;
 	RefreshToken: () => Promise<IApiResponse>;
 	sendOTP: (email: string) => Promise<IApiResponse>;
-	verifyOTP: (email: string, otp: string) => Promise<IApiResponse>;
+	verifyOTP: (email: string, otp: string, isActivation: boolean) => Promise<IApiResponse>;
 	resetPassword: (email: string) => Promise<IApiResponse>;
 	forgotPassword: (email: string, password: string, confirmPassword: string) => Promise<IApiResponse>;
 	changePassword: (email: string, oldPassword: string, password: string, confirmPassword: string) => Promise<IApiResponse>;
@@ -99,10 +99,11 @@ export const useAuthStore = createStore<IAuthStore>(
 			});
 		},
 
-		verifyOTP: async (email: string, otp: string): Promise<IApiResponse> => {
+		verifyOTP: async (email: string, otp: string, isActivation: boolean): Promise<IApiResponse> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				otp,
+				isActivation,
 			}));
 
 			return await get().handleRequest(async () => {

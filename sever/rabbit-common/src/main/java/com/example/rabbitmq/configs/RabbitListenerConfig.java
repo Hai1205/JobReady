@@ -8,6 +8,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.core.AcknowledgeMode;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class RabbitListenerConfig {
         factory.setMessageConverter(jackson2JsonMessageConverter);
 
         // Regular listeners use AUTO-ACK
-        factory.setAcknowledgeMode(org.springframework.amqp.core.AcknowledgeMode.AUTO);
+        factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
         factory.setPrefetchCount(10);
         factory.setConcurrentConsumers(3);
         factory.setMaxConcurrentConsumers(10);
@@ -82,7 +83,7 @@ public class RabbitListenerConfig {
         factory.setMessageConverter(jackson2JsonMessageConverter);
 
         // ✅ CRITICAL: Direct Reply-to REQUIRES NO-ACK mode
-        factory.setAcknowledgeMode(org.springframework.amqp.core.AcknowledgeMode.NONE);
+        factory.setAcknowledgeMode(AcknowledgeMode.NONE);
 
         // Optimize for low latency RPC
         factory.setConsumersPerQueue(2);

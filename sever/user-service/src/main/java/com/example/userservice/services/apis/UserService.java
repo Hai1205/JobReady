@@ -62,13 +62,30 @@ public class UserService extends BaseService {
             MultipartFile avatar) {
         logger.info("Creating user with email: {}", email);
 
-        if (userRepository.existsByEmail(email)) {
-            logger.warn("Attempted to create user with existing email: {}", email);
-            throw new RuntimeException("Email already exists");
+        // Basic validation
+        if (email == null || email.isEmpty()) {
+            logger.warn("Attempted to create user with empty email");
+            throw new OurException("Email is required", 400);
         }
 
-        if (username.isEmpty()) {
-            username = email.split("@")[0];
+        if (userRepository.existsByEmail(email)) {
+            logger.warn("Attempted to create user with existing email: {}", email);
+            throw new OurException("Email already exists", 400);
+        }
+
+        // Ensure username fallback to email prefix when not provided
+        if (username == null || username.isEmpty()) {
+            try {
+                username = email.split("@")[0];
+            } catch (Exception ex) {
+                username = "user" + UUID.randomUUID().toString().substring(0, 8);
+            }
+        }
+
+        // If no password provided, generate a secure random one
+        if (password == null || password.isEmpty()) {
+            password = handleGenerateRandomPassword();
+            logger.info("No password provided for {} - generated a random password", email);
         }
 
         User user = new User(

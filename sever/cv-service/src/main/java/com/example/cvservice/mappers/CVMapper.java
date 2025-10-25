@@ -6,6 +6,7 @@ import com.example.cvservice.dtos.ExperienceDto;
 import com.example.cvservice.entities.CV;
 import com.example.cvservice.entities.Education;
 import com.example.cvservice.entities.Experience;
+import com.example.cvservice.entities.CV.CVPrivacy;
 
 import org.springframework.stereotype.Component;
 
@@ -49,43 +50,53 @@ public class CVMapper {
         dto.setEducations(educations);
 
         dto.setSkills(cv.getSkills());
+
+        dto.setPrivacy(cv.getPrivacy() != null ? cv.getPrivacy().name() : null);
+
         dto.setCreatedAt(cv.getCreatedAt() != null ? cv.getCreatedAt().toString() : null);
         dto.setUpdatedAt(cv.getUpdatedAt() != null ? cv.getUpdatedAt().toString() : null);
 
         return dto;
     }
 
-    public CV toEntity(CVDto cvDto) {
-        if (cvDto == null)
+    public CV toEntity(CVDto dto) {
+        if (dto == null)
             return null;
         CV cv = new CV();
-        cv.setId(cvDto.getId());
-        cv.setUserId(cvDto.getUserId());
-        cv.setTitle(cvDto.getTitle());
-        cv.setPersonalInfo(personalInfoMapper.toEntity(cvDto.getPersonalInfo()));
+        cv.setId(dto.getId());
+        cv.setUserId(dto.getUserId());
+        cv.setTitle(dto.getTitle());
+        cv.setPersonalInfo(personalInfoMapper.toEntity(dto.getPersonalInfo()));
 
-        if (cvDto.getExperiences() != null) {
-            List<Experience> ex = cvDto.getExperiences().stream().map(exDto -> experienceMapper.toEntity(exDto))
+        if (dto.getExperiences() != null) {
+            List<Experience> ex = dto.getExperiences().stream().map(exDto -> experienceMapper.toEntity(exDto))
                     .collect(Collectors.toList());
             cv.setExperiences(ex);
         }
 
-        if (cvDto.getEducations() != null) {
-            List<Education> ed = cvDto.getEducations().stream().map(edDto -> educationMapper.toEntity(edDto))
+        if (dto.getEducations() != null) {
+            List<Education> ed = dto.getEducations().stream().map(edDto -> educationMapper.toEntity(edDto))
                     .collect(Collectors.toList());
             cv.setEducations(ed);
         }
 
-        cv.setSkills(cvDto.getSkills());
-        if (cvDto.getCreatedAt() != null) {
+        cv.setSkills(dto.getSkills());
+        if (dto.getCreatedAt() != null) {
             try {
-                cv.setCreatedAt(Instant.parse(cvDto.getCreatedAt()));
+                cv.setCreatedAt(Instant.parse(dto.getCreatedAt()));
             } catch (Exception ignored) {
             }
         }
-        if (cvDto.getUpdatedAt() != null) {
+        if (dto.getPrivacy() != null) {
             try {
-                cv.setUpdatedAt(Instant.parse(cvDto.getUpdatedAt()));
+                cv.setPrivacy(CVPrivacy.valueOf(dto.getPrivacy()));
+            } catch (IllegalArgumentException e) {
+                cv.setPrivacy(CVPrivacy.PRIVATE);
+            }
+        }
+        if (dto.getUpdatedAt() != null) {
+            try {
+                cv.setUpdatedAt(Instant.parse(dto.getUpdatedAt()));
             } catch (Exception ignored) {
             }
         }

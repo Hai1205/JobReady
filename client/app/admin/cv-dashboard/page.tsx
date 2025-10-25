@@ -8,22 +8,30 @@ import { CVTable } from "@/components/admin/cvDashboard/CVTable";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { useCVStore } from "@/stores/cvStore";
 import { TableSearch } from "@/components/admin/adminTable/TableSearch";
+import { mockCVs } from "@/services/mockData";
+import { useRouter } from "next/navigation";
 
 export default function CVDashboardPage() {
-  const { isLoading, getAllCVs, handleGeneratePDF } = useCVStore();
+  const { isLoading, getAllCVs, handleGeneratePDF, handleSetCurrentCV } =
+    useCVStore();
+
+  const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [allCVs, setAllCVs] = useState<ICV[]>([]);
   const [filteredCVs, setFilteredCVs] = useState<ICV[]>([]);
 
-  const fetchData = useCallback(() => {
-    return async () => {
+  const fetchData = useCallback(async () => {
+    try {
       const res = await getAllCVs();
       const data = res?.data?.cvs || [];
-      setAllCVs(data);
-      setFilteredCVs(data);
-    };
-  }, []);
+      setAllCVs(mockCVs);
+      // setAllCVs(data);
+      setFilteredCVs(mockCVs);
+    } catch (err) {
+      console.error("Error fetching CVs:", err);
+    }
+  }, [getAllCVs]);
 
   useEffect(() => {
     fetchData();
@@ -55,21 +63,6 @@ export default function CVDashboardPage() {
     [searchQuery, filterData]
   );
 
-  const clearFilters = () => {
-    setSearchQuery("");
-    closeMenuMenuFilters();
-  };
-
-  const applyFilters = () => {
-    filterData(searchQuery);
-    closeMenuMenuFilters();
-  };
-
-  const [openMenuFilters, setOpenMenuFilters] = useState(false);
-  const closeMenuMenuFilters = () => setOpenMenuFilters(false);
-
-  const [data, setData] = useState<ICV | null>(null);
-
   const handleRefresh = () => {
     setSearchQuery("");
     fetchData();
@@ -77,7 +70,14 @@ export default function CVDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader title="CV Dashboard" />
+      <DashboardHeader
+        title="CV Dashboard"
+        onCreateClick={() => {
+          handleSetCurrentCV(null);
+          router.push(`/cv-builder`);
+        }}
+        createButtonText="Create CV"
+      />
 
       <div className="space-y-6">
         <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
@@ -119,6 +119,10 @@ export default function CVDashboardPage() {
           <CVTable
             CVs={filteredCVs}
             isLoading={isLoading}
+            onEdit={(cv) => {
+              handleSetCurrentCV(cv);
+              router.push(`/cv-builder`);
+            }}
             onDownload={(cv) => {
               handleGeneratePDF(cv);
             }}

@@ -81,7 +81,7 @@ export const mockUsers: IUser[] = [
         fullname: "Robert Lee",
         avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
         role: EUserRole.USER,
-        status: EUserStatus.INACTIVE,
+        status: EUserStatus.BANNED,
     },
     {
         id: "user-10",

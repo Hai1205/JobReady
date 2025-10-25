@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 
 import com.example.rabbitmq.dtos.ExchangeDef;
 import com.example.rabbitmq.dtos.QueueDef;
+import org.springframework.amqp.core.Queue;
 
 import java.util.*;
 
@@ -33,7 +34,7 @@ public abstract class BaseRabbitConfig {
             declarables.add(exchange);
 
             for (QueueDef qDef : exDef.queues) {
-                org.springframework.amqp.core.Queue requestQueue = QueueBuilder.durable(qDef.requestQueue).build();
+                Queue requestQueue = QueueBuilder.durable(qDef.requestQueue).build();
                 declarables.add(requestQueue);
 
                 Binding binding = BindingBuilder.bind(requestQueue)
@@ -55,7 +56,7 @@ public abstract class BaseRabbitConfig {
      * @return Declarables object with queue and binding
      */
     public Declarables createReplyQueueDeclarable(String queueName, String exchangeName, String routingKey) {
-        org.springframework.amqp.core.Queue replyQueue = QueueBuilder.durable(queueName).build();
+        Queue replyQueue = QueueBuilder.durable(queueName).build();
         TopicExchange exchange = new TopicExchange(exchangeName, true, false);
         Binding binding = BindingBuilder.bind(replyQueue).to(exchange).with(routingKey);
         

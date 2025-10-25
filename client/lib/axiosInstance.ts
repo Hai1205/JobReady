@@ -217,31 +217,39 @@ export const handleRequest = async <T = unknown>(
     // }
     // For FormData, let axios set Content-Type automatically with boundary
 
+    // If sending FormData (file uploads), increase timeout because uploads can take longer
+    const isForm = data instanceof FormData;
+    const requestOptions: Record<string, unknown> = { headers };
+    if (isForm) {
+      // 60 seconds for uploads
+      (requestOptions as any).timeout = 60000;
+    }
+
     switch (type) {
       case EHttpType.GET:
-        response = await axiosInstance.get(route, { headers });
+        response = await axiosInstance.get(route, requestOptions as any);
         break;
 
       case EHttpType.POST:
-        response = await axiosInstance.post(route, data, { headers });
+        response = await axiosInstance.post(route, data, requestOptions as any);
         break;
 
       case EHttpType.PUT:
         if (!data) {
           throw new Error("Data is required for PUT requests");
         }
-        response = await axiosInstance.put(route, data, { headers });
+        response = await axiosInstance.put(route, data, requestOptions as any);
         break;
 
       case EHttpType.PATCH:
         if (!data) {
           throw new Error("Data is required for PATCH requests");
         }
-        response = await axiosInstance.patch(route, data, { headers });
+        response = await axiosInstance.patch(route, data, requestOptions as any);
         break;
 
       case EHttpType.DELETE:
-        response = await axiosInstance.delete(route, { headers });
+        response = await axiosInstance.delete(route, requestOptions as any);
         break;
 
       default:

@@ -1,6 +1,7 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, IBaseStore } from "@/lib/initialStore";
 import { PDFExportService } from "@/services/pdfExportService";
+import { renderCVToHTMLAsync } from "@/components/cv-builder/CVRenderer";
 import { toast } from "react-toastify";
 
 interface ICVDataResponse {
@@ -28,6 +29,7 @@ export interface ICVStore extends IBaseStore {
 		experiences: IExperience[],
 		educations: IEducation[],
 		skills: string[],
+		privacy: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	updateCV: (
 		cvId: string,
@@ -37,6 +39,7 @@ export interface ICVStore extends IBaseStore {
 		experiences: IExperience[],
 		educations: IEducation[],
 		skills: string[],
+		privacy: string,
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	deleteCV: (
 		cvId: string
@@ -82,7 +85,7 @@ export interface ICVStore extends IBaseStore {
 	handleSetJobDescription: (jd: string) => void;
 	handleApplySuggestion: (id: string) => void;
 	handleClearCVList: () => void;
-	handleGeneratePDF: (cv: ICV) => void;
+	handleGeneratePDF: (cv: ICV, htmlContent?: string) => void;
 }
 
 const storeName = "cv";
@@ -124,6 +127,7 @@ export const useCVStore = createStore<ICVStore>(
 			experiences: IExperience[],
 			educations: IEducation[],
 			skills: string[],
+			privacy: string,
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
@@ -131,7 +135,8 @@ export const useCVStore = createStore<ICVStore>(
 				personalInfo,
 				experiences,
 				educations,
-				skills
+				skills,
+				privacy
 			}));
 			if (avatar) formData.append("avatar", avatar);
 
@@ -148,6 +153,7 @@ export const useCVStore = createStore<ICVStore>(
 			experiences: IExperience[],
 			educations: IEducation[],
 			skills: string[],
+			privacy: string
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
@@ -155,7 +161,8 @@ export const useCVStore = createStore<ICVStore>(
 				personalInfo,
 				experiences,
 				educations,
-				skills
+				skills,
+				privacy
 			}));
 			if (avatar) formData.append("avatar", avatar);
 
@@ -286,17 +293,40 @@ export const useCVStore = createStore<ICVStore>(
 			set({ cvList: [] });
 		},
 
-		handleGeneratePDF: async (currentCV: ICV): Promise<void> => {
+		handleGeneratePDF: async (currentCV: ICV, htmlContent?: string): Promise<void> => {
 			try {
 				const filename = `CV_${currentCV.title.replace(
 					/\s+/g,
 					"_"
 				)}.pdf`;
 
-				// Export using PDFShift API
-				await PDFExportService.exportToPDF("cv-preview-content", filename);
+				// If HTML content is provided directly, use exportCustomHTML
+				if (htmlContent) {
+					await PDFExportService.exportCustomHTML(htmlContent, filename);
+					toast.success("Tải xuống CV thành công!");
+					return;
+				}
 
-				toast.success("Tải xuống CV thành công!");
+				// Check if we're in a browser environment
+				if (typeof document === "undefined") {
+					toast.error("PDF export chỉ khả dụng trên trình duyệt. Vui lòng thử lại trên client.");
+					return;
+				}
+
+				// Try to find the preview element in the DOM
+				const previewElement = document.getElementById("cv-preview-content");
+
+				if (previewElement) {
+					// Preview is available in DOM - use the existing method
+					await PDFExportService.exportToPDF("cv-preview-content", filename);
+					toast.success("Tải xuống CV thành công!");
+				} else {
+					// Preview not in DOM - generate HTML from CV data
+					toast.info("Đang tạo PDF...");
+					const generatedHTML = await renderCVToHTMLAsync(currentCV);
+					await PDFExportService.exportCustomHTML(generatedHTML, filename);
+					toast.success("Tải xuống CV thành công!");
+				}
 			} catch (error) {
 				console.error("PDF generation error:", error);
 				toast.error(

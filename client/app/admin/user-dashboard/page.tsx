@@ -56,18 +56,21 @@ function UserDashboardPage() {
     }
   };
 
-  const fetchData = useCallback(() => {
-    return async () => {
+  const fetchData = useCallback(async () => {
+    try {
       const res = await getAllUsers();
       const data = res?.data?.users || [];
       setAllUsers(data);
       setFilteredUsers(data);
-    };
-  }, []);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  }, [getAllUsers]);
 
   useEffect(() => {
+    // call the async fetch function
     fetchData();
-  }, [getAllUsers]);
+  }, [fetchData]);
 
   // Function to filter data based on query and activeFilters
   const filterData = useCallback(
@@ -156,15 +159,25 @@ function UserDashboardPage() {
 
   const handleUpdate = async () => {
     if (data) {
-      await updateUser(
-        data.id,
-        data.fullname,
-        avatarFile || null,
-        data.role,
-        data.status
-      );
+      try {
+        const res = await updateUser(
+          data.id,
+          data.fullname,
+          avatarFile || null,
+          data.role,
+          data.status
+        );
 
-      setIsUpdateUserOpen(false);
+        if (res && res.status && res.status >= 200 && res.status < 300) {
+          toast.success("Cập nhật người dùng thành công");
+          setIsUpdateUserOpen(false);
+        } else {
+          toast.error(res?.message || "Cập nhật thất bại");
+        }
+      } catch (err) {
+        console.error("Update user failed:", err);
+        toast.error("Lỗi khi cập nhật người dùng - vui lòng thử lại");
+      }
     }
   };
 
