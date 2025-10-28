@@ -5,16 +5,16 @@ import dynamic from "next/dynamic";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { DashboardHeader } from "@/components/admin/DashboardHeader";
-import CreateUserDialog from "@/components/admin/userDashboard/CreateUserDialog";
-import UpdateUserDialog from "@/components/admin/userDashboard/UpdateUserDialog";
-import { UserFilter } from "@/components/admin/userDashboard/UserFilter";
-import { UserTable } from "@/components/admin/userDashboard/UserTable";
+import { DashboardHeader } from "@/components/comons/admin/DashboardHeader";
+import CreateUserDialog from "@/components/comons/admin/userDashboard/CreateUserDialog";
+import UpdateUserDialog from "@/components/comons/admin/userDashboard/UpdateUserDialog";
+import { UserFilter } from "@/components/comons/admin/userDashboard/UserFilter";
+import { UserTable } from "@/components/comons/admin/userDashboard/UserTable";
 import { toast } from "react-toastify";
 import { useUserStore } from "@/stores/userStore";
 import { useAuthStore } from "@/stores/authStore";
 import { EUserRole, EUserStatus } from "@/types/enum";
-import { TableSearch } from "@/components/admin/adminTable/TableSearch";
+import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 
 // Initialize empty filters
 const initialFilters = { status: [] as string[], role: [] as string[] };
@@ -27,7 +27,6 @@ function UserDashboardPage() {
 
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isUpdateUserOpen, setIsUpdateUserOpen] = useState(false);
-  // const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
 
   const [activeFilters, setActiveFilters] = useState<{
     status: string[];

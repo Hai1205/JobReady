@@ -4,15 +4,14 @@ import { useCallback, useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { CVTable } from "@/components/admin/cvDashboard/CVTable";
-import { DashboardHeader } from "@/components/admin/DashboardHeader";
+import { CVTable } from "@/components/comons/admin/cvDashboard/CVTable";
+import { DashboardHeader } from "@/components/comons/admin/DashboardHeader";
 import { useCVStore } from "@/stores/cvStore";
-import { TableSearch } from "@/components/admin/adminTable/TableSearch";
-import { mockCVs } from "@/services/mockData";
+import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 import { useRouter } from "next/navigation";
 
 export default function CVDashboardPage() {
-  const { isLoading, getAllCVs, handleGeneratePDF, handleSetCurrentCV } =
+  const { isLoading, getAllCVs, handleGeneratePDF, handleSetCurrentCVCreate } =
     useCVStore();
 
   const router = useRouter();
@@ -25,9 +24,9 @@ export default function CVDashboardPage() {
     try {
       const res = await getAllCVs();
       const data = res?.data?.cvs || [];
-      setAllCVs(mockCVs);
-      // setAllCVs(data);
-      setFilteredCVs(mockCVs);
+
+      setAllCVs(data);
+      setFilteredCVs(data);
     } catch (err) {
       console.error("Error fetching CVs:", err);
     }
@@ -73,7 +72,7 @@ export default function CVDashboardPage() {
       <DashboardHeader
         title="CV Dashboard"
         onCreateClick={() => {
-          handleSetCurrentCV(null);
+          handleSetCurrentCVCreate(null);
           router.push(`/cv-builder`);
         }}
         createButtonText="Create CV"
@@ -120,8 +119,7 @@ export default function CVDashboardPage() {
             CVs={filteredCVs}
             isLoading={isLoading}
             onEdit={(cv) => {
-              handleSetCurrentCV(cv);
-              router.push(`/cv-builder`);
+              router.push(`/cv-builder/${cv.id}`);
             }}
             onDownload={(cv) => {
               handleGeneratePDF(cv);

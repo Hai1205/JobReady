@@ -1,7 +1,5 @@
-"use client";
-
-import MyCVsPage from "@/components/my-cvs/MyCVsPage";
+import MyCVsPageClient from "@/components/comons/my-cvs/MyCVsPageClient";
 
 export default function Page() {
-  return <MyCVsPage />;
+  return <MyCVsPageClient />;
 }

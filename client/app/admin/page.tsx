@@ -17,7 +17,7 @@ import {
   Briefcase,
   TrendingUp,
 } from "lucide-react";
-import { DashboardHeader } from "@/components/admin/DashboardHeader";
+import { DashboardHeader } from "@/components/comons/admin/DashboardHeader";
 import { mockStats } from "@/services/mockData";
 
 function AdminDashboardPage() {

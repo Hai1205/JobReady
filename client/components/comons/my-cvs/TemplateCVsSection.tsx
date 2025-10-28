@@ -1,6 +1,6 @@
 "use client";
 
-import CVCard from "@/components/my-cvs/CVCard";
+import CVCard from "@/components/comons/my-cvs/CVCard";
 
 interface Props {
   templateCVs: ICV[];

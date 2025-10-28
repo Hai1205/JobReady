@@ -14,10 +14,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { useUserStore } from "@/stores/userStore";
 import { toast } from "react-toastify";
 import { EUserRole, EUserStatus } from "@/types/enum";
-import ProfileTab from "@/components/settings/ProfileTab";
-import SecurityTab from "@/components/settings/SecurityTab";
-import NotificationsTab from "@/components/settings/NotificationsTab";
-import PrivacyTab from "@/components/settings/PrivacyTab";
+import ProfileTab from "@/components/comons/settings/ProfileTab";
+import SecurityTab from "@/components/comons/settings/SecurityTab";
+import NotificationsTab from "@/components/comons/settings/NotificationsTab";
+import PrivacyTab from "@/components/comons/settings/PrivacyTab";
 
 export default function SettingsPage() {
   const { userAuth, changePassword } = useAuthStore();

@@ -1,8 +1,9 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, IBaseStore } from "@/lib/initialStore";
 import { PDFExportService } from "@/services/pdfExportService";
-import { renderCVToHTMLAsync } from "@/components/cv-builder/CVRenderer";
+import { renderCVToHTMLAsync } from "@/components/comons/cv-builder/CVRenderer";
 import { toast } from "react-toastify";
+import { testFormData } from "@/lib/utils";
 
 interface ICVDataResponse {
 	cv: ICV,
@@ -10,7 +11,8 @@ interface ICVDataResponse {
 }
 
 export interface ICVStore extends IBaseStore {
-	currentCV: ICV | null
+	currentCVCreate: ICV | null
+	currentCVUpdate: ICV | null
 	cvList: ICV[]
 	currentStep: number
 	aiSuggestions: IAISuggestion[]
@@ -30,7 +32,8 @@ export interface ICVStore extends IBaseStore {
 		educations: IEducation[],
 		skills: string[],
 		privacy: string
-	) => Promise<IApiResponse<ICVDataResponse>>;
+	// ) => Promise<IApiResponse<ICVDataResponse>>;
+	) => Promise<void>;
 	updateCV: (
 		cvId: string,
 		title: string,
@@ -40,10 +43,11 @@ export interface ICVStore extends IBaseStore {
 		educations: IEducation[],
 		skills: string[],
 		privacy: string,
-	) => Promise<IApiResponse<ICVDataResponse>>;
+	// ) => Promise<IApiResponse<ICVDataResponse>>;
+	) => Promise<void>;
 	deleteCV: (
 		cvId: string
-	) => Promise<IApiResponse<ICVDataResponse>>;
+	) => Promise<IApiResponse<void>>;
 	duplicateCV: (
 		cvId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
@@ -79,8 +83,11 @@ export interface ICVStore extends IBaseStore {
 	) => Promise<IApiResponse<ICVDataResponse>>;
 
 	handleUpdateCV: (cvData: Partial<ICV>) => void;
+	handleUpdateCVCreate: (cvData: Partial<ICV>) => void;
+	handleUpdateCVUpdate: (cvData: Partial<ICV>) => void;
 	handleSetCurrentStep: (step: number) => void;
-	handleSetCurrentCV: (cv: ICV | null) => void;
+	handleSetCurrentCVCreate: (cv: ICV | null) => void;
+	handleSetCurrentCVUpdate: (cv: ICV | null) => void;
 	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void;
 	handleSetJobDescription: (jd: string) => void;
 	handleApplySuggestion: (id: string) => void;
@@ -90,7 +97,9 @@ export interface ICVStore extends IBaseStore {
 
 const storeName = "cv";
 const initialState = {
-	currentCV: null,
+	currentCVCreate: null,
+	currentCVUpdate: null,
+	// currentCVUpdate: null,
 	cvList: [],
 	currentStep: 0,
 	aiSuggestions: [],
@@ -128,7 +137,8 @@ export const useCVStore = createStore<ICVStore>(
 			educations: IEducation[],
 			skills: string[],
 			privacy: string,
-		): Promise<IApiResponse<ICVDataResponse>> => {
+		): Promise<void> => {
+		// ): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				title,
@@ -139,10 +149,13 @@ export const useCVStore = createStore<ICVStore>(
 				privacy
 			}));
 			if (avatar) formData.append("avatar", avatar);
+			testFormData(formData);
 
-			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/users/${userId}`, formData);
-			});
+			// return await get().handleRequest(async () => {
+			// 	const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, formData);
+			// 	console.log("Create CV Response:", res);
+			// 	return res;
+			// });
 		},
 
 		updateCV: async (
@@ -154,7 +167,8 @@ export const useCVStore = createStore<ICVStore>(
 			educations: IEducation[],
 			skills: string[],
 			privacy: string
-		): Promise<IApiResponse<ICVDataResponse>> => {
+		// ): Promise<IApiResponse<ICVDataResponse>> => {
+		): Promise<void> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				title,
@@ -165,13 +179,14 @@ export const useCVStore = createStore<ICVStore>(
 				privacy
 			}));
 			if (avatar) formData.append("avatar", avatar);
+			testFormData(formData);
 
-			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.PATCH, `/cvs/${cvId}`, formData);
-			});
+			// return await get().handleRequest(async () => {
+			// 	return await handleRequest(EHttpType.PATCH, `/cvs/${cvId}`, formData);
+			// });
 		},
 
-		deleteCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
+		deleteCV: async (cvId: string): Promise<IApiResponse<void>> => {
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.DELETE, `/cvs/${cvId}`);
 			});
@@ -259,9 +274,30 @@ export const useCVStore = createStore<ICVStore>(
 		},
 
 		handleUpdateCV: (cvData: Partial<ICV>) => {
+			// Deprecated - use handleUpdateCVCreate or handleUpdateCVUpdate instead
+			const currentState = get();
+			if (currentState.currentCVCreate) {
+				set({
+					currentCVCreate: { ...currentState.currentCVCreate, ...cvData, updatedAt: new Date().toISOString() },
+				} as Partial<ICVStore>);
+			} else if (currentState.currentCVUpdate) {
+				set({
+					currentCVUpdate: { ...currentState.currentCVUpdate, ...cvData, updatedAt: new Date().toISOString() },
+				} as Partial<ICVStore>);
+			}
+		},
+
+		handleUpdateCVCreate: (cvData: Partial<ICV>) => {
 			const currentState = get();
 			set({
-				currentCV: currentState.currentCV ? { ...currentState.currentCV, ...cvData, updatedAt: new Date().toISOString() } : null,
+				currentCVCreate: currentState.currentCVCreate ? { ...currentState.currentCVCreate, ...cvData, updatedAt: new Date().toISOString() } : null,
+			} as Partial<ICVStore>);
+		},
+
+		handleUpdateCVUpdate: (cvData: Partial<ICV>) => {
+			const currentState = get();
+			set({
+				currentCVUpdate: currentState.currentCVUpdate ? { ...currentState.currentCVUpdate, ...cvData, updatedAt: new Date().toISOString() } : null,
 			} as Partial<ICVStore>);
 		},
 
@@ -269,11 +305,13 @@ export const useCVStore = createStore<ICVStore>(
 			set({ currentStep: step });
 		},
 
-		handleSetCurrentCV: (cv: ICV | null): void => {
-			set({ currentCV: cv });
+		handleSetCurrentCVCreate: (cv: ICV | null): void => {
+			set({ currentCVCreate: cv });
 		},
 
-		handleSetAISuggestions: (suggestions: IAISuggestion[]): void => {
+		handleSetCurrentCVUpdate: (cv: ICV | null): void => {
+			set({ currentCVUpdate: cv });
+		}, handleSetAISuggestions: (suggestions: IAISuggestion[]): void => {
 			set({ aiSuggestions: suggestions });
 		},
 
@@ -295,7 +333,7 @@ export const useCVStore = createStore<ICVStore>(
 
 		handleGeneratePDF: async (currentCV: ICV, htmlContent?: string): Promise<void> => {
 			try {
-				const filename = `CV_${currentCV.title.replace(
+				const filename = `${currentCV.title.replace(
 					/\s+/g,
 					"_"
 				)}.pdf`;

@@ -4,10 +4,10 @@ import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
-import { useCVStore } from "@/stores/cvStore";
+import { useCurrentCV } from "@/hooks/use-cv-mode";
 
 export function PreviewStep() {
-  const { currentCV, handleGeneratePDF } = useCVStore();
+  const { currentCV, handleGeneratePDF } = useCurrentCV();
 
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -235,7 +235,7 @@ export function PreviewStep() {
                 <div>
                   {currentCV.experiences.map((exp, index) => (
                     <div
-                      key={exp.id}
+                      key={index}
                       style={{
                         marginBottom:
                           index < currentCV.experiences.length - 1 ? "15px" : 0,
@@ -315,7 +315,7 @@ export function PreviewStep() {
                 <div>
                   {currentCV.educations.map((edu, index) => (
                     <div
-                      key={edu.id}
+                      key={index}
                       style={{
                         marginBottom:
                           index < currentCV.educations.length - 1 ? "15px" : 0,

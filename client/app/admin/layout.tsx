@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 
 const AdminSidebar = dynamic(
-  () => import("@/components/admin/AdminSidebar"),
+  () => import("@/components/comons/admin/AdminSidebar"),
   {
     ssr: false,
     loading: () => (

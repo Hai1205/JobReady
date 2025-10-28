@@ -14,6 +14,8 @@ import { useCVStore } from "@/stores/cvStore";
 import { useAuthStore } from "@/stores/authStore";
 import { EducationStep } from "./steps/EducationStep";
 import { EPrivacy } from "@/types/enum";
+import { useEffect } from "react";
+import { useCVModeStore } from "@/hooks/use-cv-mode";
 
 const steps = [
   { id: 0, title: "Personal Info", component: PersonalInfoStep },
@@ -23,17 +25,33 @@ const steps = [
   { id: 4, title: "Preview & Export", component: PreviewStep },
 ];
 
-export function CVBuilderWizard() {
+interface CVBuilderWizardProps {
+  mode?: "create" | "update"; // Xác định rõ mode
+}
+
+export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
   const { userAuth } = useAuthStore();
+  const { setMode } = useCVModeStore();
   const {
     isLoading,
     currentStep,
     handleSetCurrentStep,
-    currentCV,
+    currentCVCreate,
+    currentCVUpdate,
     updateCV,
     createCV,
-    handleUpdateCV,
+    handleUpdateCVCreate,
+    handleUpdateCVUpdate,
   } = useCVStore();
+
+  // Set mode khi component mount
+  useEffect(() => {
+    setMode(mode);
+  }, [mode, setMode]);
+
+  // Chọn CV dựa trên mode
+  const currentCV = mode === "create" ? currentCVCreate : currentCVUpdate;
+
   const CurrentStepComponent = steps[currentStep].component;
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -55,7 +73,7 @@ export function CVBuilderWizard() {
 
     if (currentCV.id) {
       // Update existing CV
-      updateCV(
+      await updateCV(
         currentCV.id,
         currentCV.title,
         currentCV.avatar as File,
@@ -67,7 +85,7 @@ export function CVBuilderWizard() {
       );
     } else {
       // Create new CV
-      createCV(
+      await createCV(
         userAuth?.id || "",
         currentCV.title,
         currentCV.avatar as File,
@@ -77,6 +95,17 @@ export function CVBuilderWizard() {
         currentCV.skills,
         currentCV.privacy
       );
+    }
+  };
+
+  // Hàm update CV linh hoạt dựa trên mode
+  const handleCVUpdate = (cvData: Partial<ICV>) => {
+    if (mode === "update") {
+      // Mode update: cập nhật currentCVUpdate
+      handleUpdateCVUpdate(cvData);
+    } else {
+      // Mode create: cập nhật currentCVCreate
+      handleUpdateCVCreate(cvData);
     }
   };
 
@@ -101,7 +130,7 @@ export function CVBuilderWizard() {
               id="privacy-toggle"
               checked={currentCV.privacy === EPrivacy.PUBLIC}
               onCheckedChange={(checked) =>
-                handleUpdateCV({
+                handleCVUpdate({
                   privacy: checked ? EPrivacy.PUBLIC : EPrivacy.PRIVATE,
                 })
               }
@@ -114,7 +143,7 @@ export function CVBuilderWizard() {
             <Input
               id="cv-title"
               value={currentCV.title}
-              onChange={(e) => handleUpdateCV({ title: e.target.value })}
+              onChange={(e) => handleCVUpdate({ title: e.target.value })}
               placeholder="e.g., Software Engineer CV"
               className="text-lg font-semibold"
             />

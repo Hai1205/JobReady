@@ -80,7 +80,7 @@ await handleGeneratePDF(cv, customHTML);
 // File: app/my-cvs/page.tsx
 import { useCVStore } from "@/stores/cvStore";
 
-export default function MyCVsPage() {
+export default function MyCVsPageClient() {
   const { handleGeneratePDF } = useCVStore();
 
   return (

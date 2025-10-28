@@ -1,10 +1,10 @@
 "use client";
 
-import CVCard from "@/components/my-cvs/CVCard";
-import EmptyState from "@/components/my-cvs/EmptyState";
+import CVCard from "@/components/comons/my-cvs/CVCard";
+import EmptyState from "@/components/comons/my-cvs/EmptyState";
 
 interface Props {
-  cvList: ICV[];
+  userCVs: ICV[];
   onCreateNew: () => void;
   onEdit: (cv: ICV) => void;
   onDuplicate: (cvId: string) => void;
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function UserCVsSection({
-  cvList,
+  userCVs,
   onCreateNew,
   onEdit,
   onDuplicate,
@@ -20,11 +20,11 @@ export default function UserCVsSection({
 }: Props) {
   return (
     <>
-      {cvList.length === 0 ? (
+      {userCVs.length === 0 ? (
         <EmptyState onCreateNew={onCreateNew} />
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {cvList.map((cv) => (
+          {userCVs.map((cv) => (
             <CVCard
               key={cv.id}
               cv={cv}

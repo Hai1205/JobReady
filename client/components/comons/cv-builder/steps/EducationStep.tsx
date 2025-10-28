@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card } from "@/components/ui/card"
-import { Plus, Trash2 } from "lucide-react"
-import { useCVStore } from "@/stores/cvStore"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Plus, Trash2 } from "lucide-react";
+import { useCurrentCV } from "@/hooks/use-cv-mode";
 
 export function EducationStep() {
-  const { currentCV, handleUpdateCV } = useCVStore()
+  const { currentCV, handleUpdateCV } = useCurrentCV();
 
-  if (!currentCV) return null
+  if (!currentCV) return null;
 
   const addEducation = () => {
     handleUpdateCV({
@@ -25,27 +25,31 @@ export function EducationStep() {
           endDate: "",
         },
       ],
-    })
-  }
+    });
+  };
 
   const removeEducation = (id: string) => {
     handleUpdateCV({
       educations: currentCV.educations.filter((edu) => edu.id !== id),
-    })
-  }
+    });
+  };
 
   const updateEducation = (id: string, field: string, value: string) => {
     handleUpdateCV({
-      educations: currentCV.educations.map((edu) => (edu.id === id ? { ...edu, [field]: value } : edu)),
-    })
-  }
+      educations: currentCV.educations.map((edu) =>
+        edu.id === id ? { ...edu, [field]: value } : edu
+      ),
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Học vấn</h2>
-          <p className="text-muted-foreground">Thêm thông tin học vấn của bạn</p>
+          <p className="text-muted-foreground">
+            Thêm thông tin học vấn của bạn
+          </p>
         </div>
         <Button onClick={addEducation} size="sm">
           <Plus className="mr-2 h-4 w-4" />
@@ -55,7 +59,9 @@ export function EducationStep() {
 
       {currentCV.educations.length === 0 ? (
         <Card className="p-8 text-center">
-          <p className="text-muted-foreground">Chưa có Học vấn nào được thêm. Nhấn "Thêm Học vấn" để bắt đầu.</p>
+          <p className="text-muted-foreground">
+            Chưa có Học vấn nào được thêm. Nhấn "Thêm Học vấn" để bắt đầu.
+          </p>
         </Card>
       ) : (
         <div className="flex flex-col gap-4">
@@ -64,7 +70,11 @@ export function EducationStep() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">Học vấn {index + 1}</h3>
-                  <Button variant="ghost" size="sm" onClick={() => removeEducation(edu.id || "")}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeEducation(edu.id || "")}
+                  >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
@@ -74,7 +84,9 @@ export function EducationStep() {
                     <Label>Trường/Đại học *</Label>
                     <Input
                       value={edu.school}
-                      onChange={(e) => updateEducation(edu.id || "", "school", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(edu.id || "", "school", e.target.value)
+                      }
                       placeholder="Tên Trường"
                     />
                   </div>
@@ -83,7 +95,9 @@ export function EducationStep() {
                     <Label>Bằng cấp *</Label>
                     <Input
                       value={edu.degree}
-                      onChange={(e) => updateEducation(edu.id || "", "degree", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(edu.id || "", "degree", e.target.value)
+                      }
                       placeholder="Cử nhân, Thạc sĩ, v.v."
                     />
                   </div>
@@ -92,7 +106,9 @@ export function EducationStep() {
                     <Label>Chuyên ngành</Label>
                     <Input
                       value={edu.field}
-                      onChange={(e) => updateEducation(edu.id || "", "field", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(edu.id || "", "field", e.target.value)
+                      }
                       placeholder="Computer Science, Business, etc."
                     />
                   </div>
@@ -102,7 +118,13 @@ export function EducationStep() {
                     <Input
                       type="month"
                       value={edu.startDate}
-                      onChange={(e) => updateEducation(edu.id || "", "startDate", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(
+                          edu.id || "",
+                          "startDate",
+                          e.target.value
+                        )
+                      }
                     />
                   </div>
 
@@ -111,7 +133,9 @@ export function EducationStep() {
                     <Input
                       type="month"
                       value={edu.endDate}
-                      onChange={(e) => updateEducation(edu.id || "", "endDate", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(edu.id || "", "endDate", e.target.value)
+                      }
                       placeholder="Để trống nếu hiện tại"
                     />
                   </div>
@@ -122,5 +146,5 @@ export function EducationStep() {
         </div>
       )}
     </div>
-  )
+  );
 }

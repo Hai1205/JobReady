@@ -1,6 +1,7 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 import { v4 as uuidv4 } from 'uuid';
+import { EPrivacy } from '@/types/enum';
 
 // Configure PDF.js worker
 if (typeof window !== 'undefined') {
@@ -384,6 +385,7 @@ export function convertToICV(parsedCV: ParsedCV, userId: string): ICV {
         experiences: parsedCV.experiences,
         educations: parsedCV.educations,
         skills: parsedCV.skills,
+        privacy: EPrivacy.PRIVATE,
         avatar: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

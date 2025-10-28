@@ -9,13 +9,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import Link from "next/link";
-import { Loader2, Mail, Lock } from "lucide-react";
+import { Loader2, Mail, Lock, EyeOff, Eye } from "lucide-react";
 
 const LoginPage: React.FC = () => {
   const { isLoading, login, sendOTP } = useAuthStore();
 
   const router = useRouter();
 
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -125,12 +126,23 @@ const LoginPage: React.FC = () => {
             <Input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Nhập mật khẩu của bạn"
               value={formData.password}
               onChange={handleChange}
               className="pl-10"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
           </div>
           {errors.password && (
             <Alert variant="destructive">

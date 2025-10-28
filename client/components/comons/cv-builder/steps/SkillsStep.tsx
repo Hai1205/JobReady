@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
-import { useCVStore } from "@/stores/cvStore";
+import { useCurrentCV } from "@/hooks/use-cv-mode";
 
 export function SkillsStep() {
-  const { currentCV, handleUpdateCV } = useCVStore();
+  const { currentCV, handleUpdateCV } = useCurrentCV();
   const [skillInput, setSkillInput] = useState("");
 
   if (!currentCV) return null;

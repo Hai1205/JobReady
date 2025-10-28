@@ -5,14 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { HighlightableTextarea } from "@/components/cv-builder/HighlightableTextarea";
+import { HighlightableTextarea } from "@/components/comons/cv-builder/HighlightableTextarea";
 import { Upload, X } from "lucide-react";
-import { useCVStore } from "@/stores/cvStore";
+import { useCurrentCV } from "@/hooks/use-cv-mode";
 import { useRef } from "react";
 import { toast } from "react-toastify";
 
 export function PersonalInfoStep() {
-  const { currentCV, handleUpdateCV, aiSuggestions } = useCVStore();
+  const { currentCV, handleUpdateCV, aiSuggestions } = useCurrentCV();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!currentCV) return null;

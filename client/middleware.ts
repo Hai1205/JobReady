@@ -55,7 +55,7 @@ export function middleware(request: NextRequest) {
                 // Use userId from the decoded token (based on your JWT structure)
                 isAuthenticated = !!decodedPayload.userId || !!decodedPayload.id || !!decodedPayload.sub
                 userRole = decodedPayload.role
-                isAdmin = userRole === 'ADMIN'
+                isAdmin = userRole === 'admin'
             }
         } catch (error) {
             // If parsing fails, user is not authenticated
@@ -85,31 +85,31 @@ export function middleware(request: NextRequest) {
     // TEMPORARILY DISABLED: If on mobile, redirect to home page for both admin and auth routes
     // ONLY redirect mobile users, not desktop users
     if (isMobile && (pathname.startsWith('/admin') || pathname.startsWith('/auth'))) {
-        // return NextResponse.redirect(new URL('/', request.url))
+        return NextResponse.redirect(new URL('/', request.url))
     }
 
     // Check if user is accessing admin routes
     if (pathname.startsWith('/admin')) {
         // If not authenticated, redirect to login page
         if (!isAuthenticated) {
-            // return NextResponse.redirect(new URL('/auth/login', request.url))
+            return NextResponse.redirect(new URL('/auth/login', request.url))
         }
 
         // If authenticated but not admin, redirect to home page
         if (!isAdmin) {
-            // return NextResponse.redirect(new URL('/', request.url))
+            return NextResponse.redirect(new URL('/', request.url))
         }
     }
     if (pathname.startsWith('/cv-builder') || pathname.startsWith('/my-cvs')) {
         // If not authenticated, redirect to login page
         if (!isAuthenticated) {
-            // return NextResponse.redirect(new URL('/auth/login', request.url))
+            return NextResponse.redirect(new URL('/auth/login', request.url))
         }
     }
     if (pathname.startsWith('/settings') || pathname.startsWith('/my-cvs')) {
         // If not authenticated, redirect to login page
         if (!isAuthenticated) {
-            // return NextResponse.redirect(new URL('/auth/login', request.url))
+            return NextResponse.redirect(new URL('/auth/login', request.url))
         }
     }
 

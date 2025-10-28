@@ -1,4 +1,4 @@
-import { EUserRole, EUserStatus, EAISuggestionType } from "@/types/enum";
+import { EUserRole, EUserStatus, EAISuggestionType, EPrivacy } from "@/types/enum";
 
 // Mock Users Data
 export const mockUsers: IUser[] = [
@@ -100,7 +100,7 @@ export const mockPersonalInfos: IPersonalInfo[] = [
         id: "personal-1",
         fullname: "John Doe",
         email: "john.doe@example.com",
-        phone: "+1-555-0123",
+        phone: "john.doe@example.com",
         location: "New York, NY",
         summary: "Experienced software developer with 5+ years in full-stack development, specializing in React and Node.js.",
         avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
@@ -802,6 +802,7 @@ export const mockCVs: ICV[] = [
         skills: ["JavaScript", "React", "Node.js", "TypeScript", "AWS", "Docker", "MongoDB"],
         createdAt: "2024-01-15T10:30:00Z",
         updatedAt: "2024-01-20T14:45:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-2",
@@ -813,6 +814,7 @@ export const mockCVs: ICV[] = [
         skills: ["Figma", "Sketch", "Adobe XD", "User Research", "Prototyping", "Design Systems"],
         createdAt: "2024-01-10T09:15:00Z",
         updatedAt: "2024-01-18T16:20:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-3",
@@ -824,6 +826,7 @@ export const mockCVs: ICV[] = [
         skills: ["AWS", "Docker", "Kubernetes", "Terraform", "Jenkins", "Linux", "Python"],
         createdAt: "2024-01-08T11:45:00Z",
         updatedAt: "2024-01-16T13:30:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-4",
@@ -835,6 +838,7 @@ export const mockCVs: ICV[] = [
         skills: ["Product Strategy", "Agile", "User Research", "Data Analysis", "SQL", "A/B Testing"],
         createdAt: "2024-01-12T08:20:00Z",
         updatedAt: "2024-01-19T10:15:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-5",
@@ -846,6 +850,7 @@ export const mockCVs: ICV[] = [
         skills: ["Python", "Machine Learning", "Statistics", "SQL", "Tableau", "TensorFlow", "R"],
         createdAt: "2024-01-05T14:10:00Z",
         updatedAt: "2024-01-14T12:25:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-6",
@@ -857,6 +862,7 @@ export const mockCVs: ICV[] = [
         skills: ["Google Ads", "SEO", "Social Media", "Content Marketing", "Analytics", "HubSpot"],
         createdAt: "2024-01-03T16:40:00Z",
         updatedAt: "2024-01-13T09:50:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-7",
@@ -868,6 +874,7 @@ export const mockCVs: ICV[] = [
         skills: ["JavaScript", "React", "Node.js", "TypeScript", "MongoDB", "Express.js", "GraphQL"],
         createdAt: "2024-01-07T13:25:00Z",
         updatedAt: "2024-01-17T15:35:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-8",
@@ -879,6 +886,7 @@ export const mockCVs: ICV[] = [
         skills: ["User Research", "Usability Testing", "Personas", "Journey Mapping", "Survey Design"],
         createdAt: "2024-01-09T10:55:00Z",
         updatedAt: "2024-01-15T11:40:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-9",
@@ -890,6 +898,7 @@ export const mockCVs: ICV[] = [
         skills: ["Network Security", "Threat Analysis", "Incident Response", "SIEM", "Firewalls"],
         createdAt: "2024-01-11T12:15:00Z",
         updatedAt: "2024-01-21T08:30:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
     {
         id: "cv-10",
@@ -901,6 +910,7 @@ export const mockCVs: ICV[] = [
         skills: ["Project Management", "Agile", "Scrum", "Jira", "Risk Management", "Stakeholder Management"],
         createdAt: "2024-01-04T15:50:00Z",
         updatedAt: "2024-01-12T14:20:00Z",
+        privacy: EPrivacy.PUBLIC,
     },
 ];
 

@@ -4,18 +4,17 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
-import PageHeader from "@/components/my-cvs/PageHeader";
-import DeleteConfirmationDialog from "@/components/my-cvs/DeleteConfirmationDialog";
-import LoadingPage from "@/components/LoadingPage";
-import { mockCVs } from "@/services/mockData";
-import UserCVsSection from "@/components/my-cvs/UserCVsSection";
-import TemplateCVsSection from "@/components/my-cvs/TemplateCVsSection";
+import PageHeader from "@/components/comons/my-cvs/PageHeader";
+import DeleteConfirmationDialog from "@/components/comons/my-cvs/DeleteConfirmationDialog";
+import LoadingPage from "@/components/comons/layout/LoadingPage";
+import UserCVsSection from "@/components/comons/my-cvs/UserCVsSection";
+import TemplateCVsSection from "@/components/comons/my-cvs/TemplateCVsSection";
 import { EPrivacy } from "@/types/enum";
 
-export default function MyCVsPage() {
+export default function MyCVsPageClient() {
   const { userAuth } = useAuthStore();
   const {
-    handleSetCurrentCV,
+    handleSetCurrentCVCreate,
     handleSetCurrentStep,
     deleteCV,
     duplicateCV,
@@ -26,15 +25,17 @@ export default function MyCVsPage() {
 
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [cvList, setCVlist] = useState<ICV[]>([]);
+  const [userCVs, setUserCVs] = useState<ICV[]>([]);
   const [templateCVs, setTemplateCVs] = useState<ICV[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    loadCVs();
-    // Load template CVs on mount
-    setTemplateCVs(mockCVs);
+    const loadData = async () => {
+      await loadCVs();
+      await loadTemplateCVs();
+    };
+    loadData();
   }, [userAuth, router]);
 
   const loadCVs = async () => {
@@ -44,9 +45,7 @@ export default function MyCVsPage() {
 
     const response = await getUserCVs(userAuth.id);
     if (response?.data) {
-      // const cvs = response.data.cvs || [];
-      // setCVlist(cvs);
-      setCVlist([]); // Show empty for now, will show user's actual CVs when backend ready
+      setUserCVs(response.data.cvs || []);
     }
 
     setLoading(false);
@@ -56,21 +55,19 @@ export default function MyCVsPage() {
     const response = await getAllCVs();
     if (response?.data) {
       const allCvs = response.data.cvs || [];
-      // setTemplateCVs(allCvs);
-      setTemplateCVs(mockCVs); // Temporary: using mockCVs, replace with allCvs when backend ready
+      const publicCvs = allCvs.filter((cv) => cv.privacy === EPrivacy.PUBLIC);
+      setTemplateCVs(publicCvs);
     }
   };
 
   const handleCreateNew = () => {
-    handleSetCurrentCV(null);
+    handleSetCurrentCVCreate(null);
     handleSetCurrentStep(0);
     router.push("/cv-builder");
   };
 
   const handleEdit = (cv: ICV) => {
-    handleSetCurrentCV(cv);
-    handleSetCurrentStep(0);
-    router.push("/cv-builder");
+    router.push(`/cv-builder/${cv.id}`);
   };
 
   const handleDeleteClick = (cvId: string) => {
@@ -101,7 +98,7 @@ export default function MyCVsPage() {
       updatedAt: new Date().toISOString(),
     };
 
-    handleSetCurrentCV(newCV);
+    handleSetCurrentCVCreate(newCV);
     router.push("/cv-builder");
   };
 
@@ -120,7 +117,7 @@ export default function MyCVsPage() {
           <PageHeader onCreateNew={handleCreateNew} />
 
           <UserCVsSection
-            cvList={cvList}
+            userCVs={userCVs}
             onCreateNew={handleCreateNew}
             onEdit={handleEdit}
             onDuplicate={handleDuplicate}

@@ -1,12 +1,12 @@
 import type React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { Navbar } from "@/components/navbar/Navbar";
-import { TokenRefresher } from "@/components/TokenRefresher";
-import { CookieMonitor } from "@/components/CookieMonitor";
+import { ThemeProvider } from "@/components/comons/layout/ThemeProvider";
+import { TokenRefresher } from "@/components/comons/layout/TokenRefresher";
+import { CookieMonitor } from "@/components/comons/layout/CookieMonitor";
 import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Navbar } from "@/components/comons/navbar/Navbar";
 
 const geistSans = Geist({
   subsets: ["latin"],

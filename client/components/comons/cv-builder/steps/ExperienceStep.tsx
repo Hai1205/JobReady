@@ -3,13 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { HighlightableTextarea } from "@/components/cv-builder/HighlightableTextarea";
+import { HighlightableTextarea } from "@/components/comons/cv-builder/HighlightableTextarea";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
-import { useCVStore } from "@/stores/cvStore";
+import { useCurrentCV } from "@/hooks/use-cv-mode";
 
 export function ExperienceStep() {
-  const { currentCV, handleUpdateCV, aiSuggestions } = useCVStore();
+  const { currentCV, handleUpdateCV, aiSuggestions } = useCurrentCV();
 
   if (!currentCV) return null;
 
@@ -68,7 +68,8 @@ export function ExperienceStep() {
       {currentCV.experiences.length === 0 ? (
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">
-            Chưa có kinh nghiệm làm việc nào được thêm. Nhấn "Thêm Kinh nghiệm" để bắt đầu.
+            Chưa có kinh nghiệm làm việc nào được thêm. Nhấn "Thêm Kinh nghiệm"
+            để bắt đầu.
           </p>
         </Card>
       ) : (
