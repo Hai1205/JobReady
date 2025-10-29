@@ -15,6 +15,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { EducationStep } from "./steps/EducationStep";
 import { EPrivacy } from "@/types/enum";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useCVModeStore } from "@/hooks/use-cv-mode";
 
 const steps = [
@@ -42,12 +43,36 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
     createCV,
     handleUpdateCVCreate,
     handleUpdateCVUpdate,
+    handleSetCurrentCVCreate,
   } = useCVStore();
+
+  const router = useRouter();
 
   // Set mode khi component mount
   useEffect(() => {
     setMode(mode);
   }, [mode, setMode]);
+
+  // Initialize currentCVCreate if null for create mode
+  useEffect(() => {
+    if (mode === "create" && !currentCVCreate) {
+      handleSetCurrentCVCreate({
+        id: "",
+        title: "Untitled CV",
+        personalInfo: {
+          fullname: "",
+          email: "",
+          phone: "",
+          location: "",
+          summary: "",
+        },
+        experiences: [],
+        educations: [],
+        skills: [],
+        privacy: EPrivacy.PRIVATE,
+      } as ICV);
+    }
+  }, [mode, currentCVCreate, handleSetCurrentCVCreate]);
 
   // Chọn CV dựa trên mode
   const currentCV = mode === "create" ? currentCVCreate : currentCVUpdate;
@@ -72,7 +97,6 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
     if (!currentCV) return;
 
     if (currentCV.id) {
-      // Update existing CV
       await updateCV(
         currentCV.id,
         currentCV.title,
@@ -84,8 +108,7 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
         currentCV.privacy
       );
     } else {
-      // Create new CV
-      await createCV(
+      const res = await createCV(
         userAuth?.id || "",
         currentCV.title,
         currentCV.avatar as File,
@@ -95,6 +118,16 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
         currentCV.skills,
         currentCV.privacy
       );
+
+      // If API returns created CV, set it into store and redirect to its URL to avoid duplicate creates
+      const createdCv = res?.data?.cv;
+      if (createdCv && createdCv.id) {
+        if (handleSetCurrentCVCreate) {
+          handleSetCurrentCVCreate(createdCv);
+        }
+        
+        router.push(`/cv-builder/${createdCv.id}`);
+      }
     }
   };
 

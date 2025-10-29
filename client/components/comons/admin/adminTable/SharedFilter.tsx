@@ -12,14 +12,15 @@ import { Filter } from "lucide-react";
 interface SharedFilterProps {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
-  activeFilters: { status: string[] };
-  toggleFilter: (value: string, type: "status") => void;
+  activeFilters: { status?: string[]; privacy?: string[]; role?: string[] };
+  toggleFilter: (value: string, type: "status" | "privacy" | "role") => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;
   filterOptions?: {
     status?: { label: string; value: string }[];
-    contentType?: { label: string; value: string }[];
+    privacy?: { label: string; value: string }[];
+    role?: { label: string; value: string }[];
   };
 }
 
@@ -71,7 +72,9 @@ export const SharedFilter = ({
                 >
                   <Checkbox
                     id={`status-${status.value}`}
-                    checked={activeFilters.status.includes(status.value)}
+                    checked={
+                      activeFilters.status?.includes(status.value) || false
+                    }
                     onCheckedChange={() => toggleFilter(status.value, "status")}
                     className="mr-2 border-primary/50"
                   />
@@ -88,7 +91,73 @@ export const SharedFilter = ({
           </div>
         )}
 
-        {filterOptions?.status && filterOptions?.contentType && (
+        {filterOptions?.privacy && (
+          <div className="p-3">
+            <h4 className="mb-3 text-sm font-semibold text-foreground">
+              Privacy
+            </h4>
+
+            <div className="space-y-3">
+              {filterOptions.privacy.map((privacy) => (
+                <div
+                  key={privacy.value}
+                  className="flex items-center hover:bg-primary/5 p-1.5 rounded-lg transition-colors"
+                >
+                  <Checkbox
+                    id={`privacy-${privacy.value}`}
+                    checked={
+                      activeFilters.privacy?.includes(privacy.value) || false
+                    }
+                    onCheckedChange={() =>
+                      toggleFilter(privacy.value, "privacy")
+                    }
+                    className="mr-2 border-primary/50"
+                  />
+
+                  <label
+                    htmlFor={`privacy-${privacy.value}`}
+                    className="text-foreground text-sm cursor-pointer flex-1"
+                  >
+                    {privacy.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {filterOptions?.role && (
+          <div className="p-3">
+            <h4 className="mb-3 text-sm font-semibold text-foreground">Role</h4>
+
+            <div className="space-y-3">
+              {filterOptions.role.map((role) => (
+                <div
+                  key={role.value}
+                  className="flex items-center hover:bg-primary/5 p-1.5 rounded-lg transition-colors"
+                >
+                  <Checkbox
+                    id={`role-${role.value}`}
+                    checked={activeFilters.role?.includes(role.value) || false}
+                    onCheckedChange={() => toggleFilter(role.value, "role")}
+                    className="mr-2 border-primary/50"
+                  />
+
+                  <label
+                    htmlFor={`role-${role.value}`}
+                    className="text-foreground text-sm cursor-pointer flex-1"
+                  >
+                    {role.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {((filterOptions?.status && filterOptions?.privacy) ||
+          (filterOptions?.status && filterOptions?.role) ||
+          (filterOptions?.privacy && filterOptions?.role)) && (
           <DropdownMenuSeparator className="bg-border/50" />
         )}
 

@@ -4,6 +4,7 @@ import { PDFExportService } from "@/services/pdfExportService";
 import { renderCVToHTMLAsync } from "@/components/comons/cv-builder/CVRenderer";
 import { toast } from "react-toastify";
 import { testFormData } from "@/lib/utils";
+import { applySuggestionToCV, getSectionDisplayName } from "@/lib/suggestionApplier";
 
 interface ICVDataResponse {
 	cv: ICV,
@@ -32,8 +33,8 @@ export interface ICVStore extends IBaseStore {
 		educations: IEducation[],
 		skills: string[],
 		privacy: string
-	// ) => Promise<IApiResponse<ICVDataResponse>>;
-	) => Promise<void>;
+	) => Promise<IApiResponse<ICVDataResponse>>;
+	// ) => Promise<void>;
 	updateCV: (
 		cvId: string,
 		title: string,
@@ -43,8 +44,8 @@ export interface ICVStore extends IBaseStore {
 		educations: IEducation[],
 		skills: string[],
 		privacy: string,
-	// ) => Promise<IApiResponse<ICVDataResponse>>;
-	) => Promise<void>;
+	) => Promise<IApiResponse<ICVDataResponse>>;
+	// ) => Promise<void>;
 	deleteCV: (
 		cvId: string
 	) => Promise<IApiResponse<void>>;
@@ -99,7 +100,6 @@ const storeName = "cv";
 const initialState = {
 	currentCVCreate: null,
 	currentCVUpdate: null,
-	// currentCVUpdate: null,
 	cvList: [],
 	currentStep: 0,
 	aiSuggestions: [],
@@ -137,8 +137,8 @@ export const useCVStore = createStore<ICVStore>(
 			educations: IEducation[],
 			skills: string[],
 			privacy: string,
-		): Promise<void> => {
-		// ): Promise<IApiResponse<ICVDataResponse>> => {
+			// ): Promise<void> => {
+		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				title,
@@ -151,11 +151,11 @@ export const useCVStore = createStore<ICVStore>(
 			if (avatar) formData.append("avatar", avatar);
 			testFormData(formData);
 
-			// return await get().handleRequest(async () => {
-			// 	const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, formData);
-			// 	console.log("Create CV Response:", res);
-			// 	return res;
-			// });
+			return await get().handleRequest(async () => {
+				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, formData);
+				console.log("Create CV Response:", res);
+				return res;
+			});
 		},
 
 		updateCV: async (
@@ -167,8 +167,8 @@ export const useCVStore = createStore<ICVStore>(
 			educations: IEducation[],
 			skills: string[],
 			privacy: string
-		// ): Promise<IApiResponse<ICVDataResponse>> => {
-		): Promise<void> => {
+		): Promise<IApiResponse<ICVDataResponse>> => {
+			// ): Promise<void> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				title,
@@ -181,9 +181,9 @@ export const useCVStore = createStore<ICVStore>(
 			if (avatar) formData.append("avatar", avatar);
 			testFormData(formData);
 
-			// return await get().handleRequest(async () => {
-			// 	return await handleRequest(EHttpType.PATCH, `/cvs/${cvId}`, formData);
-			// });
+			return await get().handleRequest(async () => {
+				return await handleRequest(EHttpType.PATCH, `/cvs/${cvId}`, formData);
+			});
 		},
 
 		deleteCV: async (cvId: string): Promise<IApiResponse<void>> => {
@@ -223,7 +223,9 @@ export const useCVStore = createStore<ICVStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/analyze`, formData);
+				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/analyze`, formData);
+				console.log("Analyze CV Response:", res);
+				return res;
 			});
 		},
 
@@ -256,12 +258,8 @@ export const useCVStore = createStore<ICVStore>(
 
 		improveCV: async (
 			section: string,
-			content: string,
-			title: string,
-			personalInfo: IPersonalInfo,
-			experiences: IExperience[],
-			educations: IEducation[],
-			skills: string[],): Promise<IApiResponse<ICVDataResponse>> => {
+			content: string
+		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				section,
@@ -321,13 +319,38 @@ export const useCVStore = createStore<ICVStore>(
 
 		handleApplySuggestion: (id: string): void => {
 			const currentState = get();
-			const updatedSuggestions = currentState.aiSuggestions.map(suggestion =>
-				suggestion.id === id ? { ...suggestion, applied: true } : suggestion
-			);
-			set({ aiSuggestions: updatedSuggestions });
-		},
+			const suggestion = currentState.aiSuggestions.find(s => s.id === id);
 
-		handleClearCVList: (): void => {
+			if (!suggestion) {
+				toast.error("Không tìm thấy gợi ý");
+				return;
+			}
+
+			// Apply the suggestion to the appropriate CV state
+			const updatedCVCreate = applySuggestionToCV(currentState.currentCVCreate, suggestion);
+			const updatedCVUpdate = applySuggestionToCV(currentState.currentCVUpdate, suggestion);
+
+			// Check if any CV was updated
+			if (!updatedCVCreate && !updatedCVUpdate) {
+				toast.warning(`Không thể áp dụng gợi ý cho phần "${suggestion.section}"`);
+				return;
+			}
+
+			// Mark suggestion as applied
+			const updatedSuggestions = currentState.aiSuggestions.map(s =>
+				s.id === id ? { ...s, applied: true } : s
+			);
+
+			// Update state
+			set({
+				aiSuggestions: updatedSuggestions,
+				currentCVCreate: updatedCVCreate,
+				currentCVUpdate: updatedCVUpdate
+			} as Partial<ICVStore>);
+
+			const sectionName = getSectionDisplayName(suggestion.section);
+			toast.success(`✅ Đã áp dụng gợi ý cho "${sectionName}"`);
+		}, handleClearCVList: (): void => {
 			set({ cvList: [] });
 		},
 

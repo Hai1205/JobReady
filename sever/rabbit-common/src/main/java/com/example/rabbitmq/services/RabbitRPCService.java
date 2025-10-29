@@ -39,8 +39,8 @@ public class RabbitRPCService {
     public final RabbitTemplate rabbitTemplate;
     public final ObjectMapper objectMapper;
 
-    // Default timeout
-    public static final long DEFAULT_TIMEOUT_SECONDS = 10;
+    // Default timeout - increased for better reliability
+    public static final long DEFAULT_TIMEOUT_SECONDS = 30;
 
     /**
      * Initialize Direct Reply-to listener after bean construction
@@ -51,8 +51,11 @@ public class RabbitRPCService {
         rabbitTemplate.setReplyAddress(Address.AMQ_RABBITMQ_REPLY_TO);
         rabbitTemplate.setReplyTimeout(DEFAULT_TIMEOUT_SECONDS * 1000);
 
-        log.info("✅ RabbitRPCService initialized with Direct Reply-to (replyAddress: {})",
-                Address.AMQ_RABBITMQ_REPLY_TO);
+        // Additional connection configuration for reliability
+        rabbitTemplate.setUseDirectReplyToContainer(true);
+
+        log.info("✅ RabbitRPCService initialized with Direct Reply-to (replyAddress: {}, timeout: {}s)",
+                Address.AMQ_RABBITMQ_REPLY_TO, DEFAULT_TIMEOUT_SECONDS);
     }
 
     /**
@@ -178,7 +181,7 @@ public class RabbitRPCService {
     }
 
     /**
-     * Synchronous wrapper cho backward compatibility
+     * Synchronous wrapper với retry logic cho backward compatibility
      * 
      * @param exchange     Exchange name
      * @param routingKey   Routing key
@@ -195,16 +198,41 @@ public class RabbitRPCService {
             Object payload,
             Class<R> responseType) {
 
-        try {
-            return sendAndReceiveAsync(exchange, routingKey, header, payload, responseType)
-                    .get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            log.error("⏰ RPC timeout: {}", e.getMessage());
-            throw new RuntimeException("RPC timeout after " + DEFAULT_TIMEOUT_SECONDS + "s", e);
-        } catch (Exception e) {
-            log.error("❌ RPC call failed: {}", e.getMessage(), e);
-            throw new RuntimeException("RPC call failed: " + e.getMessage(), e);
+        int maxRetries = 3;
+        long retryDelayMs = 1000; // 1 second
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                log.debug("🔄 RPC attempt {}/{} for routing: {}.{}", attempt, maxRetries, exchange, routingKey);
+                return sendAndReceiveAsync(exchange, routingKey, header, payload, responseType)
+                        .get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                log.warn("⏰ RPC timeout on attempt {}/{}: {}", attempt, maxRetries, e.getMessage());
+                if (attempt == maxRetries) {
+                    throw new RuntimeException("RPC timeout after " + maxRetries + " attempts", e);
+                }
+                try {
+                    Thread.sleep(retryDelayMs * attempt); // Exponential backoff
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("RPC interrupted", ie);
+                }
+            } catch (Exception e) {
+                log.error("❌ RPC call failed on attempt {}/{}: {}", attempt, maxRetries, e.getMessage(), e);
+                if (attempt == maxRetries) {
+                    throw new RuntimeException("RPC call failed after " + maxRetries + " attempts: " + e.getMessage(),
+                            e);
+                }
+                try {
+                    Thread.sleep(retryDelayMs * attempt);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("RPC interrupted", ie);
+                }
+            }
         }
+
+        throw new RuntimeException("RPC failed after " + maxRetries + " attempts");
     }
 
     /**

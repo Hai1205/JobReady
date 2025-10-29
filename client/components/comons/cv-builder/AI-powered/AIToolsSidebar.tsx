@@ -20,7 +20,15 @@ import {
 export function AIToolsSidebar() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const { analyzeCV, handleSetAISuggestions, currentCV } = useCVStore();
+  const {
+    analyzeCV,
+    handleSetAISuggestions,
+    currentCVCreate,
+    currentCVUpdate,
+  } = useCVStore();
+
+  // Get the active CV based on context (create or update)
+  const currentCV = currentCVUpdate || currentCVCreate;
 
   const handleQuickAnalyze = async () => {
     if (!currentCV) {

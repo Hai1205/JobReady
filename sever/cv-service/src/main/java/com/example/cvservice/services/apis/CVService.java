@@ -505,7 +505,7 @@ public class CVService extends BaseService {
                 existingCV.getPersonalInfo(),
                 existingCV.getExperiences(),
                 existingCV.getEducations(),
-                existingCV.getSkills(),
+                new ArrayList<>(existingCV.getSkills()), // Copy skills list to avoid shared references
                 existingCV.getPrivacy());
 
         log.info("Duplicated CV id={} created new CV id={}", cvId, newCV.getId());

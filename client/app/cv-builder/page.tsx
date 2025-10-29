@@ -1,47 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
-import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
 import { CVBuilderWizard } from "@/components/comons/cv-builder/CVBuilderWizard";
 import { AIPanel } from "@/components/comons/cv-builder/AI-powered/AIPanel";
-import { EPrivacy } from "@/types/enum";
 
 export default function CVBuilderPage() {
-  const router = useRouter();
-  const { userAuth } = useAuthStore();
-  const { currentCVCreate, handleSetCurrentCVCreate, handleSetCurrentStep } =
-    useCVStore();
+  const { handleSetCurrentCVCreate, handleSetCurrentStep } = useCVStore();
 
   useEffect(() => {
-    // Initialize new CV if none exists
-    if (!currentCVCreate) {
-      handleSetCurrentCVCreate({
-        id: "",
-        title: "Untitled CV",
-        personalInfo: {
-          fullname: "",
-          email: "",
-          phone: "",
-          location: "",
-          summary: "",
-        },
-        experiences: [],
-        educations: [],
-        skills: [],
-        privacy: EPrivacy.PRIVATE,
-      } as ICV);
-      handleSetCurrentStep(0);
-    }
-  }, [
-    userAuth,
-    currentCVCreate,
-    router,
-    handleSetCurrentCVCreate,
-    handleSetCurrentStep,
-  ]);
+    handleSetCurrentCVCreate(null);
+    handleSetCurrentStep(0);
+  }, [handleSetCurrentCVCreate, handleSetCurrentStep]);
 
   return (
     <div className="container mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:px-8">

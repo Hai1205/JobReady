@@ -16,16 +16,30 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCVStore } from "@/stores/cvStore";
 
 export function AISuggestionsSidebar() {
-  const { currentCV, aiSuggestions, handleApplySuggestion, analyzeCV } =
-    useCVStore();
+  const {
+    currentCVCreate,
+    currentCVUpdate,
+    aiSuggestions,
+    handleApplySuggestion,
+    analyzeCV,
+  } = useCVStore();
   const [analyzing, setAnalyzing] = useState(false);
+
+  // Get the active CV based on context (create or update)
+  const currentCV = currentCVUpdate || currentCVCreate;
 
   const handleAnalyze = async () => {
     if (!currentCV) return;
 
     setAnalyzing(true);
 
-    analyzeCV(currentCV?.title, currentCV?.personalInfo, currentCV?.experiences, currentCV?.educations, currentCV?.skills);
+    analyzeCV(
+      currentCV?.title,
+      currentCV?.personalInfo,
+      currentCV?.experiences,
+      currentCV?.educations,
+      currentCV?.skills
+    );
   };
 
   const getSuggestionIcon = (type: string) => {

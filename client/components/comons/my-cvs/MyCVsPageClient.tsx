@@ -82,7 +82,18 @@ export default function MyCVsPageClient() {
   };
 
   const handleDuplicate = (cvId: string) => {
-    duplicateCV(cvId);
+    const cv = userCVs.find((c) => c.id === cvId);
+    if (cv) {
+      const duplicated: ICV = {
+        ...cv,
+        id: "",
+        title: cv.title + " (Copy)",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      handleSetCurrentCVCreate(duplicated);
+      router.push("/cv-builder");
+    }
   };
 
   const handleDuplicateTemplate = async (cv: ICV) => {

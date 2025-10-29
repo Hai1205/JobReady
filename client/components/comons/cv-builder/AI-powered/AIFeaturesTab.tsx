@@ -36,9 +36,16 @@ export function AIFeaturesTab() {
     analyzeCV,
     handleSetAISuggestions,
     improveCV,
-    currentCV,
+    currentCVCreate,
+    currentCVUpdate,
     handleUpdateCV,
+    handleUpdateCVCreate,
+    handleUpdateCVUpdate,
   } = useCVStore();
+
+  // Get the active CV based on context (create or update)
+  const currentCV = currentCVUpdate || currentCVCreate;
+  const isUpdateMode = !!currentCVUpdate;
 
   const handleQuickAnalyze = async () => {
     if (!currentCV) {
@@ -156,10 +163,15 @@ export function AIFeaturesTab() {
 
     const sectionLower = section.toLowerCase();
 
+    // Choose the appropriate update function based on mode
+    const updateFunction = isUpdateMode
+      ? handleUpdateCVUpdate
+      : handleUpdateCVCreate;
+
     switch (true) {
       case sectionLower.includes("summary") ||
         sectionLower.includes("personal"):
-        handleUpdateCV({
+        updateFunction({
           personalInfo: {
             ...currentCV.personalInfo,
             summary: content,
@@ -170,7 +182,7 @@ export function AIFeaturesTab() {
       case sectionLower.includes("experience"):
         try {
           const parsedExperience = JSON.parse(content);
-          handleUpdateCV({ experiences: parsedExperience });
+          updateFunction({ experiences: parsedExperience });
           applied = true;
         } catch (error) {
           toast.error("Failed to parse experiences data");
@@ -180,7 +192,7 @@ export function AIFeaturesTab() {
       case sectionLower.includes("education"):
         try {
           const parsedEducation = JSON.parse(content);
-          handleUpdateCV({ educations: parsedEducation });
+          updateFunction({ educations: parsedEducation });
           applied = true;
         } catch (error) {
           toast.error("Failed to parse educations data");
@@ -192,7 +204,7 @@ export function AIFeaturesTab() {
           .split(",")
           .map((s) => s.trim())
           .filter((s) => s);
-        handleUpdateCV({ skills: skillsArray });
+        updateFunction({ skills: skillsArray });
         applied = true;
         break;
       default:
