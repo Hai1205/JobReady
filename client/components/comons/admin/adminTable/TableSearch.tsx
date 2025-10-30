@@ -16,7 +16,7 @@ export const TableSearch = ({
 }: TableSearchProps) => {
   return (
     <form onSubmit={handleSearch} className="relative group">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground group-focus-within:text-primary w-4 h-4 transition-colors" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground group-focus-within:text-primary w-4 h-4 transition-colors z-10 pointer-events-none" />
       <Input
         type="text"
         placeholder={placeholder}

@@ -8,6 +8,17 @@ interface ICVTableProps {
   onDownload?: (cv: ICV) => void;
 }
 
+const getPrivacyColor = (status: string) => {
+  switch (status) {
+    case "public":
+      return "bg-green-500";
+    case "private":
+      return "bg-red-500";
+    default:
+      return "bg-gray-500";
+  }
+};
+
 export const CVTable = ({
   CVs,
   isLoading,
@@ -22,6 +33,17 @@ export const CVTable = ({
     {
       header: "Tiêu đề",
       accessor: (cv: ICV) => cv.title,
+    },
+    {
+      header: "Chế độ",
+      accessor: (cv: ICV) => (
+        <div className="inline-flex items-center justify-center gap-2">
+          <span
+            className={`h-2 w-2 rounded-full ${getPrivacyColor(cv.privacy)}`}
+          />
+          <span className="capitalize">{cv.privacy}</span>
+        </div>
+      ),
     },
     {
       header: "Ngày tạo",
