@@ -9,11 +9,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Filter } from "lucide-react";
 
+export type FilterType = "status" | "privacy" | "role";
+export const initialFilters = { status: [] as string[], role: [] as string[], privacy: [] as string[] };
+
 interface SharedFilterProps {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
   activeFilters: { status?: string[]; privacy?: string[]; role?: string[] };
-  toggleFilter: (value: string, type: "status" | "privacy" | "role") => void;
+  toggleFilter: (value: string, type: FilterType) => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;

@@ -1,7 +1,7 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, EStorageType, IBaseStore } from "@/lib/initialStore";
-import { testFormData } from "@/lib/utils";
 import { useAuthStore } from "./authStore";
+import { mockUsers } from "@/services/mockData";
 
 interface IUserDataResponse {
 	user: IUser;
@@ -12,6 +12,7 @@ interface IUserDataResponse {
 export interface IUserStore extends IBaseStore {
 	user: IUser | null;
 	users: IUser[];
+	usersTable: IUser[];
 
 	getAllUsers: () => Promise<IApiResponse<IUserDataResponse>>;
 	getUser: (
@@ -34,13 +35,18 @@ export interface IUserStore extends IBaseStore {
 	) => Promise<IApiResponse<IUserDataResponse>>;
 	deleteUser: (
 		userId: string
-	) => Promise<IApiResponse<IUserDataResponse>>;
+	) => Promise<IApiResponse>;
+
+	handleRemoveUserFromTable: (userId: string) => Promise<void>;
+	handleAddUserToTable: (user: IUser) => Promise<void>;
+	handleUpdateUserInTable: (user: IUser) => Promise<void>;
 }
 
 const storeName = "user";
 const initialState = {
 	user: null,
 	users: [],
+	usersTable: [],
 };
 
 export const useUserStore = createStore<IUserStore>(
@@ -49,7 +55,13 @@ export const useUserStore = createStore<IUserStore>(
 	(set, get) => ({
 		getAllUsers: async (): Promise<IApiResponse<IUserDataResponse>> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.GET, `/users`);
+				const res = await handleRequest<IUserDataResponse>(EHttpType.GET, `/users`);
+				
+				if (res.data && res.data.success && res.data.users) {
+					set({ usersTable: res.data.users });
+				}
+
+				return res;
 			});
 		},
 
@@ -78,7 +90,13 @@ export const useUserStore = createStore<IUserStore>(
 			if (avatar) formData.append("avatar", avatar);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/users`, formData);
+				const res = await handleRequest<IUserDataResponse>(EHttpType.POST, `/users`, formData);
+
+				if (res.data && res.data.success && res.data.user) {
+					get().handleAddUserToTable(res.data.user);
+				}
+
+				return res;
 			});
 		},
 
@@ -98,17 +116,47 @@ export const useUserStore = createStore<IUserStore>(
 			if (avatar) formData.append("avatar", avatar);
 
 			return await get().handleRequest(async () => {
-				const response = await handleRequest<IUserDataResponse>(EHttpType.PATCH, `/users/${userId}`, formData);
-				if (response?.data?.user) {
-					useAuthStore.getState().handleSetUserAuth(response.data.user);
+				const res = await handleRequest<IUserDataResponse>(EHttpType.PATCH, `/users/${userId}`, formData);
+
+				const { success, user } = res.data || {};
+				const { isAdmin, userAuth, handleSetUserAuth } = useAuthStore.getState();
+
+				if (success && user) {
+					if (isAdmin) get().handleUpdateUserInTable(user);
+					if (userAuth?.id === userId) handleSetUserAuth(user);
 				}
-				return response;
+
+				return res;
 			});
 		},
 
-		deleteUser: async (userId: string): Promise<IApiResponse<IUserDataResponse>> => {
+		deleteUser: async (userId: string): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.DELETE, `/users/${userId}`);
+				const res = await handleRequest(EHttpType.DELETE, `/users/${userId}`);
+
+				if (res.data && res.data.success) {
+					get().handleRemoveUserFromTable(userId);
+				}
+
+				return res;
+			});
+		},
+
+		handleRemoveUserFromTable: (userId: string): void => {
+			set({
+				usersTable: get().usersTable.filter((user) => user.id !== userId),
+			});
+		},
+
+		handleAddUserToTable: (user: IUser): void => {
+			set({ usersTable: [user, ...get().usersTable] });
+		},
+
+		handleUpdateUserInTable: (user: IUser): void => {
+			set({
+				usersTable: get().usersTable.map((u) =>
+					u.id === user.id ? user : u
+				),
 			});
 		},
 

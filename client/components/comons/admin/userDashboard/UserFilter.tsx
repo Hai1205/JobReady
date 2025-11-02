@@ -1,14 +1,14 @@
 "use client";
 
-import { capitalizeEnumValue } from "@/lib/utils";
 import { EUserRole, EUserStatus } from "@/types/enum";
-import { SharedFilter } from "../adminTable/SharedFilter";
+import { FilterType, SharedFilter } from "../adminTable/SharedFilter";
+import { capitalizeFirstLetter } from "@/lib/utils";
 
 interface UserFilterProps {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
-  activeFilters: { status: string[]; role: string[] };
-  toggleFilter: (value: string, type: "status" | "role") => void;
+  activeFilters: { status: string[] };
+  toggleFilter: (value: string, type: FilterType) => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;
@@ -23,10 +23,11 @@ export const UserFilter = ({
   applyFilters,
   closeMenuMenuFilters,
 }: UserFilterProps) => {
-  const handleToggleFilter = (value: string, type: "status" | "role") => {
+  const handleToggleFilter = (value: string, type: FilterType) => {
     if (type === "status") {
       toggleFilter(value, "status");
     }
+
     if (type === "role") {
       toggleFilter(value, "role");
     }
@@ -34,11 +35,12 @@ export const UserFilter = ({
 
   const filterOptions = {
     status: Object.values(EUserStatus).map((status) => ({
-      label: capitalizeEnumValue(status),
+      label: capitalizeFirstLetter(status),
       value: status,
     })),
+
     role: Object.values(EUserRole).map((role) => ({
-      label: capitalizeEnumValue(role),
+      label: capitalizeFirstLetter(role),
       value: role,
     })),
   };

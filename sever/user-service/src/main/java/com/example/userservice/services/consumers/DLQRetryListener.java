@@ -1,7 +1,8 @@
 package com.example.userservice.services.consumers;
 
-import com.example.rabbitmq.configs.DeadLetterQueueConfig;
+import com.example.rabbitmq.config.DeadLetterQueueConfig;
 import com.example.rabbitmq.constants.RabbitConstants;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
@@ -36,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class DLQRetryListener {
 
     private final RabbitTemplate rabbitTemplate;
+    private final ObjectMapper objectMapper;
 
     private static final int MAX_RETRY = 3;
     private static final int BASE_DELAY_SECONDS = 5;
@@ -49,7 +51,8 @@ public class DLQRetryListener {
                 message,
                 "UserCreate",
                 RabbitConstants.USER_EXCHANGE,
-                RabbitConstants.USER_CREATE);
+                RabbitConstants.USER_CREATE
+        );
     }
 
     /**
@@ -61,7 +64,8 @@ public class DLQRetryListener {
                 message,
                 "UserActivate",
                 RabbitConstants.USER_EXCHANGE,
-                RabbitConstants.USER_ACTIVATE);
+                RabbitConstants.USER_ACTIVATE
+        );
     }
 
     /**
@@ -89,7 +93,7 @@ public class DLQRetryListener {
 
             // Check if exceeded max retry
             if (currentRetryCount >= MAX_RETRY) {
-                log.error("🚨 [DLQ-{}] Max retry exceeded - correlationId: {}",
+                log.error("🚨 [DLQ-{}] Max retry exceeded - correlationId: {}", 
                         operationName, correlationId);
                 moveToPoisonQueue(message, operationName);
                 notifyAdmin(message, operationName, "Max retry exceeded");
@@ -116,8 +120,8 @@ public class DLQRetryListener {
 
             // Update retry count
             newProps.setHeader("x-retry-count", currentRetryCount + 1);
-            newProps.setHeader("x-first-death-time",
-                    props.getHeader("x-first-death-time") != null
+            newProps.setHeader("x-first-death-time", 
+                    props.getHeader("x-first-death-time") != null 
                             ? props.getHeader("x-first-death-time")
                             : System.currentTimeMillis());
 
@@ -186,7 +190,8 @@ public class DLQRetryListener {
             rabbitTemplate.send(
                     DeadLetterQueueConfig.POISON_EXCHANGE,
                     "poison." + operationName.toLowerCase(),
-                    poisonMessage);
+                    poisonMessage
+            );
 
             log.warn("☠️ [DLQ-{}] Message moved to poison queue - correlationId: {}",
                     operationName, correlationId);
@@ -198,6 +203,7 @@ public class DLQRetryListener {
 
     /**
      * Notify admin về poison message
+     * TODO: Implement actual notification (email, Slack, PagerDuty, etc.)
      */
     private void notifyAdmin(Message message, String operationName, String reason) {
         MessageProperties props = message.getMessageProperties();
@@ -215,10 +221,12 @@ public class DLQRetryListener {
                 correlationId,
                 reason,
                 props.getHeader("x-retry-count"),
-                body.substring(0, Math.min(200, body.length())));
+                body.substring(0, Math.min(200, body.length()))
+        );
 
         log.error(alert);
 
+        // TODO: Send to monitoring system
         // - Email to ops team
         // - Slack notification
         // - PagerDuty alert
@@ -238,5 +246,6 @@ public class DLQRetryListener {
                 operation, correlationId);
 
         // Store to database for manual review
+        // TODO: Implement persistence for poison messages
     }
 }

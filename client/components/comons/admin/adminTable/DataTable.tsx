@@ -76,7 +76,7 @@ export function DataTable<T>({
                   <TableSkeleton />
                 </TableCell>
               </TableRow>
-            ) : data.length > 0 ? (
+            ) : data && data.length > 0 ? (
               data.map((item, index) => (
                 <TableRow
                   key={index}

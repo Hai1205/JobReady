@@ -1,11 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DataTable } from "../adminTable/DataTable";
+import { useEffect, useState } from "react";
 
 interface UserTableProps {
-  Users: IUser[];
+  users: IUser[];
   isLoading: boolean;
-  onEdit?: (user: IUser) => void;
+  onUpdate?: (user: IUser) => void;
   onResetPassword?: (user: IUser) => void;
+  onDelete?: (user: IUser) => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -33,9 +35,10 @@ const getRoleColor = (role: string) => {
 };
 
 export const UserTable = ({
-  Users,
+  users,
   isLoading,
-  onEdit,
+  onUpdate,
+  onDelete,
   onResetPassword,
 }: UserTableProps) => {
   const columns = [
@@ -93,10 +96,17 @@ export const UserTable = ({
 
   const actions = [];
 
-  if (onEdit) {
+  if (onUpdate) {
     actions.push({
       label: "Edit",
-      onClick: onEdit,
+      onClick: onUpdate,
+    });
+  }
+
+  if (onDelete) {
+    actions.push({
+      label: "Xoá",
+      onClick: onDelete,
     });
   }
 
@@ -109,7 +119,7 @@ export const UserTable = ({
 
   return (
     <DataTable
-      data={Users}
+      data={users}
       isLoading={isLoading}
       columns={columns}
       actions={actions}

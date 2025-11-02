@@ -1,6 +1,6 @@
 "use client";
 
-import { capitalizeEnumValue } from "@/lib/utils";
+import { capitalizeFirstLetter } from "@/lib/utils";
 import { EPrivacy } from "@/types/enum";
 import { SharedFilter } from "../adminTable/SharedFilter";
 
@@ -34,7 +34,7 @@ export const CVFilter = ({
 
   const filterOptions = {
     privacy: Object.values(EPrivacy).map((privacy) => ({
-      label: capitalizeEnumValue(privacy),
+      label: capitalizeFirstLetter(privacy),
       value: privacy,
     })),
   };

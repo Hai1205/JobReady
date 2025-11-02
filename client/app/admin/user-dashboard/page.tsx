@@ -5,78 +5,60 @@ import dynamic from "next/dynamic";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { EUserRole, EUserStatus } from "@/types/enum";
+import { useUserStore } from "@/stores/userStore";
+import { useAuthStore } from "@/stores/authStore";
+import { toast } from "react-toastify";
 import { DashboardHeader } from "@/components/comons/admin/DashboardHeader";
 import CreateUserDialog from "@/components/comons/admin/userDashboard/CreateUserDialog";
 import UpdateUserDialog from "@/components/comons/admin/userDashboard/UpdateUserDialog";
+import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 import { UserFilter } from "@/components/comons/admin/userDashboard/UserFilter";
 import { UserTable } from "@/components/comons/admin/userDashboard/UserTable";
-import { toast } from "react-toastify";
-import { useUserStore } from "@/stores/userStore";
-import { useAuthStore } from "@/stores/authStore";
-import { EUserRole, EUserStatus } from "@/types/enum";
-import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
-
-// Initialize empty filters
-const initialFilters = { status: [] as string[], role: [] as string[] };
+import { ExtendedUserData } from "@/components/comons/admin/userDashboard/constant";
+import {
+  FilterType,
+  initialFilters,
+} from "@/components/comons/admin/adminTable/SharedFilter";
+import { mockUsers } from "@/services/mockData";
 
 function UserDashboardPage() {
-  const { isLoading, getAllUsers, createUser, updateUser } = useUserStore();
+  const { usersTable, getAllUsers, createUser, updateUser, deleteUser } =
+    useUserStore();
   const { resetPassword } = useAuthStore();
 
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [previewAvatar, setPreviewAvatar] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isUpdateUserOpen, setIsUpdateUserOpen] = useState(false);
 
   const [activeFilters, setActiveFilters] = useState<{
     status: string[];
     role: string[];
+    privacy: string[];
   }>(initialFilters);
-  const [allUsers, setAllUsers] = useState<IUser[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [previewAvatar, setPreviewAvatar] = useState<string>("");
-
-  const defaultUser: ExtendedUserData = {
-    id: "",
-    username: "",
-    email: "",
-    password: "",
-    fullname: "",
-    role: EUserRole.USER,
-    status: EUserStatus.PENDING,
-  };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      setPreviewAvatar(URL.createObjectURL(file));
-    }
-  };
+  const [filteredUsers, setFilteredUsers] = useState<IUser[] | []>(mockUsers);
 
   const fetchData = useCallback(async () => {
-    try {
-      const res = await getAllUsers();
-      const data = res?.data?.users || [];
-      setAllUsers(data);
-      setFilteredUsers(data);
-    } catch (err) {
-      console.error("Error fetching users:", err);
-    }
+    setIsLoading(true);
+    await getAllUsers();
+
+    setIsLoading(false);
   }, [getAllUsers]);
 
   useEffect(() => {
-    // call the async fetch function
     fetchData();
-  }, [fetchData]);
+  }, [getAllUsers]);
 
-  // Function to filter data based on query and activeFilters
   const filterData = useCallback(
-    (query: string, filters: { status: string[] }) => {
-      let results = [...allUsers];
+    (
+      query: string,
+      filters: { status: string[]; role: string[]; privacy: string[] }
+    ) => {
+      let results = [...usersTable];
 
-      // Filter by search query
       if (query.trim()) {
         const searchTerms = query.toLowerCase().trim();
         results = results.filter(
@@ -86,28 +68,37 @@ function UserDashboardPage() {
         );
       }
 
-      // Filter by status
       if (filters.status.length > 0) {
         results = results.filter((user) =>
           filters.status.includes(user.status || "")
         );
       }
 
+      if (filters.role.length > 0) {
+        results = results.filter((user) =>
+          filters.role.includes(user.role || "")
+        );
+      }
+
       setFilteredUsers(results);
     },
-    [allUsers]
+    [usersTable]
   );
+
+  useEffect(() => {
+    filterData(searchQuery, activeFilters);
+  }, [usersTable, searchQuery, activeFilters, filterData]);
 
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
+
       filterData(searchQuery, activeFilters);
     },
     [searchQuery, activeFilters, filterData]
   );
 
-  // Toggle filter without auto-filtering
-  const toggleFilter = (value: string, type: "status" | "role") => {
+  const toggleFilter = (value: string, type: FilterType) => {
     setActiveFilters((prev) => {
       const updated = { ...prev };
       if (updated[type]?.includes(value)) {
@@ -122,7 +113,7 @@ function UserDashboardPage() {
   const clearFilters = () => {
     setActiveFilters(initialFilters);
     setSearchQuery("");
-    setFilteredUsers(allUsers); // Reset filtered data
+    setFilteredUsers(usersTable);
     closeMenuMenuFilters();
   };
 
@@ -131,17 +122,28 @@ function UserDashboardPage() {
     closeMenuMenuFilters();
   };
 
+  const handleRefresh = () => {
+    setActiveFilters(initialFilters);
+    setSearchQuery("");
+    fetchData();
+  };
+
   const [openMenuFilters, setOpenMenuFilters] = useState(false);
   const closeMenuMenuFilters = () => setOpenMenuFilters(false);
 
   const [dialogKey, setDialogKey] = useState(0);
-  type ExtendedUserData = Omit<IUser, "status"> & {
-    status: EUserStatus;
-    role: EUserRole;
-    password?: string;
-  };
 
   const [data, setData] = useState<ExtendedUserData | null>(null);
+
+  const defaultUser: ExtendedUserData = {
+    id: "",
+    username: "",
+    email: "",
+    password: "",
+    fullname: "",
+    role: EUserRole.USER,
+    status: EUserStatus.PENDING,
+  };
 
   const handleChange = (
     field: keyof ExtendedUserData,
@@ -156,34 +158,41 @@ function UserDashboardPage() {
     });
   };
 
-  const handleUpdate = async () => {
-    if (data) {
-      try {
-        const res = await updateUser(
-          data.id,
-          data.fullname,
-          avatarFile || null,
-          data.role,
-          data.status
-        );
-
-        if (res && res.status && res.status >= 200 && res.status < 300) {
-          toast.success("Cập nhật người dùng thành công");
-          setIsUpdateUserOpen(false);
-        } else {
-          toast.error(res?.message || "Cập nhật thất bại");
-        }
-      } catch (err) {
-        console.error("Update user failed:", err);
-        toast.error("Lỗi khi cập nhật người dùng - vui lòng thử lại");
-      }
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setPreviewAvatar(URL.createObjectURL(file));
     }
+  };
+
+  const handleUpdate = async () => {
+    if (!data) {
+      return;
+    }
+
+    const res = await updateUser(
+      data.id,
+      data.fullname,
+      avatarFile || null,
+      data.role,
+      data.status
+    );
+
+    if (res?.data?.success) {
+      toast.success("User updated successfully");
+    } else {
+      toast.error("Failed to update user");
+    }
+
+    setIsUpdateUserOpen(false);
   };
 
   const handleResetPassword = async (user: IUser) => {
     if (user) {
-      const result = await resetPassword(user.email);
-      if (result?.data?.success) {
+      const res = await resetPassword(user.email);
+
+      if (res?.data?.success) {
         toast.success("Password reset email sent successfully");
       } else {
         toast.error("Failed to send password reset email");
@@ -192,24 +201,43 @@ function UserDashboardPage() {
   };
 
   const handleCreate = async () => {
-    if (data) {
-      await createUser(
-        data.email,
-        data.password || "",
-        data.fullname,
-        avatarFile || null,
-        data.role,
-        data.status
-      );
-
-      setIsCreateUserOpen(false);
+    if (!data) {
+      return;
     }
+
+    const res = await createUser(
+      data.email,
+      data.password || "",
+      data.fullname,
+      avatarFile || null,
+      data.role,
+      data.status
+    );
+
+    if (res?.data?.success) {
+      toast.success("User created successfully");
+    } else {
+      toast.error("Failed to create user");
+    }
+
+    setIsCreateUserOpen(false);
   };
 
-  const handleRefresh = () => {
-    setActiveFilters(initialFilters);
-    setSearchQuery("");
-    fetchData();
+  const onDelete = async (user: IUser) => {
+    await deleteUser(user.id);
+  };
+
+  const onUpdate = async (user: IUser) => {
+    setData(user);
+    setIsUpdateUserOpen(true);
+  };
+
+  const onResetPassword = async (user: IUser) => {
+    if (!user) {
+      return;
+    }
+
+    await resetPassword(user?.email);
   };
 
   return (
@@ -230,7 +258,6 @@ function UserDashboardPage() {
         onOpenChange={(open) => {
           setIsCreateUserOpen(open);
           if (!open) {
-            // Reset data to null when closing dialog
             setData(null);
             setDialogKey((prev) => prev + 1);
           }
@@ -240,7 +267,6 @@ function UserDashboardPage() {
         data={data}
         previewAvatar={previewAvatar}
         handleAvatarChange={handleAvatarChange}
-        isLoading={isLoading}
       />
 
       <UpdateUserDialog
@@ -255,13 +281,12 @@ function UserDashboardPage() {
         }}
         onChange={handleChange}
         data={data}
+        onUserUpdated={handleUpdate}
         previewAvatar={previewAvatar}
         handleAvatarChange={handleAvatarChange}
-        onUserUpdated={handleUpdate}
-        isLoading={isLoading}
       />
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
           <CardHeader className="pb-4 border-b border-border/30">
             <div className="flex items-center justify-between">
@@ -301,15 +326,11 @@ function UserDashboardPage() {
           </CardHeader>
 
           <UserTable
-            Users={filteredUsers}
+            users={filteredUsers}
             isLoading={isLoading}
-            onEdit={(user) => {
-              setData(user);
-              setIsUpdateUserOpen(true);
-            }}
-            onResetPassword={(user) => {
-              handleResetPassword(user);
-            }}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+            onResetPassword={onResetPassword}
           />
         </Card>
       </div>

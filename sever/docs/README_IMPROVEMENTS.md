@@ -3,6 +3,7 @@
 ## 📦 Tổng Quan
 
 Đây là package hoàn chỉnh để cải tiến kiến trúc RabbitMQ cho hệ thống microservices JobReady, giải quyết các vấn đề về:
+
 - ❌ Race condition (response mixing)
 - ❌ Duplicate requests
 - ❌ Message loss
@@ -14,6 +15,7 @@
 ### 🎯 Tài Liệu Chính
 
 1. **[RABBITMQ_ARCHITECTURE_IMPROVEMENT.md](./RABBITMQ_ARCHITECTURE_IMPROVEMENT.md)**
+
    - 📖 Phân tích chi tiết vấn đề hiện tại
    - 🏗️ Kiến trúc đề xuất (Hybrid Sync + Async + Event-Driven)
    - 💡 6 Solutions chính với code implementation
@@ -22,6 +24,7 @@
    - ⏰ **Đọc trước tiên!** (30-45 phút)
 
 2. **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)**
+
    - 🔧 Hướng dẫn migrate từ old → new architecture
    - 📋 Step-by-step instructions
    - ✅ Testing guidelines
@@ -29,12 +32,14 @@
    - ⏰ **Đọc khi bắt đầu implement** (20-30 phút)
 
 3. **[SEQUENCE_DIAGRAMS.md](./SEQUENCE_DIAGRAMS.md)**
+
    - 📊 6 sequence diagrams chi tiết
    - 🔍 So sánh Before vs After
    - 🎬 Visualize toàn bộ flow
    - ⏰ **Reference khi cần hiểu flow** (15-20 phút)
 
 4. **[IMPLEMENTATION_CHECKLIST.md](./IMPLEMENTATION_CHECKLIST.md)**
+
    - ☑️ Checklist đầy đủ cho 10 phases
    - 📊 Success metrics
    - 🚨 Rollback checklist
@@ -84,6 +89,7 @@ config/development/
 ## 🚀 Quick Start
 
 ### 1️⃣ Đọc Tài Liệu (1-2 giờ)
+
 ```bash
 # Đọc theo thứ tự:
 1. RABBITMQ_ARCHITECTURE_IMPROVEMENT.md  (45 phút)
@@ -92,6 +98,7 @@ config/development/
 ```
 
 ### 2️⃣ Setup Environment (30 phút)
+
 ```bash
 # 1. Start Redis
 docker run -d -p 6379:6379 --name redis redis:alpine
@@ -108,12 +115,14 @@ mvn clean install
 ```
 
 ### 3️⃣ Copy Code Files (15 phút)
+
 ```bash
 # Copy files vào project theo structure trên
 # Đảm bảo package names match với project của bạn
 ```
 
 ### 4️⃣ Update Configuration (15 phút)
+
 ```yaml
 # application.yml - Add Redis config
 spring:
@@ -124,6 +133,7 @@ spring:
 ```
 
 ### 5️⃣ Testing (1 giờ)
+
 ```bash
 # Run unit tests
 mvn test
@@ -141,13 +151,13 @@ mvn verify
 
 ## 📊 Expected Improvements
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Response Time (p95)** | 500-2000ms | < 200ms | **10x faster** |
-| **Concurrent Requests** | ~10-20 | > 1000 | **50x more** |
-| **Error Rate** | ~5% | < 1% | **5x better** |
-| **Message Loss** | Possible | Zero | **100% reliable** |
-| **Duplicate Prevention** | ❌ None | ✅ Redis Lock | **Guaranteed** |
+| Metric                   | Before     | After         | Improvement       |
+| ------------------------ | ---------- | ------------- | ----------------- |
+| **Response Time (p95)**  | 500-2000ms | < 200ms       | **10x faster**    |
+| **Concurrent Requests**  | ~10-20     | > 1000        | **50x more**      |
+| **Error Rate**           | ~5%        | < 1%          | **5x better**     |
+| **Message Loss**         | Possible   | Zero          | **100% reliable** |
+| **Duplicate Prevention** | ❌ None    | ✅ Redis Lock | **Guaranteed**    |
 
 ---
 
@@ -197,6 +207,7 @@ mvn verify
 ## 🔑 Key Solutions
 
 ### 1. ImprovedRabbitRPCService
+
 - ✅ Direct Reply-To pattern (no shared queue)
 - ✅ Non-blocking CompletableFuture
 - ✅ Proper correlation ID matching
@@ -205,6 +216,7 @@ mvn verify
 **Impact:** Eliminates race condition, 10x faster
 
 ### 2. IdempotencyService (Redis)
+
 - ✅ Distributed lock với SET NX
 - ✅ Cache results cho duplicate requests
 - ✅ TTL 24h tự động cleanup
@@ -213,6 +225,7 @@ mvn verify
 **Impact:** Zero duplicates, instant retry response
 
 ### 3. Dead Letter Queue + Retry
+
 - ✅ Auto retry với exponential backoff
 - ✅ Max 3 retries rồi poison queue
 - ✅ No message loss
@@ -221,6 +234,7 @@ mvn verify
 **Impact:** 100% message reliability
 
 ### 4. Circuit Breaker (Resilience4j)
+
 - ✅ Auto-detect failing services
 - ✅ Fail fast (no waiting)
 - ✅ Auto recovery
@@ -229,6 +243,7 @@ mvn verify
 **Impact:** Graceful degradation, better UX
 
 ### 5. Event-Driven (Async)
+
 - ✅ Sync cho critical operations
 - ✅ Async cho background tasks
 - ✅ Fanout to multiple consumers
@@ -237,6 +252,7 @@ mvn verify
 **Impact:** 5x faster response, better scalability
 
 ### 6. Outbox Pattern
+
 - ✅ Guaranteed event delivery
 - ✅ Atomic with DB transaction
 - ✅ Retry failed events
@@ -248,18 +264,18 @@ mvn verify
 
 ## 📅 Timeline
 
-| Phase | Duration | Focus |
-|-------|----------|-------|
-| Phase 1 | Week 1 | Setup & Dependencies |
-| Phase 2 | Week 2 | Core RPC Improvements |
-| Phase 3 | Week 2 | Consumer Improvements |
-| Phase 4 | Week 3 | Dead Letter Queue |
-| Phase 5 | Week 3 | Circuit Breaker |
-| Phase 6 | Week 4 | Event-Driven |
-| Phase 7 | Week 4-5 | Outbox Pattern |
-| Phase 8 | Week 5 | Testing & Validation |
-| Phase 9 | Week 6 | Monitoring |
-| Phase 10 | Week 6 | Documentation & Deploy |
+| Phase    | Duration | Focus                  |
+| -------- | -------- | ---------------------- |
+| Phase 1  | Week 1   | Setup & Dependencies   |
+| Phase 2  | Week 2   | Core RPC Improvements  |
+| Phase 3  | Week 2   | Consumer Improvements  |
+| Phase 4  | Week 3   | Dead Letter Queue      |
+| Phase 5  | Week 3   | Circuit Breaker        |
+| Phase 6  | Week 4   | Event-Driven           |
+| Phase 7  | Week 4-5 | Outbox Pattern         |
+| Phase 8  | Week 5   | Testing & Validation   |
+| Phase 9  | Week 6   | Monitoring             |
+| Phase 10 | Week 6   | Documentation & Deploy |
 
 **Total:** 6-8 weeks (có thể faster nếu skip phases không critical)
 
@@ -268,16 +284,19 @@ mvn verify
 ## ⚠️ Critical Points
 
 ### Must Do ✅
+
 1. **Direct Reply-To** - Fixes race condition (highest priority)
 2. **Idempotency** - Prevents duplicates (highest priority)
 3. **DLQ** - Prevents message loss (high priority)
 4. **Circuit Breaker** - Fault tolerance (high priority)
 
 ### Nice to Have 🔵
+
 5. **Event-Driven** - Better scalability (medium priority)
 6. **Outbox Pattern** - Guaranteed events (medium priority)
 
 ### Can Skip Initially ⚪
+
 7. Advanced monitoring
 8. Complex event sourcing
 9. CQRS patterns
@@ -287,6 +306,7 @@ mvn verify
 ## 🧪 Testing Strategy
 
 ### Unit Tests
+
 ```java
 // Test idempotency
 testDuplicateRequestsGetCachedResult()
@@ -299,6 +319,7 @@ testTimeoutHandling()
 ```
 
 ### Integration Tests
+
 ```java
 // Test full flow
 testRegisterFlow()
@@ -307,6 +328,7 @@ testEventPublishing()
 ```
 
 ### Load Tests
+
 ```bash
 # Apache Bench
 ab -n 1000 -c 100 http://localhost:8080/api/auth/register
@@ -322,16 +344,19 @@ ab -n 1000 -c 100 http://localhost:8080/api/auth/register
 ## 📞 Support & Questions
 
 ### Documentation
+
 - Đọc RABBITMQ_ARCHITECTURE_IMPROVEMENT.md cho details
 - Đọc MIGRATION_GUIDE.md cho step-by-step
 - Check SEQUENCE_DIAGRAMS.md để hiểu flow
 
 ### Code Issues
+
 - Check existing code comments
 - Review test cases
 - Debug với correlationId trong logs
 
 ### Production Issues
+
 - Check Actuator endpoints: `/actuator/health`
 - Check Circuit Breaker: `/actuator/circuitbreakers`
 - Check RabbitMQ Management UI
@@ -342,18 +367,22 @@ ab -n 1000 -c 100 http://localhost:8080/api/auth/register
 ## 🎓 Learning Resources
 
 ### RabbitMQ
+
 - [RabbitMQ Direct Reply-To](https://www.rabbitmq.com/direct-reply-to.html)
 - [RabbitMQ DLX](https://www.rabbitmq.com/dlx.html)
 
 ### Redis
+
 - [Redis SET NX](https://redis.io/commands/set/)
 - [Redis TTL](https://redis.io/commands/ttl/)
 
 ### Resilience4j
+
 - [Circuit Breaker](https://resilience4j.readme.io/docs/circuitbreaker)
 - [Time Limiter](https://resilience4j.readme.io/docs/timeout)
 
 ### Patterns
+
 - [Idempotency Pattern](https://microservices.io/patterns/communication-style/idempotent-consumer.html)
 - [Outbox Pattern](https://microservices.io/patterns/data/transactional-outbox.html)
 

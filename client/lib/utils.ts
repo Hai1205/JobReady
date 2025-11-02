@@ -132,7 +132,7 @@ export const cleanString = (input: string): string => {
     .join(",");
 }
 
-export const capitalizeEnumValue = (value: string | number): string => {
+export const capitalizeFirstLetter = (value: string | number): string => {
   const str = value.toString();
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
