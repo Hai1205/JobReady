@@ -18,4 +18,6 @@ public class CreateCVRequest {
     private List<EducationDto> educations;
     private List<String> skills;
     private String privacy;
+    private String color;
+    private String template;
 }

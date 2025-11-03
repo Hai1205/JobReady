@@ -33,10 +33,9 @@ export interface ICVStore extends IBaseStore {
 		educations: IEducation[],
 		skills: string[],
 		privacy: string,
-		color?: string,
-		template?: string
+		color: string,
+		template: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
-	// ) => Promise<void>;
 	updateCV: (
 		cvId: string,
 		title: string,
@@ -46,10 +45,9 @@ export interface ICVStore extends IBaseStore {
 		educations: IEducation[],
 		skills: string[],
 		privacy: string,
-		color?: string,
-		template?: string
+		color: string,
+		template: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
-	// ) => Promise<void>;
 	deleteCV: (
 		cvId: string
 	) => Promise<IApiResponse<void>>;
@@ -141,9 +139,8 @@ export const useCVStore = createStore<ICVStore>(
 			educations: IEducation[],
 			skills: string[],
 			privacy: string,
-			color: string = "#3498db",
-			template: string = "modern"
-			// ): Promise<void> => {
+			color: string,
+			template: string
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
@@ -175,10 +172,9 @@ export const useCVStore = createStore<ICVStore>(
 			educations: IEducation[],
 			skills: string[],
 			privacy: string,
-			color: string = "#3498db",
-			template: string = "modern"
+			color: string,
+			template: string
 		): Promise<IApiResponse<ICVDataResponse>> => {
-			// ): Promise<void> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				title,

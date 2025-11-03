@@ -87,7 +87,9 @@ public class CVService extends BaseService {
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
             List<String> skills,
-            String privacy) {
+            String privacy,
+            String color,
+            String template) {
         log.info("Creating CV for userId={} title='{}' experiencesCount={} educationsCount={}", userId, title,
                 experiencesDto == null ? 0 : experiencesDto.size(), educationsDto == null ? 0 : educationsDto.size());
 
@@ -115,7 +117,7 @@ public class CVService extends BaseService {
             privacy = "PRIVATE";
         }
 
-        CV cv = new CV(userId, title, skills, privacy);
+        CV cv = new CV(userId, title, skills, privacy, color, template);
 
         PersonalInfo personalInfo = new PersonalInfo(personalInfoDto);
         if (personalInfoDto.getAvatar() != null && !personalInfoDto.getAvatar().isEmpty()) {
@@ -161,6 +163,8 @@ public class CVService extends BaseService {
             List<EducationDto> educations = request.getEducations();
             List<String> skills = request.getSkills();
             String privacy = request.getPrivacy();
+            String color = request.getColor();
+            String template = request.getTemplate();
 
             log.info("Received createCV request for userId={}", userId);
             CVDto cvDto = handleCreateCV(
@@ -170,7 +174,9 @@ public class CVService extends BaseService {
                     experiences,
                     educations,
                     skills,
-                    privacy);
+                    privacy,
+                    color,
+                    template);
 
             response.setStatusCode(201);
             response.setMessage("CV created successfully");
@@ -397,11 +403,15 @@ public class CVService extends BaseService {
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
             List<String> skills,
-            String privacy) {
+            String privacy,
+            String color,
+            String template) {
         CV existing = cvRepository.findById(cvId)
                 .orElseThrow(() -> new OurException("CV not found", 404));
 
         existing.setTitle(title);
+        existing.setColor(color);
+        existing.setTemplate(template);
 
         if (personalInfoDto != null) {
             PersonalInfo pi = existing.getPersonalInfo();
@@ -473,6 +483,8 @@ public class CVService extends BaseService {
             List<EducationDto> educations = request.getEducations();
             List<String> skills = request.getSkills();
             String privacy = request.getPrivacy();
+            String color = request.getColor();
+            String template = request.getTemplate();
 
             CVDto cvDto = handleUpdateCV(
                     cvId,
@@ -481,7 +493,9 @@ public class CVService extends BaseService {
                     experiences,
                     educations,
                     skills,
-                    privacy);
+                    privacy,
+                    color,
+                    template);
 
             response.setMessage("CV updated successfully");
             response.setCv(cvDto);
@@ -512,8 +526,10 @@ public class CVService extends BaseService {
                 existingCV.getPersonalInfo(),
                 existingCV.getExperiences(),
                 existingCV.getEducations(),
-                new ArrayList<>(existingCV.getSkills()), // Copy skills list to avoid shared references
-                existingCV.getPrivacy());
+                new ArrayList<>(existingCV.getSkills()),
+                existingCV.getPrivacy(),
+                existingCV.getColor(),
+                existingCV.getTemplate());
 
         log.info("Duplicated CV id={} created new CV id={}", cvId, newCV.getId());
         return newCV;
@@ -814,7 +830,7 @@ public class CVService extends BaseService {
             }
 
             // Create CV
-            return handleCreateCV(userId, title, personalInfo, experiences, educations, skills, "PRIVATE");
+            return handleCreateCV(userId, title, personalInfo, experiences, educations, skills, "PRIVATE", "#3498db", "modern");
 
         } catch (Exception e) {
             throw new OurException("Error parsing AI response: " + e.getMessage(), 500);

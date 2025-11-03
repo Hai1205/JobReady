@@ -23,11 +23,13 @@ public class CV {
 
     private UUID userId;
 
-    public CV(UUID userId, String title, List<String> skills, String privacy) {
+    public CV(UUID userId, String title, List<String> skills, String privacy, String color, String template) {
         this.privacy = CVPrivacy.valueOf(privacy);
         this.title = title;
         this.userId = userId;
         this.skills = skills;
+        this.color = color;
+        this.template = template;
     }
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
