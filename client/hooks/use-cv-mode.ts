@@ -15,6 +15,7 @@ export const useCVModeStore = create<CVModeStore>((set) => ({
 /**
  * Hook để lấy CV và các hàm update phù hợp với mode hiện tại
  * Tự động chọn currentCVCreate hoặc currentCVUpdate dựa trên mode
+ * Note: currentCV có thể null, nên component cần check hoặc CVBuilderWizard phải đợi khởi tạo xong
  */
 export function useCurrentCV() {
     const { mode } = useCVModeStore();
@@ -28,10 +29,10 @@ export function useCurrentCV() {
     } = useCVStore();
 
     // Chọn CV dựa trên mode
-    const currentCV = mode === "create" ? currentCVCreate : currentCVUpdate;
+    const currentCV = (mode === "create" ? currentCVCreate : currentCVUpdate) as ICV;
 
-    // Chọn hàm update dựa trên mode
-    const handleUpdateCV = mode === "create" ? handleUpdateCVCreate : handleUpdateCVUpdate;
+    // Chọn hàm update dựa trên mode  
+    const handleUpdateCV = (mode === "create" ? handleUpdateCVCreate : handleUpdateCVUpdate) as (cvData: Partial<ICV>) => void;
 
     return {
         currentCV,

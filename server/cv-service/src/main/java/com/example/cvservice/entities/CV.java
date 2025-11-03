@@ -49,6 +49,12 @@ public class CV {
     @Column(nullable = false)
     private CVPrivacy privacy = CVPrivacy.PRIVATE;
 
+    @Column(nullable = false)
+    private String color = "#3498db"; // Default blue color
+
+    @Column(nullable = false)
+    private String template = "modern"; // Default modern template
+
     private Instant createdAt;
     private Instant updatedAt;
 

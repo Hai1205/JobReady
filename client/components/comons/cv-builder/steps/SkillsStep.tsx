@@ -13,8 +13,6 @@ export function SkillsStep() {
   const { currentCV, handleUpdateCV } = useCurrentCV();
   const [skillInput, setSkillInput] = useState("");
 
-  if (!currentCV) return null;
-
   const addSkill = () => {
     if (!skillInput.trim()) return;
 

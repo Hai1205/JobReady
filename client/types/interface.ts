@@ -21,6 +21,8 @@ declare global {
         educations: IEducation[]
         skills: string[]
         privacy: EPrivacy
+        color: string             // Mã màu chủ đạo, ví dụ "#3498db" hoặc "blue"
+        template: string          // Tên hoặc mã định danh của template, ví dụ "modern", "classic", "minimal"
         createdAt?: string
         updatedAt?: string
     }
@@ -32,9 +34,8 @@ declare global {
         phone: string
         location: string
         summary: string
-        // avatar?: File | null  // For upload
-        avatarUrl?: string    // From backend
-        avatarPublicId?: string // Cloudinary ID
+        avatarUrl?: string
+        avatarPublicId?: string
     }
 
     interface IExperience {

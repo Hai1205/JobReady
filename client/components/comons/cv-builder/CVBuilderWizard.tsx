@@ -6,7 +6,14 @@ import { PersonalInfoStep } from "./steps/PersonalInfoStep";
 import { ExperienceStep } from "./steps/ExperienceStep";
 import { SkillsStep } from "./steps/SkillsStep";
 import { PreviewStep } from "./steps/PreviewStep";
-import { ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Save,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -14,9 +21,11 @@ import { useCVStore } from "@/stores/cvStore";
 import { useAuthStore } from "@/stores/authStore";
 import { EducationStep } from "./steps/EducationStep";
 import { EPrivacy } from "@/types/enum";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCVModeStore } from "@/hooks/use-cv-mode";
+import { ColorThemeSelector } from "./ColorThemeSelector";
+import { TemplateSelector } from "./TemplateSelector";
 
 const steps = [
   { id: 0, title: "Personal Info", component: PersonalInfoStep },
@@ -47,32 +56,34 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
   } = useCVStore();
 
   const router = useRouter();
+  const [isCustomizationExpanded, setIsCustomizationExpanded] = useState(false);
 
   // Set mode khi component mount
   useEffect(() => {
     setMode(mode);
   }, [mode, setMode]);
 
-  // Initialize currentCVCreate if null for create mode
-  useEffect(() => {
-    if (mode === "create" && !currentCVCreate) {
-      handleSetCurrentCVCreate({
-        id: "",
-        title: "Untitled CV",
-        personalInfo: {
-          fullname: "",
-          email: "",
-          phone: "",
-          location: "",
-          summary: "",
-        },
-        experiences: [],
-        educations: [],
-        skills: [],
-        privacy: EPrivacy.PRIVATE,
-      } as ICV);
-    }
-  }, [mode, currentCVCreate, handleSetCurrentCVCreate]);
+  // Initialize currentCVCreate IMMEDIATELY (synchronously) for create mode
+  // Không dùng useEffect vì nó async, gây delay
+  if (mode === "create" && !currentCVCreate) {
+    handleSetCurrentCVCreate({
+      id: "",
+      title: "Untitled CV",
+      personalInfo: {
+        fullname: "",
+        email: "",
+        phone: "",
+        location: "",
+        summary: "",
+      },
+      experiences: [],
+      educations: [],
+      skills: [],
+      privacy: EPrivacy.PRIVATE,
+      color: "#3498db",
+      template: "modern",
+    } as ICV);
+  }
 
   // Chọn CV dựa trên mode
   const currentCV = mode === "create" ? currentCVCreate : currentCVUpdate;
@@ -105,7 +116,9 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
         currentCV.experiences,
         currentCV.educations,
         currentCV.skills,
-        currentCV.privacy
+        currentCV.privacy,
+        currentCV.color,
+        currentCV.template
       );
     } else {
       const res = await createCV(
@@ -116,7 +129,9 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
         currentCV.experiences,
         currentCV.educations,
         currentCV.skills,
-        currentCV.privacy
+        currentCV.privacy,
+        currentCV.color,
+        currentCV.template
       );
 
       // If API returns created CV, set it into store and redirect to its URL to avoid duplicate creates
@@ -125,7 +140,7 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
         if (handleSetCurrentCVCreate) {
           handleSetCurrentCVCreate(createdCv);
         }
-        
+
         router.push(`/cv-builder/${createdCv.id}`);
       }
     }
@@ -144,45 +159,96 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Tiêu đề */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="cv-title">Tiêu đề</Label>
+        <Input
+          id="cv-title"
+          value={currentCV?.title}
+          onChange={(e) => handleCVUpdate({ title: e.target.value })}
+          placeholder="e.g., Software Engineer CV"
+          className="text-lg font-semibold"
+        />
+      </div>
+
       {/* Privacy & Tiêu đề */}
-      {currentCV && (
-        <div className="flex flex-col gap-4">
-          {/* Privacy Toggle */}
-          <div className="flex items-center justify-between rounded-lg border border-border p-4">
-            <div className="space-y-0.5">
-              <Label htmlFor="privacy-toggle" className="text-base">
-                Chế độ riêng tư
+      <div className="flex flex-col gap-4">
+        {/* Privacy Toggle */}
+        <div className="flex items-center justify-between rounded-lg border border-border p-4">
+          <div className="space-y-0.5">
+            <Label htmlFor="privacy-toggle" className="text-base">
+              Chế độ riêng tư
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              {currentCV?.privacy === EPrivacy.PUBLIC
+                ? "CV của bạn hiện công khai và có thể được tìm thấy bởi nhà tuyển dụng"
+                : "CV của bạn ở chế độ riêng tư, chỉ bạn mới có thể xem"}
+            </p>
+          </div>
+          <Switch
+            id="privacy-toggle"
+            checked={currentCV?.privacy === EPrivacy.PUBLIC}
+            onCheckedChange={(checked) =>
+              handleCVUpdate({
+                privacy: checked ? EPrivacy.PUBLIC : EPrivacy.PRIVATE,
+              })
+            }
+          />
+        </div>
+
+        {/* CV Customization Section */}
+        <div className="rounded-lg border border-border">
+          {/* Header */}
+          <div
+            className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setIsCustomizationExpanded(!isCustomizationExpanded)}
+          >
+            <div>
+              <Label className="text-base font-semibold cursor-pointer">
+                Tùy chỉnh giao diện CV
               </Label>
-              <p className="text-sm text-muted-foreground">
-                {currentCV.privacy === EPrivacy.PUBLIC
-                  ? "CV của bạn hiện công khai và có thể được tìm thấy bởi nhà tuyển dụng"
-                  : "CV của bạn ở chế độ riêng tư, chỉ bạn mới có thể xem"}
+              <p className="text-sm text-muted-foreground mt-1">
+                {isCustomizationExpanded
+                  ? "Thu gọn để ẩn các tùy chọn màu sắc và template"
+                  : `Màu: ${currentCV?.color || "#3498db"} | Template: ${
+                      currentCV?.template || "modern"
+                    }`}
               </p>
             </div>
-            <Switch
-              id="privacy-toggle"
-              checked={currentCV.privacy === EPrivacy.PUBLIC}
-              onCheckedChange={(checked) =>
-                handleCVUpdate({
-                  privacy: checked ? EPrivacy.PUBLIC : EPrivacy.PRIVATE,
-                })
-              }
-            />
+            <Button type="button" variant="ghost" size="sm" className="gap-2">
+              {isCustomizationExpanded ? (
+                <>
+                  Thu gọn <ChevronUp className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Mở rộng <ChevronDown className="h-4 w-4" />
+                </>
+              )}
+            </Button>
           </div>
 
-          {/* Tiêu đề */}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="cv-title">Tiêu đề</Label>
-            <Input
-              id="cv-title"
-              value={currentCV.title}
-              onChange={(e) => handleCVUpdate({ title: e.target.value })}
-              placeholder="e.g., Software Engineer CV"
-              className="text-lg font-semibold"
-            />
-          </div>
+          {/* Content */}
+          {isCustomizationExpanded && (
+            <div className="border-t border-border p-4 space-y-4 animate-in fade-in-50 slide-in-from-top-2 duration-200">
+              {/* Color Theme Selector */}
+              <ColorThemeSelector
+                selectedColor={currentCV?.color || "#3498db"}
+                onColorChange={(color) => handleCVUpdate({ color })}
+              />
+
+              {/* Divider */}
+              <div className="border-t border-border" />
+
+              {/* Template Selector */}
+              <TemplateSelector
+                selectedTemplate={currentCV?.template || "modern"}
+                onTemplateChange={(template) => handleCVUpdate({ template })}
+              />
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* File Import */}
       {/* {currentStep === 0 && (

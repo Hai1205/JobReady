@@ -11,8 +11,6 @@ import { useCurrentCV } from "@/hooks/use-cv-mode";
 export function ExperienceStep() {
   const { currentCV, handleUpdateCV, aiSuggestions } = useCurrentCV();
 
-  if (!currentCV) return null;
-
   const addExperience = () => {
     handleUpdateCV({
       experiences: [

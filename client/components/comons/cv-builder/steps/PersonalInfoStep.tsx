@@ -15,8 +15,6 @@ export function PersonalInfoStep() {
   const { currentCV, handleUpdateCV, aiSuggestions } = useCurrentCV();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!currentCV) return null;
-
   const handleChange = (field: string, value: string) => {
     handleUpdateCV({
       personalInfo: {
@@ -90,14 +88,14 @@ export function PersonalInfoStep() {
               <AvatarImage
                 src={
                   `${
-                    currentCV.personalInfo.avatarUrl ||
-                    currentCV.personalInfo.avatarPublicId
+                    currentCV?.personalInfo?.avatarUrl ||
+                    currentCV?.personalInfo?.avatarPublicId
                   }` || ""
                 }
               />
               <AvatarFallback className="text-lg">
-                {currentCV.personalInfo.fullname
-                  ? currentCV.personalInfo.fullname
+                {currentCV?.personalInfo?.fullname
+                  ? currentCV?.personalInfo?.fullname
                       .split(" ")
                       .map((n) => n[0])
                       .join("")
@@ -115,7 +113,7 @@ export function PersonalInfoStep() {
                 <Upload className="h-4 w-4 mr-2" />
                 Tải ảnh lên
               </Button>
-              {currentCV.avatar && (
+              {currentCV?.avatar && (
                 <Button
                   type="button"
                   variant="outline"
@@ -153,7 +151,7 @@ export function PersonalInfoStep() {
           <Label htmlFor="fullname">Họ và Tên *</Label>
           <Input
             id="fullname"
-            value={currentCV.personalInfo.fullname}
+            value={currentCV?.personalInfo?.fullname}
             onChange={(e) => handleChange("fullname", e.target.value)}
             placeholder="Nguyễn Hoàng Hải"
           />
@@ -164,7 +162,7 @@ export function PersonalInfoStep() {
           <Input
             id="email"
             type="email"
-            value={currentCV.personalInfo.email}
+            value={currentCV?.personalInfo?.email}
             onChange={(e) => handleChange("email", e.target.value)}
             placeholder="hainguyenhoang1205@gmail.com"
           />
@@ -175,7 +173,7 @@ export function PersonalInfoStep() {
           <Input
             id="phone"
             type="tel"
-            value={currentCV.personalInfo.phone}
+            value={currentCV?.personalInfo?.phone}
             onChange={(e) => handleChange("phone", e.target.value)}
             placeholder="0782748863"
           />
@@ -185,7 +183,7 @@ export function PersonalInfoStep() {
           <Label htmlFor="location">Địa Chỉ</Label>
           <Input
             id="location"
-            value={currentCV.personalInfo.location}
+            value={currentCV?.personalInfo?.location}
             onChange={(e) => handleChange("location", e.target.value)}
             placeholder="Hà Nội, Việt Nam"
           />
@@ -196,7 +194,7 @@ export function PersonalInfoStep() {
         <Label htmlFor="summary">Mục Tiêu Nghề Nghiệp</Label>
         <HighlightableTextarea
           id="summary"
-          value={currentCV.personalInfo.summary}
+          value={currentCV?.personalInfo?.summary}
           onChange={(value) => handleChange("summary", value)}
           placeholder="Mô tả ngắn gọn về kinh nghiệm chuyên môn và mục tiêu nghề nghiệp của bạn..."
           rows={6}

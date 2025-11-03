@@ -32,7 +32,9 @@ export interface ICVStore extends IBaseStore {
 		experiences: IExperience[],
 		educations: IEducation[],
 		skills: string[],
-		privacy: string
+		privacy: string,
+		color?: string,
+		template?: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	// ) => Promise<void>;
 	updateCV: (
@@ -44,6 +46,8 @@ export interface ICVStore extends IBaseStore {
 		educations: IEducation[],
 		skills: string[],
 		privacy: string,
+		color?: string,
+		template?: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	// ) => Promise<void>;
 	deleteCV: (
@@ -137,6 +141,8 @@ export const useCVStore = createStore<ICVStore>(
 			educations: IEducation[],
 			skills: string[],
 			privacy: string,
+			color: string = "#3498db",
+			template: string = "modern"
 			// ): Promise<void> => {
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
@@ -146,7 +152,9 @@ export const useCVStore = createStore<ICVStore>(
 				experiences,
 				educations,
 				skills,
-				privacy
+				privacy,
+				color,
+				template
 			}));
 			if (avatar) formData.append("avatar", avatar);
 			testFormData(formData);
@@ -166,7 +174,9 @@ export const useCVStore = createStore<ICVStore>(
 			experiences: IExperience[],
 			educations: IEducation[],
 			skills: string[],
-			privacy: string
+			privacy: string,
+			color: string = "#3498db",
+			template: string = "modern"
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			// ): Promise<void> => {
 			const formData = new FormData();
@@ -176,7 +186,9 @@ export const useCVStore = createStore<ICVStore>(
 				experiences,
 				educations,
 				skills,
-				privacy
+				privacy,
+				color,
+				template
 			}));
 			if (avatar) formData.append("avatar", avatar);
 			testFormData(formData);

@@ -53,6 +53,9 @@ public class CVMapper {
 
         dto.setPrivacy(cv.getPrivacy() != null ? cv.getPrivacy().name() : null);
 
+        dto.setColor(cv.getColor());
+        dto.setTemplate(cv.getTemplate());
+
         dto.setCreatedAt(cv.getCreatedAt() != null ? cv.getCreatedAt().toString() : null);
         dto.setUpdatedAt(cv.getUpdatedAt() != null ? cv.getUpdatedAt().toString() : null);
 
@@ -87,6 +90,10 @@ public class CVMapper {
             } catch (Exception ignored) {
             }
         }
+
+        cv.setColor(dto.getColor());
+        cv.setTemplate(dto.getTemplate());
+
         if (dto.getPrivacy() != null) {
             try {
                 cv.setPrivacy(CVPrivacy.valueOf(dto.getPrivacy()));

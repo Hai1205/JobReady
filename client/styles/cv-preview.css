@@ -1,0 +1,89 @@
+/* CV Preview Styling with Custom Properties */
+
+/* Container uses CSS custom property for dynamic color theming */
+#cv-preview-content {
+  --cv-primary-color: #3498db;
+  /* Default - will be overridden by inline style */
+}
+
+/* Section Headers */
+.cv-section-header {
+  color: var(--cv-primary-color);
+  border-bottom: 2px solid var(--cv-primary-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Avatar border */
+.cv-avatar {
+  border: 3px solid var(--cv-primary-color);
+  border-radius: 50%;
+}
+
+.cv-avatar-placeholder {
+  background-color: var(--cv-primary-color);
+  border: 3px solid var(--cv-primary-color);
+  border-radius: 50%;
+}
+
+/* Section dividers */
+.cv-divider {
+  border-bottom: 2px solid var(--cv-primary-color);
+}
+
+/* Experience and Education cards */
+.cv-card {
+  border-left: 3px solid var(--cv-primary-color);
+  background-color: #f8f9fa;
+  padding: 12px 15px;
+}
+
+/* Skills badges */
+.cv-skill-badge {
+  background-color: var(--cv-primary-color);
+  opacity: 0.1;
+  /* For background */
+  color: var(--cv-primary-color);
+  border: 1px solid var(--cv-primary-color);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Links */
+.cv-link {
+  color: var(--cv-primary-color);
+  text-decoration: none;
+}
+
+.cv-link:hover {
+  opacity: 0.8;
+}
+
+/* Icons */
+.cv-icon {
+  color: var(--cv-primary-color);
+}
+
+/* Print-specific styles to ensure colors are preserved */
+@media print {
+  #cv-preview-content {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cv-section-header,
+  .cv-avatar,
+  .cv-avatar-placeholder,
+  .cv-card,
+  .cv-skill-badge,
+  .cv-link,
+  .cv-icon {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

@@ -17,6 +17,8 @@ public class CVDto {
     private List<EducationDto> educations;
     private List<String> skills;
     private String privacy;
+    private String color;
+    private String template;
     private String createdAt;
     private String updatedAt;
 }

@@ -10,8 +10,6 @@ import { useCurrentCV } from "@/hooks/use-cv-mode";
 export function EducationStep() {
   const { currentCV, handleUpdateCV } = useCurrentCV();
 
-  if (!currentCV) return null;
-
   const addEducation = () => {
     handleUpdateCV({
       educations: [

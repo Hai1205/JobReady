@@ -387,6 +387,8 @@ export function convertToICV(parsedCV: ParsedCV, userId: string): ICV {
         skills: parsedCV.skills,
         privacy: EPrivacy.PRIVATE,
         avatar: null,
+        color: '#ffffff',
+        template: 'default',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };
