@@ -16,16 +16,16 @@ const ResetPasswordPage: React.FC = () => {
   const { forgotPassword, isLoading } = useAuthStore();
 
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const emailParam = urlParams.get("email");
+    const identifierParam = urlParams.get("identifier");
 
-    if (emailParam) {
-      setEmail(emailParam);
+    if (identifierParam) {
+      setIdentifier(identifierParam);
     }
   }, []);
 
@@ -70,7 +70,7 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     const res = await forgotPassword(
-      email,
+      identifier,
       formData.newPassword,
       formData.rePassword
     );
@@ -94,7 +94,7 @@ const ResetPasswordPage: React.FC = () => {
         </div>
         <h1 className="text-2xl font-bold tracking-tight">Đặt lại mật khẩu</h1>
         <p className="text-muted-foreground">
-          Tạo mật khẩu mới cho tài khoản <strong>{email}</strong>
+          Tạo mật khẩu mới cho tài khoản <strong>{identifier}</strong>
         </p>
       </div>
 

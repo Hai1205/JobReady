@@ -13,12 +13,11 @@ import { Loader2, Mail, Lock, EyeOff, Eye } from "lucide-react";
 
 const LoginPage: React.FC = () => {
   const { isLoading, login, sendOTP } = useAuthStore();
-
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "", // có thể là email hoặc username
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -26,7 +25,7 @@ const LoginPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user types
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -35,56 +34,45 @@ const LoginPage: React.FC = () => {
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
+    if (!formData.identifier.trim()) {
+      newErrors.identifier = "Vui lòng nhập email hoặc username";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = "Vui lòng nhập mật khẩu";
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
 
-    if (!validate()) {
-      return;
-    }
+    console.log("🔐 Bắt đầu đăng nhập...");
 
-    console.log("🔐 Starting login process...");
+    const response = await login(formData.identifier, formData.password);
 
-    const response = await login(formData.email, formData.password);
-
-    console.log("📥 Login response:", response);
+    console.log("📥 Kết quả đăng nhập:", response);
 
     if (response?.status === 403) {
       router.push(
-        `/auth/verification?email=${encodeURIComponent(
-          formData.email
+        `/auth/verification?identifier=${encodeURIComponent(
+          formData.identifier
         )}&isActivation=true`
       );
-
-      await sendOTP(formData.email);
-
+      await sendOTP(formData.identifier);
       return;
     }
 
     if (response?.status && response?.status > 403 && response?.status < 500) {
       router.push(`/auth/banned`);
-
       return;
     }
 
-    if (response?.status && response?.status === 200) {
+    if (response?.status === 200) {
       router.push(`/`);
-
-      return;
     }
   };
 
@@ -93,28 +81,28 @@ const LoginPage: React.FC = () => {
       <div className="space-y-2 text-center">
         <h1 className="text-2xl font-bold tracking-tight">Đăng nhập</h1>
         <p className="text-muted-foreground">
-          Nhập thông tin để truy cập tài khoản của bạn
+          Nhập email hoặc username để truy cập tài khoản
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="identifier">Email hoặc username</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Nhập email của bạn"
-              value={formData.email}
+              id="identifier"
+              name="identifier"
+              type="text"
+              placeholder="Nhập email hoặc username"
+              value={formData.identifier}
               onChange={handleChange}
               className="pl-10"
             />
           </div>
-          {errors.email && (
+          {errors.identifier && (
             <Alert variant="destructive">
-              <AlertDescription>{errors.email}</AlertDescription>
+              <AlertDescription>{errors.identifier}</AlertDescription>
             </Alert>
           )}
         </div>

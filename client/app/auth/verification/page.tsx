@@ -15,7 +15,7 @@ const VerificationPage: React.FC = () => {
   const { isLoading, verifyOTP } = useAuthStore();
 
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [isActivation, setIsActivation] = useState(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
 
@@ -29,13 +29,13 @@ const VerificationPage: React.FC = () => {
     setIsClient(true);
     const urlParams = new URLSearchParams(window.location.search);
     const isActivationParam = urlParams.get("isActivation") === "true";
-    const emailParam = urlParams.get("email");
+    const identifierParam = urlParams.get("identifier");
 
-    if (emailParam) {
-      setEmail(emailParam);
+    if (identifierParam) {
+      setIdentifier(identifierParam);
     }
 
-    if (emailParam) {
+    if (identifierParam) {
       setIsActivation(isActivationParam);
     }
   }, []);
@@ -102,7 +102,7 @@ const VerificationPage: React.FC = () => {
       return;
     }
 
-    const res = await verifyOTP(email, otp.join(""), isActivation);
+    const res = await verifyOTP(identifier, otp.join(""), isActivation);
 
     if (!res) {
       setOtp(Array(6).fill(""));
@@ -119,7 +119,7 @@ const VerificationPage: React.FC = () => {
     }
 
     if (!isActivation) {
-      router.push(`/auth/reset-password/?email=${encodeURIComponent(email)}`);
+      router.push(`/auth/reset-password/?identifier=${encodeURIComponent(identifier)}`);
     } else {
       toast.success("Xác thực tài khoản thành công");
       router.push("/auth/login");
@@ -128,7 +128,7 @@ const VerificationPage: React.FC = () => {
 
   const handleResend = async () => {
     const { sendOTP } = useAuthStore.getState();
-    const result = await sendOTP(email);
+    const result = await sendOTP(identifier);
 
     if (result) {
       toast.success("Mã OTP đã được gửi lại");
@@ -159,7 +159,7 @@ const VerificationPage: React.FC = () => {
         </div>
         <h1 className="text-2xl font-bold tracking-tight">Nhập mã xác thực</h1>
         <p className="text-muted-foreground">
-          Chúng tôi đã gửi mã OTP gồm 6 chữ số về email <strong>{email}</strong>
+          Chúng tôi đã gửi mã OTP gồm 6 chữ số về tài khoản <strong>{identifier}</strong>
         </p>
         <p className="text-sm text-muted-foreground">
           Vui lòng nhập mã để{" "}

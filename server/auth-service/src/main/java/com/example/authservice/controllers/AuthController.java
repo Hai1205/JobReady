@@ -35,27 +35,27 @@ public class AuthController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/send-otp/{email}")
-    public ResponseEntity<Response> sendOTP(@PathVariable("email") String email) {
-        Response response = authService.sendOTP(email);
+    @PostMapping("/send-otp/{identifier}")
+    public ResponseEntity<Response> sendOTP(@PathVariable("identifier") String identifier) {
+        Response response = authService.sendOTP(identifier);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/verify-otp/{email}")
+    @PostMapping("/verify-otp/{identifier}")
     public ResponseEntity<Response> verifyOTP(
-            @PathVariable("email") String email,
+            @PathVariable("identifier") String identifier,
             @RequestPart("data") String dataJson) {
-        Response response = authService.verifyOTP(email, dataJson);
+        Response response = authService.verifyOTP(identifier, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PatchMapping("/change-password/{email}")
+    @PatchMapping("/change-password/{identifier}")
     public ResponseEntity<Response> changePassword(
-            @PathVariable("email") String email,
+            @PathVariable("identifier") String identifier,
             @RequestPart("data") String dataJson) {
-        Response response = authService.changePassword(email,
+        Response response = authService.changePassword(identifier,
                 dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -70,11 +70,11 @@ public class AuthController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PatchMapping("/forgot-password/{email}")
+    @PatchMapping("/forgot-password/{identifier}")
     public ResponseEntity<Response> forgotPassword(
-            @PathVariable("email") String email,
+            @PathVariable("identifier") String identifier,
             @RequestPart("data") String dataJson) {
-        Response response = authService.forgotPassword(email,
+        Response response = authService.forgotPassword(identifier,
                 dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);

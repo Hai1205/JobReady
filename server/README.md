@@ -123,6 +123,7 @@ Xem hướng dẫn trong [`docs/OAUTH2_SETUP_GUIDE.md`](docs/OAUTH2_SETUP_GUIDE.
 mvn clean package -DskipTests
 
 # Hoặc build từng module
+mvn clean install -pl rabbit-common
 mvn clean install -pl discovery-service
 mvn clean install -pl gateway-service
 mvn clean install -pl user-service
@@ -186,41 +187,6 @@ mvn spring-boot:run -pl cv-service
 - `GET /users/{id}` - Lấy user theo ID
 - `PUT /users/{id}` - Cập nhật user
 - `DELETE /users/{id}` - Xóa user
-
-## 🧪 Testing CV Service
-
-### Import CV File
-
-```bash
-curl -X POST http://localhost:8080/cv/import \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -F "file=@/path/to/your/cv.pdf"
-```
-
-### Analyze CV
-
-```bash
-curl -X POST http://localhost:8080/cv/analyze \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "cvId": "your-cv-id",
-    "sections": ["experience", "skills", "education"]
-  }'
-```
-
-### Analyze CV with Job Description
-
-```bash
-curl -X POST http://localhost:8080/cv/analyze-with-jd \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "cvId": "your-cv-id",
-    "jobDescription": "Paste job description here...",
-    "focusAreas": ["technical-skills", "experience-match"]
-  }'
-```
 
 ## 🔧 Cấu hình Environment
 

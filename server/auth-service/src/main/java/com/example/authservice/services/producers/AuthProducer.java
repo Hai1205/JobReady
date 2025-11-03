@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Component;
 
 import com.example.authservice.dtos.UserDto;
-import com.example.authservice.dtos.responses.RPCResponse;
+import com.example.rabbitcommon.dtos.RPCResponse;
 
+@Component
 public class AuthProducer {
     private final RabbitTemplate rabbitTemplate;
 
@@ -17,10 +19,20 @@ public class AuthProducer {
 
     public RPCResponse<UserDto> findUserByEmail(String email) {
         String exchange = "user.profile.exchange";
-        String routingKey = "user.profile.find.by.email.request";
+        String routingKey = "user.profile.find-by-email.request";
 
         Map<String, Object> message = new HashMap<>();
         message.put("email", email);
+
+        return (RPCResponse<UserDto>) rabbitTemplate.convertSendAndReceive(exchange, routingKey, message);
+    }
+
+    public RPCResponse<UserDto> findUserByIdentifier(String identifier) {
+        String exchange = "user.profile.exchange";
+        String routingKey = "user.profile.find-by-identifier.request";
+
+        Map<String, Object> message = new HashMap<>();
+        message.put("identifier", identifier);
 
         return (RPCResponse<UserDto>) rabbitTemplate.convertSendAndReceive(exchange, routingKey, message);
     }
@@ -50,7 +62,7 @@ public class AuthProducer {
 
     public RPCResponse<UserDto> changePasswordUser(String email, String currentPassword, String newPassword) {
         String exchange = "auth.user.exchange";
-        String routingKey = "auth.user.change.password.request";
+        String routingKey = "auth.user.change-password.request";
 
         Map<String, Object> message = new HashMap<>();
         message.put("email", email);
@@ -62,7 +74,7 @@ public class AuthProducer {
 
     public RPCResponse<UserDto> forgotPasswordUser(String email, String newPassword) {
         String exchange = "auth.user.exchange";
-        String routingKey = "auth.user.forgot.password.request";
+        String routingKey = "auth.user.forgot-password.request";
 
         Map<String, Object> message = new HashMap<>();
         message.put("email", email);
@@ -84,7 +96,7 @@ public class AuthProducer {
 
     public RPCResponse<String> resetPasswordUser(String email) {
         String exchange = "auth.user.exchange";
-        String routingKey = "auth.user.reset.password.request";
+        String routingKey = "auth.user.reset-password.request";
 
         Map<String, Object> message = new HashMap<>();
         message.put("email", email);

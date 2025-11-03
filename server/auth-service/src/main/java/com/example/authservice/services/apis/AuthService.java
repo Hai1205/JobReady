@@ -8,6 +8,7 @@ import com.example.authservice.exceptions.OurException;
 import com.example.authservice.services.OtpService;
 import com.example.authservice.services.producers.AuthProducer;
 import com.example.authservice.utils.JwtUtil;
+import com.example.rabbitcommon.dtos.RPCResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
@@ -45,30 +46,31 @@ public class AuthService extends BaseService {
 
         try {
             request = objectMapper.readValue(dataJson, LoginRequest.class);
-            String email = request.getEmail();
+            String identifier = request.getIdentifier();
             String password = request.getPassword();
 
-            RPCResponse<UserDto> rpcResponse = authProducer.authenticateUser(email, password);
-            UserDto user = (UserDto) rpcResponse.getData();
+            RPCResponse<UserDto> rpcResponse = authProducer.authenticateUser(identifier, password);
+            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
 
             if (user == null) {
-                logger.warn("Login failed: Invalid credentials for email: {}", email);
+                logger.warn("Login failed: Invalid credentials for username or email: {}", identifier);
                 throw new OurException("Invalid credentials", 404);
             }
 
             boolean isPending = user.getStatus().equals("pending");
             if (isPending) {
-                logger.warn("Login blocked: Account not verified for email: {}", email);
+                logger.warn("Login blocked: Account not verified for username or email: {}", identifier);
                 throw new OurException("Account not verified. Please verify your account before logging in.", 403);
             }
 
             boolean isBanned = user.getStatus().equals("banned");
             if (isBanned) {
-                logger.warn("Login blocked: Account banned for email: {}", email);
+                logger.warn("Login blocked: Account banned for username or email: {}", identifier);
                 throw new OurException("Account is banned. Please contact support.", 405);
             }
 
             String userId = user.getId().toString();
+            String email = user.getEmail();
             String username = user.getUsername();
             String role = user.getRole();
 
@@ -88,12 +90,12 @@ public class AuthService extends BaseService {
             logger.info("Login successful for user: {} (ID: {})", email, userId);
             return response;
         } catch (OurException e) {
-            logger.error("Login failed with OurException for email {}: {}",
-                    request != null ? request.getEmail() : "unknown", e.getMessage());
+            logger.error("Login failed with OurException for identifier {}: {}",
+                    request != null ? request.getIdentifier() : "unknown", e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("Login failed with unexpected error for email {}",
-                    request != null ? request.getEmail() : "unknown", e);
+            logger.error("Login failed with unexpected error for identifier {}",
+                    request != null ? request.getIdentifier() : "unknown", e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }
@@ -152,7 +154,7 @@ public class AuthService extends BaseService {
             String fullname = request.getFullname();
 
             RPCResponse<UserDto> rpcResponse = authProducer.createUser(username, email, password, fullname);
-            UserDto user = (UserDto) rpcResponse.getData();
+            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
 
             response.setMessage("Registration successful");
             response.setUser(user);
@@ -168,11 +170,21 @@ public class AuthService extends BaseService {
         }
     }
 
-    public Response verifyOTP(String email, String dataJson) {
-        logger.info("OTP verification attempt for email: {}", email);
+    public Response verifyOTP(String identifier, String dataJson) {
+        logger.info("OTP verification attempt for identifier: {}", identifier);
         Response response = new Response();
 
         try {
+            RPCResponse<UserDto> rpcResponse = authProducer.findUserByIdentifier(identifier);
+            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+
+            if (user == null) {
+                logger.warn("OTP verification failed: User not found for identifier: {}", identifier);
+                throw new OurException("User not found.", 404);
+            }
+
+            String email = user.getEmail();
+
             VerifyOtpRequest request = objectMapper.readValue(dataJson, VerifyOtpRequest.class);
             String otp = request.getOtp();
 
@@ -192,29 +204,31 @@ public class AuthService extends BaseService {
             logger.info("OTP verification successful for email: {}", email);
             return response;
         } catch (OurException e) {
-            logger.error("OTP verification failed with OurException for email {}: {}", email, e.getMessage());
+            logger.error("OTP verification failed with OurException for identifier {}: {}", identifier, e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("OTP verification failed with unexpected error for email {}", email, e);
+            logger.error("OTP verification failed with unexpected error for identifier {}", identifier, e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }
     }
 
-    public Response sendOTP(String email) {
-        logger.info("Sending OTP to email: {}", email);
+    public Response sendOTP(String identifier) {
+        logger.info("Sending OTP to identifier: {}", identifier);
         Response response = new Response();
 
         try {
-            String otp = otpService.generateOtp(email);
-
-            RPCResponse<UserDto> rpcResponse = authProducer.findUserByEmail(email);
-            UserDto user = (UserDto) rpcResponse.getData();
+            RPCResponse<UserDto> rpcResponse = authProducer.findUserByIdentifier(identifier);
+            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
 
             if (user == null) {
-                logger.warn("OTP send failed: User not found for email: {}", email);
+                logger.warn("OTP send failed: User not found for identifier: {}", identifier);
                 throw new OurException("User not found.", 404);
             }
+
+            String email = user.getEmail();
+
+            String otp = otpService.generateOtp(email);
 
             String subject = "Account Activation";
             String templateName = "mail_active_account";
@@ -229,21 +243,30 @@ public class AuthService extends BaseService {
             logger.info("OTP sent successfully to email: {}", email);
             return response;
         } catch (OurException e) {
-            logger.error("OTP send failed with OurException for email {}: {}", email, e.getMessage());
+            logger.error("OTP send failed with OurException for identifier {}: {}", identifier, e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("OTP send failed with unexpected error for email {}", email, e);
+            logger.error("OTP send failed with unexpected error for identifier {}", identifier, e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }
     }
 
-    public Response changePassword(String email, String dataJson) {
-        logger.info("Password change attempt for email: {}", email);
+    public Response changePassword(String identifier, String dataJson) {
+        logger.info("Password change attempt for identifier: {}", identifier);
         Response response = new Response();
 
         try {
+            RPCResponse<UserDto> rpcResponse = authProducer.findUserByIdentifier(identifier);
+            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+
+            if (user == null) {
+                logger.warn("OTP send failed: User not found for identifier: {}", identifier);
+                throw new OurException("User not found.", 404);
+            }
+
             ChangePasswordRequest request = objectMapper.readValue(dataJson, ChangePasswordRequest.class);
+            String email = user.getEmail();
             String currentPassword = request.getCurrentPassword();
             String newPassword = request.getNewPassword();
             String rePassword = request.getRePassword();
@@ -259,10 +282,10 @@ public class AuthService extends BaseService {
             logger.info("Password changed successfully for email: {}", email);
             return response;
         } catch (OurException e) {
-            logger.error("Password change failed with OurException for email {}: {}", email, e.getMessage());
+            logger.error("Password change failed with OurException for identifier {}: {}", identifier, e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("Password change failed with unexpected error for email {}", email, e);
+            logger.error("Password change failed with unexpected error for identifier {}", identifier, e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }
@@ -299,12 +322,21 @@ public class AuthService extends BaseService {
         }
     }
 
-    public Response forgotPassword(String email, String dataJson) {
-        logger.info("Forgot password attempt for email: {}", email);
+    public Response forgotPassword(String identifier, String dataJson) {
+        logger.info("Forgot password attempt for identifier: {}", identifier);
         Response response = new Response();
 
         try {
+            RPCResponse<UserDto> rpcResponse = authProducer.findUserByIdentifier(identifier);
+            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+
+            if (user == null) {
+                logger.warn("OTP send failed: User not found for identifier: {}", identifier);
+                throw new OurException("User not found.", 404);
+            }
+
             ChangePasswordRequest request = objectMapper.readValue(dataJson, ChangePasswordRequest.class);
+            String email = user.getEmail();
             String newPassword = request.getNewPassword();
             String rePassword = request.getRePassword();
 
@@ -319,10 +351,10 @@ public class AuthService extends BaseService {
             logger.info("Password updated successfully via forgot password for email: {}", email);
             return response;
         } catch (OurException e) {
-            logger.error("Forgot password failed with OurException for email {}: {}", email, e.getMessage());
+            logger.error("Forgot password failed with OurException for identifier {}: {}", identifier, e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("Forgot password failed with unexpected error for email {}", email, e);
+            logger.error("Forgot password failed with unexpected error for identifier {}", identifier, e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }
@@ -375,7 +407,7 @@ public class AuthService extends BaseService {
             String userId = jwtUtil.extractUserId(refreshToken);
 
             RPCResponse<UserDto> rpcResponse = authProducer.findUserByEmail(email);
-            UserDto user = (UserDto) rpcResponse.getData();
+            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
 
             if (user == null) {
                 logger.warn("Token refresh failed: User not found for email: {}", email);

@@ -1,4 +1,4 @@
-package com.example.userservice.dtos.response;
+package com.example.rabbitcommon.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

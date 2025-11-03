@@ -21,6 +21,7 @@ import com.example.cvservice.services.producers.CVProducer;
 import com.example.cvservice.services.utils.PromptBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.rabbitcommon.dtos.RPCResponse;
 
 import java.time.Instant;
 import java.util.List;
@@ -94,7 +95,7 @@ public class CVService extends BaseService {
                 experiencesDto == null ? 0 : experiencesDto.size(), educationsDto == null ? 0 : educationsDto.size());
 
         RPCResponse<UserDto> rpcResponse = cvProducer.findUserById(userId);
-        UserDto user = (UserDto) rpcResponse.getData();
+        UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
 
         if (user == null) {
             log.warn("User not found when creating CV: userId={}", userId);
@@ -308,7 +309,7 @@ public class CVService extends BaseService {
 
     public List<CVDto> handleGetUserCVs(UUID userId) {
         RPCResponse<UserDto> rpcResponse = cvProducer.findUserById(userId);
-        UserDto user = (UserDto) rpcResponse.getData();
+        UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
 
         if (user == null) {
             throw new OurException("User not found", 404);
@@ -340,7 +341,7 @@ public class CVService extends BaseService {
 
         try {
             RPCResponse<UserDto> rpcResponse = cvProducer.findUserById(userId);
-            UserDto user = (UserDto) rpcResponse.getData();
+            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
 
             if (user == null) {
                 log.warn("User not found while importing file: userId={}", userId);
@@ -830,7 +831,8 @@ public class CVService extends BaseService {
             }
 
             // Create CV
-            return handleCreateCV(userId, title, personalInfo, experiences, educations, skills, "PRIVATE", "#3498db", "modern");
+            return handleCreateCV(userId, title, personalInfo, experiences, educations, skills, "PRIVATE", "#3498db",
+                    "modern");
 
         } catch (Exception e) {
             throw new OurException("Error parsing AI response: " + e.getMessage(), 500);

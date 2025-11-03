@@ -15,14 +15,14 @@ export interface IAuthStore extends IBaseStore {
 	isAdmin: boolean;
 
 	register: (fullname: string, username: string, email: string, password: string) => Promise<IApiResponse>;
-	login: (email: string, password: string) => Promise<IApiResponse<IAuthDataResponse>>;
+	login: (identifier: string, password: string) => Promise<IApiResponse<IAuthDataResponse>>;
 	logout: () => Promise<IApiResponse>;
 	RefreshToken: () => Promise<IApiResponse>;
-	sendOTP: (email: string) => Promise<IApiResponse>;
-	verifyOTP: (email: string, otp: string, isActivation: boolean) => Promise<IApiResponse>;
+	sendOTP: (identifier: string) => Promise<IApiResponse>;
+	verifyOTP: (identifier: string, otp: string, isActivation: boolean) => Promise<IApiResponse>;
 	resetPassword: (email: string) => Promise<IApiResponse>;
-	forgotPassword: (email: string, password: string, confirmPassword: string) => Promise<IApiResponse>;
-	changePassword: (email: string, oldPassword: string, password: string, confirmPassword: string) => Promise<IApiResponse>;
+	forgotPassword: (identifier: string, password: string, confirmPassword: string) => Promise<IApiResponse>;
+	changePassword: (identifier: string, oldPassword: string, password: string, confirmPassword: string) => Promise<IApiResponse>;
 
 	handleSetUserAuth: (user: IUser) => void;
 }
@@ -57,10 +57,10 @@ export const useAuthStore = createStore<IAuthStore>(
 			});
 		},
 
-		login: async (email: string, password: string): Promise<IApiResponse<IAuthDataResponse>> => {
+		login: async (identifier: string, password: string): Promise<IApiResponse<IAuthDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
-				email,
+				identifier,
 				password,
 			}));
 
@@ -93,13 +93,13 @@ export const useAuthStore = createStore<IAuthStore>(
 			});
 		},
 
-		sendOTP: async (email: string): Promise<IApiResponse> => {
+		sendOTP: async (identifier: string): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/auth/send-otp/${email}`);
+				return await handleRequest(EHttpType.POST, `/auth/send-otp/${identifier}`);
 			});
 		},
 
-		verifyOTP: async (email: string, otp: string, isActivation: boolean): Promise<IApiResponse> => {
+		verifyOTP: async (identifier: string, otp: string, isActivation: boolean): Promise<IApiResponse> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				otp,
@@ -107,7 +107,7 @@ export const useAuthStore = createStore<IAuthStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/auth/verify-otp/${email}`, formData);
+				return await handleRequest(EHttpType.POST, `/auth/verify-otp/${identifier}`, formData);
 
 			});
 		},
@@ -119,7 +119,7 @@ export const useAuthStore = createStore<IAuthStore>(
 			});
 		},
 
-		forgotPassword: async (email: string, password: string, confirmPassword: string): Promise<IApiResponse> => {
+		forgotPassword: async (identifier: string, password: string, confirmPassword: string): Promise<IApiResponse> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				password,
@@ -127,11 +127,11 @@ export const useAuthStore = createStore<IAuthStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.PATCH, `/auth/forgot-password/${email}`, formData);
+				return await handleRequest(EHttpType.PATCH, `/auth/forgot-password/${identifier}`, formData);
 			});
 		},
 
-		changePassword: async (email: string, oldPassword: string, newPassword: string, confirmPassword: string): Promise<IApiResponse> => {
+		changePassword: async (identifier: string, oldPassword: string, newPassword: string, confirmPassword: string): Promise<IApiResponse> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				oldPassword,
@@ -140,7 +140,7 @@ export const useAuthStore = createStore<IAuthStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.PATCH, `/auth/change-password/${email}`, formData);
+				return await handleRequest(EHttpType.PATCH, `/auth/change-password/${identifier}`, formData);
 			});
 		},
 

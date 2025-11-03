@@ -16,33 +16,18 @@ const ForgotPasswordPage: React.FC = () => {
   const router = useRouter();
 
   const { isLoading, sendOTP } = useAuthStore();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
+    setIdentifier(e.target.value);
     if (error) setError("");
-  };
-
-  const validate = () => {
-    if (!email.trim()) {
-      setError("Email is required");
-      return false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("Please enter a valid email");
-      return false;
-    }
-    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
-      return;
-    }
-
-    const res = await sendOTP(email);
+    const res = await sendOTP(identifier);
 
     if (!res) {
       return;
@@ -51,8 +36,8 @@ const ForgotPasswordPage: React.FC = () => {
     toast.success("Đã gửi mã OTP về email của bạn");
 
     router.push(
-      `/auth/verification?email=${encodeURIComponent(
-        email
+      `/auth/verification?identifier=${encodeURIComponent(
+        identifier
       )}&isActivation=false`
     );
   };
@@ -69,15 +54,15 @@ const ForgotPasswordPage: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="identifier">Email hoặc username</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="Nhập email của bạn"
-              value={email}
+              id="identifier"
+              type="text"
+              name="identifier"
+              placeholder="Nhập email hoặc username của bạn"
+              value={identifier}
               onChange={handleChange}
               className="pl-10"
             />
