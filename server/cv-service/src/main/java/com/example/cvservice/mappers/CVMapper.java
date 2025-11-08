@@ -35,26 +35,35 @@ public class CVMapper {
         dto.setId(cv.getId());
         dto.setUserId(cv.getUserId());
         dto.setTitle(cv.getTitle());
+
+        // Always set personalInfo, even if null (client will handle it)
         dto.setPersonalInfo(personalInfoMapper.toDto(cv.getPersonalInfo()));
 
-        List<ExperienceDto> experiences = null;
-        if (cv.getExperiences() != null) {
-            experiences = cv.getExperiences().stream().map(experienceMapper::toDto).collect(Collectors.toList());
+        // Return empty list instead of null for experiences
+        List<ExperienceDto> experiences = java.util.Collections.emptyList();
+        if (cv.getExperiences() != null && !cv.getExperiences().isEmpty()) {
+            experiences = cv.getExperiences().stream()
+                    .map(experienceMapper::toDto)
+                    .collect(Collectors.toList());
         }
         dto.setExperiences(experiences);
 
-        List<EducationDto> educations = null;
-        if (cv.getEducations() != null) {
-            educations = cv.getEducations().stream().map(educationMapper::toDto).collect(Collectors.toList());
+        // Return empty list instead of null for educations
+        List<EducationDto> educations = java.util.Collections.emptyList();
+        if (cv.getEducations() != null && !cv.getEducations().isEmpty()) {
+            educations = cv.getEducations().stream()
+                    .map(educationMapper::toDto)
+                    .collect(Collectors.toList());
         }
         dto.setEducations(educations);
 
-        dto.setSkills(cv.getSkills());
+        // Return empty list instead of null for skills
+        dto.setSkills(cv.getSkills() != null ? cv.getSkills() : java.util.Collections.emptyList());
 
-        dto.setPrivacy(cv.getPrivacy() != null ? cv.getPrivacy().name() : null);
+        dto.setPrivacy(cv.getPrivacy() != null ? cv.getPrivacy().name() : "PRIVATE");
 
-        dto.setColor(cv.getColor());
-        dto.setTemplate(cv.getTemplate());
+        dto.setColor(cv.getColor() != null ? cv.getColor() : "#3498db");
+        dto.setTemplate(cv.getTemplate() != null ? cv.getTemplate() : "modern");
 
         dto.setCreatedAt(cv.getCreatedAt() != null ? cv.getCreatedAt().toString() : null);
         dto.setUpdatedAt(cv.getUpdatedAt() != null ? cv.getUpdatedAt().toString() : null);

@@ -153,7 +153,7 @@ public class CVService extends BaseService {
                 throw new OurException("User not found", 404);
             }
 
-            CV savedCV = cvRepository.save(new CV());
+            CV savedCV = cvRepository.save(new CV(userId, "Untitled CV"));
 
             response.setStatusCode(201);
             response.setMessage("CV created successfully");
@@ -337,9 +337,16 @@ public class CVService extends BaseService {
         CV existing = cvRepository.findById(cvId)
                 .orElseThrow(() -> new OurException("CV not found", 404));
 
-        existing.setTitle(title);
-        existing.setColor(color);
-        existing.setTemplate(template);
+        // Only update if not null
+        if (title != null && !title.trim().isEmpty()) {
+            existing.setTitle(title);
+        }
+        if (color != null && !color.trim().isEmpty()) {
+            existing.setColor(color);
+        }
+        if (template != null && !template.trim().isEmpty()) {
+            existing.setTemplate(template);
+        }
 
         if (personalInfoDto != null) {
             PersonalInfo pi = existing.getPersonalInfo();
@@ -347,11 +354,22 @@ public class CVService extends BaseService {
             if (pi == null)
                 pi = new PersonalInfo();
 
-            pi.setFullname(personalInfoDto.getFullname());
-            pi.setEmail(personalInfoDto.getEmail());
-            pi.setPhone(personalInfoDto.getPhone());
-            pi.setLocation(personalInfoDto.getLocation());
-            pi.setSummary(personalInfoDto.getSummary());
+            // Only update non-null fields
+            if (personalInfoDto.getFullname() != null && !personalInfoDto.getFullname().trim().isEmpty()) {
+                pi.setFullname(personalInfoDto.getFullname());
+            }
+            if (personalInfoDto.getEmail() != null && !personalInfoDto.getEmail().trim().isEmpty()) {
+                pi.setEmail(personalInfoDto.getEmail());
+            }
+            if (personalInfoDto.getPhone() != null) {
+                pi.setPhone(personalInfoDto.getPhone());
+            }
+            if (personalInfoDto.getLocation() != null) {
+                pi.setLocation(personalInfoDto.getLocation());
+            }
+            if (personalInfoDto.getSummary() != null) {
+                pi.setSummary(personalInfoDto.getSummary());
+            }
 
             if (avatar != null && !avatar.isEmpty()) {
                 String oldAvatarPublicId = pi.getAvatarPublicId();
@@ -371,27 +389,40 @@ public class CVService extends BaseService {
             existing.setPersonalInfo(pi);
         }
 
-        existing.getExperiences().clear();
+        // Only update experiences if provided
         if (experiencesDto != null) {
+            existing.getExperiences().clear();
             for (ExperienceDto e : experiencesDto) {
                 Experience ex = new Experience(e);
                 existing.getExperiences().add(ex);
             }
         }
 
-        existing.getEducations().clear();
+        // Only update educations if provided
         if (educationsDto != null) {
+            existing.getEducations().clear();
             for (EducationDto ed : educationsDto) {
                 Education e = new Education(ed);
                 existing.getEducations().add(e);
             }
         }
 
-        existing.getSkills().clear();
-        if (skills != null)
+        // Only update skills if provided
+        if (skills != null) {
+            existing.getSkills().clear();
             existing.getSkills().addAll(skills);
+        }
 
-        existing.setPrivacy(CVPrivacy.valueOf(privacy));
+        // Only update privacy if provided and valid
+        if (privacy != null && !privacy.trim().isEmpty()) {
+            try {
+                // Convert to uppercase to handle case-insensitive input
+                existing.setPrivacy(CVPrivacy.valueOf(privacy.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid privacy value: {}. Keeping existing value.", privacy);
+                // Keep existing privacy value if invalid
+            }
+        }
 
         existing.setUpdatedAt(Instant.now());
 

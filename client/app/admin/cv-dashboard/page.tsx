@@ -11,11 +11,18 @@ import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 import { CVFilter } from "@/components/comons/admin/cvDashboard/CVFilter";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
+import { on } from "events";
 
 export default function CVDashboardPage() {
-  const { isLoading, getAllCVs, createCV, handleGeneratePDF } =
-    useCVStore();
-    const { userAuth } = useAuthStore();
+  const {
+    isLoading,
+    getAllCVs,
+    createCV,
+    deleteCV,
+    handleGeneratePDF,
+    handleSetCurrentCV,
+  } = useCVStore();
+  const { userAuth } = useAuthStore();
 
   const router = useRouter();
 
@@ -69,6 +76,19 @@ export default function CVDashboardPage() {
     },
     [allCVs]
   );
+
+  const onDelete = async (cv: ICV) => {
+    await deleteCV(cv.id);
+  };
+
+  const onUpdate = (cv: ICV) => {
+    handleSetCurrentCV(cv);
+    router.push(`/cv-builder`);
+  };
+
+  const onDownload = async (cv: ICV) => {
+    handleGeneratePDF(cv);
+  };
 
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
@@ -167,12 +187,9 @@ export default function CVDashboardPage() {
           <CVTable
             CVs={filteredCVs}
             isLoading={isLoading}
-            onEdit={(cv) => {
-              router.push(`/cv-builder/${cv.id}`);
-            }}
-            onDownload={(cv) => {
-              handleGeneratePDF(cv);
-            }}
+            onUpdate={onUpdate}
+            onDownload={onDownload}
+            onDelete={onDelete}
           />
         </Card>
       </div>

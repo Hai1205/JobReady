@@ -74,6 +74,7 @@ export interface ICVStore extends IBaseStore {
 		content: string,
 	) => Promise<IApiResponse<ICVDataResponse>>;
 
+	handleSetCurrentCV: (cv: ICV | null) => void;
 	handleUpdateCV: (cvData: Partial<ICV>) => void;
 	handleSetCurrentStep: (step: number) => void;
 	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void;
@@ -120,7 +121,7 @@ export const useCVStore = createStore<ICVStore>(
 			return await get().handleRequest(async () => {
 				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, new FormData());
 
-				if (res.data && res.data.cv) {
+				if (res.data && res.data.success && res.data.cv) {
 					set({ currentCV: res.data.cv });
 				}
 
@@ -257,12 +258,20 @@ export const useCVStore = createStore<ICVStore>(
 			} as Partial<ICVStore>);
 		},
 
+		handleSetCurrentCV: (cv: ICV | null): void => {
+			set({ currentCV: cv });
+		},
+
 		handleSetCurrentStep: (step: number): void => {
 			set({ currentStep: step });
 		},
 
 		handleSetJobDescription: (jd: string): void => {
 			set({ jobDescription: jd });
+		},
+
+		handleSetAISuggestions: (suggestions: IAISuggestion[]): void => {
+			set({ aiSuggestions: suggestions });
 		},
 
 		handleApplySuggestion: (id: string): void => {

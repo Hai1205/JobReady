@@ -53,11 +53,13 @@ export const NavbarMobileMenu = ({
           <Link href="/settings" onClick={() => onOpenChange(false)}>
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-lg">
-                <AvatarImage
-                  src={userAuth.avatarUrl}
-                  alt={userAuth.fullname || "User"}
-                  className="object-cover"
-                />
+                {userAuth.avatarUrl && (
+                  <AvatarImage
+                    src={userAuth.avatarUrl}
+                    alt={userAuth.fullname || "User"}
+                    className="object-cover"
+                  />
+                )}
                 <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold text-lg">
                   {userAuth.fullname?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>

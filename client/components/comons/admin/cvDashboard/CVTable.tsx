@@ -4,8 +4,9 @@ import { DataTable } from "../adminTable/DataTable";
 interface ICVTableProps {
   CVs: ICV[];
   isLoading: boolean;
-  onEdit?: (cv: ICV) => void;
+  onUpdate?: (cv: ICV) => void;
   onDownload?: (cv: ICV) => void;
+  onDelete?: (cv: ICV) => void;
 }
 
 const getPrivacyColor = (status: string) => {
@@ -22,8 +23,9 @@ const getPrivacyColor = (status: string) => {
 export const CVTable = ({
   CVs,
   isLoading,
-  onEdit,
+  onUpdate,
   onDownload,
+  onDelete,
 }: ICVTableProps) => {
   const columns = [
     {
@@ -57,17 +59,24 @@ export const CVTable = ({
 
   const actions = [];
 
-  if (onEdit) {
+  if (onUpdate) {
     actions.push({
-      label: "Edit",
-      onClick: onEdit,
+      label: "Sửa",
+      onClick: onUpdate,
     });
   }
 
   if (onDownload) {
     actions.push({
-      label: "Download",
+      label: "Tải xuống",
       onClick: onDownload,
+    });
+  }
+
+  if (onDelete) {
+    actions.push({
+      label: "Xoá",
+      onClick: onDelete,
     });
   }
 
@@ -77,7 +86,7 @@ export const CVTable = ({
       isLoading={isLoading}
       columns={columns}
       actions={actions}
-      emptyMessage="No CVs found"
+      emptyMessage="Không tìm thấy CV nào"
     />
   );
 };

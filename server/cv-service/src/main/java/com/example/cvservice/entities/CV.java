@@ -23,6 +23,11 @@ public class CV {
 
     private UUID userId;
 
+    public CV(UUID userId, String title){
+        this.userId = userId;
+        this.title = title;
+    }
+
     public CV(UUID userId, String title, List<String> skills, String privacy, String color, String template) {
         this.privacy = CVPrivacy.valueOf(privacy);
         this.title = title;

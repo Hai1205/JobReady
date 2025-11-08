@@ -23,12 +23,8 @@ export function AIToolsSidebar() {
   const {
     analyzeCV,
     handleSetAISuggestions,
-    currentCVCreate,
-    currentCVUpdate,
+    currentCV,
   } = useCVStore();
-
-  // Get the active CV based on context (create or update)
-  const currentCV = currentCVUpdate || currentCVCreate;
 
   const handleQuickAnalyze = async () => {
     if (!currentCV) {
@@ -50,6 +46,7 @@ export function AIToolsSidebar() {
       const responseData: any = maybeResponse?.data
         ? maybeResponse.data
         : maybeResponse;
+      console.log(responseData)
 
       const suggestions = responseData?.suggestions || [];
 

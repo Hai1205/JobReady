@@ -63,7 +63,7 @@ export function DataTable<T>({
               ))}
               {actions && actions.length > 0 && (
                 <TableHead className="text-right font-bold text-foreground/90">
-                  Actions
+                  Hành động
                 </TableHead>
               )}
             </TableRow>
@@ -114,7 +114,7 @@ export function DataTable<T>({
                           className="bg-card/95 backdrop-blur-sm border border-border/50 shadow-xl"
                         >
                           <DropdownMenuLabel className="text-foreground font-semibold bg-gradient-to-r from-primary/10 to-secondary/10">
-                            Actions
+                            Hành động
                           </DropdownMenuLabel>
 
                           <DropdownMenuSeparator className="bg-border/50" />

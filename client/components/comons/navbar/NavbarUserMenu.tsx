@@ -17,11 +17,13 @@ export const NavbarUserMenu = ({
     <Link href="/settings">
       <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 border border-border/50">
         <Avatar className="h-8 w-8 border-2 border-primary/20 shadow-md">
-          <AvatarImage
-            src={userAuth.avatarUrl}
-            alt={userAuth.fullname || "User"}
-            className="object-cover"
-          />
+          {userAuth.avatarUrl && (
+            <AvatarImage
+              src={userAuth.avatarUrl}
+              alt={userAuth.fullname || "User"}
+              className="object-cover"
+            />
+          )}
           <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold text-sm">
             {userAuth.fullname?.charAt(0).toUpperCase() || "U"}
           </AvatarFallback>

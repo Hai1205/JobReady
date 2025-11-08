@@ -14,7 +14,7 @@ import { formatDateAgo } from "@/lib/utils";
 
 interface CVCardProps {
   cv: ICV;
-  onEdit?: (cv: ICV) => void;
+  onUpdate?: (cv: ICV) => void;
   onDuplicate: (cvId: string) => void;
   onDelete?: (cvId: string) => void;
   onDownload?: () => void;
@@ -22,7 +22,7 @@ interface CVCardProps {
 
 export default function CVCard({
   cv,
-  onEdit,
+  onUpdate,
   onDuplicate,
   onDelete,
   onDownload,
@@ -49,25 +49,25 @@ export default function CVCard({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium">
-              {cv.personalInfo.fullname || "Chưa đặt tên"}
+              {cv.personalInfo?.fullname || "Chưa đặt tên"}
             </p>
             <p className="text-xs text-muted-foreground line-clamp-2">
-              {cv.personalInfo.summary || "Chưa có tóm tắt"}
+              {cv.personalInfo?.summary || "Chưa có tóm tắt"}
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {cv.experiences.length > 0 && (
+            {cv.experiences && cv.experiences.length > 0 && (
               <Badge variant="secondary" className="text-xs">
                 {cv.experiences.length} Kinh nghiệm
               </Badge>
             )}
-            {cv.educations.length > 0 && (
+            {cv.educations && cv.educations.length > 0 && (
               <Badge variant="secondary" className="text-xs">
                 {cv.educations.length} Học vấn
               </Badge>
             )}
-            {cv.skills.length > 0 && (
+            {cv.skills && cv.skills.length > 0 && (
               <Badge variant="secondary" className="text-xs">
                 {cv.skills.length} Kỹ năng
               </Badge>
@@ -75,11 +75,11 @@ export default function CVCard({
           </div>
 
           <div className="flex gap-2 pt-2 border-t border-border/50">
-            {onEdit && (
+            {onUpdate && (
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onEdit(cv)}
+                onClick={() => onUpdate(cv)}
                 className="flex-1 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200"
               >
                 <Edit className="mr-2 h-3 w-3" />

@@ -21,6 +21,7 @@ export default function MyCVsPageClient() {
     getUserCVs,
     getAllCVs,
     handleGeneratePDF,
+    handleSetCurrentCV,
   } = useCVStore();
 
   const router = useRouter();
@@ -60,15 +61,16 @@ export default function MyCVsPageClient() {
     }
   };
 
-  const handleCreateNew = async () => {
+  const handleCreate = async () => {
     await createCV(userAuth?.id || "");
     handleSetCurrentStep(0);
-    console.log("Redirecting to CV Builder...");
     router.push("/cv-builder");
   };
 
   const handleEdit = (cv: ICV) => {
-    router.push(`/cv-builder/${cv.id}`);
+    handleSetCurrentStep(0);
+    handleSetCurrentCV(cv);
+    router.push(`/cv-builder`);
   };
 
   const handleDeleteClick = (cvId: string) => {
@@ -99,12 +101,12 @@ export default function MyCVsPageClient() {
     <div className="min-h-screen flex items-center justify-center py-12">
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8">
-          <PageHeader onCreateNew={handleCreateNew} />
+          <PageHeader onCreateNew={handleCreate} />
 
           <UserCVsSection
             userCVs={userCVs}
-            onCreateNew={handleCreateNew}
-            onEdit={handleEdit}
+            onCreateNew={handleCreate}
+            onUpdate={handleEdit}
             onDuplicate={handleDuplicate}
             onDelete={handleDeleteClick}
           />

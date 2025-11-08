@@ -3,8 +3,25 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FileText, Sparkles } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
+import { useCVStore } from "@/stores/cvStore";
+import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
+const { userAuth } = useAuthStore();
+  const {
+    handleSetCurrentStep,
+    createCV,
+  } = useCVStore();
+
+  const router = useRouter();
+
+  const handleCreate = async () => {
+    await createCV(userAuth?.id || "");
+    handleSetCurrentStep(0);
+    router.push("/cv-builder");
+  };
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center gap-8 py-24 md:py-32">
       <div className="flex flex-col items-center gap-4 text-center">
@@ -22,7 +39,7 @@ export default function HeroSection() {
 
       <div className="flex flex-col gap-4 sm:flex-row">
         <Link href="/cv-builder">
-          <Button size="lg" className="gap-2">
+          <Button size="lg" className="gap-2" onClick={handleCreate}>
             <Sparkles className="h-5 w-5" />
             Bắt Đầu Tạo
           </Button>

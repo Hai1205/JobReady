@@ -6,7 +6,7 @@ import EmptyState from "@/components/comons/my-cvs/EmptyState";
 interface Props {
   userCVs: ICV[];
   onCreateNew: () => void;
-  onEdit: (cv: ICV) => void;
+  onUpdate: (cv: ICV) => void;
   onDuplicate: (cvId: string) => void;
   onDelete: (cvId: string) => void;
 }
@@ -14,7 +14,7 @@ interface Props {
 export default function UserCVsSection({
   userCVs,
   onCreateNew,
-  onEdit,
+  onUpdate,
   onDuplicate,
   onDelete,
 }: Props) {
@@ -28,7 +28,7 @@ export default function UserCVsSection({
             <CVCard
               key={cv.id}
               cv={cv}
-              onEdit={onEdit}
+              onUpdate={onUpdate}
               onDuplicate={onDuplicate}
               onDelete={onDelete}
             />

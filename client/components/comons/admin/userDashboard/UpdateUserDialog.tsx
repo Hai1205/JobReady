@@ -26,7 +26,7 @@ const UpdateUserDialog = ({
     <AdminDialog<IUser>
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      title="Chỉnh sửa quản trị viên"
+      title="Chỉnh sửa người dùng"
       description="Cập nhật thông tin quản trị viên"
       icon={UserCog}
       onSubmit={onUserUpdated}

@@ -89,14 +89,16 @@ export function PersonalInfoStep() {
         <div className="flex items-center gap-6">
           <div className="flex flex-col items-center gap-4">
             <Avatar className="h-24 w-24">
-              <AvatarImage
-                src={
-                  `${
-                    currentCV?.personalInfo?.avatarUrl ||
-                    currentCV?.personalInfo?.avatarPublicId
-                  }` || ""
-                }
-              />
+              {(currentCV?.personalInfo?.avatarUrl ||
+                currentCV?.personalInfo?.avatarPublicId) && (
+                <AvatarImage
+                  src={
+                    currentCV.personalInfo.avatarUrl ||
+                    currentCV.personalInfo.avatarPublicId ||
+                    ""
+                  }
+                />
+              )}
               <AvatarFallback className="text-lg">
                 {currentCV?.personalInfo?.fullname
                   ? currentCV?.personalInfo?.fullname

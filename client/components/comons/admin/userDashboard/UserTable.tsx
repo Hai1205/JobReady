@@ -51,7 +51,12 @@ export const UserTable = ({
       accessor: (user: IUser) => (
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={user?.avatarUrl} alt={user?.fullname || "User"} />
+            {user?.avatarUrl && (
+              <AvatarImage
+                src={user.avatarUrl}
+                alt={user?.fullname || "User"}
+              />
+            )}
             <AvatarFallback>
               {user?.fullname ? user.fullname.substring(0, 2) : "User"}
             </AvatarFallback>
@@ -98,7 +103,7 @@ export const UserTable = ({
 
   if (onUpdate) {
     actions.push({
-      label: "Edit",
+      label: "Sửa",
       onClick: onUpdate,
     });
   }
@@ -112,7 +117,7 @@ export const UserTable = ({
 
   if (onResetPassword) {
     actions.push({
-      label: "Reset Password",
+      label: "Đặt lại mật khẩu",
       onClick: onResetPassword,
     });
   }
@@ -123,7 +128,7 @@ export const UserTable = ({
       isLoading={isLoading}
       columns={columns}
       actions={actions}
-      emptyMessage="No users found"
+      emptyMessage="Không tìm thấy người dùng nào"
     />
   );
 };
