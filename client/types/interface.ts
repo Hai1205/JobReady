@@ -21,8 +21,8 @@ declare global {
         educations: IEducation[]
         skills: string[]
         privacy: EPrivacy
-        color: string             // Mã màu chủ đạo, ví dụ "#3498db" hoặc "blue"
-        template: string          // Tên hoặc mã định danh của template, ví dụ "modern", "classic", "minimal"
+        color: string
+        template: string
         createdAt?: string
         updatedAt?: string
     }
@@ -39,34 +39,33 @@ declare global {
     }
 
     interface IExperience {
-        id?: string  // Optional for new entries, UUID string from backend
+        id?: string
         company: string
         position: string
-        startDate: string  // Format: YYYY-MM
-        endDate: string    // Format: YYYY-MM or "Present"
+        startDate: string
+        endDate: string
         description: string
     }
 
     interface IEducation {
-        id?: string  // Optional for new entries, UUID string from backend
+        id?: string
         school: string
         degree: string
         field: string
-        startDate: string  // Format: YYYY-MM
-        endDate: string    // Format: YYYY-MM
+        startDate: string
+        endDate: string
     }
 
     interface IAISuggestion {
         id: string
-        type: EAISuggestionType | string  // "improvement", "warning", "error"
-        section: string  // "summary", "experience", "education", "skills"
+        type: EAISuggestionType | string
+        section: string
         lineNumber?: number
         message: string
         suggestion: string
         applied: boolean
     }
 
-    // Job Description Analysis Result
     interface IJobDescriptionResult {
         jobTitle: string
         company: string
@@ -81,52 +80,6 @@ declare global {
         benefits: string[]
     }
 
-    // Backend Response Structure (matches Response.java)
-    interface IBackendResponse {
-        statusCode: number
-        message: string
-
-        // CV related data
-        cv?: ICV
-        cvs?: ICV[]
-        experience?: IExperience
-        experiences?: IExperience[]
-        education?: IEducation
-        educations?: IEducation[]
-        skills?: string[]
-
-        // AI Analyze and Improvement
-        analyze?: string
-        improvedSection?: string
-        suggestions?: IAISuggestion[]
-        extractedText?: string
-        matchScore?: number
-        parsedJobDescription?: IJobDescriptionResult
-        missingKeywords?: string[]
-
-        // Pagination and stats
-        pagination?: IPagination
-        stats?: IStats
-        additionalData?: Record<string, unknown>
-    }
-
-    // Axios Response wrapper
-    interface IAPIResponse<T = IBackendResponse> {
-        data: T
-        status: number
-        statusText: string
-        headers: Record<string, string>
-    }
-
-    // Pagination structure
-    interface IPagination {
-        currentPage: number
-        pageSize: number
-        totalPages: number
-        totalItems: number
-    }
-
-    // Stats structure
     interface IStats {
         totalCVs?: number
         totalUsers?: number

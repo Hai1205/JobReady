@@ -100,11 +100,13 @@ export const useAuthStore = createStore<IAuthStore>(
 		},
 
 		verifyOTP: async (identifier: string, otp: string, isActivation: boolean): Promise<IApiResponse> => {
+			console.log("Verifying OTP for identifier:", identifier);
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				otp,
 				isActivation,
 			}));
+			console.log("Identifier in verifyOTP:", identifier);
 
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.POST, `/auth/verify-otp/${identifier}`, formData);

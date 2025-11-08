@@ -106,17 +106,6 @@ export const testFormData = (formData: FormData) => {
   });
 }
 
-export const validateEmail = (email: string): boolean => {
-  return Boolean(email && /\S+@\S+\.\S+/.test(email));
-}
-
-export const validatePhone = (phone: string): boolean => {
-  return Boolean(
-    phone &&
-    !/^[0-9]{10,11}$/.test(phone.replace(/\s/g, ""))
-  );
-}
-
 export const stringToList = (str: string): string[] => {
   return str
     .split(",")

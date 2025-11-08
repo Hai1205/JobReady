@@ -4,11 +4,11 @@ import React, { useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
-import { useCurrentCV } from "@/hooks/use-cv-mode";
-import { generateCVHTML } from "../templates";
+import { useCVStore } from "@/stores/cvStore";
+import { generateCVHTML } from "../templates/templates";
 
 export function PreviewStep() {
-  const { currentCV, handleGeneratePDF } = useCurrentCV();
+  const { currentCV, handleGeneratePDF } = useCVStore();
 
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -30,6 +30,7 @@ export function PreviewStep() {
   // if (!currentCV) return null;
 
   const generatePDF = async () => {
+    if (!currentCV) return;
     setIsLoading(true);
     await handleGeneratePDF(currentCV);
     setIsLoading(false);

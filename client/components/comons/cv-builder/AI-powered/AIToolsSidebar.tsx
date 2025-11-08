@@ -86,7 +86,7 @@ export function AIToolsSidebar() {
         ) : (
           <>
             <Sparkles className="mr-2 h-4 w-4" />
-            Phân Tích CV Nhanh
+            Phân tích nhanh
           </>
         )}
       </Button>

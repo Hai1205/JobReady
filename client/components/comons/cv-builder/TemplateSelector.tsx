@@ -7,55 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
-
-interface CVTemplate {
-  id: string;
-  name: string;
-  description: string;
-  preview: string;
-  isPremium?: boolean;
-}
-
-const templates: CVTemplate[] = [
-  {
-    id: "modern",
-    name: "Modern",
-    description: "Thiết kế hiện đại, phù hợp cho ngành công nghệ",
-    preview: "M",
-  },
-  {
-    id: "classic",
-    name: "Classic",
-    description: "Thiết kế truyền thống, chuyên nghiệp",
-    preview: "C",
-  },
-  {
-    id: "minimal",
-    name: "Minimal",
-    description: "Thiết kế tối giản, sạch sẽ và tinh tế",
-    preview: "Mi",
-  },
-  {
-    id: "creative",
-    name: "Creative",
-    description: "Thiết kế sáng tạo cho ngành nghệ thuật, thiết kế",
-    preview: "Cr",
-    isPremium: true,
-  },
-  {
-    id: "executive",
-    name: "Executive",
-    description: "Thiết kế cao cấp cho vị trí quản lý",
-    preview: "E",
-    isPremium: true,
-  },
-  {
-    id: "compact",
-    name: "Compact",
-    description: "Thiết kế gọn nhẹ, tối ưu không gian",
-    preview: "Co",
-  },
-];
+import { templates } from "./templates/templates";
 
 interface TemplateSelectorProps {
   selectedTemplate: string;

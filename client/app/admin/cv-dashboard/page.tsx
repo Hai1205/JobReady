@@ -10,10 +10,12 @@ import { useCVStore } from "@/stores/cvStore";
 import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 import { CVFilter } from "@/components/comons/admin/cvDashboard/CVFilter";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function CVDashboardPage() {
-  const { isLoading, getAllCVs, handleGeneratePDF, handleSetCurrentCVCreate } =
+  const { isLoading, getAllCVs, createCV, handleGeneratePDF } =
     useCVStore();
+    const { userAuth } = useAuthStore();
 
   const router = useRouter();
 
@@ -117,7 +119,7 @@ export default function CVDashboardPage() {
       <DashboardHeader
         title="CV Dashboard"
         onCreateClick={() => {
-          handleSetCurrentCVCreate(null);
+          createCV(userAuth?.id || "");
           router.push(`/cv-builder`);
         }}
         createButtonText="Create CV"

@@ -42,22 +42,43 @@ const parseAfterContent = (suggestionText: string): string => {
 
 /**
  * Extract skills from suggestion text
- * Handles formats like: "Technical Skills: A, B. Soft Skills: C, D."
+ * Handles multiple formats:
+ * 1. "Technical Skills: A, B. Soft Skills: C, D."
+ * 2. "Thêm kỹ năng như 'Spring Boot', 'Docker', 'RESTful API'"
+ * 3. "After: 'skill1, skill2, skill3'"
  */
 const parseSkillsSuggestion = (suggestionText: string): string[] => {
+    // Try to get content after "After:" first
     const afterContent = parseAfterContent(suggestionText);
 
-    // Remove category labels and split by common delimiters
-    const cleanedText = afterContent
-        .replace(/(Technical Skills|Soft Skills|Kỹ năng|Skills):\s*/gi, "")
+    // If no "After:" pattern, work with the full suggestion text
+    const textToParse = afterContent || suggestionText;
+
+    // Extract skills from quotes (e.g., 'Spring Boot', 'Docker')
+    const quotedSkillsMatch = textToParse.match(/['"]([^'"]+)['"]/g);
+    if (quotedSkillsMatch && quotedSkillsMatch.length > 0) {
+        const skills = quotedSkillsMatch
+            .map((match) => match.replace(/['"]/g, "").trim())
+            .filter((skill) => skill.length > 0 && skill.length < 100); // Reasonable skill name length
+
+        if (skills.length > 0) {
+            console.log('📝 Extracted skills from quotes:', skills);
+            return skills;
+        }
+    }
+
+    // Fallback: Remove category labels and split by common delimiters
+    const cleanedText = textToParse
+        .replace(/(Technical Skills|Soft Skills|Kỹ năng|Skills|Thêm|như|để phù hợp|với mô tả công việc)[:：]?\s*/gi, "")
         .replace(/\.\s*/g, ","); // Replace periods with commas
 
     // Split by comma and clean up
     const skills = cleanedText
         .split(",")
         .map((skill) => skill.trim())
-        .filter((skill) => skill.length > 0);
+        .filter((skill) => skill.length > 0 && skill.length < 100);
 
+    console.log('📝 Extracted skills from text:', skills);
     return skills;
 };
 
@@ -175,14 +196,23 @@ export const applySuggestionToCV = (
         case "skill":
         case "kỹ năng":
             // Parse and add skills from suggestion
-            if (afterContent) {
+            if (suggestion.suggestion) {
                 const newSkills = parseSkillsSuggestion(suggestion.suggestion);
+                console.log('🎯 Parsed new skills:', newSkills);
+                console.log('📋 Current skills:', updatedCV.skills);
+
                 const uniqueNewSkills = newSkills.filter(
-                    (skill) => !updatedCV.skills.includes(skill)
+                    (skill) => !updatedCV.skills.some(
+                        (existingSkill) => existingSkill.toLowerCase() === skill.toLowerCase()
+                    )
                 );
 
                 if (uniqueNewSkills.length > 0) {
                     updatedCV.skills = [...updatedCV.skills, ...uniqueNewSkills];
+                    console.log('✅ Added new skills:', uniqueNewSkills);
+                    console.log('📊 Updated skills list:', updatedCV.skills);
+                } else {
+                    console.log('⚠️ No new skills to add (all already exist)');
                 }
             }
             break;

@@ -6,10 +6,14 @@ import { Label } from "@/components/ui/label";
 import { HighlightableTextarea } from "@/components/comons/cv-builder/HighlightableTextarea";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
-import { useCurrentCV } from "@/hooks/use-cv-mode";
+import { useCVStore } from "@/stores/cvStore";
 
 export function ExperienceStep() {
-  const { currentCV, handleUpdateCV, aiSuggestions } = useCurrentCV();
+  const { currentCV, handleUpdateCV, aiSuggestions } = useCVStore();
+
+  if (!currentCV) {
+    return <div>Loading...</div>;
+  }
 
   const addExperience = () => {
     handleUpdateCV({

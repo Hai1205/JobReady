@@ -7,13 +7,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { HighlightableTextarea } from "@/components/comons/cv-builder/HighlightableTextarea";
 import { Upload, X } from "lucide-react";
-import { useCurrentCV } from "@/hooks/use-cv-mode";
+import { useCVStore } from "@/stores/cvStore";
 import { useRef } from "react";
 import { toast } from "react-toastify";
 
 export function PersonalInfoStep() {
-  const { currentCV, handleUpdateCV, aiSuggestions } = useCurrentCV();
+  const { currentCV, handleUpdateCV, aiSuggestions } = useCVStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (!currentCV) {
+    return <div>Loading...</div>;
+  }
 
   const handleChange = (field: string, value: string) => {
     handleUpdateCV({

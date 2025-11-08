@@ -4,13 +4,13 @@ import CVCard from "@/components/comons/my-cvs/CVCard";
 
 interface Props {
   templateCVs: ICV[];
-  onDuplicateTemplate: (cv: ICV) => void;
+  handleDuplicate: (cvId: string) => void;
   onDownload: (cv: ICV) => void;
 }
 
 export default function TemplateCVsSection({
   templateCVs,
-  onDuplicateTemplate,
+  handleDuplicate,
   onDownload,
 }: Props) {
   if (!templateCVs || templateCVs.length === 0) return null;
@@ -29,7 +29,7 @@ export default function TemplateCVsSection({
           <CVCard
             key={cv.id}
             cv={cv}
-            onDuplicate={() => onDuplicateTemplate(cv)}
+            onDuplicate={() => handleDuplicate(cv?.id)}
             onDownload={() => onDownload(cv)}
           />
         ))}

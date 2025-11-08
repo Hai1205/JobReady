@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.example</groupId>
         <artifactId>jobready</artifactId>
@@ -11,32 +12,39 @@
     <artifactId>rabbit-common</artifactId>
     <version>1.0.0</version>
     <name>Rabbit Common</name>
-    <description>Common RabbitMQ Configuration and Utilities for Microservices</description>    <dependencies>
-        <!-- Spring Boot Starter AMQP -->
+    <description>Common RabbitMQ Configuration and Utilities for Microservices</description>
+
+    <dependencies>
+        <!-- Messaging and Communication -->
+        <!-- Spring Boot AMQP for RabbitMQ integration -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
-        <!-- Jackson for JSON processing -->
+        <!-- JSON Processing -->
+        <!-- Jackson for serializing and deserializing message payloads -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-json</artifactId>
         </dependency>
 
-        <!-- Spring Data Redis for Idempotency -->
+        <!-- Caching and Idempotency -->
+        <!-- Redis integration for storing message states and idempotency tracking -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
-        <!-- Lettuce Redis Client -->
+        <!-- Redis Client -->
+        <!-- Lettuce as the reactive Redis driver -->
         <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
         </dependency>
 
-        <!-- Lombok -->
+        <!-- Development Utilities -->
+        <!-- Lombok to reduce boilerplate code in models and configs -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -46,6 +54,7 @@
 
     <build>
         <plugins>
+            <!-- Compiler configuration with Lombok support -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

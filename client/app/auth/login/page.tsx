@@ -66,7 +66,7 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    if (response?.status && response?.status > 403 && response?.status < 500) {
+    if (response?.status && response?.status === 403) {
       router.push(`/auth/banned`);
       return;
     }

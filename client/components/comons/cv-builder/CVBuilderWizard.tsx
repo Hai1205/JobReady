@@ -23,7 +23,6 @@ import { EducationStep } from "./steps/EducationStep";
 import { EPrivacy } from "@/types/enum";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCVModeStore } from "@/hooks/use-cv-mode";
 import { ColorThemeSelector } from "./ColorThemeSelector";
 import { TemplateSelector } from "./TemplateSelector";
 
@@ -35,58 +34,18 @@ const steps = [
   { id: 4, title: "Preview & Export", component: PreviewStep },
 ];
 
-interface CVBuilderWizardProps {
-  mode?: "create" | "update"; // Xác định rõ mode
-}
-
-export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
+export function CVBuilderWizard() {
   const { userAuth } = useAuthStore();
-  const { setMode } = useCVModeStore();
   const {
     isLoading,
     currentStep,
     handleSetCurrentStep,
-    currentCVCreate,
-    currentCVUpdate,
+    currentCV,
     updateCV,
-    createCV,
-    handleUpdateCVCreate,
-    handleUpdateCVUpdate,
-    handleSetCurrentCVCreate,
+    handleUpdateCV,
   } = useCVStore();
 
-  const router = useRouter();
   const [isCustomizationExpanded, setIsCustomizationExpanded] = useState(false);
-
-  // Set mode khi component mount
-  useEffect(() => {
-    setMode(mode);
-  }, [mode, setMode]);
-
-  // Initialize currentCVCreate IMMEDIATELY (synchronously) for create mode
-  // Không dùng useEffect vì nó async, gây delay
-  if (mode === "create" && !currentCVCreate) {
-    handleSetCurrentCVCreate({
-      id: "",
-      title: "Untitled CV",
-      personalInfo: {
-        fullname: "",
-        email: "",
-        phone: "",
-        location: "",
-        summary: "",
-      },
-      experiences: [],
-      educations: [],
-      skills: [],
-      privacy: EPrivacy.PRIVATE,
-      color: "#3498db",
-      template: "modern",
-    } as ICV);
-  }
-
-  // Chọn CV dựa trên mode
-  const currentCV = mode === "create" ? currentCVCreate : currentCVUpdate;
 
   const CurrentStepComponent = steps[currentStep].component;
 
@@ -105,56 +64,24 @@ export function CVBuilderWizard({ mode = "create" }: CVBuilderWizardProps) {
   };
 
   const handleSave = async () => {
-    if (!currentCV) return;
+    if (!currentCV || !userAuth) return;
 
-    if (currentCV.id) {
-      await updateCV(
-        currentCV.id,
-        currentCV.title,
-        currentCV.avatar as File,
-        currentCV.personalInfo,
-        currentCV.experiences,
-        currentCV.educations,
-        currentCV.skills,
-        currentCV.privacy,
-        currentCV.color,
-        currentCV.template
-      );
-    } else {
-      const res = await createCV(
-        userAuth?.id || "",
-        currentCV.title,
-        currentCV.avatar as File,
-        currentCV.personalInfo,
-        currentCV.experiences,
-        currentCV.educations,
-        currentCV.skills,
-        currentCV.privacy,
-        currentCV.color,
-        currentCV.template
-      );
-
-      // If API returns created CV, set it into store and redirect to its URL to avoid duplicate creates
-      const createdCv = res?.data?.cv;
-      if (createdCv && createdCv.id) {
-        if (handleSetCurrentCVCreate) {
-          handleSetCurrentCVCreate(createdCv);
-        }
-
-        router.push(`/cv-builder/${createdCv.id}`);
-      }
-    }
+    await updateCV(
+      currentCV.id,
+      currentCV.title,
+      currentCV.avatar as File,
+      currentCV.personalInfo,
+      currentCV.experiences,
+      currentCV.educations,
+      currentCV.skills,
+      currentCV.privacy,
+      currentCV.color,
+      currentCV.template
+    );
   };
 
-  // Hàm update CV linh hoạt dựa trên mode
   const handleCVUpdate = (cvData: Partial<ICV>) => {
-    if (mode === "update") {
-      // Mode update: cập nhật currentCVUpdate
-      handleUpdateCVUpdate(cvData);
-    } else {
-      // Mode create: cập nhật currentCVCreate
-      handleUpdateCVCreate(cvData);
-    }
+    handleUpdateCV(cvData);
   };
 
   return (

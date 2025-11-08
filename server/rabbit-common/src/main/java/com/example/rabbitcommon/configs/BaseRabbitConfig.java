@@ -38,7 +38,9 @@ public class BaseRabbitConfig {
             MessageConverter messageConverter) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);
-        template.setReplyTimeout(60000);
+        template.setReplyTimeout(120000); // 120 seconds - increased for AI processing
+        template.setReceiveTimeout(120000); // 120 seconds
+        template.setUseDirectReplyToContainer(true); // Enable direct reply-to optimization
         return template;
     }
 }

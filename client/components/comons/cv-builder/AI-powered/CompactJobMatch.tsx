@@ -83,14 +83,17 @@ export function CompactJobMatch({
         currentCV.skills
       );
 
-      const backendData = response.data as unknown as IBackendResponse;
+      const backendData = response.data;
       const suggestions = backendData?.suggestions || [];
       const score = backendData?.matchScore;
 
+      // Store suggestions in CV store for AI Suggestions Sidebar
       handleSetAISuggestions(suggestions);
 
       toast.success(
-        `Phân tích xong! Điểm khớp: ${score ? Math.round(score) : "N/A"}%`
+        `Phân tích xong! Điểm khớp: ${score ? Math.round(score) : "N/A"}%${
+          suggestions.length > 0 ? `, ${suggestions.length} gợi ý` : ""
+        }`
       );
 
       if (onAnalysisComplete) {
@@ -140,7 +143,7 @@ export function CompactJobMatch({
           placeholder="Paste job description here..."
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          className="mt-1 min-h-[120px] text-xs"
+          className="mt-1 min-h-[120px] max-h-[400px] text-xs"
         />
       </div>
 
@@ -158,7 +161,7 @@ export function CompactJobMatch({
         ) : (
           <>
             <Sparkles className="mr-2 h-3 w-3" />
-            So Sánh Ngay
+            Phân tích
           </>
         )}
       </Button>

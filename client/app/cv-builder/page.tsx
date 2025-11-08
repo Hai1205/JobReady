@@ -7,12 +7,11 @@ import { CVBuilderWizard } from "@/components/comons/cv-builder/CVBuilderWizard"
 import { AIPanel } from "@/components/comons/cv-builder/AI-powered/AIPanel";
 
 export default function CVBuilderPage() {
-  const { handleSetCurrentCVCreate, handleSetCurrentStep } = useCVStore();
+  const { handleSetCurrentStep } = useCVStore();
 
   useEffect(() => {
-    handleSetCurrentCVCreate(null);
     handleSetCurrentStep(0);
-  }, [handleSetCurrentCVCreate, handleSetCurrentStep]);
+  }, [handleSetCurrentStep]);
 
   return (
     <div className="container mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:px-8">
@@ -26,7 +25,7 @@ export default function CVBuilderPage() {
 
         <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
           <Card className="p-6">
-            <CVBuilderWizard mode="create" />
+            <CVBuilderWizard />
           </Card>
 
           <AIPanel />

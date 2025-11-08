@@ -5,10 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
-import { useCurrentCV } from "@/hooks/use-cv-mode";
+import { useCVStore } from "@/stores/cvStore";
 
 export function EducationStep() {
-  const { currentCV, handleUpdateCV } = useCurrentCV();
+  const { currentCV, handleUpdateCV } = useCVStore();
+
+  if (!currentCV) {
+    return <div>Loading...</div>;
+  }
 
   const addEducation = () => {
     handleUpdateCV({

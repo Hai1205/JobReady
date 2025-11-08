@@ -70,13 +70,10 @@ Hệ thống backend JobReady với kiến trúc microservices hoàn chỉnh, t�
 ### 6. **MySQL Database** (Port: 3306)
 
 - Lưu trữ thông tin user và CV data
-- Database: `jobready`
 
 ### 7. **RabbitMQ** (Port: 5672, Management: 15672)
 
 - Message broker cho async communication
-- Exchange: `user.exchange`
-- Queue: `user.login.queue`
 
 ### 8. **OpenRouter AI** (External API)
 
@@ -127,8 +124,10 @@ mvn clean install -pl rabbit-common
 mvn clean install -pl discovery-service
 mvn clean install -pl gateway-service
 mvn clean install -pl user-service
-mvn clean install -pl cv-service
 mvn clean install -pl auth-service
+mvn clean install -pl mail-service
+mvn clean install -pl cv-service
+mvn clean install -pl ai-service
 ```
 
 ### 4. Chạy Services
@@ -145,7 +144,9 @@ mvn spring-boot:run -pl discovery-service
 mvn spring-boot:run -pl gateway-service
 mvn spring-boot:run -pl user-service
 mvn spring-boot:run -pl auth-service
+mvn spring-boot:run -pl mail-service
 mvn spring-boot:run -pl cv-service
+mvn spring-boot:run -pl ai-service
 ```
 
 ### 5. Kiểm tra Services

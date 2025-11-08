@@ -39,7 +39,6 @@ export function AIFeaturesTab() {
     currentCVCreate,
     currentCVUpdate,
     handleUpdateCV,
-    handleUpdateCVCreate,
     handleUpdateCVUpdate,
   } = useCVStore();
 
@@ -63,10 +62,9 @@ export function AIFeaturesTab() {
         currentCV?.skills
       );
 
-      // Response.data contains IBackendResponse from server
-      const backendData = response.data as unknown as IBackendResponse;
-      const suggestions = backendData?.suggestions || [];
-      const analyzeText = backendData?.analyze || "";
+      const data = response.data;
+      const suggestions = data?.suggestions || [];
+      const analyzeText = data?.analyze || "";
 
       // Store raw analyze text
       if (analyzeText) {
@@ -80,7 +78,7 @@ export function AIFeaturesTab() {
         );
         setActiveTab("suggestions");
       } else {
-        toast.error(backendData?.message || "Failed to Phân Tích");
+        toast.error(response?.message || "Failed to Phân Tích");
       }
     } catch (error) {
       console.error("Error analyzing CV:", error);
@@ -121,18 +119,10 @@ export function AIFeaturesTab() {
           content = suggestion.suggestion;
       }
 
-      const response = await improveCV(
-        suggestion.section,
-        content,
-        currentCV?.title,
-        currentCV?.personalInfo,
-        currentCV?.experiences,
-        currentCV?.educations,
-        currentCV?.skills
-      );
+      const response = await improveCV(suggestion.section, content);
 
-      const backendData = response.data as unknown as IBackendResponse;
-      const improvedSection = backendData?.improvedSection;
+      const data = response.data;
+      const improvedSection = data?.improvedSection;
 
       if (improvedSection) {
         // Store improved content for manual review
@@ -145,7 +135,7 @@ export function AIFeaturesTab() {
         );
         console.log("Improved section:", improvedSection);
       } else {
-        toast.error(backendData?.message || "Failed to apply suggestion");
+        toast.error(response?.message || "Failed to apply suggestion");
       }
     } catch (error) {
       console.error("Error applying suggestion:", error);
@@ -164,9 +154,7 @@ export function AIFeaturesTab() {
     const sectionLower = section.toLowerCase();
 
     // Choose the appropriate update function based on mode
-    const updateFunction = isUpdateMode
-      ? handleUpdateCVUpdate
-      : handleUpdateCVCreate;
+    const updateFunction = isUpdateMode ? handleUpdateCVUpdate : handleUpdateCV;
 
     switch (true) {
       case sectionLower.includes("summary") ||
@@ -294,8 +282,14 @@ export function AIFeaturesTab() {
         <TabsContent value="analyze" className="space-y-4">
           <JobDescriptionImport
             currentCV={currentCV}
-            onAnalysisComplete={(suggestions) => {
-              setActiveTab("suggestions");
+            onAnalysisComplete={(suggestions, matchScore) => {
+              // Switch to suggestions tab to show AI suggestions
+              if (suggestions && suggestions.length > 0) {
+                setActiveTab("suggestions");
+                toast.info(
+                  `Xem ${suggestions.length} gợi ý từ AI trong tab "Gợi Ý AI"`
+                );
+              }
             }}
           />
         </TabsContent>

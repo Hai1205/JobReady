@@ -44,20 +44,6 @@ services:
     networks:
       - app-network
 
-  auth-service:
-    build:
-      context: .
-      dockerfile: auth-service/Dockerfile
-    container_name: auth-service
-    env_file:
-      - ./auth-service/.env
-    ports:
-      - "8082:8082"
-    depends_on:
-      - discovery-service
-    networks:
-      - app-network
-
   user-service:
     build:
       context: .
@@ -75,8 +61,68 @@ services:
     networks:
       - app-network
 
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    env_file:
+      - ./auth-service/.env
+    ports:
+      - "8082:8082"
+    depends_on:
+      - discovery-service
+    networks:
+      - app-network
+  
+  mail-service:
+    build:
+      context: .
+      dockerfile: mail-service/Dockerfile
+    container_name: mail-service
+    env_file:
+      - ./mail-service/.env
+    ports:
+      - "8082:8082"
+    depends_on:
+      - discovery-service
+    networks:
+      - app-network
+
+  cv-service:
+    build:
+      context: .
+      dockerfile: cv-service/Dockerfile
+    container_name: cv-service
+    env_file:
+      - ./cv-service/.env
+    ports:
+      - "8084:8084"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    networks:
+      - app-network
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: ai-service/Dockerfile
+    container_name: ai-service
+    env_file:
+      - ./ai-service/.env
+    ports:
+      - "8085:8085"
+    depends_on:
+      discovery-service:
+        condition: service_started
+    networks:
+      - app-network
+
 volumes:
-  mysql_data:
+  rabbitmq_data:
 
 networks:
   app-network:

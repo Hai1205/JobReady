@@ -1,19 +1,22 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, IBaseStore } from "@/lib/initialStore";
-import { PDFExportService } from "@/services/pdfExportService";
 import { renderCVToHTMLAsync } from "@/components/comons/cv-builder/CVRenderer";
 import { toast } from "react-toastify";
 import { testFormData } from "@/lib/utils";
 import { applySuggestionToCV, getSectionDisplayName } from "@/lib/suggestionApplier";
+import { exportCustomHTML, exportToPDF } from "@/services/pdfExportService";
 
 interface ICVDataResponse {
 	cv: ICV,
-	cvs: ICV[]
+	cvs: ICV[],
+	suggestions: IAISuggestion[],
+	analyze: string,
+	improvedSection: string,
+	matchScore: number,
 }
 
 export interface ICVStore extends IBaseStore {
-	currentCVCreate: ICV | null
-	currentCVUpdate: ICV | null
+	currentCV: ICV | null
 	cvList: ICV[]
 	currentStep: number
 	aiSuggestions: IAISuggestion[]
@@ -26,15 +29,6 @@ export interface ICVStore extends IBaseStore {
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	createCV: (
 		userId: string,
-		title: string,
-		avatar: File,
-		personalInfo: IPersonalInfo,
-		experiences: IExperience[],
-		educations: IEducation[],
-		skills: string[],
-		privacy: string,
-		color: string,
-		template: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	updateCV: (
 		cvId: string,
@@ -78,19 +72,10 @@ export interface ICVStore extends IBaseStore {
 	improveCV: (
 		section: string,
 		content: string,
-		title: string,
-		personalInfo: IPersonalInfo,
-		experiences: IExperience[],
-		educations: IEducation[],
-		skills: string[],
 	) => Promise<IApiResponse<ICVDataResponse>>;
 
 	handleUpdateCV: (cvData: Partial<ICV>) => void;
-	handleUpdateCVCreate: (cvData: Partial<ICV>) => void;
-	handleUpdateCVUpdate: (cvData: Partial<ICV>) => void;
 	handleSetCurrentStep: (step: number) => void;
-	handleSetCurrentCVCreate: (cv: ICV | null) => void;
-	handleSetCurrentCVUpdate: (cv: ICV | null) => void;
 	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void;
 	handleSetJobDescription: (jd: string) => void;
 	handleApplySuggestion: (id: string) => void;
@@ -100,8 +85,7 @@ export interface ICVStore extends IBaseStore {
 
 const storeName = "cv";
 const initialState = {
-	currentCVCreate: null,
-	currentCVUpdate: null,
+	currentCV: null,
 	cvList: [],
 	currentStep: 0,
 	aiSuggestions: [],
@@ -131,34 +115,15 @@ export const useCVStore = createStore<ICVStore>(
 		},
 
 		createCV: async (
-			userId: string,
-			title: string,
-			avatar: File,
-			personalInfo: IPersonalInfo,
-			experiences: IExperience[],
-			educations: IEducation[],
-			skills: string[],
-			privacy: string,
-			color: string,
-			template: string
+			userId: string
 		): Promise<IApiResponse<ICVDataResponse>> => {
-			const formData = new FormData();
-			formData.append("data", JSON.stringify({
-				title,
-				personalInfo,
-				experiences,
-				educations,
-				skills,
-				privacy,
-				color,
-				template
-			}));
-			if (avatar) formData.append("avatar", avatar);
-			testFormData(formData);
-
 			return await get().handleRequest(async () => {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, formData);
-				console.log("Create CV Response:", res);
+				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, new FormData());
+
+				if (res.data && res.data.cv) {
+					set({ currentCV: res.data.cv });
+				}
+
 				return res;
 			});
 		},
@@ -202,7 +167,13 @@ export const useCVStore = createStore<ICVStore>(
 
 		duplicateCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/${cvId}/duplicate`);
+				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/${cvId}/duplicate`);
+
+				if (res.data && res.data.cv) {
+					set({ currentCV: res.data.cv });
+				}
+
+				return res;
 			});
 		},
 
@@ -280,45 +251,14 @@ export const useCVStore = createStore<ICVStore>(
 		},
 
 		handleUpdateCV: (cvData: Partial<ICV>) => {
-			// Deprecated - use handleUpdateCVCreate or handleUpdateCVUpdate instead
-			const currentState = get();
-			if (currentState.currentCVCreate) {
-				set({
-					currentCVCreate: { ...currentState.currentCVCreate, ...cvData, updatedAt: new Date().toISOString() },
-				} as Partial<ICVStore>);
-			} else if (currentState.currentCVUpdate) {
-				set({
-					currentCVUpdate: { ...currentState.currentCVUpdate, ...cvData, updatedAt: new Date().toISOString() },
-				} as Partial<ICVStore>);
-			}
-		},
-
-		handleUpdateCVCreate: (cvData: Partial<ICV>) => {
 			const currentState = get();
 			set({
-				currentCVCreate: currentState.currentCVCreate ? { ...currentState.currentCVCreate, ...cvData, updatedAt: new Date().toISOString() } : null,
-			} as Partial<ICVStore>);
-		},
-
-		handleUpdateCVUpdate: (cvData: Partial<ICV>) => {
-			const currentState = get();
-			set({
-				currentCVUpdate: currentState.currentCVUpdate ? { ...currentState.currentCVUpdate, ...cvData, updatedAt: new Date().toISOString() } : null,
+				currentCV: currentState.currentCV ? { ...currentState.currentCV, ...cvData, updatedAt: new Date().toISOString() } : null,
 			} as Partial<ICVStore>);
 		},
 
 		handleSetCurrentStep: (step: number): void => {
 			set({ currentStep: step });
-		},
-
-		handleSetCurrentCVCreate: (cv: ICV | null): void => {
-			set({ currentCVCreate: cv });
-		},
-
-		handleSetCurrentCVUpdate: (cv: ICV | null): void => {
-			set({ currentCVUpdate: cv });
-		}, handleSetAISuggestions: (suggestions: IAISuggestion[]): void => {
-			set({ aiSuggestions: suggestions });
 		},
 
 		handleSetJobDescription: (jd: string): void => {
@@ -335,11 +275,10 @@ export const useCVStore = createStore<ICVStore>(
 			}
 
 			// Apply the suggestion to the appropriate CV state
-			const updatedCVCreate = applySuggestionToCV(currentState.currentCVCreate, suggestion);
-			const updatedCVUpdate = applySuggestionToCV(currentState.currentCVUpdate, suggestion);
+			const updatedCVCreate = applySuggestionToCV(currentState.currentCV, suggestion);
 
 			// Check if any CV was updated
-			if (!updatedCVCreate && !updatedCVUpdate) {
+			if (!updatedCVCreate) {
 				toast.warning(`Không thể áp dụng gợi ý cho phần "${suggestion.section}"`);
 				return;
 			}
@@ -352,8 +291,7 @@ export const useCVStore = createStore<ICVStore>(
 			// Update state
 			set({
 				aiSuggestions: updatedSuggestions,
-				currentCVCreate: updatedCVCreate,
-				currentCVUpdate: updatedCVUpdate
+				currentCV: updatedCVCreate
 			} as Partial<ICVStore>);
 
 			const sectionName = getSectionDisplayName(suggestion.section);
@@ -371,7 +309,7 @@ export const useCVStore = createStore<ICVStore>(
 
 				// If HTML content is provided directly, use exportCustomHTML
 				if (htmlContent) {
-					await PDFExportService.exportCustomHTML(htmlContent, filename);
+					await exportCustomHTML(htmlContent, filename);
 					toast.success("Tải xuống CV thành công!");
 					return;
 				}
@@ -387,13 +325,13 @@ export const useCVStore = createStore<ICVStore>(
 
 				if (previewElement) {
 					// Preview is available in DOM - use the existing method
-					await PDFExportService.exportToPDF("cv-preview-content", filename);
+					await exportToPDF("cv-preview-content", filename);
 					toast.success("Tải xuống CV thành công!");
 				} else {
 					// Preview not in DOM - generate HTML from CV data
 					toast.info("Đang tạo PDF...");
 					const generatedHTML = await renderCVToHTMLAsync(currentCV);
-					await PDFExportService.exportCustomHTML(generatedHTML, filename);
+					await exportCustomHTML(generatedHTML, filename);
 					toast.success("Tải xuống CV thành công!");
 				}
 			} catch (error) {

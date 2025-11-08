@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.ai";
+option java_outer_classname = "AIServiceProto";
+
+package ai;
+
+// AI Service Definition
+service AIService {
+  // Analyze CV
+  rpc AnalyzeCV(AnalyzeCVRequest) returns (AIResponse);
+  
+  // Improve CV section
+  rpc ImproveCV(ImproveCVRequest) returns (AIResponse);
+  
+  // Analyze CV with Job Description
+  rpc AnalyzeCVWithJobDescription(AnalyzeCVWithJDRequest) returns (AIResponse);
+}
+
+// Request Messages
+message AnalyzeCVRequest {
+  CV cv = 1;
+}
+
+message ImproveCVRequest {
+  string section = 1;
+  string content = 2;
+}
+
+message AnalyzeCVWithJDRequest {
+  CV cv = 1;
+  string language = 2;
+  string jd_text = 3;
+}
+
+// Response Messages
+message AIResponse {
+  int32 code = 1;
+  string message = 2;
+  AIResponseData data = 3;
+}
+
+message AIResponseData {
+  string analysis = 1;
+  string suggestion = 2;
+  string improved_content = 3;
+}
+
+// CV Entity
+message CV {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  string summary = 4;
+  string contact_email = 5;
+  string contact_phone = 6;
+  string contact_address = 7;
+  repeated Experience experiences = 8;
+  repeated Education educations = 9;
+  repeated Skill skills = 10;
+  repeated Project projects = 11;
+  repeated Certification certifications = 12;
+  repeated Language languages = 13;
+}
+
+message Experience {
+  string id = 1;
+  string company = 2;
+  string position = 3;
+  string start_date = 4;
+  string end_date = 5;
+  string description = 6;
+}
+
+message Education {
+  string id = 1;
+  string school = 2;
+  string degree = 3;
+  string field_of_study = 4;
+  string start_date = 5;
+  string end_date = 6;
+  string description = 7;
+}
+
+message Skill {
+  string id = 1;
+  string name = 2;
+  string level = 3;
+}
+
+message Project {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string technologies = 4;
+  string start_date = 5;
+  string end_date = 6;
+  string url = 7;
+}
+
+message Certification {
+  string id = 1;
+  string name = 2;
+  string issuer = 3;
+  string issue_date = 4;
+  string expiry_date = 5;
+  string credential_id = 6;
+  string credential_url = 7;
+}
+
+message Language {
+  string id = 1;
+  string name = 2;
+  string proficiency = 3;
+}

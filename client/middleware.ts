@@ -92,12 +92,12 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith('/admin')) {
         // If not authenticated, redirect to login page
         if (!isAuthenticated) {
-            // return NextResponse.redirect(new URL('/auth/login', request.url))
+            return NextResponse.redirect(new URL('/auth/login', request.url))
         }
 
         // If authenticated but not admin, redirect to home page
         if (!isAdmin) {
-            // return NextResponse.redirect(new URL('/', request.url))
+            return NextResponse.redirect(new URL('/', request.url))
         }
     }
     if (pathname.startsWith('/cv-builder') || pathname.startsWith('/my-cvs')) {

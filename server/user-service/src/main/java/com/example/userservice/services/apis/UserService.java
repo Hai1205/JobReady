@@ -158,7 +158,7 @@ public class UserService extends BaseService {
 
             User user = null;
             boolean isEmailValid = handleIsValidEmail(identifier);
-            if (!isEmailValid) {
+            if (isEmailValid) {
                 user = userRepository.findByEmail(identifier)
                         .orElseThrow(() -> new OurException("User not found", 404));
             } else {
@@ -485,7 +485,7 @@ public class UserService extends BaseService {
             throw new OurException("Failed to find user by email", 500);
         }
     }
-    
+
     public UserDto handleFindByUsername(String username) {
         try {
             return userRepository.findByUsername(username)
@@ -507,7 +507,7 @@ public class UserService extends BaseService {
             throw new OurException("Failed to find user by ID", 500);
         }
     }
-   
+
     public UserDto handleFindByIdentifier(String identifier) {
         try {
             boolean isEmailValid = handleIsValidEmail(identifier);

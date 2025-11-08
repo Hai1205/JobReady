@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>server</artifactId>
+    <artifactId>jobready</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
         <name>JobReady</name>
@@ -24,11 +24,15 @@
 
     <modules>
         <module>rabbit-common</module>
+        <module>grpc-common</module>
         <module>discovery-service</module>
         <module>gateway-service</module>
         <module>auth-service</module>
+        <module>mail-service</module>
         <module>user-service</module>
         <module>cv-service</module>
+        <!-- <module>chat-service</module> -->
+        <module>ai-service</module>
     </modules>
 
     <dependencyManagement>

@@ -107,7 +107,7 @@ export function JobDescriptionImport({
       );
 
       const maybeResponse = (response as any).data;
-      const responseData: IResponseData | undefined = maybeResponse?.data
+      const responseData = maybeResponse?.data
         ? maybeResponse.data
         : maybeResponse;
 
@@ -127,7 +127,9 @@ export function JobDescriptionImport({
       handleSetJobDescription(jobDescription || "");
 
       toast.success(
-        `Analyze complete! Match score: ${score ? Math.round(score) : "N/A"}%`
+        `Phân tích hoàn tất! Điểm khớp: ${score ? Math.round(score) : "N/A"}%${
+          suggestions.length > 0 ? `, ${suggestions.length} gợi ý` : ""
+        }`
       );
 
       if (onAnalysisComplete) {

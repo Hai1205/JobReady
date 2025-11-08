@@ -1,14 +1,13 @@
 package com.example.authservice.services.apis;
 
-import com.example.authservice.configs.MailConfig;
 import com.example.authservice.dtos.*;
 import com.example.authservice.dtos.requests.*;
 import com.example.authservice.dtos.responses.*;
 import com.example.authservice.exceptions.OurException;
 import com.example.authservice.services.OtpService;
+import com.example.authservice.services.grpcs.UserGrpcClient;
 import com.example.authservice.services.producers.AuthProducer;
 import com.example.authservice.utils.JwtUtil;
-import com.example.rabbitcommon.dtos.RPCResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
@@ -26,14 +25,15 @@ public class AuthService extends BaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
     private JwtUtil jwtUtil;
-    private MailConfig mailConfig;
+    private UserGrpcClient userGrpcClient;
     private AuthProducer authProducer;
     private OtpService otpService;
     private final ObjectMapper objectMapper;
 
-    public AuthService(JwtUtil jwtUtil, MailConfig mailConfig, AuthProducer authProducer, OtpService otpService) {
+    public AuthService(JwtUtil jwtUtil, UserGrpcClient userGrpcClient, AuthProducer authProducer,
+            OtpService otpService) {
         this.jwtUtil = jwtUtil;
-        this.mailConfig = mailConfig;
+        this.userGrpcClient = userGrpcClient;
         this.authProducer = authProducer;
         this.otpService = otpService;
         this.objectMapper = new ObjectMapper();
@@ -49,8 +49,7 @@ public class AuthService extends BaseService {
             String identifier = request.getIdentifier();
             String password = request.getPassword();
 
-            RPCResponse<UserDto> rpcResponse = authProducer.authenticateUser(identifier, password);
-            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+            UserDto user = userGrpcClient.authenticateUser(identifier, password);
 
             if (user == null) {
                 logger.warn("Login failed: Invalid credentials for username or email: {}", identifier);
@@ -122,15 +121,14 @@ public class AuthService extends BaseService {
             Map<String, Object> additionalData = new HashMap<>();
             additionalData.put("valid", isValid);
 
-            response.setMessage("Token validation successful");
-            response.setAdditionalData(additionalData);
-
             if (isValid) {
                 logger.debug("Token validation successful for username: {}", username);
             } else {
                 logger.warn("Token validation failed for username: {}", username);
             }
-
+            
+            response.setMessage("Token validation successful");
+            response.setAdditionalData(additionalData);
             return response;
         } catch (OurException e) {
             logger.error("Token validation failed with OurException for username {}: {}", username, e.getMessage());
@@ -153,8 +151,7 @@ public class AuthService extends BaseService {
             String password = request.getPassword();
             String fullname = request.getFullname();
 
-            RPCResponse<UserDto> rpcResponse = authProducer.createUser(username, email, password, fullname);
-            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+            UserDto user = userGrpcClient.createUser(username, email, password, fullname);
 
             response.setMessage("Registration successful");
             response.setUser(user);
@@ -175,8 +172,18 @@ public class AuthService extends BaseService {
         Response response = new Response();
 
         try {
-            RPCResponse<UserDto> rpcResponse = authProducer.findUserByIdentifier(identifier);
-            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+            // Validate input parameters
+            if (identifier == null || identifier.trim().isEmpty()) {
+                logger.warn("OTP verification failed: Identifier is required");
+                throw new OurException("Identifier is required", 400);
+            }
+
+            if (dataJson == null || dataJson.trim().isEmpty()) {
+                logger.warn("OTP verification failed: Request data is required");
+                throw new OurException("Request data is required", 400);
+            }
+
+            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
 
             if (user == null) {
                 logger.warn("OTP verification failed: User not found for identifier: {}", identifier);
@@ -188,6 +195,11 @@ public class AuthService extends BaseService {
             VerifyOtpRequest request = objectMapper.readValue(dataJson, VerifyOtpRequest.class);
             String otp = request.getOtp();
 
+            if (otp == null || otp.trim().isEmpty()) {
+                logger.warn("OTP verification failed: OTP is required");
+                throw new OurException("OTP is required", 400);
+            }
+
             boolean isValid = otpService.validateOtp(email, otp);
 
             if (!isValid) {
@@ -195,8 +207,8 @@ public class AuthService extends BaseService {
                 throw new OurException("Invalid OTP.");
             }
 
-            if (request.getIsActivation()) {
-                authProducer.activateUser(email);
+            if (request.getIsActivation() != null && request.getIsActivation()) {
+                userGrpcClient.activateUser(email);
                 logger.info("User account activated for email: {}", email);
             }
 
@@ -218,8 +230,7 @@ public class AuthService extends BaseService {
         Response response = new Response();
 
         try {
-            RPCResponse<UserDto> rpcResponse = authProducer.findUserByIdentifier(identifier);
-            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
 
             if (user == null) {
                 logger.warn("OTP send failed: User not found for identifier: {}", identifier);
@@ -230,14 +241,7 @@ public class AuthService extends BaseService {
 
             String otp = otpService.generateOtp(email);
 
-            String subject = "Account Activation";
-            String templateName = "mail_active_account";
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("recipientEmail", email);
-            variables.put("recipientName", email);
-            variables.put("senderName", "JobReady");
-            variables.put("otp", otp);
-            mailConfig.sendMail(email, subject, templateName, variables);
+            authProducer.sendMailActivation(email, otp);
 
             response.setMessage("OTP is sent!");
             logger.info("OTP sent successfully to email: {}", email);
@@ -257,8 +261,7 @@ public class AuthService extends BaseService {
         Response response = new Response();
 
         try {
-            RPCResponse<UserDto> rpcResponse = authProducer.findUserByIdentifier(identifier);
-            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
 
             if (user == null) {
                 logger.warn("OTP send failed: User not found for identifier: {}", identifier);
@@ -276,7 +279,7 @@ public class AuthService extends BaseService {
                 throw new OurException("Password does not match.");
             }
 
-            authProducer.changePasswordUser(email, currentPassword, newPassword);
+            userGrpcClient.changePassword(email, currentPassword, newPassword);
 
             response.setMessage("Password changed successfully!");
             logger.info("Password changed successfully for email: {}", email);
@@ -296,18 +299,9 @@ public class AuthService extends BaseService {
         Response response = new Response();
 
         try {
-            RPCResponse<String> rpcResponse = authProducer.resetPasswordUser(email);
-            String newPassword = (String) rpcResponse.getData();
+            String newPassword = userGrpcClient.resetPassword(email);
 
-            String subject = "Reset Password";
-            String templateName = "mail_reset_password";
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("recipientEmail", email);
-            variables.put("recipientName", email);
-            variables.put("senderName", "JobReady");
-            variables.put("password", newPassword);
-
-            mailConfig.sendMail(email, subject, templateName, variables);
+            authProducer.sendMailResetPassword(email, newPassword);
 
             response.setMessage("Password reset email sent successfully!");
             logger.info("Password reset email sent successfully to: {}", email);
@@ -327,25 +321,24 @@ public class AuthService extends BaseService {
         Response response = new Response();
 
         try {
-            RPCResponse<UserDto> rpcResponse = authProducer.findUserByIdentifier(identifier);
-            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
 
             if (user == null) {
                 logger.warn("OTP send failed: User not found for identifier: {}", identifier);
                 throw new OurException("User not found.", 404);
             }
 
-            ChangePasswordRequest request = objectMapper.readValue(dataJson, ChangePasswordRequest.class);
+            ForgotPasswordRequest request = objectMapper.readValue(dataJson, ForgotPasswordRequest.class);
             String email = user.getEmail();
-            String newPassword = request.getNewPassword();
-            String rePassword = request.getRePassword();
+            String newPassword = request.getPassword();
+            String rePassword = request.getConfirmPassword();
 
             if (!newPassword.equals(rePassword)) {
                 logger.warn("Forgot password failed: Password mismatch for email: {}", email);
                 throw new OurException("Password does not match.");
             }
 
-            authProducer.forgotPasswordUser(email, newPassword);
+            userGrpcClient.forgotPassword(email, newPassword);
 
             response.setMessage("Password updated successfully!");
             logger.info("Password updated successfully via forgot password for email: {}", email);
@@ -406,8 +399,7 @@ public class AuthService extends BaseService {
             String email = jwtUtil.extractEmail(refreshToken);
             String userId = jwtUtil.extractUserId(refreshToken);
 
-            RPCResponse<UserDto> rpcResponse = authProducer.findUserByEmail(email);
-            UserDto user = objectMapper.convertValue(rpcResponse.getData(), UserDto.class);
+            UserDto user = userGrpcClient.findUserByEmail(email);
 
             if (user == null) {
                 logger.warn("Token refresh failed: User not found for email: {}", email);

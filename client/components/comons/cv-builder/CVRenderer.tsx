@@ -1,5 +1,5 @@
 import React from "react";
-import { generateCVHTML as generateTemplateHTML } from "./templates";
+import { generateCVHTML as generateTemplateHTML } from "./templates/templates";
 
 interface CVRendererProps {
   cv: any;

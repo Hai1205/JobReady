@@ -21,17 +21,13 @@ public class CVController {
 
     @PostMapping("/users/{userId}")
     @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> createCV(
-            @PathVariable("userId") UUID userId,
-            @RequestPart("data") String dataJson,
-            @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
-        Response response = cvService.createCV(userId, dataJson, avatar);
+    public ResponseEntity<Response> createCV(@PathVariable("userId") UUID userId) {
+        Response response = cvService.createCV(userId);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> getAllCVs() {
         Response response = cvService.getAllCVs();
 
@@ -74,16 +70,6 @@ public class CVController {
     @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> getUserCVs(@PathVariable("userId") UUID userId) {
         Response response = cvService.getUserCVs(userId);
-
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
-    @PostMapping("/users/{userId}/import")
-    @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> importFile(
-            @PathVariable("userId") UUID userId,
-            @RequestParam("file") MultipartFile file) {
-        Response response = cvService.importFile(userId, file);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

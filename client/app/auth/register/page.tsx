@@ -89,7 +89,7 @@ const RegisterPage: React.FC = () => {
       toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.");
 
       router.push(
-        `/auth/verification?email=${encodeURIComponent(
+        `/auth/verification?identifier=${encodeURIComponent(
           formData.email
         )}&isActivation=true`
       );
