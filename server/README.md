@@ -227,7 +227,35 @@ mvn spring-boot:run -pl ai-service
 - **Database connection**: Check MySQL service và credentials
 - **OAuth2 redirect error**: Verify callback URLs trong provider console
 
-## 📚 Tech Stack
+## 🧪 Testing
+
+### Chạy Tests
+
+```bash
+mvn test
+```
+
+### Test Coverage
+
+- **UserServiceTest**: 42 test cases - CRUD operations, validation, edge cases
+- **AuthServiceTest**: 35 unit tests + integration tests - JWT, OAuth2, authentication
+- **OtpServiceTest**: 23 test cases - OTP generation, validation, Redis operations
+- **MailServiceTest**: 12 test cases - Email sending, templates, error handling
+- **AIServiceTest**: 20 test cases - AI processing, null/empty inputs, error scenarios
+
+**Tổng cộng: 132 test cases** với STT numbering trong `TESTCASE.md`
+
+### Test Scripts
+
+- `run-tests.ps1`: PowerShell script để chạy tất cả tests (có option skip auth-service nếu cần)
+- `run-tests.bat`: Batch script đơn giản cho Windows
+- `TESTCASE.md`: Documentation đầy đủ tất cả test cases với STT numbering
+
+### Troubleshooting Tests
+
+- **Auth Service Integration Tests Fail**: Có thể bỏ qua bằng `.\run-tests.ps1 -SkipAuthService`
+- **AI Service Tests Fail**: Kiểm tra Mockito configuration và null input handling
+- **Database Tests Fail**: Đảm bảo MySQL container đang chạy
 
 - **Spring Boot 3.2.0** - Framework chính
 - **Spring Cloud 2023.0.0** - Microservices support

@@ -543,14 +543,13 @@ public class CVService extends BaseService {
         }
     }
 
-    public Response analyzeCVWithJobDescription(String dataJson) {
+    public Response analyzeCVWithJobDescription(String dataJson, MultipartFile jdFile) {
         Response response = new Response();
 
         try {
             AnalyzeCVWithJDRequest request = objectMapper.readValue(dataJson, AnalyzeCVWithJDRequest.class);
             String language = request.getLanguage();
 
-            MultipartFile jdFile = request.getJdFile();
             String jobDescription = request.getJobDescription();
             String jdText = handleExtractJobDescriptionText(jdFile, jobDescription);
 

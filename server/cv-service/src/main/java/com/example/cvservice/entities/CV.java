@@ -23,7 +23,7 @@ public class CV {
 
     private UUID userId;
 
-    public CV(UUID userId, String title){
+    public CV(UUID userId, String title) {
         this.userId = userId;
         this.title = title;
     }
@@ -38,15 +38,12 @@ public class CV {
     }
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cv_id")
     private PersonalInfo personalInfo;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cv_id")
     private List<Experience> experiences = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cv_id")
     private List<Education> educations = new ArrayList<>();
 
     @ElementCollection

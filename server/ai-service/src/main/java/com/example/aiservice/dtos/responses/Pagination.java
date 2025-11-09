@@ -1,4 +1,4 @@
-package com.example.aiservice.dtos.response;
+package com.example.aiservice.dtos.responses;
 
 import lombok.*;
 

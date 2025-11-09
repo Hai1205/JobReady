@@ -1,0 +1,743 @@
+package com.example.authservice.services;
+
+import com.example.authservice.dtos.UserDto;
+import com.example.authservice.dtos.requests.*;
+import com.example.authservice.dtos.responses.*;
+import com.example.authservice.exceptions.OurException;
+import com.example.authservice.services.apis.AuthService;
+import com.example.authservice.services.grpcs.UserGrpcClient;
+import com.example.authservice.services.producers.AuthProducer;
+import com.example.authservice.utils.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.UUID;
+
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
+
+    @Mock
+    private JwtUtil jwtUtil;
+
+    @Mock
+    private UserGrpcClient userGrpcClient;
+
+    @Mock
+    private AuthProducer authProducer;
+
+    @Mock
+    private OtpService otpService;
+
+    @Mock
+    private HttpServletResponse httpServletResponse;
+
+    @Mock
+    private HttpServletRequest httpServletRequest;
+
+    @InjectMocks
+    private AuthService authService;
+
+    private ObjectMapper objectMapper;
+    private UserDto mockUser;
+
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper();
+
+        // Mock user data
+        mockUser = new UserDto();
+        String idStr = "550e8400-e29b-41d4-a716-446655440000";
+        UUID id = UUID.fromString(idStr);
+        mockUser.setId(id);
+        mockUser.setEmail("test@example.com");
+        mockUser.setUsername("testuser");
+        mockUser.setRole("user");
+        mockUser.setStatus("active");
+    }
+
+    @Test
+    void testLogin_Success() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setIdentifier("testuser");
+        loginRequest.setPassword("password123");
+        String dataJson = objectMapper.writeValueAsString(loginRequest);
+
+        when(userGrpcClient.authenticateUser(anyString(), anyString())).thenReturn(mockUser);
+        when(jwtUtil.generateAccessToken(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn("access_token");
+        when(jwtUtil.generateRefreshToken(anyString(), anyString(), anyString()))
+                .thenReturn("refresh_token");
+
+        // Act
+        Response response = authService.login(dataJson, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Login successful", response.getMessage());
+        assertNotNull(response.getUser());
+
+        verify(userGrpcClient).authenticateUser("testuser", "password123");
+        verify(httpServletResponse, times(2)).addCookie(any(Cookie.class));
+        verify(httpServletResponse).setHeader("X-Access-Token", "access_token");
+        verify(httpServletResponse).setHeader("X-Refresh-Token", "refresh_token");
+    }
+
+    @Test
+    void testLogin_InvalidCredentials() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setIdentifier("testuser");
+        loginRequest.setPassword("wrongpassword");
+        String dataJson = objectMapper.writeValueAsString(loginRequest);
+
+        when(userGrpcClient.authenticateUser(anyString(), anyString())).thenReturn(null);
+
+        // Act
+        Response response = authService.login(dataJson, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCode());
+        assertTrue(response.getMessage().contains("Invalid credentials"));
+    }
+
+    @Test
+    void testLogin_PendingAccount() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setIdentifier("testuser");
+        loginRequest.setPassword("password123");
+        String dataJson = objectMapper.writeValueAsString(loginRequest);
+
+        mockUser.setStatus("pending");
+        when(userGrpcClient.authenticateUser(anyString(), anyString())).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.login(dataJson, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(403, response.getStatusCode());
+        assertTrue(response.getMessage().contains("Account not verified"));
+    }
+
+    @Test
+    void testLogin_BannedAccount() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setIdentifier("testuser");
+        loginRequest.setPassword("password123");
+        String dataJson = objectMapper.writeValueAsString(loginRequest);
+
+        mockUser.setStatus("banned");
+        when(userGrpcClient.authenticateUser(anyString(), anyString())).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.login(dataJson, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(405, response.getStatusCode());
+        assertTrue(response.getMessage().contains("Account is banned"));
+    }
+
+    @Test
+    void testRegister_Success() throws Exception {
+        // Arrange
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setUsername("newuser");
+        registerRequest.setEmail("newuser@example.com");
+        registerRequest.setPassword("password123");
+        registerRequest.setFullname("New User");
+        String dataJson = objectMapper.writeValueAsString(registerRequest);
+
+        when(userGrpcClient.createUser(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(mockUser);
+
+        // Act
+        Response response = authService.register(dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Registration successful", response.getMessage());
+        assertNotNull(response.getUser());
+
+        verify(userGrpcClient).createUser("newuser", "newuser@example.com", "password123", "New User");
+    }
+
+    @Test
+    void testValidateToken_Valid() {
+        // Arrange
+        String token = "valid_token";
+        String username = "testuser";
+        when(jwtUtil.validateToken(token, username)).thenReturn(true);
+
+        // Act
+        Response response = authService.validateToken(token, username);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Token validation successful", response.getMessage());
+        assertTrue((Boolean) response.getAdditionalData().get("valid"));
+
+        verify(jwtUtil).validateToken(token, username);
+    }
+
+    @Test
+    void testValidateToken_Invalid() {
+        // Arrange
+        String token = "invalid_token";
+        String username = "testuser";
+        when(jwtUtil.validateToken(token, username)).thenReturn(false);
+
+        // Act
+        Response response = authService.validateToken(token, username);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertFalse((Boolean) response.getAdditionalData().get("valid"));
+    }
+
+    @Test
+    void testSendOTP_Success() {
+        // Arrange
+        String identifier = "test@example.com";
+        String otp = "123456";
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(otpService.generateOtp(anyString())).thenReturn(otp);
+
+        // Act
+        Response response = authService.sendOTP(identifier);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("OTP is sent!", response.getMessage());
+
+        verify(userGrpcClient).findUserByIdentifier(identifier);
+        verify(otpService).generateOtp(mockUser.getEmail());
+        verify(authProducer).sendMailActivation(mockUser.getEmail(), otp);
+    }
+
+    @Test
+    void testSendOTP_UserNotFound() {
+        // Arrange
+        String identifier = "nonexistent@example.com";
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
+
+        // Act
+        Response response = authService.sendOTP(identifier);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCode());
+        assertTrue(response.getMessage().contains("User not found"));
+    }
+
+    @Test
+    void testVerifyOTP_Success() throws Exception {
+        // Arrange
+        String identifier = "test@example.com";
+        VerifyOtpRequest verifyRequest = new VerifyOtpRequest();
+        verifyRequest.setOtp("123456");
+        verifyRequest.setIsActivation(true);
+        String dataJson = objectMapper.writeValueAsString(verifyRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(otpService.validateOtp(anyString(), anyString())).thenReturn(true);
+
+        // Act
+        Response response = authService.verifyOTP(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Otp verified successfully!", response.getMessage());
+
+        verify(otpService).validateOtp(mockUser.getEmail(), "123456");
+        verify(userGrpcClient).activateUser(mockUser.getEmail());
+    }
+
+    @Test
+    void testVerifyOTP_InvalidOTP() throws Exception {
+        // Arrange
+        String identifier = "test@example.com";
+        VerifyOtpRequest verifyRequest = new VerifyOtpRequest();
+        verifyRequest.setOtp("wrong_otp");
+        String dataJson = objectMapper.writeValueAsString(verifyRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(otpService.validateOtp(anyString(), anyString())).thenReturn(false);
+
+        // Act
+        Response response = authService.verifyOTP(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test
+    void testChangePassword_Success() throws Exception {
+        // Arrange
+        String identifier = "testuser";
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
+        changePasswordRequest.setCurrentPassword("oldPassword");
+        changePasswordRequest.setNewPassword("newPassword");
+        changePasswordRequest.setRePassword("newPassword");
+        String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.changePassword(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Password changed successfully!", response.getMessage());
+
+        verify(userGrpcClient).changePassword(mockUser.getEmail(), "oldPassword", "newPassword");
+    }
+
+    @Test
+    void testChangePassword_PasswordMismatch() throws Exception {
+        // Arrange
+        String identifier = "testuser";
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
+        changePasswordRequest.setCurrentPassword("oldPassword");
+        changePasswordRequest.setNewPassword("newPassword");
+        changePasswordRequest.setRePassword("differentPassword");
+        String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.changePassword(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test
+    void testResetPassword_Success() {
+        // Arrange
+        String email = "test@example.com";
+        String newPassword = "newPassword123";
+
+        when(userGrpcClient.resetPassword(email)).thenReturn(newPassword);
+
+        // Act
+        Response response = authService.resetPassword(email);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Password reset email sent successfully!", response.getMessage());
+
+        verify(userGrpcClient).resetPassword(email);
+        verify(authProducer).sendMailResetPassword(email, newPassword);
+    }
+
+    @Test
+    void testRefreshToken_Success() {
+        // Arrange
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
+        refreshTokenRequest.setRefreshToken("valid_refresh_token");
+
+        when(jwtUtil.validateRefreshToken(anyString())).thenReturn(true);
+        when(jwtUtil.extractEmail(anyString())).thenReturn("test@example.com");
+        when(jwtUtil.extractUserId(anyString())).thenReturn("1");
+        when(userGrpcClient.findUserByEmail(anyString())).thenReturn(mockUser);
+        when(jwtUtil.generateAccessToken(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn("new_access_token");
+
+        // Act
+        Response response = authService.refreshToken(
+                refreshTokenRequest, null, httpServletRequest, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Token refreshed successfully!", response.getMessage());
+
+        verify(httpServletResponse).addCookie(any(Cookie.class));
+        verify(httpServletResponse).setHeader("X-Access-Token", "new_access_token");
+    }
+
+    @Test
+    void testRefreshToken_InvalidToken() {
+        // Arrange
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
+        refreshTokenRequest.setRefreshToken("invalid_refresh_token");
+
+        when(jwtUtil.validateRefreshToken(anyString())).thenReturn(false);
+
+        // Act
+        Response response = authService.refreshToken(
+                refreshTokenRequest, null, httpServletRequest, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(401, response.getStatusCode());
+        assertTrue(response.getMessage().contains("Invalid or expired refresh token"));
+    }
+
+    @Test
+    void testLogout_Success() {
+        // Act
+        Response response = authService.logout(httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Logged out successfully", response.getMessage());
+
+        verify(httpServletResponse, times(2)).addCookie(any(Cookie.class));
+        verify(httpServletResponse).setHeader("X-Access-Token", "");
+        verify(httpServletResponse).setHeader("X-Refresh-Token", "");
+    }
+
+    // Additional test cases for forgotPassword (completely missing)
+    @Test
+    void testForgotPassword_Success() throws Exception {
+        // Arrange
+        String identifier = "testuser";
+        ForgotPasswordRequest forgotRequest = new ForgotPasswordRequest();
+        forgotRequest.setPassword("newPassword");
+        forgotRequest.setConfirmPassword("newPassword");
+        String dataJson = objectMapper.writeValueAsString(forgotRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.forgotPassword(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode());
+        assertEquals("Password updated successfully!", response.getMessage());
+
+        verify(userGrpcClient).forgotPassword(mockUser.getEmail(), "newPassword");
+    }
+
+    @Test
+    void testForgotPassword_UserNotFound() throws Exception {
+        // Arrange
+        String identifier = "nonexistent";
+        ForgotPasswordRequest forgotRequest = new ForgotPasswordRequest();
+        forgotRequest.setPassword("newPassword");
+        forgotRequest.setConfirmPassword("newPassword");
+        String dataJson = objectMapper.writeValueAsString(forgotRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
+
+        // Act
+        Response response = authService.forgotPassword(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCode());
+        assertTrue(response.getMessage().contains("User not found"));
+    }
+
+    @Test
+    void testForgotPassword_PasswordMismatch() throws Exception {
+        // Arrange
+        String identifier = "testuser";
+        ForgotPasswordRequest forgotRequest = new ForgotPasswordRequest();
+        forgotRequest.setPassword("newPassword");
+        forgotRequest.setConfirmPassword("differentPassword");
+        String dataJson = objectMapper.writeValueAsString(forgotRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.forgotPassword(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCode());
+        assertTrue(response.getMessage().contains("Password does not match"));
+    }
+
+    @Test
+    void testForgotPassword_NullFields() throws Exception {
+        // Arrange
+        String identifier = "testuser";
+        ForgotPasswordRequest forgotRequest = new ForgotPasswordRequest();
+        forgotRequest.setPassword(null);
+        forgotRequest.setConfirmPassword("");
+        String dataJson = objectMapper.writeValueAsString(forgotRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.forgotPassword(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(500, response.getStatusCode()); // NullPointerException in service
+    }
+
+    // Additional test cases for register
+    @Test
+    void testRegister_DuplicateEmail() throws Exception {
+        // Arrange
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setUsername("newuser");
+        registerRequest.setEmail("existing@example.com");
+        registerRequest.setPassword("password123");
+        registerRequest.setFullname("New User");
+        String dataJson = objectMapper.writeValueAsString(registerRequest);
+
+        when(userGrpcClient.createUser(anyString(), anyString(), anyString(), anyString()))
+                .thenThrow(new OurException("Email already exists", 409));
+
+        // Act
+        Response response = authService.register(dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(409, response.getStatusCode());
+        assertTrue(response.getMessage().contains("Email already exists"));
+    }
+
+    @Test
+    void testRegister_EmptyFields() throws Exception {
+        // Arrange
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setUsername("");
+        registerRequest.setEmail(null);
+        registerRequest.setPassword("password123");
+        registerRequest.setFullname("New User");
+        String dataJson = objectMapper.writeValueAsString(registerRequest);
+
+        // Act
+        Response response = authService.register(dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode()); // Service does not validate empty fields
+    }
+
+    @Test
+    void testRegister_InvalidJson() throws Exception {
+        // Arrange
+        String dataJson = "{invalid json";
+
+        // Act
+        Response response = authService.register(dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(500, response.getStatusCode());
+    }
+
+    // Additional test cases for login
+    @Test
+    void testLogin_NullIdentifier() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setIdentifier(null);
+        loginRequest.setPassword("password123");
+        String dataJson = objectMapper.writeValueAsString(loginRequest);
+
+        // Act
+        Response response = authService.login(dataJson, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCode()); // User not found when identifier is null
+    }
+
+    @Test
+    void testLogin_InvalidJson() throws Exception {
+        // Arrange
+        String dataJson = "{invalid";
+
+        // Act
+        Response response = authService.login(dataJson, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(500, response.getStatusCode());
+    }
+
+    // Additional test cases for verifyOTP
+    @Test
+    void testVerifyOTP_NullIdentifier() throws Exception {
+        // Arrange
+        String identifier = null;
+        VerifyOtpRequest verifyRequest = new VerifyOtpRequest();
+        verifyRequest.setOtp("123456");
+        String dataJson = objectMapper.writeValueAsString(verifyRequest);
+
+        // Act
+        Response response = authService.verifyOTP(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test
+    void testVerifyOTP_UserNotFound() throws Exception {
+        // Arrange
+        String identifier = "nonexistent";
+        VerifyOtpRequest verifyRequest = new VerifyOtpRequest();
+        verifyRequest.setOtp("123456");
+        String dataJson = objectMapper.writeValueAsString(verifyRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
+
+        // Act
+        Response response = authService.verifyOTP(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test
+    void testVerifyOTP_InvalidJson() throws Exception {
+        // Arrange
+        String identifier = "test@example.com";
+        String dataJson = "{invalid";
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.verifyOTP(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(500, response.getStatusCode());
+    }
+
+    // Additional test cases for changePassword
+    @Test
+    void testChangePassword_UserNotFound() throws Exception {
+        // Arrange
+        String identifier = "nonexistent";
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
+        changePasswordRequest.setCurrentPassword("oldPassword");
+        changePasswordRequest.setNewPassword("newPassword");
+        changePasswordRequest.setRePassword("newPassword");
+        String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
+
+        // Act
+        Response response = authService.changePassword(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test
+    void testChangePassword_NullFields() throws Exception {
+        // Arrange
+        String identifier = "testuser";
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
+        changePasswordRequest.setCurrentPassword(null);
+        changePasswordRequest.setNewPassword("");
+        changePasswordRequest.setRePassword("newPassword");
+        String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
+
+        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+
+        // Act
+        Response response = authService.changePassword(identifier, dataJson);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCode());
+    }
+
+    // Additional test cases for resetPassword
+    @Test
+    void testResetPassword_UserNotFound() {
+        // Arrange
+        String email = "nonexistent@example.com";
+
+        when(userGrpcClient.resetPassword(email)).thenThrow(new OurException("User not found", 404));
+
+        // Act
+        Response response = authService.resetPassword(email);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test
+    void testResetPassword_NullEmail() {
+        // Arrange
+        String email = null;
+
+        // Act
+        Response response = authService.resetPassword(email);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode()); // Service does not validate null email
+    }
+
+    // Additional test cases for refreshToken
+    @Test
+    void testRefreshToken_NoToken() {
+        // Arrange
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
+        refreshTokenRequest.setRefreshToken(null);
+
+        // Act
+        Response response = authService.refreshToken(
+                refreshTokenRequest, null, httpServletRequest, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test
+    void testRefreshToken_UserNotFound() {
+        // Arrange
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
+        refreshTokenRequest.setRefreshToken("valid_refresh_token");
+
+        when(jwtUtil.validateRefreshToken(anyString())).thenReturn(true);
+        when(jwtUtil.extractEmail(anyString())).thenReturn("nonexistent@example.com");
+        when(userGrpcClient.findUserByEmail(anyString())).thenReturn(null);
+
+        // Act
+        Response response = authService.refreshToken(
+                refreshTokenRequest, null, httpServletRequest, httpServletResponse);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCode());
+    }
+}

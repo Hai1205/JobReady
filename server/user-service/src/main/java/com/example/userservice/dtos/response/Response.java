@@ -3,6 +3,7 @@ package com.example.userservice.dtos.response;
 import java.util.List;
 import java.util.Map;
 
+import com.example.userservice.dtos.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.*;
@@ -16,8 +17,8 @@ public class Response {
     private String message;
     
      // User related data
-    private Object user;
-    private List<?> users;
+    private UserDto user;
+    private List<UserDto> users;
     private String token;
     private String role;
     private String status;

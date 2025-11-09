@@ -3,8 +3,7 @@ package com.example.aiservice.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.aiservice.dtos.response.Response;
-
+import com.example.aiservice.dtos.responses.Response;
 
 @RestController
 @RequestMapping("/ai")

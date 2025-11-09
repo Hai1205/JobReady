@@ -60,8 +60,9 @@ public class CVController {
 
     @PostMapping("/analyze-with-jd")
     @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> analyzeCVWithJobDescription(@RequestPart String dataJson) {
-        Response response = cvService.analyzeCVWithJobDescription(dataJson);
+    public ResponseEntity<Response> analyzeCVWithJobDescription(@RequestPart String dataJson,
+            @RequestPart(value = "jdFile", required = false) MultipartFile jdFile) {
+        Response response = cvService.analyzeCVWithJobDescription(dataJson, jdFile);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
