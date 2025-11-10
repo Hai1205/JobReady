@@ -90,4 +90,40 @@ public class CVController {
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+     @GetMapping("/health1")
+    @PreAuthorize("hasAnyAuthority('admin')")
+    public ResponseEntity<Response> health1() {
+        Response response = new Response();
+        response.setStatusCode(200);
+        response.setMessage("CV Service is running");
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    @GetMapping("/health2")
+    @PreAuthorize("hasAnyAuthority('user')")
+    public ResponseEntity<Response> health2() {
+        Response response = new Response();
+        response.setStatusCode(200);
+        response.setMessage("CV Service is running");
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    @GetMapping("/health3")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
+    public ResponseEntity<Response> health3() {
+        Response response = new Response();
+        response.setStatusCode(200);
+        response.setMessage("CV Service is running");
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    @GetMapping("/health4")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<Response> health4() {
+        Response response = new Response();
+        response.setStatusCode(200);
+        response.setMessage("CV Service is running");
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

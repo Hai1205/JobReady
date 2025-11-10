@@ -1,12 +1,12 @@
-package com.example.aiservice.securities;
+// package com.example.aiservice.securities;
 
-public class JwtValidationException extends RuntimeException {
+// public class JwtValidationException extends RuntimeException {
 
-    public JwtValidationException(String message) {
-        super(message);
-    }
+//     public JwtValidationException(String message) {
+//         super(message);
+//     }
 
-    public JwtValidationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-}
+//     public JwtValidationException(String message, Throwable cause) {
+//         super(message, cause);
+//     }
+// }

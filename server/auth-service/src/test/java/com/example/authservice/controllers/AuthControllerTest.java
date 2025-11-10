@@ -36,9 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import java.util.Arrays;
 import java.util.UUID;
 
-import com.example.authservice.securitys.JsonAuthenticationEntryPoint;
-import com.example.authservice.securitys.JsonAccessDeniedHandler;
-import com.example.authservice.securitys.JwtTokenProvider;
+import com.example.securitycommon.handler.JsonAuthenticationEntryPoint;
+import com.example.securitycommon.handler.JsonAccessDeniedHandler;
+import com.example.securitycommon.jwt.JwtTokenProvider;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContext;

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration.class
 })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(com.example.userservice.configs.SecurityConfig.class)
 class UserControllerTest {
 
         @Autowired
@@ -44,13 +42,13 @@ class UserControllerTest {
         private UserService userService;
 
         @MockBean
-        private com.example.userservice.securities.JwtTokenProvider jwtTokenProvider;
+        private com.example.securitycommon.jwt.JwtTokenProvider jwtTokenProvider;
 
         @MockBean
-        private com.example.userservice.securities.JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
+        private com.example.securitycommon.handler.JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
 
         @MockBean
-        private com.example.userservice.securities.JsonAccessDeniedHandler jsonAccessDeniedHandler;
+        private com.example.securitycommon.handler.JsonAccessDeniedHandler jsonAccessDeniedHandler;
 
         private ObjectMapper objectMapper;
         private Response successResponse;

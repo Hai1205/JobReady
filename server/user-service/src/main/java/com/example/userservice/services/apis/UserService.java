@@ -10,8 +10,9 @@ import com.example.userservice.entities.User.UserStatus;
 import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
 import com.example.userservice.repositories.UserRepository;
-import com.example.userservice.securities.*;
 import com.example.userservice.services.CloudinaryService;
+import com.example.securitycommon.model.AuthenticatedUser;
+import com.example.securitycommon.util.SecurityUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
@@ -348,7 +349,7 @@ public class UserService extends BaseService {
             User existingUser = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            AuthenticatedUser currentUser = SecurityUtils.getCurrentUser().orElse(null);
+            AuthenticatedUser currentUser = SecurityUtils.getCurrentUser();
             boolean privilegedChangeAllowed = currentUser == null || currentUser.hasRole("ADMIN");
 
             // Handle avatar upload

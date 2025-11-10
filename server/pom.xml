@@ -23,6 +23,7 @@
     </properties>
 
     <modules>
+        <module>security-common</module>
         <module>rabbit-common</module>
         <module>grpc-common</module>
         <module>discovery-service</module>
