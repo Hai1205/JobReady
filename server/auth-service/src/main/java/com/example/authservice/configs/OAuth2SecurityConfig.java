@@ -54,12 +54,15 @@ public class OAuth2SecurityConfig {
                                                 .requestMatchers("/auth/login", "/auth/register").permitAll()
                                                 .requestMatchers("/auth/send-otp/**", "/auth/verify-otp/**").permitAll()
                                                 .requestMatchers("/auth/forgot-password/**").permitAll()
+                                                .requestMatchers("/auth/refresh-token").permitAll() // Cho phép refresh
+                                                                                                    // token không cần
+                                                                                                    // access token
                                                 .requestMatchers("/oauth2/**").permitAll()
                                                 .requestMatchers("/actuator/**").permitAll()
                                                 .requestMatchers("/error").permitAll()
 
                                                 // Protected endpoints - yêu cầu authentication
-                                                .requestMatchers("/auth/logout", "/auth/refresh-token").authenticated()
+                                                .requestMatchers("/auth/logout").authenticated()
                                                 .requestMatchers("/auth/change-password/**").authenticated()
                                                 .requestMatchers("/auth/reset-password/**").authenticated()
                                                 .requestMatchers("/auth/health*").authenticated()

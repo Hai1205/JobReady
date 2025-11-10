@@ -7,7 +7,6 @@ import com.example.cvservice.entities.CV;
 import com.example.cvservice.mappers.CVMapper;
 import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.apis.CVService;
-import com.example.cvservice.services.grpcs.AIGrpcClient;
 import com.example.cvservice.services.grpcs.UserGrpcClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,9 +37,6 @@ class CVServiceTest {
     private PersonalInfoRepository personalInfoRepository;
 
     @Mock
-    private JobDescriptionParserService jobDescriptionParserService;
-
-    @Mock
     private CloudinaryService cloudinaryService;
 
     @Mock
@@ -48,9 +44,6 @@ class CVServiceTest {
 
     @Mock
     private UserGrpcClient userGrpcClient;
-
-    @Mock
-    private AIGrpcClient aiGrpcClient;
 
     @InjectMocks
     private CVService cvService;

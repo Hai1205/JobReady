@@ -27,6 +27,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String requestURI = request.getRequestURI();
+
+        // Skip JWT validation for refresh token endpoint
+        if (requestURI.contains("/auth/refresh-token")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // Try to get token from Authorization header first
         String token = null;
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);

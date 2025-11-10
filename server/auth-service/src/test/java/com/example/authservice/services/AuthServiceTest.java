@@ -730,6 +730,7 @@ class AuthServiceTest {
 
         when(jwtUtil.validateRefreshToken(anyString())).thenReturn(true);
         when(jwtUtil.extractEmail(anyString())).thenReturn("nonexistent@example.com");
+        when(jwtUtil.extractUserId(anyString())).thenReturn("some-user-id");
         when(userGrpcClient.findUserByEmail(anyString())).thenReturn(null);
 
         // Act

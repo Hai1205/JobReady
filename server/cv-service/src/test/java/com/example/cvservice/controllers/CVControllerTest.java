@@ -50,7 +50,7 @@ class CVControllerTest {
         when(cvService.createCV(userId)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/cvs/users/{userId}", userId)
+        mockMvc.perform(post("/api/v1/cvs/users/{userId}", userId)
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
@@ -62,7 +62,7 @@ class CVControllerTest {
     @Test
     void testCreateCV_Unauthorized() throws Exception {
         // Act & Assert
-        mockMvc.perform(post("/cvs/users/{userId}", userId)
+        mockMvc.perform(post("/api/v1/cvs/users/{userId}", userId)
                 .with(csrf()))
                 .andExpect(status().isUnauthorized());
     }
@@ -74,7 +74,7 @@ class CVControllerTest {
         when(cvService.getAllCVs()).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(get("/cvs"))
+        mockMvc.perform(get("/api/v1/cvs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.message").value("Success"));
@@ -89,7 +89,7 @@ class CVControllerTest {
         when(cvService.getCVById(cvId)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(get("/cvs/{cvId}", cvId))
+        mockMvc.perform(get("/api/v1/cvs/{cvId}", cvId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.message").value("Success"));
@@ -100,81 +100,8 @@ class CVControllerTest {
     @Test
     void testGetCVById_Unauthorized() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/cvs/{cvId}", cvId))
+        mockMvc.perform(get("/api/v1/cvs/{cvId}", cvId))
                 .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(authorities = { "admin", "user" })
-    void testAnalyzeCV_Success() throws Exception {
-        // Arrange
-        String jsonData = "{\"title\":\"Test CV\",\"personalInfo\":{\"fullname\":\"John Doe\"}}";
-        when(cvService.analyzeCV(jsonData)).thenReturn(mockResponse);
-
-        MockMultipartFile dataFile = new MockMultipartFile("data", "", "application/json", jsonData.getBytes());
-
-        // Act & Assert
-        mockMvc.perform(multipart("/cvs/analyze")
-                .file(dataFile)
-                .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value(200))
-                .andExpect(jsonPath("$.message").value("Success"));
-
-        verify(cvService).analyzeCV(jsonData);
-    }
-
-    @Test
-    void testAnalyzeCV_Unauthorized() throws Exception {
-        // Arrange
-        String jsonData = "{\"title\":\"Test CV\"}";
-        MockMultipartFile dataFile = new MockMultipartFile("data", "", "application/json", jsonData.getBytes());
-
-        // Act & Assert
-        mockMvc.perform(multipart("/cvs/analyze")
-                .file(dataFile)
-                .with(csrf()))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(authorities = { "admin", "user" })
-    void testImproveCV_Success() throws Exception {
-        // Arrange
-        String jsonData = "{\"section\":\"summary\",\"content\":\"Old content\"}";
-        when(cvService.improveCV(jsonData)).thenReturn(mockResponse);
-
-        MockMultipartFile dataFile = new MockMultipartFile("dataJson", "", "application/json", jsonData.getBytes());
-
-        // Act & Assert
-        mockMvc.perform(multipart("/cvs/improve")
-                .file(dataFile)
-                .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value(200))
-                .andExpect(jsonPath("$.message").value("Success"));
-
-        verify(cvService).improveCV(jsonData);
-    }
-
-    @Test
-    @WithMockUser(authorities = { "admin", "user" })
-    void testAnalyzeCVWithJobDescription_Success() throws Exception {
-        // Arrange
-        String jsonData = "{\"title\":\"Test CV\",\"jobDescription\":\"Looking for developer\"}";
-        when(cvService.analyzeCVWithJobDescription(eq(jsonData), isNull())).thenReturn(mockResponse);
-
-        MockMultipartFile dataFile = new MockMultipartFile("dataJson", "", "application/json", jsonData.getBytes());
-
-        // Act & Assert
-        mockMvc.perform(multipart("/cvs/analyze-with-jd")
-                .file(dataFile)
-                .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value(200))
-                .andExpect(jsonPath("$.message").value("Success"));
-
-        verify(cvService).analyzeCVWithJobDescription(eq(jsonData), isNull());
     }
 
     @Test
@@ -184,7 +111,7 @@ class CVControllerTest {
         when(cvService.getUserCVs(userId)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(get("/cvs/users/{userId}", userId))
+        mockMvc.perform(get("/api/v1/cvs/users/{userId}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.message").value("Success"));
@@ -195,7 +122,7 @@ class CVControllerTest {
     @Test
     void testGetUserCVs_Unauthorized() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/cvs/users/{userId}", userId))
+        mockMvc.perform(get("/api/v1/cvs/users/{userId}", userId))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -207,7 +134,7 @@ class CVControllerTest {
         when(cvService.getCVByTitle(title)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(get("/cvs/title/{title}", title))
+        mockMvc.perform(get("/api/v1/cvs/title/{title}", title))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.message").value("Success"));
@@ -226,7 +153,7 @@ class CVControllerTest {
         when(cvService.updateCV(eq(cvId), eq(jsonData), any())).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(multipart("/cvs/{cvId}", cvId)
+        mockMvc.perform(multipart("/api/v1/cvs/{cvId}", cvId)
                 .file(dataFile)
                 .file(avatarFile)
                 .with(request -> {
@@ -248,7 +175,7 @@ class CVControllerTest {
         MockMultipartFile dataFile = new MockMultipartFile("data", "", "application/json", jsonData.getBytes());
 
         // Act & Assert
-        mockMvc.perform(multipart("/cvs/{cvId}", cvId)
+        mockMvc.perform(multipart("/api/v1/cvs/{cvId}", cvId)
                 .file(dataFile)
                 .with(request -> {
                     request.setMethod("PATCH");
@@ -265,7 +192,7 @@ class CVControllerTest {
         when(cvService.deleteCV(cvId)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(delete("/cvs/{cvId}", cvId)
+        mockMvc.perform(delete("/api/v1/cvs/{cvId}", cvId)
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
@@ -281,7 +208,7 @@ class CVControllerTest {
         when(cvService.duplicateCV(cvId)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/cvs/{cvId}/duplicate", cvId)
+        mockMvc.perform(post("/api/v1/cvs/{cvId}/duplicate", cvId)
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
@@ -294,7 +221,7 @@ class CVControllerTest {
     @WithMockUser(authorities = { "admin", "user" })
     void testHealth_Success() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/cvs/health"))
+        mockMvc.perform(get("/api/v1/cvs/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.message").value("CV Service is running"));
@@ -304,7 +231,7 @@ class CVControllerTest {
     @WithMockUser(authorities = { "admin", "user" })
     void testInvalidEndpoint() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/cvs/api/invalid"))
+        mockMvc.perform(get("/api/v1/cvs/api/invalid"))
                 .andExpect(status().isNotFound());
     }
 
@@ -315,7 +242,7 @@ class CVControllerTest {
         when(cvService.createCV(userId)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/cvs/users/{userId}", userId)
+        mockMvc.perform(post("/api/v1/cvs/users/{userId}", userId)
                 .with(csrf()))
                 .andExpect(status().isOk());
 
@@ -329,7 +256,7 @@ class CVControllerTest {
         when(cvService.createCV(userId)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/cvs/users/{userId}", userId)
+        mockMvc.perform(post("/api/v1/cvs/users/{userId}", userId)
                 .with(csrf()))
                 .andExpect(status().isOk());
 
@@ -340,7 +267,7 @@ class CVControllerTest {
     @WithMockUser(authorities = { "guest" })
     void testCreateCV_WithInsufficientRole_Unauthorized() throws Exception {
         // Act & Assert
-        mockMvc.perform(post("/cvs/users/{userId}", userId)
+        mockMvc.perform(post("/api/v1/cvs/users/{userId}", userId)
                 .with(csrf()))
                 .andExpect(status().isForbidden());
     }

@@ -3,6 +3,7 @@ package com.example.cvservice.dtos.responses;
 import java.util.List;
 import java.util.Map;
 
+import com.example.cvservice.dtos.CVDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.*;
@@ -15,23 +16,13 @@ public class Response {
     private int statusCode;
     private String message;
 
-     // CV related data
-    private Object cv;
-    private List<?> cvs;
-    private Object experience;
-    private List<?> experiences;
-    private Object education;
-    private List<?> educations;
-    private List<?> skills;
-
-    // AI Analyze and Improvement
-    private String analyze;
-    private String improvedSection;
-    private List<?> suggestions;
-    private String extractedText;
-    private Double matchScore;
-    private Object parsedJobDescription;
-    private List<String> missingKeywords;
+    private CVDto cv;
+    private List<CVDto> cvs;
+    private CVDto experience;
+    private List<CVDto> experiences;
+    private CVDto education;
+    private List<CVDto> educations;
+    private List<String> skills;
 
     // Pagination and stats
     private Object pagination;

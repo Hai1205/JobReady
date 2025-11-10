@@ -34,7 +34,7 @@ export const getRefreshToken = (): string | null => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: `${SERVER_URL}`,
+  baseURL: `${SERVER_URL}/api/v1`,
   withCredentials: true,
   timeout: 10000, // Add a timeout to prevent hanging requests
 });
@@ -59,14 +59,28 @@ const refreshAccessToken = async (): Promise<string | null> => {
   }
 
   try {
-    console.log('🔄 Attempting to refresh token...');
+    console.log('🔄 Attempting to refresh token...', {
+      hasRefreshToken: !!refreshToken,
+      refreshTokenLength: refreshToken?.length
+    });
+
+    // Gửi request với refresh token trong cả body và cookie để server có nhiều lựa chọn
     const response = await axios.post(
       `${SERVER_URL}/auth/refresh-token`,
-      { refreshToken }, // Truyền refresh token trong body request
-      { withCredentials: true }
+      {}, // Không gửi trong body nữa, để server lấy từ cookie
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
     );
 
-    console.log('✅ Token refreshed successfully');
+    console.log('✅ Token refreshed successfully', response.data);
+
+    // Wait a bit to ensure cookie is set
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     return getCookie('access_token');
   } catch (error) {
     console.error('❌ Token refresh failed:', error);
@@ -76,6 +90,8 @@ const refreshAccessToken = async (): Promise<string | null> => {
       console.log('🔒 Token invalid or expired - clearing auth state');
       document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      localStorage.removeItem('refresh_token');
+      sessionStorage.removeItem('refresh_token');
 
       if (typeof window !== 'undefined') {
         window.location.href = '/auth/login';
@@ -122,38 +138,64 @@ axiosInstance.interceptors.response.use(
 
     // If 401 Unauthorized and not already retrying
     if (error.response?.status === 401 && !config._retry) {
+      // Skip refresh for login/register/refresh-token endpoints
+      if (config.url?.includes('/auth/login') ||
+        config.url?.includes('/auth/register') ||
+        config.url?.includes('/auth/refresh-token')) {
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         // If already refreshing, queue this request
+        console.log('⏳ Request queued while token is being refreshed:', config.url);
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then(() => {
+          .then(async () => {
+            // Wait a bit to ensure token is properly set
+            await new Promise(resolve => setTimeout(resolve, 100));
             const newToken = getAccessToken("access_token");
+            console.log('🔓 Retrying queued request with new token:', config.url, {
+              hasToken: !!newToken,
+              tokenPreview: newToken ? newToken.substring(0, 20) + '...' : 'NONE'
+            });
             if (newToken && config.headers) {
               config.headers.Authorization = `Bearer ${newToken}`;
             }
             return axiosInstance(config);
           })
           .catch((err) => {
+            console.error('❌ Queued request failed:', config.url, err);
             return Promise.reject(err);
           });
       }
 
       config._retry = true;
       isRefreshing = true;
+      console.log('🔄 Starting token refresh due to 401 from:', config.url);
 
       try {
         const newToken = await refreshAccessToken();
 
         if (newToken && config.headers) {
           config.headers.Authorization = `Bearer ${newToken}`;
+          console.log('✅ Retrying original request with new token:', config.url);
+        } else {
+          console.error('❌ No new token received, cannot retry request');
+          processQueue(new Error('Token refresh failed'), null);
+          isRefreshing = false;
+          return Promise.reject(error);
         }
 
         processQueue(null, newToken);
         isRefreshing = false;
 
+        // Add small delay to ensure cookie is set before retrying
+        await new Promise(resolve => setTimeout(resolve, 200));
+
         return axiosInstance(config);
       } catch (refreshError) {
+        console.error('❌ Token refresh error:', refreshError);
         processQueue(refreshError, null);
         isRefreshing = false;
         return Promise.reject(refreshError);

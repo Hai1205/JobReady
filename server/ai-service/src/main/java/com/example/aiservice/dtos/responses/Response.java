@@ -1,7 +1,9 @@
 package com.example.aiservice.dtos.responses;
 
+import java.util.List;
 import java.util.Map;
 
+import com.example.aiservice.dtos.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.*;
@@ -13,6 +15,14 @@ import lombok.*;
 public class Response {
     private int statusCode;
     private String message;
+
+    private AnalyzeResultDto analyze;
+    private String improvedSection;
+    private List<AISuggestionDto> suggestions;
+    private String extractedText;
+    private Double matchScore;
+    private Object parsedJobDescription;
+    private List<String> missingKeywords;
 
     private Map<String, Object> additionalData;
 

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -94,7 +93,7 @@ class UserControllerTest {
                                 "data", "", "application/json", dataJson.getBytes());
 
                 // Act & Assert
-                mockMvc.perform(multipart("/users")
+                mockMvc.perform(multipart("/api/v1/users")
                                 .file(dataPart)
                                 .with(csrf()))
                                 .andExpect(status().isOk())
@@ -115,7 +114,7 @@ class UserControllerTest {
                 when(userService.getAllUsers()).thenReturn(response);
 
                 // Act & Assert
-                mockMvc.perform(get("/users")
+                mockMvc.perform(get("/api/v1/users")
                                 .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.statusCode").value(200))
@@ -132,7 +131,7 @@ class UserControllerTest {
                 when(userService.getUserById(any(UUID.class))).thenReturn(successResponse);
 
                 // Act & Assert
-                mockMvc.perform(get("/users/" + userId)
+                mockMvc.perform(get("/api/v1/users/" + userId)
                                 .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.statusCode").value(200))
@@ -155,7 +154,7 @@ class UserControllerTest {
                                 "data", "", "application/json", dataJson.getBytes());
 
                 // Act & Assert
-                mockMvc.perform(multipart("/users/" + userId)
+                mockMvc.perform(multipart("/api/v1/users/" + userId)
                                 .file(dataPart)
                                 .with(request -> {
                                         request.setMethod("PATCH");
@@ -184,7 +183,7 @@ class UserControllerTest {
                                 "avatar", "avatar.jpg", "image/jpeg", "image data".getBytes());
 
                 // Act & Assert
-                mockMvc.perform(multipart("/users/" + userId)
+                mockMvc.perform(multipart("/api/v1/users/" + userId)
                                 .file(dataPart)
                                 .file(avatarPart)
                                 .with(request -> {
@@ -210,7 +209,7 @@ class UserControllerTest {
                 when(userService.deleteUser(any(UUID.class))).thenReturn(response);
 
                 // Act & Assert
-                mockMvc.perform(delete("/users/" + userId)
+                mockMvc.perform(delete("/api/v1/users/" + userId)
                                 .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.statusCode").value(200));
@@ -222,7 +221,7 @@ class UserControllerTest {
         @WithMockUser
         void testHealth_Success() throws Exception {
                 // Act & Assert
-                mockMvc.perform(get("/users/health")
+                mockMvc.perform(get("/api/v1/users/health")
                                 .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.statusCode").value(200))

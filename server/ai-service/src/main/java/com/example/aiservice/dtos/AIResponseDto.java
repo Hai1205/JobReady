@@ -11,7 +11,7 @@ import lombok.*;
 public class AIResponseDto {
     CVDto cv;
     List<AISuggestionDto> suggestions;
-    String analyzeResult;
+    AnalyzeResultDto analyzeResult;
     String improved;
     JobDescriptionResult jdResult;
     Double matchScore;

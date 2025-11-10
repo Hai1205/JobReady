@@ -123,7 +123,7 @@ class AuthControllerTest {
                 "data", "", "application/json", dataJson.getBytes());
 
         // Act & Assert
-        mockMvc.perform(multipart("/auth/login")
+        mockMvc.perform(multipart("/api/v1/auth/login")
                 .file(dataPart)
                 .with(csrf()))
                 .andExpect(status().isOk())
@@ -151,7 +151,7 @@ class AuthControllerTest {
                 "data", "", "application/json", dataJson.getBytes());
 
         // Act & Assert
-        mockMvc.perform(multipart("/auth/register")
+        mockMvc.perform(multipart("/api/v1/auth/register")
                 .file(dataPart)
                 .with(csrf()))
                 .andExpect(status().isOk())
@@ -167,7 +167,7 @@ class AuthControllerTest {
         when(authService.sendOTP(anyString())).thenReturn(successResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/auth/send-otp/test@example.com")
+        mockMvc.perform(post("/api/v1/auth/send-otp/test@example.com")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200));
@@ -189,7 +189,7 @@ class AuthControllerTest {
                 "data", "", "application/json", dataJson.getBytes());
 
         // Act & Assert
-        mockMvc.perform(multipart("/auth/verify-otp/test@example.com")
+        mockMvc.perform(multipart("/api/v1/auth/verify-otp/test@example.com")
                 .file(dataPart)
                 .with(csrf()))
                 .andExpect(status().isOk())
@@ -214,7 +214,7 @@ class AuthControllerTest {
                 "data", "", "application/json", dataJson.getBytes());
 
         // Act & Assert
-        mockMvc.perform(multipart("/auth/change-password/testuser")
+        mockMvc.perform(multipart("/api/v1/auth/change-password/testuser")
                 .file(dataPart)
                 .with(request -> {
                     request.setMethod("PATCH");
@@ -234,7 +234,7 @@ class AuthControllerTest {
         when(authService.resetPassword(anyString())).thenReturn(successResponse);
 
         // Act & Assert
-        mockMvc.perform(patch("/auth/reset-password/test@example.com")
+        mockMvc.perform(patch("/api/v1/auth/reset-password/test@example.com")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200));
@@ -257,7 +257,7 @@ class AuthControllerTest {
                 "data", "", "application/json", dataJson.getBytes());
 
         // Act & Assert
-        mockMvc.perform(multipart("/auth/forgot-password/testuser")
+        mockMvc.perform(multipart("/api/v1/auth/forgot-password/testuser")
                 .file(dataPart)
                 .with(request -> {
                     request.setMethod("PATCH");
@@ -280,7 +280,7 @@ class AuthControllerTest {
         when(authService.refreshToken(any(), any(), any(), any())).thenReturn(successResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/auth/refresh-token")
+        mockMvc.perform(post("/api/v1/auth/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(refreshTokenRequest))
                 .with(csrf()))
@@ -297,7 +297,7 @@ class AuthControllerTest {
         when(authService.logout(any(HttpServletResponse.class))).thenReturn(successResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/auth/logout")
+        mockMvc.perform(post("/api/v1/auth/logout")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200));
@@ -335,7 +335,7 @@ class AuthControllerTest {
     @WithMockUser
     void testHealth_Success() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/auth/health")
+        mockMvc.perform(get("/api/v1/auth/health")
                 .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())

@@ -56,7 +56,7 @@ export default function MyCVsPageClient() {
     const response = await getAllCVs();
     if (response?.data) {
       const allCvs = response.data.cvs || [];
-      const publicCvs = allCvs.filter((cv) => cv.privacy === EPrivacy.PUBLIC);
+      const publicCvs = allCvs.filter((cv) => `${cv.privacy}` === `${EPrivacy.PUBLIC}`);
       setTemplateCVs(publicCvs);
     }
   };

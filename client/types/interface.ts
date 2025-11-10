@@ -66,6 +66,13 @@ declare global {
         applied: boolean
     }
 
+    interface IAnalyzeResult {
+        overallScore: number
+        strengths: string[]
+        weaknesses: string[]
+        suggestions: IAISuggestion[]
+    }
+
     interface IJobDescriptionResult {
         jobTitle: string
         company: string

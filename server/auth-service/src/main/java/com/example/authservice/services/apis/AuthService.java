@@ -126,7 +126,7 @@ public class AuthService extends BaseService {
             } else {
                 logger.warn("Token validation failed for username: {}", username);
             }
-            
+
             response.setMessage("Token validation successful");
             response.setAdditionalData(additionalData);
             return response;
@@ -364,41 +364,56 @@ public class AuthService extends BaseService {
 
         try {
             String refreshToken = null;
-            // Thử lấy refresh token từ request body
-            if (request != null && request.getRefreshToken() != null && !request.getRefreshToken().isEmpty()) {
-                refreshToken = request.getRefreshToken();
-                logger.debug("Refresh token obtained from request body");
-            }
-            // Thử lấy từ Authorization header
-            else if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                refreshToken = authHeader.substring(7);
-                logger.debug("Refresh token obtained from Authorization header");
-            }
-            // Thử lấy từ cookie
-            else if (httpRequest.getCookies() != null) {
+            String source = "unknown";
+
+            // Priority 1: Thử lấy từ cookie (recommended for security)
+            if (httpRequest.getCookies() != null) {
                 for (Cookie cookie : httpRequest.getCookies()) {
                     if ("refresh_token".equals(cookie.getName()) && cookie.getValue() != null
                             && !cookie.getValue().isEmpty()) {
                         refreshToken = cookie.getValue();
-                        logger.debug("Refresh token obtained from cookie");
+                        source = "cookie";
                         break;
                     }
                 }
             }
 
+            // Priority 2: Thử lấy refresh token từ request body
+            if (refreshToken == null && request != null && request.getRefreshToken() != null
+                    && !request.getRefreshToken().isEmpty()) {
+                refreshToken = request.getRefreshToken();
+                source = "request body";
+            }
+
+            // Priority 3: Thử lấy từ Authorization header
+            if (refreshToken == null && authHeader != null && authHeader.startsWith("Bearer ")) {
+                refreshToken = authHeader.substring(7);
+                source = "Authorization header";
+            }
+
+            logger.debug("Refresh token source: {}", source);
+
             if (refreshToken == null || refreshToken.isEmpty()) {
-                logger.warn("Token refresh failed: No refresh token provided");
+                logger.warn("Token refresh failed: No refresh token provided from any source");
                 throw new OurException("Refresh token is required", 400);
             }
 
+            // Validate refresh token
             if (!jwtUtil.validateRefreshToken(refreshToken)) {
-                logger.warn("Token refresh failed: Invalid or expired refresh token");
+                logger.warn("Token refresh failed: Invalid or expired refresh token from {}", source);
                 throw new OurException("Invalid or expired refresh token", 401);
             }
 
+            // Extract user info from refresh token
             String email = jwtUtil.extractEmail(refreshToken);
             String userId = jwtUtil.extractUserId(refreshToken);
 
+            if (email == null || userId == null) {
+                logger.warn("Token refresh failed: Cannot extract user info from refresh token");
+                throw new OurException("Invalid refresh token format", 401);
+            }
+
+            // Find user
             UserDto user = userGrpcClient.findUserByEmail(email);
 
             if (user == null) {
@@ -406,9 +421,11 @@ public class AuthService extends BaseService {
                 throw new OurException("User not found", 404);
             }
 
+            // Generate new access token
             String newAccessToken = jwtUtil.generateAccessToken(userId, email, user.getRole(),
                     user.getUsername());
 
+            // Set new access token in cookie and header
             Cookie accessTokenCookie = handleCreateHttpOnlyCookie("access_token", newAccessToken, 15 * 60); // 15
                                                                                                             // minutes
             httpServletResponse.addCookie(accessTokenCookie);
@@ -417,7 +434,7 @@ public class AuthService extends BaseService {
             response.setMessage("Token refreshed successfully!");
             response.setUser(user);
 
-            logger.info("Token refreshed successfully for user: {}", user.getUsername());
+            logger.info("Token refreshed successfully for user: {} (source: {})", user.getUsername(), source);
             return response;
         } catch (OurException e) {
             logger.error("Token refresh failed with OurException: {}", e.getMessage());
@@ -425,7 +442,7 @@ public class AuthService extends BaseService {
         } catch (Exception e) {
             logger.error("Token refresh failed with unexpected error", e);
             e.printStackTrace();
-            return buildErrorResponse(500, e.getMessage());
+            return buildErrorResponse(500, "Token refresh failed: " + e.getMessage());
         }
     }
 

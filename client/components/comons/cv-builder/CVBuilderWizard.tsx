@@ -107,7 +107,7 @@ export function CVBuilderWizard() {
               Chế độ riêng tư
             </Label>
             <p className="text-sm text-muted-foreground">
-              {currentCV?.privacy === EPrivacy.PUBLIC
+              {`${currentCV?.privacy}` === `${EPrivacy.PUBLIC}`
                 ? "CV của bạn hiện công khai và có thể được tìm thấy bởi nhà tuyển dụng"
                 : "CV của bạn ở chế độ riêng tư, chỉ bạn mới có thể xem"}
             </p>

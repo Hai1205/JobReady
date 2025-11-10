@@ -1,16 +1,13 @@
 package com.example.cvservice;
 
 import com.example.cvservice.dtos.*;
-import com.example.cvservice.dtos.requests.AnalyzeCVWithJDRequest;
 import com.example.cvservice.dtos.responses.Response;
 import com.example.cvservice.entities.*;
 import com.example.cvservice.exceptions.OurException;
 import com.example.cvservice.mappers.CVMapper;
 import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.CloudinaryService;
-import com.example.cvservice.services.JobDescriptionParserService;
 import com.example.cvservice.services.apis.CVService;
-import com.example.cvservice.services.grpcs.AIGrpcClient;
 import com.example.cvservice.services.grpcs.UserGrpcClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,9 +45,6 @@ class CVServiceTest {
     private PersonalInfoRepository personalInfoRepository;
 
     @Mock
-    private JobDescriptionParserService jobDescriptionParserService;
-
-    @Mock
     private CloudinaryService cloudinaryService;
 
     @Mock
@@ -58,9 +52,6 @@ class CVServiceTest {
 
     @Mock
     private UserGrpcClient userGrpcClient;
-
-    @Mock
-    private AIGrpcClient aiGrpcClient;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -305,97 +296,6 @@ class CVServiceTest {
     }
 
     @Test
-    void testAnalyzeCV_Success() throws Exception {
-        // Setup AI gRPC client mock for this test
-        JobDescriptionResult jdResult = new JobDescriptionResult();
-        jdResult.setJobTitle("Software Developer");
-        jdResult.setCompany("Tech Corp");
-        jdResult.setResponsibilities(Arrays.asList("Develop software", "Write tests"));
-        jdResult.setRequirements(Arrays.asList("Java experience", "Spring Boot"));
-        jdResult.setRequiredSkills(Arrays.asList("Java", "Spring", "SQL"));
-
-        AIResponseDto analyzeResponse = AIResponseDto.builder()
-                .analyzeResult("Good CV with strong technical skills")
-                .suggestions(
-                        Arrays.asList(AISuggestionDto.builder().suggestion("Add more details to projects").build()))
-                .matchScore(85.5)
-                .missingKeywords(Arrays.asList("Docker", "Kubernetes"))
-                .jdResult(jdResult)
-                .build();
-
-        lenient().doReturn(analyzeResponse).when(aiGrpcClient).analyzeCV(any(CVDto.class));
-
-        // Arrange - Use proper JSON that matches CreateCVRequest structure
-        String jsonData = """
-                {
-                    "title": "Test CV",
-                    "personalInfo": {
-                        "fullname": "John Doe",
-                        "email": "john@example.com",
-                        "phone": "1234567890"
-                    },
-                    "experiences": [{
-                        "company": "Tech Corp",
-                        "position": "Developer"
-                    }],
-                    "educations": [{
-                        "school": "University",
-                        "degree": "Bachelor"
-                    }],
-                    "skills": ["Java"],
-                    "privacy": "PRIVATE",
-                    "color": "blue",
-                    "template": "modern"
-                }
-                """;
-
-        // Act
-        Response response = cvService.analyzeCV(jsonData);
-
-        // Assert
-        assertEquals(200, response.getStatusCode());
-        assertEquals("CV analyzed successfully", response.getMessage());
-        assertEquals("Good CV with strong technical skills", response.getAnalyze());
-        assertNotNull(response.getSuggestions());
-    }
-
-    @Test
-    void testAnalyzeCV_InvalidJson() {
-        // Act
-        Response response = cvService.analyzeCV("invalid json");
-
-        // Assert
-        assertEquals(500, response.getStatusCode());
-        assertTrue(response.getMessage().startsWith("Error") || response.getMessage().contains("JSON"));
-    }
-
-    @Test
-    void testImproveCV_Success() throws Exception {
-        // Setup AI gRPC client mock for this test
-        AIResponseDto improveResponse = AIResponseDto.builder()
-                .improved("Enhanced summary with more impact and quantifiable achievements")
-                .build();
-
-        lenient().doReturn(improveResponse).when(aiGrpcClient).improveCV(anyString(), anyString());
-
-        // Arrange - Use proper JSON that matches ImproveCVRequest structure
-        String jsonData = """
-                {
-                    "section": "summary",
-                    "content": "Old summary content"
-                }
-                """;
-
-        // Act
-        Response response = cvService.improveCV(jsonData);
-
-        // Assert
-        assertEquals(200, response.getStatusCode());
-        assertEquals("CV section improved successfully", response.getMessage());
-        assertEquals("Enhanced summary with more impact and quantifiable achievements", response.getImprovedSection());
-    }
-
-    @Test
     void testGetUserCVs_Success() {
         // Arrange
         List<CV> userCvs = Arrays.asList(cv);
@@ -631,194 +531,6 @@ class CVServiceTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("CV duplicated successfully", response.getMessage());
         assertNotNull(response.getCv());
-    }
-
-    @Test
-    void testAnalyzeCVWithJobDescription_Success() throws Exception {
-        // Setup AI gRPC client mock for this test
-        JobDescriptionResult jdResult = new JobDescriptionResult();
-        jdResult.setJobTitle("Software Developer");
-        jdResult.setCompany("Tech Corp");
-        jdResult.setResponsibilities(Arrays.asList("Develop software", "Write tests"));
-        jdResult.setRequirements(Arrays.asList("Java experience", "Spring Boot"));
-        jdResult.setRequiredSkills(Arrays.asList("Java", "Spring", "SQL"));
-
-        AIResponseDto analyzeWithJDResponse = AIResponseDto.builder()
-                .analyzeResult("Excellent match for the position")
-                .matchScore(92.0)
-                .missingKeywords(Arrays.asList("AWS", "Microservices"))
-                .jdResult(jdResult)
-                .build();
-
-        lenient().doReturn(analyzeWithJDResponse).when(aiGrpcClient).analyzeCVWithJobDescription(any(CVDto.class),
-                anyString(), anyString());
-
-        // Arrange - Use proper JSON that matches AnalyzeCVWithJDRequest structure
-        String jsonData = """
-                {
-                    "title": "Test CV",
-                    "personalInfo": {
-                        "fullname": "John Doe",
-                        "email": "john@example.com",
-                        "phone": "1234567890"
-                    },
-                    "experiences": [{
-                        "company": "Tech Corp",
-                        "position": "Developer"
-                    }],
-                    "educations": [{
-                        "school": "University",
-                        "degree": "Bachelor"
-                    }],
-                    "skills": ["Java"],
-                    "jobDescription": "Looking for Java developer",
-                    "language": "en"
-                }
-                """;
-
-        // Act
-        Response response = cvService.analyzeCVWithJobDescription(jsonData, null);
-
-        // Assert
-        assertEquals(200, response.getStatusCode());
-        assertEquals("CV analyzed with job description successfully", response.getMessage());
-        assertEquals("Excellent match for the position", response.getAnalyze());
-        assertEquals(92.0, response.getMatchScore());
-        assertNotNull(response.getMissingKeywords());
-        assertNotNull(response.getParsedJobDescription());
-    }
-
-    @Test
-    void testAnalyzeCVWithJobDescription_WithFile() throws Exception {
-        // Setup AI gRPC client mock for this test
-        JobDescriptionResult jdResult = new JobDescriptionResult();
-        jdResult.setJobTitle("Software Developer");
-        jdResult.setCompany("Tech Corp");
-        jdResult.setResponsibilities(Arrays.asList("Develop software", "Write tests"));
-        jdResult.setRequirements(Arrays.asList("Java experience", "Spring Boot"));
-        jdResult.setRequiredSkills(Arrays.asList("Java", "Spring", "SQL"));
-
-        AIResponseDto analyzeWithJDResponse = AIResponseDto.builder()
-                .analyzeResult("Excellent match for the position")
-                .matchScore(92.0)
-                .missingKeywords(Arrays.asList("AWS", "Microservices"))
-                .jdResult(jdResult)
-                .build();
-
-        lenient().doReturn(analyzeWithJDResponse).when(aiGrpcClient).analyzeCVWithJobDescription(any(CVDto.class),
-                anyString(), anyString());
-
-        // Arrange - Create a proper JSON with jdFile field set to null
-        String dataJson = """
-                {
-                    "title": "Test CV",
-                    "personalInfo": {
-                        "fullname": "John Doe",
-                        "email": "john@example.com",
-                        "phone": "1234567890"
-                    },
-                    "experiences": [{
-                        "company": "Tech Corp",
-                        "position": "Developer"
-                    }],
-                    "educations": [{
-                        "school": "University",
-                        "degree": "Bachelor"
-                    }],
-                    "skills": ["Java"],
-                    "language": "en",
-                    "jdFile": null,
-                    "jobDescription": "Looking for Java developer"
-                }
-                """;
-
-        // Act
-        Response response = cvService.analyzeCVWithJobDescription(dataJson, null);
-
-        // Assert
-        assertEquals(200, response.getStatusCode());
-        assertEquals(92.0, response.getMatchScore());
-    }
-
-    @Test
-    void testAnalyzeCVWithJobDescription_FileParsing() throws Exception {
-        // Setup AI gRPC client mock for this test
-        JobDescriptionResult jdResult = new JobDescriptionResult();
-        jdResult.setJobTitle("Software Developer");
-        jdResult.setCompany("Tech Corp");
-        jdResult.setResponsibilities(Arrays.asList("Develop software", "Write tests"));
-        jdResult.setRequirements(Arrays.asList("Java experience", "Spring Boot"));
-        jdResult.setRequiredSkills(Arrays.asList("Java", "Spring", "SQL"));
-
-        AIResponseDto analyzeWithJDResponse = AIResponseDto.builder()
-                .analyzeResult("Excellent match for the position")
-                .matchScore(92.0)
-                .missingKeywords(Arrays.asList("AWS", "Microservices"))
-                .jdResult(jdResult)
-                .build();
-
-        lenient().doReturn(analyzeWithJDResponse).when(aiGrpcClient).analyzeCVWithJobDescription(any(CVDto.class),
-                anyString(), anyString());
-
-        // Arrange
-        MultipartFile mockJdFile = mock(MultipartFile.class);
-        when(mockJdFile.isEmpty()).thenReturn(false); // Ensure the file is not empty
-
-        AnalyzeCVWithJDRequest request = new AnalyzeCVWithJDRequest();
-        request.setTitle("Test CV");
-
-        PersonalInfoDto personalInfo = new PersonalInfoDto();
-        personalInfo.setFullname("John Doe");
-        personalInfo.setEmail("john@example.com");
-        request.setPersonalInfo(personalInfo);
-
-        ExperienceDto experience = new ExperienceDto();
-        experience.setCompany("Tech Corp");
-        experience.setPosition("Developer");
-        request.setExperiences(Arrays.asList(experience));
-
-        EducationDto education = new EducationDto();
-        education.setSchool("University");
-        education.setDegree("Bachelor");
-        request.setEducations(Arrays.asList(education));
-
-        request.setSkills(Arrays.asList("Java"));
-        request.setLanguage("en");
-        // jdFile is passed as parameter, not in JSON
-        request.setJobDescription("Looking for Java developer");
-
-        // Removed ObjectMapper mock to let JSON parse naturally
-        // when(objectMapper.readValue(anyString(),
-        // any(Class.class))).thenReturn(request);
-        when(jobDescriptionParserService.extractTextFromFile(mockJdFile)).thenReturn("Parsed JD content");
-
-        // Setup AI gRPC client mock for this test
-        JobDescriptionResult jdResult2 = new JobDescriptionResult();
-        jdResult2.setJobTitle("Software Developer");
-        jdResult2.setCompany("Tech Corp");
-        jdResult2.setResponsibilities(Arrays.asList("Develop software", "Write tests"));
-        jdResult2.setRequirements(Arrays.asList("Java experience", "Spring Boot"));
-        jdResult2.setRequiredSkills(Arrays.asList("Java", "Spring", "SQL"));
-
-        AIResponseDto analyzeWithJDResponse2 = AIResponseDto.builder()
-                .analyzeResult("Excellent match for the position")
-                .matchScore(92.0)
-                .missingKeywords(Arrays.asList("AWS", "Microservices"))
-                .jdResult(jdResult2)
-                .build();
-
-        lenient().doReturn(analyzeWithJDResponse2).when(aiGrpcClient).analyzeCVWithJobDescription(any(CVDto.class),
-                anyString(), anyString());
-
-        // Act
-        Response response = cvService.analyzeCVWithJobDescription(
-                "{\"title\":\"Test CV\",\"personalInfo\":{\"fullname\":\"John Doe\",\"email\":\"john@example.com\",\"phone\":\"1234567890\"},\"experiences\":[{\"company\":\"Tech Corp\",\"position\":\"Developer\"}],\"educations\":[{\"school\":\"University\",\"degree\":\"Bachelor\"}],\"skills\":[\"Java\"],\"language\":\"en\",\"jobDescription\":\"Looking for Java developer\"}",
-                mockJdFile);
-
-        // Assert
-        assertEquals(200, response.getStatusCode());
-        assertEquals(92.0, response.getMatchScore());
-        verify(jobDescriptionParserService).extractTextFromFile(mockJdFile);
     }
 
     @Test

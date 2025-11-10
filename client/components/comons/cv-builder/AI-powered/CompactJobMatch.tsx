@@ -50,11 +50,8 @@ export function CompactJobMatch({
       reader.onload = (event) => {
         const text = event.target?.result as string;
         setJobDescription(text);
-        toast.success("Đã tải mô tả công việc");
       };
       reader.readAsText(selectedFile);
-    } else {
-      toast.info("File sẽ được xử lý bởi server");
     }
   };
 

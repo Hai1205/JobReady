@@ -27,7 +27,7 @@ class UserServiceIntegrationTest {
     @Test
     @WithMockUser
     void testHealthEndpoint() throws Exception {
-        mockMvc.perform(get("/users/health")
+        mockMvc.perform(get("/api/v1/users/health")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))

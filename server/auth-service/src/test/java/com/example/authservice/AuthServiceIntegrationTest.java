@@ -41,7 +41,7 @@ class AuthServiceIntegrationTest {
     @Test
     @WithMockUser
     void testHealthEndpoint() throws Exception {
-        mockMvc.perform(get("/auth/health")
+        mockMvc.perform(get("/api/v1/auth/health")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
@@ -65,7 +65,7 @@ class AuthServiceIntegrationTest {
                 "data", "", "application/json", dataJson.getBytes());
 
         // Act & Assert - Testing endpoint structure
-        mockMvc.perform(multipart("/auth/login")
+        mockMvc.perform(multipart("/api/v1/auth/login")
                 .file(dataPart)
                 .with(csrf()))
                 .andExpect(status().isOk());

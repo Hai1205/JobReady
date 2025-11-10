@@ -14,8 +14,6 @@ import com.example.cvservice.exceptions.OurException;
 import com.example.cvservice.mappers.*;
 import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.CloudinaryService;
-import com.example.cvservice.services.JobDescriptionParserService;
-import com.example.cvservice.services.grpcs.AIGrpcClient;
 import com.example.cvservice.services.grpcs.UserGrpcClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,32 +33,26 @@ public class CVService extends BaseService {
     private final EducationRepository educationRepository;
     private final ExperienceRepository experienceRepository;
     private final PersonalInfoRepository personalInfoRepository;
-    private final JobDescriptionParserService jobDescriptionParserService;
     private final CVMapper cvMapper;
     private final ObjectMapper objectMapper;
     private final CloudinaryService cloudinaryService;
     private final UserGrpcClient userGrpcClient;
-    private final AIGrpcClient aiGrpcClient;
 
     public CVService(
             CVRepository cvRepository,
             EducationRepository educationRepository,
             ExperienceRepository experienceRepository,
             PersonalInfoRepository personalInfoRepository,
-            JobDescriptionParserService jobDescriptionParserService,
             CloudinaryService cloudinaryService,
             CVMapper cvMapper,
-            UserGrpcClient userGrpcClient,
-            AIGrpcClient aiGrpcClient) {
+            UserGrpcClient userGrpcClient) {
         this.cvRepository = cvRepository;
         this.educationRepository = educationRepository;
         this.experienceRepository = experienceRepository;
         this.personalInfoRepository = personalInfoRepository;
-        this.jobDescriptionParserService = jobDescriptionParserService;
         this.cvMapper = cvMapper;
         this.cloudinaryService = cloudinaryService;
         this.userGrpcClient = userGrpcClient;
-        this.aiGrpcClient = aiGrpcClient;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -199,67 +191,6 @@ public class CVService extends BaseService {
 
             response.setMessage("Get cv successfully");
             response.setCv(cvDto);
-            return response;
-        } catch (OurException e) {
-            return buildErrorResponse(e.getStatusCode(), e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return buildErrorResponse(500, e.getMessage());
-        }
-    }
-
-    public Response analyzeCV(String dataJson) {
-        Response response = new Response();
-
-        try {
-            CreateCVRequest request = objectMapper.readValue(dataJson, CreateCVRequest.class);
-            String title = request.getTitle();
-            PersonalInfoDto personalInfo = request.getPersonalInfo();
-            List<ExperienceDto> experiences = request.getExperiences();
-            List<EducationDto> educations = request.getEducations();
-            List<String> skills = request.getSkills();
-
-            CVDto cvDto = CVDto.builder()
-                    .title(title)
-                    .personalInfo(personalInfo)
-                    .experiences(experiences)
-                    .educations(educations)
-                    .skills(skills)
-                    .build();
-
-            log.info("Analyzing CV with title={}", title);
-
-            AIResponseDto aiResponse = aiGrpcClient.analyzeCV(cvDto);
-            List<AISuggestionDto> suggestions = aiResponse.getSuggestions();
-            String analyzeResult = aiResponse.getAnalyzeResult();
-
-            response.setMessage("CV analyzed successfully");
-            response.setAnalyze(analyzeResult);
-            response.setSuggestions(suggestions);
-            log.debug("Analysis completed for CV title={} suggestionsCount={}", title,
-                    suggestions == null ? 0 : suggestions.size());
-            return response;
-        } catch (OurException e) {
-            return buildErrorResponse(e.getStatusCode(), e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return buildErrorResponse(500, e.getMessage());
-        }
-    }
-
-    public Response improveCV(String dataJson) {
-        Response response = new Response();
-
-        try {
-            ImproveCVRequest request = objectMapper.readValue(dataJson, ImproveCVRequest.class);
-            String section = request.getSection();
-            String content = request.getContent();
-
-            AIResponseDto aiResponse = aiGrpcClient.improveCV(section, content);
-            String improved = aiResponse.getImproved();
-
-            response.setMessage("CV section improved successfully");
-            response.setImprovedSection(improved);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -521,63 +452,6 @@ public class CVService extends BaseService {
             response.setMessage("CV duplicated successfully");
             response.setCv(duplicatedCV);
             log.info("Duplicated CV id={}", cvId);
-            return response;
-        } catch (OurException e) {
-            return buildErrorResponse(e.getStatusCode(), e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return buildErrorResponse(500, e.getMessage());
-        }
-    }
-
-    private String handleExtractJobDescriptionText(MultipartFile jdFile, String jobDescription) {
-        if (jdFile == null || jdFile.isEmpty()) {
-            return jobDescription;
-        }
-
-        try {
-            return jobDescriptionParserService.extractTextFromFile(jdFile);
-        } catch (Exception ex) {
-            System.err.println("Error extracting JD file: " + ex.getMessage());
-            return jobDescription;
-        }
-    }
-
-    public Response analyzeCVWithJobDescription(String dataJson, MultipartFile jdFile) {
-        Response response = new Response();
-
-        try {
-            AnalyzeCVWithJDRequest request = objectMapper.readValue(dataJson, AnalyzeCVWithJDRequest.class);
-            String language = request.getLanguage();
-
-            String jobDescription = request.getJobDescription();
-            String jdText = handleExtractJobDescriptionText(jdFile, jobDescription);
-
-            String title = request.getTitle();
-            PersonalInfoDto personalInfo = request.getPersonalInfo();
-            List<ExperienceDto> experiences = request.getExperiences();
-            List<EducationDto> educations = request.getEducations();
-            List<String> skills = request.getSkills();
-
-            CVDto cvDto = CVDto.builder()
-                    .title(title)
-                    .personalInfo(personalInfo)
-                    .experiences(experiences)
-                    .educations(educations)
-                    .skills(skills)
-                    .build();
-
-            AIResponseDto aiResponse = aiGrpcClient.analyzeCVWithJobDescription(cvDto, language, jdText);
-            JobDescriptionResult jdResult = aiResponse.getJdResult();
-            String analyzeResult = aiResponse.getAnalyzeResult();
-            Double matchScore = aiResponse.getMatchScore();
-            List<String> missingKeywords = aiResponse.getMissingKeywords();
-
-            response.setMessage("CV analyzed with job description successfully");
-            response.setParsedJobDescription(jdResult);
-            response.setAnalyze(analyzeResult);
-            response.setMatchScore(matchScore);
-            response.setMissingKeywords(missingKeywords);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());

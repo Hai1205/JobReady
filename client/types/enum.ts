@@ -21,6 +21,6 @@ export enum EAISuggestionType {
 }
 
 export enum EPrivacy {
-    PUBLIC = "public",
-    PRIVATE = "private"
+    PUBLIC = "PUBLIC",
+    PRIVATE = "PRIVATE"
 }

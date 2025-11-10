@@ -2,14 +2,11 @@ package com.example.mailservice.controllers;
 
 import com.example.mailservice.dtos.responses.*;
 
-import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/mails")
+@RequestMapping("/api/v1/mail")
 public class MailController {
     @GetMapping("/health")
     public ResponseEntity<Response> health() {

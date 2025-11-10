@@ -13,7 +13,7 @@ import com.example.cvservice.services.apis.CVService;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
-@RequestMapping("/cvs")
+@RequestMapping("/api/v1/cvs")
 public class CVController {
 
     @Autowired
@@ -38,31 +38,6 @@ public class CVController {
     @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> getCVById(@PathVariable("cvId") UUID cvId) {
         Response response = cvService.getCVById(cvId);
-
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
-    @PostMapping("/analyze")
-    @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> analyzeCV(@RequestPart("data") String dataJson) {
-        Response response = cvService.analyzeCV(dataJson);
-
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
-    @PostMapping("/improve")
-    @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> improveCV(@RequestPart String dataJson) {
-        Response response = cvService.improveCV(dataJson);
-
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
-    @PostMapping("/analyze-with-jd")
-    @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> analyzeCVWithJobDescription(@RequestPart String dataJson,
-            @RequestPart(value = "jdFile", required = false) MultipartFile jdFile) {
-        Response response = cvService.analyzeCVWithJobDescription(dataJson, jdFile);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

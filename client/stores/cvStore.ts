@@ -9,8 +9,11 @@ import { exportCustomHTML, exportToPDF } from "@/services/pdfExportService";
 interface ICVDataResponse {
 	cv: ICV,
 	cvs: ICV[],
+}
+
+interface IAIDataResponse {
 	suggestions: IAISuggestion[],
-	analyze: string,
+	analyze: IAnalyzeResult,
 	improvedSection: string,
 	matchScore: number,
 }
@@ -48,17 +51,13 @@ export interface ICVStore extends IBaseStore {
 	duplicateCV: (
 		cvId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
-	importFile: (
-		userId: string,
-		file: File
-	) => Promise<IApiResponse<ICVDataResponse>>;
 	analyzeCV: (
 		title: string,
 		personalInfo: IPersonalInfo,
 		experiences: IExperience[],
 		educations: IEducation[],
 		skills: string[],
-	) => Promise<IApiResponse<ICVDataResponse>>;
+	) => Promise<IApiResponse<IAIDataResponse>>;
 	analyzeCVWithJD: (
 		jobDescription: string,
 		jdFile: File | null,
@@ -68,11 +67,11 @@ export interface ICVStore extends IBaseStore {
 		experiences: IExperience[],
 		educations: IEducation[],
 		skills: string[],
-	) => Promise<IApiResponse<ICVDataResponse>>;
+	) => Promise<IApiResponse<IAIDataResponse>>;
 	improveCV: (
 		section: string,
 		content: string,
-	) => Promise<IApiResponse<ICVDataResponse>>;
+	) => Promise<IApiResponse<IAIDataResponse>>;
 
 	handleSetCurrentCV: (cv: ICV | null) => void;
 	handleUpdateCV: (cvData: Partial<ICV>) => void;
@@ -105,7 +104,9 @@ export const useCVStore = createStore<ICVStore>(
 
 		getUserCVs: async (userId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.GET, `/cvs/users/${userId}`);
+				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs/users/${userId}`);
+				console.log("User CVs:", res);
+				return res;
 			});
 		},
 
@@ -192,7 +193,7 @@ export const useCVStore = createStore<ICVStore>(
 			personalInfo: IPersonalInfo,
 			experiences: IExperience[],
 			educations: IEducation[],
-			skills: string[],): Promise<IApiResponse<ICVDataResponse>> => {
+			skills: string[],): Promise<IApiResponse<IAIDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				title,
@@ -203,7 +204,7 @@ export const useCVStore = createStore<ICVStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/analyze`, formData);
+				const res = await handleRequest<IAIDataResponse>(EHttpType.POST, `/ai/analyze`, formData);
 				console.log("Analyze CV Response:", res);
 				return res;
 			});
@@ -218,7 +219,7 @@ export const useCVStore = createStore<ICVStore>(
 			experiences: IExperience[],
 			educations: IEducation[],
 			skills: string[],
-		): Promise<IApiResponse<ICVDataResponse>> => {
+		): Promise<IApiResponse<IAIDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				jobDescription,
@@ -232,14 +233,16 @@ export const useCVStore = createStore<ICVStore>(
 			if (jdFile) formData.append("jdFile", jdFile);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/analyze-with-jd`, formData);
+				const res = await handleRequest<IAIDataResponse>(EHttpType.POST, `/ai/analyze-with-jd`, formData);
+				console.log("Analyze CV with JD Response:", res);
+				return res;
 			});
 		},
 
 		improveCV: async (
 			section: string,
 			content: string
-		): Promise<IApiResponse<ICVDataResponse>> => {
+		): Promise<IApiResponse<IAIDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				section,
@@ -247,7 +250,7 @@ export const useCVStore = createStore<ICVStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/improve`, formData);
+				return await handleRequest<IAIDataResponse>(EHttpType.POST, `/ai/improve`, formData);
 			});
 		},
 

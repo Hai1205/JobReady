@@ -242,14 +242,43 @@ public class JwtUtil {
      */
     public Boolean validateRefreshToken(String refreshToken) {
         try {
-            String tokenType = extractTokenType(refreshToken);
+            if (refreshToken == null || refreshToken.isEmpty()) {
+                return false;
+            }
+
+            // Parse token để validate signature
+            Claims claims = Jwts.parser()
+                    .verifyWith(publicKey)
+                    .build()
+                    .parseSignedClaims(refreshToken)
+                    .getPayload();
+
             // Kiểm tra token type phải là REFRESH
+            String tokenType = claims.get("tokenType", String.class);
             if (!"REFRESH".equals(tokenType)) {
                 return false;
             }
+
             // Kiểm tra token chưa hết hạn
-            return !isTokenExpired(refreshToken);
+            Date expiration = claims.getExpiration();
+            if (expiration == null) {
+                return false;
+            }
+
+            boolean isExpired = expiration.before(new Date());
+            return !isExpired;
+
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // Token đã hết hạn
+            return false;
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            // Signature không hợp lệ
+            return false;
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            // Token không đúng format
+            return false;
         } catch (Exception e) {
+            // Lỗi khác
             return false;
         }
     }
