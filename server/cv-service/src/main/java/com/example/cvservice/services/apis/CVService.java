@@ -9,7 +9,6 @@ import com.example.cvservice.dtos.*;
 import com.example.cvservice.dtos.requests.*;
 import com.example.cvservice.dtos.responses.*;
 import com.example.cvservice.entities.*;
-import com.example.cvservice.entities.CV.CVPrivacy;
 import com.example.cvservice.exceptions.OurException;
 import com.example.cvservice.mappers.*;
 import com.example.cvservice.repositoryies.*;
@@ -71,7 +70,7 @@ public class CVService extends BaseService {
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
             List<String> skills,
-            String privacy,
+            Boolean isVisibility,
             String color,
             String template) {
         log.info("Creating CV for userId={} title='{}' experiencesCount={} educationsCount={}", userId, title,
@@ -96,11 +95,11 @@ public class CVService extends BaseService {
             throw new OurException("At least one education is required", 400);
         }
 
-        if (privacy == null || privacy.isEmpty()) {
-            privacy = "PRIVATE";
+        if (isVisibility == null) {
+            isVisibility = false;
         }
 
-        CV cv = new CV(userId, title, skills, privacy, color, template);
+        CV cv = new CV(userId, title, skills, isVisibility, color, template);
 
         PersonalInfo personalInfo = new PersonalInfo(personalInfoDto);
         if (avatar != null && !avatar.isEmpty()) {
@@ -262,7 +261,7 @@ public class CVService extends BaseService {
             List<ExperienceDto> experiencesDto,
             List<EducationDto> educationsDto,
             List<String> skills,
-            String privacy,
+            Boolean isVisibility,
             String color,
             String template) {
         CV existing = cvRepository.findById(cvId)
@@ -344,16 +343,7 @@ public class CVService extends BaseService {
             existing.getSkills().addAll(skills);
         }
 
-        // Only update privacy if provided and valid
-        if (privacy != null && !privacy.trim().isEmpty()) {
-            try {
-                // Convert to uppercase to handle case-insensitive input
-                existing.setPrivacy(CVPrivacy.valueOf(privacy.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                log.warn("Invalid privacy value: {}. Keeping existing value.", privacy);
-                // Keep existing privacy value if invalid
-            }
-        }
+        existing.setIsVisibility(isVisibility);
 
         existing.setUpdatedAt(Instant.now());
 
@@ -371,7 +361,7 @@ public class CVService extends BaseService {
             List<ExperienceDto> experiences = request.getExperiences();
             List<EducationDto> educations = request.getEducations();
             List<String> skills = request.getSkills();
-            String privacy = request.getPrivacy();
+            Boolean isVisibility = request.getIsVisibility();
             String color = request.getColor();
             String template = request.getTemplate();
 
@@ -383,7 +373,7 @@ public class CVService extends BaseService {
                     experiences,
                     educations,
                     skills,
-                    privacy,
+                    isVisibility,
                     color,
                     template);
 
@@ -418,7 +408,7 @@ public class CVService extends BaseService {
                 existingCV.getExperiences(),
                 existingCV.getEducations(),
                 new ArrayList<>(existingCV.getSkills()),
-                existingCV.getPrivacy(),
+                existingCV.getIsVisibility(),
                 existingCV.getColor(),
                 existingCV.getTemplate());
 

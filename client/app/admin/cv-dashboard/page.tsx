@@ -11,11 +11,13 @@ import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 import { CVFilter } from "@/components/comons/admin/cvDashboard/CVFilter";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
-import { on } from "events";
+import DeleteConfirmationDialog from "@/components/comons/layout/DeleteConfirmationDialog";
+
+export type CvFilterType = "visibility";
 
 export default function CVDashboardPage() {
   const {
-    isLoading,
+    CVsTable,
     getAllCVs,
     createCV,
     deleteCV,
@@ -26,26 +28,25 @@ export default function CVDashboardPage() {
 
   const router = useRouter();
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [allCVs, setAllCVs] = useState<ICV[]>([]);
   const [filteredCVs, setFilteredCVs] = useState<ICV[]>([]);
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [cvToDelete, setCvToDelete] = useState<ICV | null>(null);
+
   // Initialize empty filters
-  const initialFilters = { privacy: [] as string[] };
+  const initialFilters = { visibility: [] as string[] };
   const [activeFilters, setActiveFilters] = useState<{
-    privacy?: string[];
+    visibility?: string[];
   }>(initialFilters);
 
   const fetchData = useCallback(async () => {
-    try {
-      const res = await getAllCVs();
-      const data = res?.data?.cvs || [];
+    setIsLoading(true);
 
-      setAllCVs(data);
-      setFilteredCVs(data);
-    } catch (err) {
-      console.error("Error fetching CVs:", err);
-    }
+    await getAllCVs();
+
+    setIsLoading(false);
   }, [getAllCVs]);
 
   useEffect(() => {
@@ -54,8 +55,8 @@ export default function CVDashboardPage() {
 
   // Function to filter data based on query and activeFilters
   const filterData = useCallback(
-    (query: string, filters: { privacy?: string[] }) => {
-      let results = [...allCVs];
+    (query: string, filters: { visibility?: string[] }) => {
+      let results = [...CVsTable];
 
       // Filter by search query
       if (query.trim()) {
@@ -65,20 +66,38 @@ export default function CVDashboardPage() {
         );
       }
 
-      // Filter by privacy
-      if (filters.privacy && filters.privacy.length > 0) {
-        results = results.filter((cv) =>
-          filters.privacy!.includes(cv.privacy || "")
-        );
+      // Filter by visibility
+      if (filters.visibility && filters.visibility.length > 0) {
+        results = results.filter((cv) => {
+          const isVisibility = cv.isVisibility;
+          return filters.visibility!.some((filterValue) => {
+            if (filterValue === "true") return isVisibility === true;
+            if (filterValue === "false") return isVisibility === false;
+            return false;
+          });
+        });
       }
 
       setFilteredCVs(results);
     },
-    [allCVs]
+    [CVsTable]
   );
 
-  const onDelete = async (cv: ICV) => {
-    await deleteCV(cv.id);
+  useEffect(() => {
+    filterData(searchQuery, activeFilters);
+  }, [CVsTable, searchQuery, activeFilters, filterData]);
+
+  const onDelete = (cv: ICV) => {
+    setCvToDelete(cv);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (cvToDelete) {
+      await deleteCV(cvToDelete.id);
+      setDeleteDialogOpen(false);
+      setCvToDelete(null);
+    }
   };
 
   const onUpdate = (cv: ICV) => {
@@ -102,14 +121,16 @@ export default function CVDashboardPage() {
   const closeMenuMenuFilters = () => setOpenMenuFilters(false);
 
   // Toggle filter without auto-filtering
-  const toggleFilter = (value: string, type: "status" | "privacy" | "role") => {
-    if (type === "privacy") {
+  const toggleFilter = (value: string, type: CvFilterType) => {
+    if (type === "visibility") {
       setActiveFilters((prev) => {
         const updated = { ...prev };
-        if (updated.privacy?.includes(value)) {
-          updated.privacy = updated.privacy.filter((item) => item !== value);
+        if (updated.visibility?.includes(value)) {
+          updated.visibility = updated.visibility.filter(
+            (item) => item !== value
+          );
         } else {
-          updated.privacy = [...(updated.privacy || []), value];
+          updated.visibility = [...(updated.visibility || []), value];
         }
         return updated;
       });
@@ -119,7 +140,7 @@ export default function CVDashboardPage() {
   const clearFilters = () => {
     setActiveFilters(initialFilters);
     setSearchQuery("");
-    setFilteredCVs(allCVs); // Reset filtered data
+    setFilteredCVs(CVsTable);
     closeMenuMenuFilters();
   };
 
@@ -193,6 +214,13 @@ export default function CVDashboardPage() {
           />
         </Card>
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        description="Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn CV và loại bỏ nó khỏi máy chủ của chúng tôi."
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

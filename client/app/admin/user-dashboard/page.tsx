@@ -16,11 +16,10 @@ import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 import { UserFilter } from "@/components/comons/admin/userDashboard/UserFilter";
 import { UserTable } from "@/components/comons/admin/userDashboard/UserTable";
 import { ExtendedUserData } from "@/components/comons/admin/userDashboard/constant";
-import {
-  FilterType,
-  initialFilters,
-} from "@/components/comons/admin/adminTable/SharedFilter";
-import { mockUsers } from "@/services/mockData";
+import DeleteConfirmationDialog from "@/components/comons/layout/DeleteConfirmationDialog";
+
+export type UserFilterType = "status" | "role";
+const userInitialFilters = { status: [] as string[], role: [] as string[] };
 
 function UserDashboardPage() {
   const { usersTable, getAllUsers, createUser, updateUser, deleteUser } =
@@ -37,12 +36,12 @@ function UserDashboardPage() {
   const [activeFilters, setActiveFilters] = useState<{
     status: string[];
     role: string[];
-    privacy: string[];
-  }>(initialFilters);
-  const [filteredUsers, setFilteredUsers] = useState<IUser[] | []>(mockUsers);
+  }>(userInitialFilters);
+  const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
+
     await getAllUsers();
 
     setIsLoading(false);
@@ -53,10 +52,7 @@ function UserDashboardPage() {
   }, [getAllUsers]);
 
   const filterData = useCallback(
-    (
-      query: string,
-      filters: { status: string[]; role: string[]; privacy: string[] }
-    ) => {
+    (query: string, filters: { status: string[]; role: string[] }) => {
       let results = [...usersTable];
 
       if (query.trim()) {
@@ -98,7 +94,7 @@ function UserDashboardPage() {
     [searchQuery, activeFilters, filterData]
   );
 
-  const toggleFilter = (value: string, type: FilterType) => {
+  const toggleFilter = (value: string, type: UserFilterType) => {
     setActiveFilters((prev) => {
       const updated = { ...prev };
       if (updated[type]?.includes(value)) {
@@ -111,7 +107,7 @@ function UserDashboardPage() {
   };
 
   const clearFilters = () => {
-    setActiveFilters(initialFilters);
+    setActiveFilters(userInitialFilters);
     setSearchQuery("");
     setFilteredUsers(usersTable);
     closeMenuMenuFilters();
@@ -123,7 +119,7 @@ function UserDashboardPage() {
   };
 
   const handleRefresh = () => {
-    setActiveFilters(initialFilters);
+    setActiveFilters(userInitialFilters);
     setSearchQuery("");
     fetchData();
   };
@@ -134,6 +130,9 @@ function UserDashboardPage() {
   const [dialogKey, setDialogKey] = useState(0);
 
   const [data, setData] = useState<ExtendedUserData | null>(null);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<IUser | null>(null);
 
   const defaultUser: ExtendedUserData = {
     id: "",
@@ -223,8 +222,17 @@ function UserDashboardPage() {
     setIsCreateUserOpen(false);
   };
 
-  const onDelete = async (user: IUser) => {
-    await deleteUser(user.id);
+  const onDelete = (user: IUser) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (userToDelete) {
+      await deleteUser(userToDelete.id);
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+    }
   };
 
   const onUpdate = async (user: IUser) => {
@@ -334,6 +342,13 @@ function UserDashboardPage() {
           />
         </Card>
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        description="Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn người dùng và loại bỏ nó khỏi máy chủ của chúng tôi."
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

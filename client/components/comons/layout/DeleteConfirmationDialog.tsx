@@ -13,12 +13,14 @@ import {
 
 interface DeleteConfirmationDialogProps {
   open: boolean;
+  description: string;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }
 
 export default function DeleteConfirmationDialog({
   open,
+  description,
   onOpenChange,
   onConfirm,
 }: DeleteConfirmationDialogProps) {
@@ -28,8 +30,7 @@ export default function DeleteConfirmationDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Bạn có chắc chắn?</AlertDialogTitle>
           <AlertDialogDescription>
-            Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn CV của
-            bạn và loại bỏ nó khỏi máy chủ của chúng tôi.
+            {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -28,8 +28,8 @@ public class CV {
         this.title = title;
     }
 
-    public CV(UUID userId, String title, List<String> skills, String privacy, String color, String template) {
-        this.privacy = CVPrivacy.valueOf(privacy);
+    public CV(UUID userId, String title, List<String> skills, Boolean isVisibility, String color, String template) {
+        this.isVisibility = isVisibility;
         this.title = title;
         this.userId = userId;
         this.skills = skills;
@@ -49,9 +49,8 @@ public class CV {
     @ElementCollection
     private List<String> skills = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CVPrivacy privacy = CVPrivacy.PRIVATE;
+    private Boolean isVisibility = false;
 
     @Column(nullable = false)
     private String color = "#3498db"; // Default blue color
@@ -71,10 +70,5 @@ public class CV {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = Instant.now();
-    }
-
-    public enum CVPrivacy {
-        PUBLIC,
-        PRIVATE
     }
 }

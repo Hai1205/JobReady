@@ -21,6 +21,8 @@ interface IAIDataResponse {
 export interface ICVStore extends IBaseStore {
 	currentCV: ICV | null
 	cvList: ICV[]
+	userCVs: ICV[]
+	CVsTable: ICV[]
 	currentStep: number
 	aiSuggestions: IAISuggestion[]
 	jobDescription: string
@@ -41,7 +43,7 @@ export interface ICVStore extends IBaseStore {
 		experiences: IExperience[],
 		educations: IEducation[],
 		skills: string[],
-		privacy: string,
+		isVisibility: boolean,
 		color: string,
 		template: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
@@ -81,12 +83,17 @@ export interface ICVStore extends IBaseStore {
 	handleApplySuggestion: (id: string) => void;
 	handleClearCVList: () => void;
 	handleGeneratePDF: (cv: ICV, htmlContent?: string) => void;
+	handleAddCVToUserCVs: (cv: ICV) => void;
+	handleRemoveCVFromUserCVs: (cvId: string) => void;
+	handleRemoveCVFromTable: (cvId: string) => void;
 }
 
 const storeName = "cv";
 const initialState = {
 	currentCV: null,
 	cvList: [],
+	userCVs: [],
+	CVsTable: [],
 	currentStep: 0,
 	aiSuggestions: [],
 	jobDescription: "",
@@ -98,7 +105,13 @@ export const useCVStore = createStore<ICVStore>(
 	(set, get) => ({
 		getAllCVs: async (): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.GET, `/cvs`);
+				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs`);
+
+				if (res.data && res.data.success && res.data.cvs) {
+					set({ CVsTable: res.data.cvs });
+				}
+
+				return res;
 			});
 		},
 
@@ -106,6 +119,11 @@ export const useCVStore = createStore<ICVStore>(
 			return await get().handleRequest(async () => {
 				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs/users/${userId}`);
 				console.log("User CVs:", res);
+
+				if (res.data && res.data.success && res.data.cvs) {
+					set({ userCVs: res.data.cvs });
+				}
+
 				return res;
 			});
 		},
@@ -120,13 +138,7 @@ export const useCVStore = createStore<ICVStore>(
 			userId: string
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, new FormData());
-
-				if (res.data && res.data.success && res.data.cv) {
-					set({ currentCV: res.data.cv });
-				}
-
-				return res;
+				return await handleRequest(EHttpType.POST, `/cvs/users/${userId}`, new FormData());
 			});
 		},
 
@@ -138,7 +150,7 @@ export const useCVStore = createStore<ICVStore>(
 			experiences: IExperience[],
 			educations: IEducation[],
 			skills: string[],
-			privacy: string,
+			isVisibility: boolean,
 			color: string,
 			template: string
 		): Promise<IApiResponse<ICVDataResponse>> => {
@@ -149,7 +161,7 @@ export const useCVStore = createStore<ICVStore>(
 				experiences,
 				educations,
 				skills,
-				privacy,
+				isVisibility,
 				color,
 				template
 			}));
@@ -161,9 +173,19 @@ export const useCVStore = createStore<ICVStore>(
 			});
 		},
 
-		deleteCV: async (cvId: string): Promise<IApiResponse<void>> => {
+		deleteCV: async (cvId: string): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.DELETE, `/cvs/${cvId}`);
+				const res = await handleRequest(EHttpType.DELETE, `/cvs/${cvId}`);
+
+				if (res.data && res.data.success) {
+					// Remove from user CVs if exists
+					get().handleRemoveCVFromUserCVs(cvId);
+					
+					// Remove from CVs table if exists
+					get().handleRemoveCVFromTable(cvId);
+				}
+
+				return res;
 			});
 		},
 
@@ -173,6 +195,7 @@ export const useCVStore = createStore<ICVStore>(
 
 				if (res.data && res.data.cv) {
 					set({ currentCV: res.data.cv });
+					get().handleAddCVToUserCVs(res.data.cv);
 				}
 
 				return res;
@@ -353,6 +376,22 @@ export const useCVStore = createStore<ICVStore>(
 					}`
 				);
 			};
+		},
+
+		handleAddCVToUserCVs: (cv: ICV): void => {
+			set({ userCVs: [cv, ...get().userCVs] });
+		},
+
+		handleRemoveCVFromUserCVs: (cvId: string): void => {
+			set({
+				userCVs: get().userCVs.filter((cv) => cv.id !== cvId),
+			});
+		},
+
+		handleRemoveCVFromTable: (cvId: string): void => {
+			set({
+				CVsTable: get().CVsTable.filter((cv) => cv.id !== cvId),
+			});
 		},
 
 		reset: () => {

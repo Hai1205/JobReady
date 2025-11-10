@@ -1,7 +1,6 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, EStorageType, IBaseStore } from "@/lib/initialStore";
 import { useAuthStore } from "./authStore";
-import { mockUsers } from "@/services/mockData";
 
 interface IUserDataResponse {
 	user: IUser;

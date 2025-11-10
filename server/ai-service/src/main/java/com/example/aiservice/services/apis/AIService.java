@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.example.aiservice.configs.OpenRouterConfig;
 import com.example.aiservice.dtos.*;
 import com.example.aiservice.dtos.requests.*;
+import com.example.aiservice.dtos.responses.AIResponseDto;
 import com.example.aiservice.dtos.responses.Response;
 import com.example.aiservice.exceptions.OurException;
 import com.example.aiservice.services.*;

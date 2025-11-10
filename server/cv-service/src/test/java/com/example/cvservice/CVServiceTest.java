@@ -1,6 +1,7 @@
 package com.example.cvservice;
 
 import com.example.cvservice.dtos.*;
+import com.example.cvservice.dtos.requests.UpdateCVRequest;
 import com.example.cvservice.dtos.responses.Response;
 import com.example.cvservice.entities.*;
 import com.example.cvservice.exceptions.OurException;
@@ -152,7 +153,7 @@ class CVServiceTest {
 
         // Act
         CVDto result = cvService.handleDuplicateCV(userId, "Test CV", personalInfoDto, avatar,
-                experiencesDto, educationsDto, Arrays.asList("Java"), "PRIVATE", "blue", "modern");
+                experiencesDto, educationsDto, Arrays.asList("Java"), false, "blue", "modern");
 
         // Assert
         assertNotNull(result);
@@ -172,7 +173,7 @@ class CVServiceTest {
         // Act & Assert
         OurException exception = assertThrows(OurException.class,
                 () -> cvService.handleDuplicateCV(userId, "Test CV", personalInfoDto, null,
-                        experiencesDto, educationsDto, Arrays.asList("Java"), "PRIVATE", "blue", "modern"));
+                        experiencesDto, educationsDto, Arrays.asList("Java"), false, "blue", "modern"));
         assertEquals("User not found", exception.getMessage());
         assertEquals(404, exception.getStatusCode());
     }
@@ -185,7 +186,7 @@ class CVServiceTest {
         // Act & Assert
         OurException exception = assertThrows(OurException.class,
                 () -> cvService.handleDuplicateCV(userId, "Test CV", null, null,
-                        experiencesDto, educationsDto, Arrays.asList("Java"), "PRIVATE", "blue", "modern"));
+                        experiencesDto, educationsDto, Arrays.asList("Java"), false, "blue", "modern"));
         assertEquals("Personal info is required", exception.getMessage());
         assertEquals(400, exception.getStatusCode());
     }
@@ -198,7 +199,7 @@ class CVServiceTest {
         // Act & Assert
         OurException exception = assertThrows(OurException.class,
                 () -> cvService.handleDuplicateCV(userId, "Test CV", personalInfoDto, null,
-                        null, educationsDto, Arrays.asList("Java"), "PRIVATE", "blue", "modern"));
+                        null, educationsDto, Arrays.asList("Java"), false, "blue", "modern"));
         assertEquals("At least one experience is required", exception.getMessage());
         assertEquals(400, exception.getStatusCode());
     }
@@ -211,7 +212,7 @@ class CVServiceTest {
         // Act & Assert
         OurException exception = assertThrows(OurException.class,
                 () -> cvService.handleDuplicateCV(userId, "Test CV", personalInfoDto, null,
-                        experiencesDto, null, Arrays.asList("Java"), "PRIVATE", "blue", "modern"));
+                        experiencesDto, null, Arrays.asList("Java"), false, "blue", "modern"));
         assertEquals("At least one education is required", exception.getMessage());
         assertEquals(400, exception.getStatusCode());
     }
@@ -368,7 +369,7 @@ class CVServiceTest {
 
         // Act
         CVDto result = cvService.handleUpdateCV(cvId, "Updated Title", personalInfoDto, null,
-                experiencesDto, educationsDto, Arrays.asList("Java", "Spring"), "PUBLIC", "red", "classic");
+                experiencesDto, educationsDto, Arrays.asList("Java", "Spring"), true, "red", "classic");
 
         // Assert
         assertNotNull(result);
@@ -408,12 +409,24 @@ class CVServiceTest {
                         "degree": "Bachelor"
                     }],
                     "skills": ["Java"],
-                    "privacy": "PRIVATE",
+                    "isVisibility": false,
                     "color": "blue",
                     "template": "modern"
                 }
                 """;
 
+        // Create expected UpdateCVRequest object
+        UpdateCVRequest expectedRequest = new UpdateCVRequest();
+        expectedRequest.setTitle("Updated CV");
+        expectedRequest.setPersonalInfo(personalInfoDto);
+        expectedRequest.setExperiences(experiencesDto);
+        expectedRequest.setEducations(educationsDto);
+        expectedRequest.setSkills(Arrays.asList("Java"));
+        expectedRequest.setIsVisibility(false);
+        expectedRequest.setColor("blue");
+        expectedRequest.setTemplate("modern");
+
+        when(objectMapper.readValue(jsonData, UpdateCVRequest.class)).thenReturn(expectedRequest);
         when(cvRepository.findById(cvId)).thenReturn(Optional.of(cv));
         when(cvRepository.save(cv)).thenReturn(cv);
         when(cvMapper.toDto(cv)).thenReturn(cvDto);

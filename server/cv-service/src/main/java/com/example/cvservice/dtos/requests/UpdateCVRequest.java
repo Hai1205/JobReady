@@ -17,7 +17,7 @@ public class UpdateCVRequest {
     private List<ExperienceDto> experiences;
     private List<EducationDto> educations;
     private List<String> skills;
-    private String privacy;
+    private Boolean isVisibility;
     private String color;
     private String template;
 }

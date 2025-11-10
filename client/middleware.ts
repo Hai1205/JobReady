@@ -100,14 +100,18 @@ export function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/', request.url))
         }
     }
-    if (pathname.startsWith('/cv-builder') || pathname.startsWith('/my-cvs')) {
-        // If not authenticated, redirect to login page
+    if (pathname.startsWith('/cv-builder')) {
         if (!isAuthenticated) {
-            // return NextResponse.redirect(new URL('/auth/login', request.url))
+            return NextResponse.redirect(new URL('/auth/login', request.url))
         }
     }
-    if (pathname.startsWith('/settings') || pathname.startsWith('/my-cvs')) {
+    if (pathname.startsWith('/my-cvs')) {
         // If not authenticated, redirect to login page
+        if (!isAuthenticated) {
+            return NextResponse.redirect(new URL('/auth/login', request.url))
+        }
+    }
+    if (pathname.startsWith('/settings')) {
         if (!isAuthenticated) {
             return NextResponse.redirect(new URL('/auth/login', request.url))
         }

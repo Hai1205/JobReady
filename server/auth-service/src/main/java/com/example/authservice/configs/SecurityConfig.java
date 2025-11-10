@@ -19,13 +19,13 @@ import com.example.authservice.securitys.JwtAuthenticationFilter;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-public class OAuth2SecurityConfig {
+public class SecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
         private final JsonAuthenticationEntryPoint authenticationEntryPoint;
         private final JsonAccessDeniedHandler accessDeniedHandler;
 
-        public OAuth2SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+        public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                         JsonAuthenticationEntryPoint authenticationEntryPoint,
                         JsonAccessDeniedHandler accessDeniedHandler) {
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -51,21 +51,27 @@ public class OAuth2SecurityConfig {
                                 .authorizeHttpRequests(authz -> authz
                                                 // Public endpoints - không cần authentication
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                                .requestMatchers("/auth/login", "/auth/register").permitAll()
-                                                .requestMatchers("/auth/send-otp/**", "/auth/verify-otp/**").permitAll()
-                                                .requestMatchers("/auth/forgot-password/**").permitAll()
-                                                .requestMatchers("/auth/refresh-token").permitAll() // Cho phép refresh
-                                                                                                    // token không cần
-                                                                                                    // access token
+                                                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register")
+                                                .permitAll()
+                                                .requestMatchers("/api/v1/auth/send-otp/**",
+                                                                "/api/v1/auth/verify-otp/**")
+                                                .permitAll()
+                                                .requestMatchers("/api/v1/auth/forgot-password/**").permitAll()
+                                                .requestMatchers("/api/v1/auth/refresh-token").permitAll() // Cho phép
+                                                                                                           // refresh
+                                                                                                           // token
+                                                                                                           // không cần
+                                                                                                           // access
+                                                                                                           // token
                                                 .requestMatchers("/oauth2/**").permitAll()
                                                 .requestMatchers("/actuator/**").permitAll()
                                                 .requestMatchers("/error").permitAll()
 
                                                 // Protected endpoints - yêu cầu authentication
-                                                .requestMatchers("/auth/logout").authenticated()
-                                                .requestMatchers("/auth/change-password/**").authenticated()
-                                                .requestMatchers("/auth/reset-password/**").authenticated()
-                                                .requestMatchers("/auth/health*").authenticated()
+                                                .requestMatchers("/api/v1/auth/logout").authenticated()
+                                                .requestMatchers("/api/v1/auth/change-password/**").authenticated()
+                                                .requestMatchers("/api/v1/auth/reset-password/**").authenticated()
+                                                .requestMatchers("/api/v1/auth/health*").authenticated()
 
                                                 .anyRequest().authenticated())
 

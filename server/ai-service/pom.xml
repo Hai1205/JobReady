@@ -52,21 +52,6 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Internal Communication -->
-        <!-- gRPC shared communication module -->
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>grpc-common</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        
-        <!-- gRPC Spring Boot Starter -->
-        <dependency>
-            <groupId>net.devh</groupId>
-            <artifactId>grpc-server-spring-boot-starter</artifactId>
-            <version>2.15.0.RELEASE</version>
-        </dependency>
-
         <!-- Security and Authentication -->
         <!-- Spring Security for access control annotations -->
         <dependency>

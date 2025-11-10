@@ -6,7 +6,6 @@ import com.example.cvservice.dtos.ExperienceDto;
 import com.example.cvservice.entities.CV;
 import com.example.cvservice.entities.Education;
 import com.example.cvservice.entities.Experience;
-import com.example.cvservice.entities.CV.CVPrivacy;
 
 import org.springframework.stereotype.Component;
 
@@ -60,7 +59,7 @@ public class CVMapper {
         // Return empty list instead of null for skills
         dto.setSkills(cv.getSkills() != null ? cv.getSkills() : java.util.Collections.emptyList());
 
-        dto.setPrivacy(cv.getPrivacy() != null ? cv.getPrivacy().name() : "PRIVATE");
+        dto.setIsVisibility(cv.getIsVisibility() != null ? cv.getIsVisibility() : false);
 
         dto.setColor(cv.getColor() != null ? cv.getColor() : "#3498db");
         dto.setTemplate(cv.getTemplate() != null ? cv.getTemplate() : "modern");
@@ -102,14 +101,8 @@ public class CVMapper {
 
         cv.setColor(dto.getColor());
         cv.setTemplate(dto.getTemplate());
+        cv.setIsVisibility(dto.getIsVisibility());
 
-        if (dto.getPrivacy() != null) {
-            try {
-                cv.setPrivacy(CVPrivacy.valueOf(dto.getPrivacy()));
-            } catch (IllegalArgumentException e) {
-                cv.setPrivacy(CVPrivacy.PRIVATE);
-            }
-        }
         if (dto.getUpdatedAt() != null) {
             try {
                 cv.setUpdatedAt(Instant.parse(dto.getUpdatedAt()));

@@ -9,20 +9,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Filter } from "lucide-react";
 
-export type FilterType = "status" | "privacy" | "role";
-export const initialFilters = { status: [] as string[], role: [] as string[], privacy: [] as string[] };
+export type FilterType = "status" | "visibility" | "role";
+export const initialFilters = { status: [] as string[], role: [] as string[], visibility: [] as string[] };
 
 interface SharedFilterProps {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
-  activeFilters: { status?: string[]; privacy?: string[]; role?: string[] };
+  activeFilters: { status?: string[]; visibility?: string[]; role?: string[] };
   toggleFilter: (value: string, type: FilterType) => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;
   filterOptions?: {
     status?: { label: string; value: string }[];
-    privacy?: { label: string; value: string }[];
+    visibility?: { label: string; value: string }[];
     role?: { label: string; value: string }[];
   };
 }
@@ -64,7 +64,7 @@ export const SharedFilter = ({
         {filterOptions?.status && (
           <div className="p-3">
             <h4 className="mb-3 text-sm font-semibold text-foreground">
-              Status
+              Trạng thái
             </h4>
 
             <div className="space-y-3">
@@ -94,34 +94,34 @@ export const SharedFilter = ({
           </div>
         )}
 
-        {filterOptions?.privacy && (
+        {filterOptions?.visibility && (
           <div className="p-3">
             <h4 className="mb-3 text-sm font-semibold text-foreground">
-              Privacy
+              Chế độ hiển thị
             </h4>
 
             <div className="space-y-3">
-              {filterOptions.privacy.map((privacy) => (
+              {filterOptions.visibility.map((visibility) => (
                 <div
-                  key={privacy.value}
+                  key={visibility.value}
                   className="flex items-center hover:bg-primary/5 p-1.5 rounded-lg transition-colors"
                 >
                   <Checkbox
-                    id={`privacy-${privacy.value}`}
+                    id={`visibility-${visibility.value}`}
                     checked={
-                      activeFilters.privacy?.includes(privacy.value) || false
+                      activeFilters.visibility?.includes(visibility.value) || false
                     }
                     onCheckedChange={() =>
-                      toggleFilter(privacy.value, "privacy")
+                      toggleFilter(visibility.value, "visibility")
                     }
                     className="mr-2 border-primary/50"
                   />
 
                   <label
-                    htmlFor={`privacy-${privacy.value}`}
+                    htmlFor={`visibility-${visibility.value}`}
                     className="text-foreground text-sm cursor-pointer flex-1"
                   >
-                    {privacy.label}
+                    {visibility.label}
                   </label>
                 </div>
               ))}
@@ -131,7 +131,7 @@ export const SharedFilter = ({
 
         {filterOptions?.role && (
           <div className="p-3">
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Role</h4>
+            <h4 className="mb-3 text-sm font-semibold text-foreground">Vai trò</h4>
 
             <div className="space-y-3">
               {filterOptions.role.map((role) => (
@@ -158,9 +158,9 @@ export const SharedFilter = ({
           </div>
         )}
 
-        {((filterOptions?.status && filterOptions?.privacy) ||
+        {((filterOptions?.status && filterOptions?.visibility) ||
           (filterOptions?.status && filterOptions?.role) ||
-          (filterOptions?.privacy && filterOptions?.role)) && (
+          (filterOptions?.visibility && filterOptions?.role)) && (
           <DropdownMenuSeparator className="bg-border/50" />
         )}
 

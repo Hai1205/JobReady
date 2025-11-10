@@ -20,9 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { useCVStore } from "@/stores/cvStore";
 import { useAuthStore } from "@/stores/authStore";
 import { EducationStep } from "./steps/EducationStep";
-import { EPrivacy } from "@/types/enum";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { ColorThemeSelector } from "./ColorThemeSelector";
 import { TemplateSelector } from "./TemplateSelector";
 
@@ -74,7 +72,7 @@ export function CVBuilderWizard() {
       currentCV.experiences,
       currentCV.educations,
       currentCV.skills,
-      currentCV.privacy,
+      currentCV.isVisibility,
       currentCV.color,
       currentCV.template
     );
@@ -98,26 +96,26 @@ export function CVBuilderWizard() {
         />
       </div>
 
-      {/* Privacy & Tiêu đề */}
+      {/* Visibility & Tiêu đề */}
       <div className="flex flex-col gap-4">
-        {/* Privacy Toggle */}
+        {/* Visibility Toggle */}
         <div className="flex items-center justify-between rounded-lg border border-border p-4">
           <div className="space-y-0.5">
-            <Label htmlFor="privacy-toggle" className="text-base">
-              Chế độ riêng tư
+            <Label htmlFor="visibility-toggle" className="text-base">
+              Chế độ hiển thị
             </Label>
             <p className="text-sm text-muted-foreground">
-              {`${currentCV?.privacy}` === `${EPrivacy.PUBLIC}`
+              {currentCV?.isVisibility
                 ? "CV của bạn hiện công khai và có thể được tìm thấy bởi nhà tuyển dụng"
                 : "CV của bạn ở chế độ riêng tư, chỉ bạn mới có thể xem"}
             </p>
           </div>
           <Switch
-            id="privacy-toggle"
-            checked={currentCV?.privacy === EPrivacy.PUBLIC}
+            id="visibility-toggle"
+            checked={currentCV?.isVisibility || false}
             onCheckedChange={(checked) =>
               handleCVUpdate({
-                privacy: checked ? EPrivacy.PUBLIC : EPrivacy.PRIVATE,
+                isVisibility: checked,
               })
             }
           />

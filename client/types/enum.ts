@@ -19,8 +19,3 @@ export enum EAISuggestionType {
     WARNING = "warning",
     TIP = "tip",
 }
-
-export enum EPrivacy {
-    PUBLIC = "PUBLIC",
-    PRIVATE = "PRIVATE"
-}

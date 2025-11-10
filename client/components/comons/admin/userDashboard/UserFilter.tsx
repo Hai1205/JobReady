@@ -3,12 +3,13 @@
 import { EUserRole, EUserStatus } from "@/types/enum";
 import { FilterType, SharedFilter } from "../adminTable/SharedFilter";
 import { capitalizeFirstLetter } from "@/lib/utils";
+import { UserFilterType } from "@/app/admin/user-dashboard/page";
 
 interface UserFilterProps {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
-  activeFilters: { status: string[] };
-  toggleFilter: (value: string, type: FilterType) => void;
+  activeFilters: { status: string[]; role: string[] };
+  toggleFilter: (value: string, type: UserFilterType) => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;

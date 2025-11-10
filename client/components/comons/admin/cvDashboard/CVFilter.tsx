@@ -1,14 +1,13 @@
 "use client";
 
-import { capitalizeFirstLetter } from "@/lib/utils";
-import { EPrivacy } from "@/types/enum";
-import { SharedFilter } from "../adminTable/SharedFilter";
+import { CvFilterType } from "@/app/admin/cv-dashboard/page";
+import { FilterType, SharedFilter } from "../adminTable/SharedFilter";
 
 interface CVFilterProps {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
-  activeFilters: { privacy?: string[] };
-  toggleFilter: (value: string, type: "status" | "privacy" | "role") => void;
+  activeFilters: { visibility?: string[] };
+  toggleFilter: (value: string, type: CvFilterType) => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;
@@ -25,18 +24,18 @@ export const CVFilter = ({
 }: CVFilterProps) => {
   const handleToggleFilter = (
     value: string,
-    type: "status" | "privacy" | "role"
+    type: FilterType
   ) => {
-    if (type === "privacy") {
-      toggleFilter(value, "privacy");
+    if (type === "visibility") {
+      toggleFilter(value, "visibility");
     }
   };
 
   const filterOptions = {
-    privacy: Object.values(EPrivacy).map((privacy) => ({
-      label: capitalizeFirstLetter(privacy),
-      value: privacy,
-    })),
+    visibility: [
+      { label: "Công khai", value: "true" },
+      { label: "Riêng tư", value: "false" },
+    ],
   };
 
   return (

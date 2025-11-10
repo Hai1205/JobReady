@@ -28,7 +28,7 @@ const getRoleColor = (role: string) => {
     case "admin":
       return "bg-blue-500";
     case "user":
-      return "bg-gray-500";
+      return "bg-yellow-500";
     default:
       return "bg-gray-500";
   }
@@ -49,7 +49,8 @@ export const UserTable = ({
     {
       header: "Người dùng",
       accessor: (user: IUser) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 justify-center mx-auto">
+          {" "}
           <Avatar className="h-9 w-9">
             {user?.avatarUrl && (
               <AvatarImage
@@ -61,12 +62,11 @@ export const UserTable = ({
               {user?.fullname ? user.fullname.substring(0, 2) : "User"}
             </AvatarFallback>
           </Avatar>
-
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start">
+            {" "}
             <span className="font-medium">
               {user?.fullname || "Unknown Artist"}
             </span>
-
             <span className="text-sm text-muted-foreground">
               @{user?.username || "unknown"}
             </span>
