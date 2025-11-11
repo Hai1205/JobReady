@@ -310,9 +310,9 @@ public class UserGrpcServer extends UserServiceGrpc.UserServiceImplBase {
                 .setRole(userDto.getRole())
                 .setStatus(userDto.getStatus());
 
-        // if (userDto.getAvatar() != null) {
-        // userBuilder.setAvatar(userDto.getAvatar());
-        // }
+        if (userDto.getAvatarUrl() != null) {
+            userBuilder.setAvatar(userDto.getAvatarUrl());
+        }
         // if (userDto.getCreatedAt() != null) {
         // userBuilder.setCreatedAt(userDto.getCreatedAt().toString());
         // }

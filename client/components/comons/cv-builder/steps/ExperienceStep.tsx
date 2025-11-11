@@ -154,12 +154,24 @@ export function ExperienceStep() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label>Mô tả</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Mô tả</Label>
+                    <span className="text-xs text-muted-foreground">
+                      {exp.description?.length || 0}/2000
+                    </span>
+                  </div>
                   <HighlightableTextarea
                     value={exp.description}
-                    onChange={(value) =>
-                      updateExperience(exp.id || "", "description", value)
-                    }
+                    onChange={(value) => {
+                      // Truncate to 2000 characters if exceeded
+                      const truncatedValue =
+                        value.length > 2000 ? value.slice(0, 2000) : value;
+                      updateExperience(
+                        exp.id || "",
+                        "description",
+                        truncatedValue
+                      );
+                    }}
                     placeholder="Describe your responsibilities and achievements..."
                     rows={4}
                     highlighted={hasExperienceSuggestion(index)}

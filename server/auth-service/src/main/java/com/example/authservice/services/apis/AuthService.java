@@ -278,8 +278,15 @@ public class AuthService extends BaseService {
                 throw new OurException("Password does not match.");
             }
 
-            UserDto user = userGrpcClient.changePassword(identifier, currentPassword, newPassword);
+            // Check if user exists
+            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
             if (user == null) {
+                logger.warn("Password change failed: User not found for identifier: {}", identifier);
+                throw new OurException("User not found", 404);
+            }
+
+            UserDto updatedUser = userGrpcClient.changePassword(identifier, currentPassword, newPassword);
+            if (updatedUser == null) {
                 logger.warn("Password change failed: Invalid current password for identifier: {}", identifier);
                 throw new OurException("Invalid current password.");
             }
@@ -302,7 +309,18 @@ public class AuthService extends BaseService {
         Response response = new Response();
 
         try {
+            // Validate input parameter
+            if (email == null || email.trim().isEmpty()) {
+                logger.warn("Password reset failed: Email is required");
+                throw new OurException("Email is required", 400);
+            }
+
             String newPassword = userGrpcClient.resetPassword(email);
+
+            if (newPassword == null) {
+                logger.warn("Password reset failed: Unable to reset password for email: {}", email);
+                throw new OurException("Unable to reset password. User may not exist.", 404);
+            }
 
             authProducer.sendMailResetPassword(email, newPassword);
 

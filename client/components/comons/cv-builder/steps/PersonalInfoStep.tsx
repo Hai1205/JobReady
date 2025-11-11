@@ -197,11 +197,21 @@ export function PersonalInfoStep() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="summary">Mục Tiêu Nghề Nghiệp</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="summary">Mục Tiêu Nghề Nghiệp</Label>
+          <span className="text-xs text-muted-foreground">
+            {currentCV?.personalInfo?.summary?.length || 0}/2000
+          </span>
+        </div>
         <HighlightableTextarea
           id="summary"
           value={currentCV?.personalInfo?.summary}
-          onChange={(value) => handleChange("summary", value)}
+          onChange={(value) => {
+            // Truncate to 2000 characters if exceeded
+            const truncatedValue =
+              value.length > 2000 ? value.slice(0, 2000) : value;
+            handleChange("summary", truncatedValue);
+          }}
           placeholder="Mô tả ngắn gọn về kinh nghiệm chuyên môn và mục tiêu nghề nghiệp của bạn..."
           rows={6}
           highlighted={summaryHasSuggestion}

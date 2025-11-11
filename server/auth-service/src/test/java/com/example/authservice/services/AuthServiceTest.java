@@ -308,6 +308,7 @@ class AuthServiceTest {
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
         when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(userGrpcClient.changePassword(identifier, "oldPassword", "newPassword")).thenReturn(mockUser);
 
         // Act
         Response response = authService.changePassword(identifier, dataJson);
@@ -317,6 +318,7 @@ class AuthServiceTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("Password changed successfully!", response.getMessage());
 
+        verify(userGrpcClient).findUserByIdentifier(identifier);
         verify(userGrpcClient).changePassword(identifier, "oldPassword", "newPassword");
     }
 
@@ -703,7 +705,7 @@ class AuthServiceTest {
 
         // Assert
         assertNotNull(response);
-        assertEquals(200, response.getStatusCode()); // Service does not validate null email
+        assertEquals(400, response.getStatusCode()); // Service now validates null email
     }
 
     // Additional test cases for refreshToken

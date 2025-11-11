@@ -230,7 +230,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "admin")
     void testResetPassword_Success() throws Exception {
         // Arrange
         when(authService.resetPassword(anyString())).thenReturn(successResponse);

@@ -23,6 +23,7 @@ export function Navbar() {
   useEffect(() => setIsHydrated(true), []);
 
   const userAuth = authStore?.userAuth || null;
+  console.log("User Auth in Navbar:", userAuth);
   const isAdmin = authStore?.isAdmin || false;
   const logout = authStore?.logout || (() => {});
 

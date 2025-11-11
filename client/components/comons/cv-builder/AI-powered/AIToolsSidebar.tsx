@@ -92,11 +92,12 @@ export function AIToolsSidebar() {
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="job-match">
           <AccordionTrigger className="text-sm font-medium">
-            So Sánh Với Công Việc
+            Phân Tích Với Mô Tả Công Việc
           </AccordionTrigger>
           <AccordionContent>
             <CompactJobMatch
               currentCV={currentCV}
+              isQuickAnalyzing={isAnalyzing}
               onAnalysisComplete={(suggestions) => {
                 toast.success("Phân tích hoàn tất!");
               }}
