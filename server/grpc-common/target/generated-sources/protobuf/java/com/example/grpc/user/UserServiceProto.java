@@ -92,37 +92,37 @@ public final class UserServiceProto {
       "\005email\030\002 \001(\t\022\020\n\010password\030\003 \001(\t\022\020\n\010fullna" +
       "me\030\004 \001(\t\"$\n\023ActivateUserRequest\022\r\n\005email" +
       "\030\001 \001(\t\"?\n\027AuthenticateUserRequest\022\022\n\nide" +
-      "ntifier\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\"V\n\025Chang" +
-      "ePasswordRequest\022\r\n\005email\030\001 \001(\t\022\030\n\020curre" +
-      "nt_password\030\002 \001(\t\022\024\n\014new_password\030\003 \001(\t\"" +
-      "<\n\025ForgotPasswordRequest\022\r\n\005email\030\001 \001(\t\022" +
-      "\024\n\014new_password\030\002 \001(\t\"%\n\024ResetPasswordRe" +
-      "quest\022\r\n\005email\030\001 \001(\t\"G\n\014UserResponse\022\014\n\004" +
-      "code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\030\n\004user\030\003 \001(" +
-      "\0132\n.user.User\"L\n\025ResetPasswordResponse\022\014" +
-      "\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\024\n\014new_pas" +
-      "sword\030\003 \001(\t\"\233\001\n\004User\022\n\n\002id\030\001 \001(\t\022\020\n\010user" +
-      "name\030\002 \001(\t\022\r\n\005email\030\003 \001(\t\022\020\n\010fullname\030\004 " +
-      "\001(\t\022\014\n\004role\030\005 \001(\t\022\016\n\006status\030\006 \001(\t\022\016\n\006ava" +
-      "tar\030\007 \001(\t\022\022\n\ncreated_at\030\010 \001(\t\022\022\n\nupdated" +
-      "_at\030\t \001(\t2\361\004\n\013UserService\022=\n\014FindUserByI" +
-      "d\022\031.user.FindUserByIdRequest\032\022.user.User" +
-      "Response\022C\n\017FindUserByEmail\022\034.user.FindU" +
-      "serByEmailRequest\032\022.user.UserResponse\022M\n" +
-      "\024FindUserByIdentifier\022!.user.FindUserByI" +
-      "dentifierRequest\032\022.user.UserResponse\0229\n\n" +
-      "CreateUser\022\027.user.CreateUserRequest\032\022.us" +
-      "er.UserResponse\022=\n\014ActivateUser\022\031.user.A" +
-      "ctivateUserRequest\032\022.user.UserResponse\022E" +
-      "\n\020AuthenticateUser\022\035.user.AuthenticateUs" +
-      "erRequest\032\022.user.UserResponse\022A\n\016ChangeP" +
-      "assword\022\033.user.ChangePasswordRequest\032\022.u" +
-      "ser.UserResponse\022A\n\016ForgotPassword\022\033.use" +
-      "r.ForgotPasswordRequest\032\022.user.UserRespo" +
-      "nse\022H\n\rResetPassword\022\032.user.ResetPasswor" +
-      "dRequest\032\033.user.ResetPasswordResponseB+\n" +
-      "\025com.example.grpc.userB\020UserServiceProto" +
-      "P\001b\006proto3"
+      "ntifier\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\"[\n\025Chang" +
+      "ePasswordRequest\022\022\n\nidentifier\030\001 \001(\t\022\030\n\020" +
+      "current_password\030\002 \001(\t\022\024\n\014new_password\030\003" +
+      " \001(\t\"<\n\025ForgotPasswordRequest\022\r\n\005email\030\001" +
+      " \001(\t\022\024\n\014new_password\030\002 \001(\t\"%\n\024ResetPassw" +
+      "ordRequest\022\r\n\005email\030\001 \001(\t\"G\n\014UserRespons" +
+      "e\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\030\n\004user" +
+      "\030\003 \001(\0132\n.user.User\"L\n\025ResetPasswordRespo" +
+      "nse\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\024\n\014ne" +
+      "w_password\030\003 \001(\t\"\233\001\n\004User\022\n\n\002id\030\001 \001(\t\022\020\n" +
+      "\010username\030\002 \001(\t\022\r\n\005email\030\003 \001(\t\022\020\n\010fullna" +
+      "me\030\004 \001(\t\022\014\n\004role\030\005 \001(\t\022\016\n\006status\030\006 \001(\t\022\016" +
+      "\n\006avatar\030\007 \001(\t\022\022\n\ncreated_at\030\010 \001(\t\022\022\n\nup" +
+      "dated_at\030\t \001(\t2\361\004\n\013UserService\022=\n\014FindUs" +
+      "erById\022\031.user.FindUserByIdRequest\032\022.user" +
+      ".UserResponse\022C\n\017FindUserByEmail\022\034.user." +
+      "FindUserByEmailRequest\032\022.user.UserRespon" +
+      "se\022M\n\024FindUserByIdentifier\022!.user.FindUs" +
+      "erByIdentifierRequest\032\022.user.UserRespons" +
+      "e\0229\n\nCreateUser\022\027.user.CreateUserRequest" +
+      "\032\022.user.UserResponse\022=\n\014ActivateUser\022\031.u" +
+      "ser.ActivateUserRequest\032\022.user.UserRespo" +
+      "nse\022E\n\020AuthenticateUser\022\035.user.Authentic" +
+      "ateUserRequest\032\022.user.UserResponse\022A\n\016Ch" +
+      "angePassword\022\033.user.ChangePasswordReques" +
+      "t\032\022.user.UserResponse\022A\n\016ForgotPassword\022" +
+      "\033.user.ForgotPasswordRequest\032\022.user.User" +
+      "Response\022H\n\rResetPassword\022\032.user.ResetPa" +
+      "sswordRequest\032\033.user.ResetPasswordRespon" +
+      "seB+\n\025com.example.grpc.userB\020UserService" +
+      "ProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -169,7 +169,7 @@ public final class UserServiceProto {
     internal_static_user_ChangePasswordRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_user_ChangePasswordRequest_descriptor,
-        new java.lang.String[] { "Email", "CurrentPassword", "NewPassword", });
+        new java.lang.String[] { "Identifier", "CurrentPassword", "NewPassword", });
     internal_static_user_ForgotPasswordRequest_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_user_ForgotPasswordRequest_fieldAccessorTable = new

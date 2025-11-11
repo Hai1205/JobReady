@@ -62,7 +62,7 @@ public class AuthController {
     }
 
     @PatchMapping("/reset-password/{email}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> resetPassword(
             @PathVariable("email") String email) {
         Response response = authService.resetPassword(email);

@@ -98,6 +98,7 @@ mvn clean package -DskipTests
 # Hoặc build từng module
 mvn clean install -pl rabbit-common
 mvn clean install -pl grpc-common
+mvn clean install -pl security-common
 mvn clean install -pl discovery-service
 mvn clean install -pl gateway-service
 mvn clean install -pl user-service

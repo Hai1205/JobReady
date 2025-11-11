@@ -108,17 +108,17 @@ export const UserTable = ({
     });
   }
 
-  if (onDelete) {
-    actions.push({
-      label: "Xoá",
-      onClick: onDelete,
-    });
-  }
-
   if (onResetPassword) {
     actions.push({
       label: "Đặt lại mật khẩu",
       onClick: onResetPassword,
+    });
+  }
+  
+  if (onDelete) {
+    actions.push({
+      label: "Xoá",
+      onClick: onDelete,
     });
   }
 

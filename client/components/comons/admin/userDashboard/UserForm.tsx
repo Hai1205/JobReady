@@ -88,24 +88,24 @@ const UserForm: React.FC<UserFormProps> = ({
           />
         </div>
 
-        {/* Email */}
-        <div className="space-y-2">
-          <Label htmlFor="form-email" className="text-sm font-medium">
-            Email
-          </Label>
-          <Input
-            id="form-email"
-            type="email"
-            value={data?.email || ""}
-            onChange={(e) => onChange("email", e.target.value)}
-            className="bg-background/50 border-border/50 focus:border-primary transition-colors"
-            placeholder="example@vietau.com"
-          />
-        </div>
-
         {/* Password - only for create */}
         {isCreateDialog && (
           <div className="space-y-2">
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="form-email" className="text-sm font-medium">
+                Email
+              </Label>
+              <Input
+                id="form-email"
+                type="email"
+                value={data?.email || ""}
+                onChange={(e) => onChange("email", e.target.value)}
+                className="bg-background/50 border-border/50 focus:border-primary transition-colors"
+                placeholder="example@vietau.com"
+              />
+            </div>
+            
             <Label htmlFor="form-password" className="text-sm font-medium">
               Mật khẩu
             </Label>

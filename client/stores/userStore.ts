@@ -55,7 +55,7 @@ export const useUserStore = createStore<IUserStore>(
 		getAllUsers: async (): Promise<IApiResponse<IUserDataResponse>> => {
 			return await get().handleRequest(async () => {
 				const res = await handleRequest<IUserDataResponse>(EHttpType.GET, `/users`);
-				
+
 				if (res.data && res.data.success && res.data.users) {
 					set({ usersTable: res.data.users });
 				}
@@ -116,7 +116,7 @@ export const useUserStore = createStore<IUserStore>(
 
 			return await get().handleRequest(async () => {
 				const res = await handleRequest<IUserDataResponse>(EHttpType.PATCH, `/users/${userId}`, formData);
-
+				console.log('updateUser res:', res);
 				const { success, user } = res.data || {};
 				const { isAdmin, userAuth, handleSetUserAuth } = useAuthStore.getState();
 

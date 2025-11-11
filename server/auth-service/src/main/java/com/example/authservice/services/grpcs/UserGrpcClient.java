@@ -106,10 +106,10 @@ public class UserGrpcClient {
         }
     }
 
-    public UserDto changePassword(String email, String currentPassword, String newPassword) {
+    public UserDto changePassword(String identifier, String currentPassword, String newPassword) {
         try {
             ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
-                    .setEmail(email)
+                    .setIdentifier(identifier)
                     .setCurrentPassword(currentPassword)
                     .setNewPassword(newPassword)
                     .build();

@@ -25,6 +25,7 @@ export default function SettingsPage() {
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string>("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   type ExtendedUserData = Omit<IUser, "status"> & {
     status: EUserStatus;
@@ -91,19 +92,39 @@ export default function SettingsPage() {
     }
 
     if (
-      data?.email &&
-      data?.currentPassword &&
-      data?.newPassword &&
-      data?.confirmPassword
+      !data?.email &&
+      !data?.currentPassword &&
+      !data?.newPassword &&
+      !data?.confirmPassword
     ) {
-      changePassword(
-        data.email,
-        data.currentPassword,
-        data.newPassword,
-        data.confirmPassword
-      );
-      toast.info("Change password successfully!");
+      toast.error("Please fill in all password fields!");
+      return;
     }
+
+    setIsChangingPassword(true);
+
+    const res = await changePassword(
+      data.email,
+      data.currentPassword || "",
+      data.newPassword || "",
+      data.confirmPassword || ""
+    );
+
+    if (res.data?.success) {
+      toast.success("Password changed successfully!");
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              currentPassword: "",
+              newPassword: "",
+              confirmPassword: "",
+            }
+          : null
+      );
+    }
+
+    setIsChangingPassword(false);
   };
 
   if (!userAuth) return null;
@@ -134,6 +155,7 @@ export default function SettingsPage() {
           data={data}
           onChange={handleChange}
           onChangePassword={handleChangePassword}
+          isLoading={isChangingPassword}
         />
       ),
     },

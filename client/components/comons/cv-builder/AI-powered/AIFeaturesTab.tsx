@@ -36,15 +36,9 @@ export function AIFeaturesTab() {
     analyzeCV,
     handleSetAISuggestions,
     improveCV,
-    currentCVCreate,
-    currentCVUpdate,
+    currentCV,
     handleUpdateCV,
-    handleUpdateCVUpdate,
   } = useCVStore();
-
-  // Get the active CV based on context (create or update)
-  const currentCV = currentCVUpdate || currentCVCreate;
-  const isUpdateMode = !!currentCVUpdate;
 
   const handleQuickAnalyze = async () => {
     if (!currentCV) {
@@ -63,22 +57,29 @@ export function AIFeaturesTab() {
       );
 
       const data = response.data;
-      const suggestions = data?.suggestions || [];
+
+      // Extract suggestions - they can be at root level or inside analyze object
+      const suggestions = data?.analyze?.suggestions || data?.suggestions || [];
+
       const analyzeText = data?.analyze || "";
+
+      console.log("AIFeaturesTab data:", data);
+      console.log("AIFeaturesTab suggestions:", suggestions);
 
       // Store raw analyze text
       if (analyzeText) {
-        setAnalyzeRawText(analyzeText);
+        setAnalyzeRawText(JSON.stringify(analyzeText, null, 2));
       }
 
-      if (suggestions.length >= 0) {
+      if (suggestions.length > 0) {
         handleSetAISuggestions(suggestions);
         toast.success(
           `Analysis complete! Found ${suggestions.length} suggestions`
         );
         setActiveTab("suggestions");
       } else {
-        toast.error(response?.message || "Failed to Phân Tích");
+        handleSetAISuggestions([]);
+        toast.info("Không có gợi ý nào từ AI.");
       }
     } catch (error) {
       console.error("Error analyzing CV:", error);
@@ -153,13 +154,10 @@ export function AIFeaturesTab() {
 
     const sectionLower = section.toLowerCase();
 
-    // Choose the appropriate update function based on mode
-    const updateFunction = isUpdateMode ? handleUpdateCVUpdate : handleUpdateCV;
-
     switch (true) {
       case sectionLower.includes("summary") ||
         sectionLower.includes("personal"):
-        updateFunction({
+        handleUpdateCV({
           personalInfo: {
             ...currentCV.personalInfo,
             summary: content,
@@ -170,7 +168,7 @@ export function AIFeaturesTab() {
       case sectionLower.includes("experience"):
         try {
           const parsedExperience = JSON.parse(content);
-          updateFunction({ experiences: parsedExperience });
+          handleUpdateCV({ experiences: parsedExperience });
           applied = true;
         } catch (error) {
           toast.error("Failed to parse experiences data");
@@ -180,7 +178,7 @@ export function AIFeaturesTab() {
       case sectionLower.includes("education"):
         try {
           const parsedEducation = JSON.parse(content);
-          updateFunction({ educations: parsedEducation });
+          handleUpdateCV({ educations: parsedEducation });
           applied = true;
         } catch (error) {
           toast.error("Failed to parse educations data");
@@ -192,7 +190,7 @@ export function AIFeaturesTab() {
           .split(",")
           .map((s) => s.trim())
           .filter((s) => s);
-        updateFunction({ skills: skillsArray });
+        handleUpdateCV({ skills: skillsArray });
         applied = true;
         break;
       default:

@@ -20,11 +20,7 @@ import {
 export function AIToolsSidebar() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const {
-    analyzeCV,
-    handleSetAISuggestions,
-    currentCV,
-  } = useCVStore();
+  const { analyzeCV, handleSetAISuggestions, currentCV } = useCVStore();
 
   const handleQuickAnalyze = async () => {
     if (!currentCV) {
@@ -46,9 +42,13 @@ export function AIToolsSidebar() {
       const responseData: any = maybeResponse?.data
         ? maybeResponse.data
         : maybeResponse;
-      console.log(responseData)
+      console.log("AIToolsSidebar responseData:", responseData);
 
-      const suggestions = responseData?.suggestions || [];
+      // Extract suggestions - they can be at root level or inside analyze object
+      const suggestions =
+        responseData?.analyze?.suggestions || responseData?.suggestions || [];
+
+      console.log("AIToolsSidebar extracted suggestions:", suggestions);
 
       if (suggestions.length >= 0) {
         handleSetAISuggestions(suggestions);

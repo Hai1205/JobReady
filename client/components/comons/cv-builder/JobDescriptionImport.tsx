@@ -111,11 +111,20 @@ export function JobDescriptionImport({
         ? maybeResponse.data
         : maybeResponse;
 
-      const suggestions = responseData?.suggestions || [];
+      console.log("Full responseData:", responseData);
+      console.log("Analyze object:", responseData?.analyze);
+
+      // Extract suggestions - they can be at root level or inside analyze object
+      const suggestions =
+        responseData?.analyze?.suggestions || responseData?.suggestions || [];
+
       const score = responseData?.matchScore;
       const parsed = responseData?.parsedJobDescription;
       const missing = responseData?.missingKeywords || [];
       const summary = responseData?.analyze || "";
+
+      console.log("Extracted suggestions:", suggestions);
+      console.log("Suggestions length:", suggestions.length);
 
       // Update state with results
       setMatchScore(score);
@@ -126,10 +135,20 @@ export function JobDescriptionImport({
       handleSetAISuggestions(suggestions);
       handleSetJobDescription(jobDescription || "");
 
+      // Show detailed success message
+      const scoreText = score ? `${Math.round(score)}%` : "N/A";
+      const suggestionsText =
+        suggestions.length > 0
+          ? `\n📋 ${suggestions.length} gợi ý để cải thiện`
+          : "";
+      const missingText =
+        missing.length > 0 ? `\n🔑 ${missing.length} từ khóa còn thiếu` : "";
+
       toast.success(
-        `Phân tích hoàn tất! Điểm khớp: ${score ? Math.round(score) : "N/A"}%${
-          suggestions.length > 0 ? `, ${suggestions.length} gợi ý` : ""
-        }`
+        `✅ Phân tích hoàn tất!\n🎯 Điểm khớp: ${scoreText}${suggestionsText}${missingText}\n\n💡 Xem chi tiết trong tab "Gợi Ý"`,
+        {
+          autoClose: 5000,
+        }
       );
 
       if (onAnalysisComplete) {

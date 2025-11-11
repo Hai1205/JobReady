@@ -84,15 +84,15 @@ public class CVService extends BaseService {
         }
 
         if (personalInfoDto == null) {
-            throw new OurException("Personal info is required", 400);
+            personalInfoDto = new PersonalInfoDto();
         }
 
         if (experiencesDto == null || experiencesDto.isEmpty()) {
-            throw new OurException("At least one experience is required", 400);
+            experiencesDto = new ArrayList<>();
         }
 
         if (educationsDto == null || educationsDto.isEmpty()) {
-            throw new OurException("At least one education is required", 400);
+            educationsDto = new ArrayList<>();
         }
 
         if (isVisibility == null) {

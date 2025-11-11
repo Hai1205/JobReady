@@ -1,4 +1,4 @@
-package com.example.userservice.grpc;
+package com.example.userservice.services.grpc;
 
 import com.example.grpc.user.*;
 import com.example.userservice.dtos.UserDto;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.UUID;
 
 @GrpcService
-public class UserGrpcServiceImpl extends UserServiceGrpc.UserServiceImplBase {
+public class UserGrpcServer extends UserServiceGrpc.UserServiceImplBase {
 
     @Autowired
     private UserService userService;
@@ -210,7 +210,7 @@ public class UserGrpcServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     public void changePassword(ChangePasswordRequest request, StreamObserver<UserResponse> responseObserver) {
         try {
             UserDto userData = userService.handleChangePasswordUser(
-                    request.getEmail(),
+                    request.getIdentifier(),
                     request.getCurrentPassword(),
                     request.getNewPassword());
 

@@ -42,7 +42,7 @@ public class UserMapper {
         }
 
         User user = new User();
-        // Don't set ID - it's generated
+        user.setId(dto.getId()); // Set ID for updates
         user.setUsername(dto.getUsername());
         user.setPassword(dto.getPassword());
         user.setEmail(dto.getEmail());

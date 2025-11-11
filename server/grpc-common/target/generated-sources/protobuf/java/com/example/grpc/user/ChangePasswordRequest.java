@@ -17,7 +17,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private ChangePasswordRequest() {
-    email_ = "";
+    identifier_ = "";
     currentPassword_ = "";
     newPassword_ = "";
   }
@@ -42,39 +42,39 @@ private static final long serialVersionUID = 0L;
             com.example.grpc.user.ChangePasswordRequest.class, com.example.grpc.user.ChangePasswordRequest.Builder.class);
   }
 
-  public static final int EMAIL_FIELD_NUMBER = 1;
+  public static final int IDENTIFIER_FIELD_NUMBER = 1;
   @SuppressWarnings("serial")
-  private volatile java.lang.Object email_ = "";
+  private volatile java.lang.Object identifier_ = "";
   /**
-   * <code>string email = 1;</code>
-   * @return The email.
+   * <code>string identifier = 1;</code>
+   * @return The identifier.
    */
   @java.lang.Override
-  public java.lang.String getEmail() {
-    java.lang.Object ref = email_;
+  public java.lang.String getIdentifier() {
+    java.lang.Object ref = identifier_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      email_ = s;
+      identifier_ = s;
       return s;
     }
   }
   /**
-   * <code>string email = 1;</code>
-   * @return The bytes for email.
+   * <code>string identifier = 1;</code>
+   * @return The bytes for identifier.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getEmailBytes() {
-    java.lang.Object ref = email_;
+      getIdentifierBytes() {
+    java.lang.Object ref = identifier_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      email_ = b;
+      identifier_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -173,8 +173,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(email_)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, email_);
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identifier_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, identifier_);
     }
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(currentPassword_)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, currentPassword_);
@@ -191,8 +191,8 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(email_)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, email_);
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identifier_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, identifier_);
     }
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(currentPassword_)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, currentPassword_);
@@ -215,8 +215,8 @@ private static final long serialVersionUID = 0L;
     }
     com.example.grpc.user.ChangePasswordRequest other = (com.example.grpc.user.ChangePasswordRequest) obj;
 
-    if (!getEmail()
-        .equals(other.getEmail())) return false;
+    if (!getIdentifier()
+        .equals(other.getIdentifier())) return false;
     if (!getCurrentPassword()
         .equals(other.getCurrentPassword())) return false;
     if (!getNewPassword()
@@ -232,8 +232,8 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + EMAIL_FIELD_NUMBER;
-    hash = (53 * hash) + getEmail().hashCode();
+    hash = (37 * hash) + IDENTIFIER_FIELD_NUMBER;
+    hash = (53 * hash) + getIdentifier().hashCode();
     hash = (37 * hash) + CURRENT_PASSWORD_FIELD_NUMBER;
     hash = (53 * hash) + getCurrentPassword().hashCode();
     hash = (37 * hash) + NEW_PASSWORD_FIELD_NUMBER;
@@ -369,7 +369,7 @@ private static final long serialVersionUID = 0L;
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
-      email_ = "";
+      identifier_ = "";
       currentPassword_ = "";
       newPassword_ = "";
       return this;
@@ -406,7 +406,7 @@ private static final long serialVersionUID = 0L;
     private void buildPartial0(com.example.grpc.user.ChangePasswordRequest result) {
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.email_ = email_;
+        result.identifier_ = identifier_;
       }
       if (((from_bitField0_ & 0x00000002) != 0)) {
         result.currentPassword_ = currentPassword_;
@@ -460,8 +460,8 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.example.grpc.user.ChangePasswordRequest other) {
       if (other == com.example.grpc.user.ChangePasswordRequest.getDefaultInstance()) return this;
-      if (!other.getEmail().isEmpty()) {
-        email_ = other.email_;
+      if (!other.getIdentifier().isEmpty()) {
+        identifier_ = other.identifier_;
         bitField0_ |= 0x00000001;
         onChanged();
       }
@@ -502,7 +502,7 @@ private static final long serialVersionUID = 0L;
               done = true;
               break;
             case 10: {
-              email_ = input.readStringRequireUtf8();
+              identifier_ = input.readStringRequireUtf8();
               bitField0_ |= 0x00000001;
               break;
             } // case 10
@@ -533,73 +533,73 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
-    private java.lang.Object email_ = "";
+    private java.lang.Object identifier_ = "";
     /**
-     * <code>string email = 1;</code>
-     * @return The email.
+     * <code>string identifier = 1;</code>
+     * @return The identifier.
      */
-    public java.lang.String getEmail() {
-      java.lang.Object ref = email_;
+    public java.lang.String getIdentifier() {
+      java.lang.Object ref = identifier_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        email_ = s;
+        identifier_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string email = 1;</code>
-     * @return The bytes for email.
+     * <code>string identifier = 1;</code>
+     * @return The bytes for identifier.
      */
     public com.google.protobuf.ByteString
-        getEmailBytes() {
-      java.lang.Object ref = email_;
+        getIdentifierBytes() {
+      java.lang.Object ref = identifier_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        email_ = b;
+        identifier_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string email = 1;</code>
-     * @param value The email to set.
+     * <code>string identifier = 1;</code>
+     * @param value The identifier to set.
      * @return This builder for chaining.
      */
-    public Builder setEmail(
+    public Builder setIdentifier(
         java.lang.String value) {
       if (value == null) { throw new NullPointerException(); }
-      email_ = value;
+      identifier_ = value;
       bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
     /**
-     * <code>string email = 1;</code>
+     * <code>string identifier = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearEmail() {
-      email_ = getDefaultInstance().getEmail();
+    public Builder clearIdentifier() {
+      identifier_ = getDefaultInstance().getIdentifier();
       bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
     /**
-     * <code>string email = 1;</code>
-     * @param value The bytes for email to set.
+     * <code>string identifier = 1;</code>
+     * @param value The bytes for identifier to set.
      * @return This builder for chaining.
      */
-    public Builder setEmailBytes(
+    public Builder setIdentifierBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) { throw new NullPointerException(); }
       checkByteStringIsUtf8(value);
-      email_ = value;
+      identifier_ = value;
       bitField0_ |= 0x00000001;
       onChanged();
       return this;

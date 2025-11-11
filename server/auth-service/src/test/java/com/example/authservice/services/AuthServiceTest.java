@@ -304,7 +304,7 @@ class AuthServiceTest {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setCurrentPassword("oldPassword");
         changePasswordRequest.setNewPassword("newPassword");
-        changePasswordRequest.setRePassword("newPassword");
+        changePasswordRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
         when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
@@ -317,7 +317,7 @@ class AuthServiceTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("Password changed successfully!", response.getMessage());
 
-        verify(userGrpcClient).changePassword(mockUser.getEmail(), "oldPassword", "newPassword");
+        verify(userGrpcClient).changePassword(identifier, "oldPassword", "newPassword");
     }
 
     @Test
@@ -327,10 +327,10 @@ class AuthServiceTest {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setCurrentPassword("oldPassword");
         changePasswordRequest.setNewPassword("newPassword");
-        changePasswordRequest.setRePassword("differentPassword");
+        changePasswordRequest.setConfirmPassword("differentPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        lenient().when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
 
         // Act
         Response response = authService.changePassword(identifier, dataJson);
@@ -644,7 +644,7 @@ class AuthServiceTest {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setCurrentPassword("oldPassword");
         changePasswordRequest.setNewPassword("newPassword");
-        changePasswordRequest.setRePassword("newPassword");
+        changePasswordRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
         when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
@@ -664,10 +664,10 @@ class AuthServiceTest {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setCurrentPassword(null);
         changePasswordRequest.setNewPassword("");
-        changePasswordRequest.setRePassword("newPassword");
+        changePasswordRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        lenient().when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
 
         // Act
         Response response = authService.changePassword(identifier, dataJson);

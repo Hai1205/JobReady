@@ -187,17 +187,17 @@ function UserDashboardPage() {
     setIsUpdateUserOpen(false);
   };
 
-  const handleResetPassword = async (user: IUser) => {
-    if (user) {
-      const res = await resetPassword(user.email);
+  // const handleResetPassword = async (user: IUser) => {
+  //   if (user) {
+  //     const res = await resetPassword(user.email);
 
-      if (res?.data?.success) {
-        toast.success("Password reset email sent successfully");
-      } else {
-        toast.error("Failed to send password reset email");
-      }
-    }
-  };
+  //     if (res?.data?.success) {
+  //       toast.success("Password reset email sent successfully");
+  //     } else {
+  //       toast.error("Failed to send password reset email");
+  //     }
+  //   }
+  // };
 
   const handleCreate = async () => {
     if (!data) {
@@ -246,6 +246,7 @@ function UserDashboardPage() {
     }
 
     await resetPassword(user?.email);
+    toast.success("Password reset email sent successfully");
   };
 
   return (

@@ -81,16 +81,33 @@ export function CompactJobMatch({
       );
 
       const backendData = response.data;
-      const suggestions = backendData?.suggestions || [];
+
+      // Extract suggestions - they can be at root level or inside analyze object
+      const suggestions =
+        backendData?.analyze?.suggestions || backendData?.suggestions || [];
+
       const score = backendData?.matchScore;
+      const missing = backendData?.missingKeywords || [];
+
+      console.log("CompactJobMatch - suggestions:", suggestions);
 
       // Store suggestions in CV store for AI Suggestions Sidebar
       handleSetAISuggestions(suggestions);
 
+      // Show detailed success message
+      const scoreText = score ? `${Math.round(score)}%` : "N/A";
+      const suggestionsText =
+        suggestions.length > 0
+          ? `\n📋 ${suggestions.length} gợi ý cải thiện`
+          : "";
+      const missingText =
+        missing.length > 0 ? `\n🔑 ${missing.length} từ khóa thiếu` : "";
+
       toast.success(
-        `Phân tích xong! Điểm khớp: ${score ? Math.round(score) : "N/A"}%${
-          suggestions.length > 0 ? `, ${suggestions.length} gợi ý` : ""
-        }`
+        `✅ Phân tích xong!\n🎯 Điểm khớp: ${scoreText}${suggestionsText}${missingText}\n\n💡 Xem tab "Gợi Ý"`,
+        {
+          autoClose: 4000,
+        }
       );
 
       if (onAnalysisComplete) {

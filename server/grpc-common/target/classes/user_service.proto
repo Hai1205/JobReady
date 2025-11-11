@@ -66,7 +66,7 @@ message AuthenticateUserRequest {
 }
 
 message ChangePasswordRequest {
-  string email = 1;
+  string identifier = 1;
   string current_password = 2;
   string new_password = 3;
 }

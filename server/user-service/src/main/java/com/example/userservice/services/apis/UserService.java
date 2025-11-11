@@ -237,6 +237,7 @@ public class UserService extends BaseService {
     public UserDto handleChangePasswordUser(String email, String currentPassword, String newPassword) {
         try {
             UserDto userDto = handleAuthenticateUser(email, currentPassword);
+            System.out.println("Authenticated user for password change: " + userDto.getEmail());
 
             User user = userMapper.toEntity(userDto);
             user.setPassword(passwordEncoder.encode(newPassword));

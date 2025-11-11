@@ -221,34 +221,48 @@ public class AIService extends BaseService {
             logger.info("Response length: {}", aiResponseText.length());
             logger.info("First 500 chars: {}", aiResponseText.substring(0, Math.min(500, aiResponseText.length())));
             logger.info("=====================================");
-            
+
             String jsonContent = handleExtractJsonFromResponse(aiResponseText);
             logger.info("========== EXTRACTED JSON ==========");
             logger.info("JSON length: {}", jsonContent.length());
             logger.info("JSON content: {}", jsonContent);
             logger.info("====================================");
-            JobDescriptionResult jdResult = handleTryParseJobDescription(jsonContent);
+
             JsonNode root = objectMapper.readTree(jsonContent);
+
+            // Check if data is nested in "analysis" field
+            JsonNode analysisNode = root.has("analysis") ? root.get("analysis") : root;
+            JsonNode jdNode = root.has("jobDescription") ? root.get("jobDescription") : root;
+
+            // Parse job description
+            JobDescriptionResult jdResult = null;
+            if (jdNode != null && jdNode.isObject()) {
+                try {
+                    jdResult = objectMapper.treeToValue(jdNode, JobDescriptionResult.class);
+                } catch (Exception e) {
+                    logger.warn("Failed to parse job description: {}", e.getMessage());
+                }
+            }
 
             Double matchScore = null;
 
-            // Extract match score
-            if (root.has("overallMatchScore")) {
-                matchScore = root.get("overallMatchScore").asDouble();
-            } else if (root.has("matchScore")) {
-                matchScore = root.get("matchScore").asDouble();
+            // Extract match score from analysis node
+            if (analysisNode.has("overallMatchScore")) {
+                matchScore = analysisNode.get("overallMatchScore").asDouble();
+            } else if (analysisNode.has("matchScore")) {
+                matchScore = analysisNode.get("matchScore").asDouble();
             }
 
-            // Extract missing keywords
+            // Extract missing keywords from analysis node
             List<String> missingKeywords = new ArrayList<>();
-            if (root.has("missingKeywords") && root.get("missingKeywords").isArray()) {
-                for (JsonNode n : root.get("missingKeywords")) {
+            if (analysisNode.has("missingKeywords") && analysisNode.get("missingKeywords").isArray()) {
+                for (JsonNode n : analysisNode.get("missingKeywords")) {
                     missingKeywords.add(n.asText());
                 }
             }
 
-            // Parse the analyze result as object
-            AnalyzeResultDto analyzeResult = handleParseAnalyzeResult(aiResponseText);
+            // Parse the analyze result from analysis node
+            AnalyzeResultDto analyzeResult = handleParseAnalyzeResultFromNode(analysisNode);
             List<AISuggestionDto> suggestions = analyzeResult.getSuggestions() != null
                     ? analyzeResult.getSuggestions()
                     : new ArrayList<>();
@@ -273,23 +287,6 @@ public class AIService extends BaseService {
         return String.format(
                 "Job Description:\n%s\n\nCV Content:\n%s\n\nReturn the parsed JD JSON and the analyze JSON.",
                 jdText, cvContent);
-    }
-
-    private JobDescriptionResult handleTryParseJobDescription(String jsonContent) {
-        try {
-            return objectMapper.readValue(jsonContent, JobDescriptionResult.class);
-        } catch (Exception e) {
-            try {
-                JsonNode root = objectMapper.readTree(jsonContent);
-                if (root.has("jobTitle") || root.has("responsibilities")) {
-                    return objectMapper.treeToValue(root, JobDescriptionResult.class);
-                } else if (root.has("parsedJobDescription")) {
-                    return objectMapper.treeToValue(root.get("parsedJobDescription"), JobDescriptionResult.class);
-                }
-            } catch (Exception ignored) {
-            }
-            return null;
-        }
     }
 
     private String handleFormatCVForAnalysis(CVDto cvDto) {
@@ -341,10 +338,29 @@ public class AIService extends BaseService {
             String jsonContent = handleExtractJsonFromResponse(aiResponse);
             JsonNode rootNode = objectMapper.readTree(jsonContent);
 
+            // Check if data is nested in "analysis" field
+            JsonNode analysisNode = rootNode.has("analysis") ? rootNode.get("analysis") : rootNode;
+
+            return handleParseAnalyzeResultFromNode(analysisNode);
+        } catch (Exception e) {
+            logger.error("Error parsing analyze result: {}", e.getMessage(), e);
+            // Return empty result on error
+            return AnalyzeResultDto.builder()
+                    .suggestions(new ArrayList<>())
+                    .strengths(new ArrayList<>())
+                    .weaknesses(new ArrayList<>())
+                    .build();
+        }
+    }
+
+    private AnalyzeResultDto handleParseAnalyzeResultFromNode(JsonNode rootNode) {
+        try {
             // Parse overallScore
             Integer overallScore = null;
             if (rootNode.has("overallScore")) {
                 overallScore = rootNode.get("overallScore").asInt();
+            } else if (rootNode.has("overallMatchScore")) {
+                overallScore = rootNode.get("overallMatchScore").asInt();
             }
 
             // Parse strengths
@@ -386,7 +402,7 @@ public class AIService extends BaseService {
                     .suggestions(suggestions)
                     .build();
         } catch (Exception e) {
-            logger.error("Error parsing analyze result: {}", e.getMessage(), e);
+            logger.error("Error parsing analyze result from node: {}", e.getMessage(), e);
             // Return empty result on error
             return AnalyzeResultDto.builder()
                     .suggestions(new ArrayList<>())

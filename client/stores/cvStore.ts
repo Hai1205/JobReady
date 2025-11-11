@@ -16,6 +16,8 @@ interface IAIDataResponse {
 	analyze: IAnalyzeResult,
 	improvedSection: string,
 	matchScore: number,
+	missingKeywords?: string[],
+	parsedJobDescription?: IJobDescriptionResult,
 }
 
 export interface ICVStore extends IBaseStore {
@@ -180,7 +182,7 @@ export const useCVStore = createStore<ICVStore>(
 				if (res.data && res.data.success) {
 					// Remove from user CVs if exists
 					get().handleRemoveCVFromUserCVs(cvId);
-					
+
 					// Remove from CVs table if exists
 					get().handleRemoveCVFromTable(cvId);
 				}

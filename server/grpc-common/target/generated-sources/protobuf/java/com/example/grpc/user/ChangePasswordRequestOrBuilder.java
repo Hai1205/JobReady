@@ -9,16 +9,16 @@ public interface ChangePasswordRequestOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string email = 1;</code>
-   * @return The email.
+   * <code>string identifier = 1;</code>
+   * @return The identifier.
    */
-  java.lang.String getEmail();
+  java.lang.String getIdentifier();
   /**
-   * <code>string email = 1;</code>
-   * @return The bytes for email.
+   * <code>string identifier = 1;</code>
+   * @return The bytes for identifier.
    */
   com.google.protobuf.ByteString
-      getEmailBytes();
+      getIdentifierBytes();
 
   /**
    * <code>string current_password = 2;</code>

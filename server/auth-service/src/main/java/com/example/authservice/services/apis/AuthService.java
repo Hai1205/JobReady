@@ -234,7 +234,7 @@ public class AuthService extends BaseService {
 
             if (user == null) {
                 logger.warn("OTP send failed: User not found for identifier: {}", identifier);
-                throw new OurException("User not found.", 404);
+                throw new OurException("User not found", 404);
             }
 
             String email = user.getEmail();
@@ -261,28 +261,31 @@ public class AuthService extends BaseService {
         Response response = new Response();
 
         try {
-            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
-
-            if (user == null) {
-                logger.warn("OTP send failed: User not found for identifier: {}", identifier);
-                throw new OurException("User not found.", 404);
-            }
-
             ChangePasswordRequest request = objectMapper.readValue(dataJson, ChangePasswordRequest.class);
-            String email = user.getEmail();
             String currentPassword = request.getCurrentPassword();
             String newPassword = request.getNewPassword();
-            String rePassword = request.getRePassword();
+            String confirmPassword = request.getConfirmPassword();
 
-            if (!newPassword.equals(rePassword)) {
-                logger.warn("Password change failed: Password mismatch for email: {}", email);
+            if (currentPassword == null || currentPassword.trim().isEmpty() ||
+                    newPassword == null || newPassword.trim().isEmpty() ||
+                    confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                logger.warn("Password change failed: All password fields are required for identifier: {}", identifier);
+                throw new OurException("All password fields are required", 400);
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                logger.warn("Password change failed: Password mismatch for identifier: {}", identifier);
                 throw new OurException("Password does not match.");
             }
 
-            userGrpcClient.changePassword(email, currentPassword, newPassword);
+            UserDto user = userGrpcClient.changePassword(identifier, currentPassword, newPassword);
+            if (user == null) {
+                logger.warn("Password change failed: Invalid current password for identifier: {}", identifier);
+                throw new OurException("Invalid current password.");
+            }
 
             response.setMessage("Password changed successfully!");
-            logger.info("Password changed successfully for email: {}", email);
+            logger.info("Password changed successfully for identifier: {}", identifier);
             return response;
         } catch (OurException e) {
             logger.error("Password change failed with OurException for identifier {}: {}", identifier, e.getMessage());
@@ -324,8 +327,8 @@ public class AuthService extends BaseService {
             UserDto user = userGrpcClient.findUserByIdentifier(identifier);
 
             if (user == null) {
-                logger.warn("OTP send failed: User not found for identifier: {}", identifier);
-                throw new OurException("User not found.", 404);
+                logger.warn("Forgot password failed: User not found for identifier: {}", identifier);
+                throw new OurException("User not found", 404);
             }
 
             ForgotPasswordRequest request = objectMapper.readValue(dataJson, ForgotPasswordRequest.class);

@@ -27,6 +27,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -205,7 +207,7 @@ class AuthControllerTest {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setCurrentPassword("oldPassword");
         changePasswordRequest.setNewPassword("newPassword");
-        changePasswordRequest.setRePassword("newPassword");
+        changePasswordRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
         when(authService.changePassword(anyString(), anyString())).thenReturn(successResponse);

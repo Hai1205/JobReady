@@ -53,7 +53,9 @@ export const useAuthStore = createStore<IAuthStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/register`, formData);
+				const res = await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/register`, formData);
+				console.log("Registration res:", res);
+				return res;
 			});
 		},
 
@@ -65,23 +67,23 @@ export const useAuthStore = createStore<IAuthStore>(
 			}));
 
 			return await get().handleRequest(async () => {
-				const response = await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/login`, formData);
-				if (response && response?.data) {
-					const user = response.data.user;
+				const res = await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/login`, formData);
+				const { success, user } = res.data || {};
 
+				if (success) {
 					set({
 						userAuth: user,
-						isAdmin: user.role === EUserRole.ADMIN,
+						isAdmin: user?.role === EUserRole.ADMIN,
 					});
 				}
 
-				return response;
+				return res;
 			});
 		},
 
 		logout: async (): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
-				const response = await handleRequest(EHttpType.POST, `/auth/logout`);
+				const res = await handleRequest(EHttpType.POST, `/auth/logout`);
 
 				// Clear all auth cookies
 				Cookies.remove('access_token');
@@ -89,7 +91,7 @@ export const useAuthStore = createStore<IAuthStore>(
 
 				get().reset();
 
-				return response;
+				return res;
 			});
 		},
 
@@ -116,8 +118,7 @@ export const useAuthStore = createStore<IAuthStore>(
 
 		resetPassword: async (email: string): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.PATCH, `/auth/reset-password/${email}`);
-
+				return await handleRequest(EHttpType.PATCH, `/auth/reset-password/${email}`, {});
 			});
 		},
 
@@ -133,16 +134,18 @@ export const useAuthStore = createStore<IAuthStore>(
 			});
 		},
 
-		changePassword: async (identifier: string, oldPassword: string, newPassword: string, confirmPassword: string): Promise<IApiResponse> => {
+		changePassword: async (identifier: string, currentPassword: string, newPassword: string, confirmPassword: string): Promise<IApiResponse> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
-				oldPassword,
+				currentPassword,
 				newPassword,
 				confirmPassword
 			}));
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.PATCH, `/auth/change-password/${identifier}`, formData);
+				const res = await handleRequest(EHttpType.PATCH, `/auth/change-password/${identifier}`, formData);
+				console.log("Change password res:", res);
+				return res;
 			});
 		},
 
