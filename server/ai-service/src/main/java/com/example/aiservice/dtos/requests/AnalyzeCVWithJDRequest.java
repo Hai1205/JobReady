@@ -2,10 +2,12 @@ package com.example.aiservice.dtos.requests;
 
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 // @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AnalyzeCVWithJDRequest extends AnalyzeCVRequest {
     // optional raw text
     private String jobDescription;

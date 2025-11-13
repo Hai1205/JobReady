@@ -11,6 +11,7 @@ interface ICVDataResponse {
 }
 
 export interface ICVStore extends IBaseStore {
+	initialCV: ICV
 	currentCV: ICV | null
 	cvList: ICV[]
 	userCVs: ICV[]
@@ -71,6 +72,49 @@ const initialState = {
 	lastFetchTimeUserCVs: null as number | null,
 	isLoadingAllCVs: false,
 	isLoadingUserCVs: false,
+
+	initialCV: {
+		id: '',
+		userId: '',
+		avatar: null,
+		title: '',
+		personalInfo: {
+			id: '',
+			fullname: '',
+			email: '',
+			phone: '',
+			location: '',
+			summary: '',
+			avatarUrl: '',
+			avatarPublicId: '',
+		},
+		experiences: [
+			{
+				id: '',
+				company: '',
+				position: '',
+				startDate: '',
+				endDate: '',
+				description: '',
+			},
+		],
+		educations: [
+			{
+				id: '',
+				school: '',
+				degree: '',
+				field: '',
+				startDate: '',
+				endDate: '',
+			},
+		],
+		skills: [],
+		isVisibility: true,
+		color: '#000000',
+		template: 'default',
+		createdAt: '',
+		updatedAt: '',
+	}
 };
 
 // Cache expiration time: 3 minutes
@@ -191,6 +235,8 @@ export const useCVStore = createStore<ICVStore>(
 		createCV: async (
 			userId: string
 		): Promise<IApiResponse<ICVDataResponse>> => {
+			get().handleSetCurrentCV(get().initialCV);
+
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.POST, `/cvs/users/${userId}`, new FormData());
 			});

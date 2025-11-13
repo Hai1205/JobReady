@@ -7,11 +7,13 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
+import com.example.securitycommon.config.SecurityCommonAutoConfiguration;
+
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableRabbit
 @ComponentScan(basePackages = { "com.example.authservice", "com.example.rabbitmq" })
-@Import(com.example.securitycommon.config.SecurityCommonAutoConfiguration.class)
+@Import(SecurityCommonAutoConfiguration.class)
 public class AuthServiceApplication {
 
     public static void main(String[] args) {

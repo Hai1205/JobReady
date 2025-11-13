@@ -13,7 +13,6 @@ import ConfirmationDialog from "../layout/ConfirmationDialog";
 export default function MyCVsPageClient() {
   const { userAuth } = useAuthStore();
   const {
-    handleSetCurrentStep,
     createCV,
     deleteCV,
     duplicateCV,
@@ -49,12 +48,10 @@ export default function MyCVsPageClient() {
 
   const handleCreate = async () => {
     await createCV(userAuth?.id || "");
-    handleSetCurrentStep(0);
     router.push("/cv-builder");
   };
 
   const handleEdit = (cv: ICV) => {
-    handleSetCurrentStep(0);
     handleSetCurrentCV(cv);
     router.push(`/cv-builder`);
   };

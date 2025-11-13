@@ -13,6 +13,7 @@ import {
 import { Upload, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAIStore } from "@/stores/aiStore";
+import { useCVStore } from "@/stores/cvStore";
 import { JobDescriptionMatchResult } from "./JobDescriptionMatchResult";
 
 interface JobDescriptionImportProps {
@@ -40,8 +41,14 @@ export function JobDescriptionImport({
   const [missingKeywords, setMissingKeywords] = useState<string[]>([]);
   const [analyzeSummary, setAnalyzeSummary] = useState<string>("");
 
-  const { analyzeCVWithJD, handleSetAISuggestions, handleSetJobDescription } =
-    useAIStore();
+  const {
+    analyzeCVWithJD,
+    handleSetAISuggestions,
+    handleSetJobDescription,
+    handleSetIsAnalyzing,
+    isAnalyzing: globalIsAnalyzing,
+  } = useAIStore();
+  const { isLoading } = useCVStore();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -88,6 +95,7 @@ export function JobDescriptionImport({
     }
 
     setIsAnalyzing(true);
+    handleSetIsAnalyzing(true);
 
     try {
       if (!currentCV) {
@@ -159,6 +167,7 @@ export function JobDescriptionImport({
       toast.error("Đã xảy ra lỗi trong quá trình phân tích");
     } finally {
       setIsAnalyzing(false);
+      handleSetIsAnalyzing(false);
     }
   };
 
@@ -234,7 +243,11 @@ export function JobDescriptionImport({
 
           <Button
             onClick={handleAnalyze}
-            disabled={isAnalyzing || (!jobDescription.trim() && !jdFile)}
+            disabled={
+              globalIsAnalyzing ||
+              isLoading ||
+              (!jobDescription.trim() && !jdFile)
+            }
             className="w-full"
           >
             {isAnalyzing ? (

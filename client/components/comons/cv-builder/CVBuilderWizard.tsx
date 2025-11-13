@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useCVStore } from "@/stores/cvStore";
 import { useAuthStore } from "@/stores/authStore";
+import { useAIStore } from "@/stores/aiStore";
 import { EducationStep } from "./steps/EducationStep";
 import { useState } from "react";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -42,6 +43,7 @@ export function CVBuilderWizard() {
     updateCV,
     handleUpdateCV,
   } = useCVStore();
+  const { isAnalyzing } = useAIStore();
 
   const [isCustomizationExpanded, setIsCustomizationExpanded] = useState(false);
 
@@ -243,12 +245,12 @@ export function CVBuilderWizard() {
 
         <div className="flex gap-2">
           {currentStep < steps.length - 1 ? (
-            <Button onClick={handleNext}>
+            <Button onClick={handleNext} disabled={isAnalyzing}>
               Next
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button onClick={handleSave}>
+            <Button onClick={handleSave} disabled={isLoading || isAnalyzing}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

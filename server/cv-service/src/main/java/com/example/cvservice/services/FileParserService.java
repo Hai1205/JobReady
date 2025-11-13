@@ -1,5 +1,6 @@
 package com.example.cvservice.services;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
@@ -45,7 +46,8 @@ public class FileParserService {
     }
 
     private String extractTextFromPDF(InputStream inputStream) throws IOException {
-        try (PDDocument document = PDDocument.load(inputStream)) {
+        byte[] bytes = inputStream.readAllBytes();
+        try (PDDocument document = Loader.loadPDF(bytes)) {
             PDFTextStripper stripper = new PDFTextStripper();
             return stripper.getText(document);
         }

@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 export default function HeroSection() {
 const { userAuth } = useAuthStore();
   const {
-    handleSetCurrentStep,
     createCV,
   } = useCVStore();
 
@@ -18,7 +17,6 @@ const { userAuth } = useAuthStore();
 
   const handleCreate = async () => {
     await createCV(userAuth?.id || "");
-    handleSetCurrentStep(0);
     router.push("/cv-builder");
   };
 

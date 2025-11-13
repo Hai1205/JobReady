@@ -7,10 +7,12 @@ import com.example.aiservice.dtos.ExperienceDto;
 import com.example.aiservice.dtos.PersonalInfoDto;
 
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AnalyzeCVRequest {
     private String title;
     private PersonalInfoDto personalInfo;

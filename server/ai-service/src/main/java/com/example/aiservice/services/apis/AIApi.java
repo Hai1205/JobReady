@@ -15,19 +15,23 @@ import com.fasterxml.jackson.databind.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class AIApi extends BaseApi {
     private final OpenRouterConfig openRouterConfig;
+    private final EmbeddingService embeddingService;
     private final PromptBuilderService promptBuilderService;
     private final ObjectMapper objectMapper;
     private final JobDescriptionParserService jobDescriptionParserService;
 
     public AIApi(
             OpenRouterConfig openRouterConfig,
+            EmbeddingService embeddingService,
             PromptBuilderService promptBuilderService,
             JobDescriptionParserService jobDescriptionParserService) {
         this.openRouterConfig = openRouterConfig;
+        this.embeddingService = embeddingService;
         this.promptBuilderService = promptBuilderService;
         this.objectMapper = new ObjectMapper();
         this.jobDescriptionParserService = jobDescriptionParserService;
@@ -157,9 +161,22 @@ public class AIApi extends BaseApi {
         try {
             String systemPrompt = promptBuilderService.buildCVAnalysisPrompt();
             String cvContent = handleFormatCVForAnalysis(cv);
-            String prompt = "Analyze this CV:\n\n" + cvContent;
-            String aiResponseText = openRouterConfig.callModelWithSystemPrompt(systemPrompt,
-                    prompt);
+
+            // First, ingest the CV into vector store for future retrieval
+            embeddingService.ingestCV(cvContent, cv.getTitle(), "user-" + UUID.randomUUID());
+
+            // Retrieve similar CVs for context (RAG)
+            List<EmbeddingService.Document> similarDocuments = embeddingService.retrieveSimilarDocuments(cvContent, 3);
+            String context = similarDocuments.stream()
+                    .map(doc -> "Similar CV: " + doc.getContent())
+                    .collect(Collectors.joining("\n\n"));
+
+            // Augment the prompt with retrieved context
+            String augmentedPrompt = String.format(
+                    "Context from similar CVs:\n%s\n\nAnalyze this CV:\n\n%s",
+                    context, cvContent);
+
+            String aiResponseText = openRouterConfig.callModelWithSystemPrompt(systemPrompt, augmentedPrompt);
 
             // Parse the analyze result as object
             AnalyzeResultDto analyzeResult = handleParseAnalyzeResult(aiResponseText);
@@ -186,10 +203,19 @@ public class AIApi extends BaseApi {
                     section,
                     "General position",
                     List.of());
-            String prompt = String.format(
-                    "Improve the following %s section of a CV:\n\n%s\n\nProvide only the improved version without explanations.",
-                    section, content);
-            String improved = openRouterConfig.callModelWithSystemPrompt(systemPrompt, prompt);
+
+            // Retrieve similar CV sections for context
+            List<EmbeddingService.Document> similarDocuments = embeddingService.retrieveSimilarDocuments(content, 2);
+            String context = similarDocuments.stream()
+                    .map(doc -> "Example: " + doc.getContent())
+                    .collect(Collectors.joining("\n\n"));
+
+            // Augment the prompt with retrieved context
+            String augmentedPrompt = String.format(
+                    "Context from similar CV sections:\n%s\n\nImprove the following %s section of a CV:\n\n%s\n\nProvide only the improved version without explanations.",
+                    context, section, content);
+
+            String improved = openRouterConfig.callModelWithSystemPrompt(systemPrompt, augmentedPrompt);
 
             return AIResponseDto.builder()
                     .improved(improved)
@@ -207,11 +233,22 @@ public class AIApi extends BaseApi {
         try {
             String cvContent = handleFormatCVForAnalysis(cv);
 
+            // Ingest job description into vector store
+            embeddingService.ingestJobDescription(jdText, "Job Description", "jd-" + UUID.randomUUID().toString());
+
             String systemPrompt = promptBuilderService.buildJobMatchPrompt(language != null ? language : "vi");
             logger.info("jdText", jdText);
-            String userPrompt = handleBuildUserPrompt(jdText, cvContent);
+
+            // Retrieve similar job descriptions for context
+            List<EmbeddingService.Document> similarJDs = embeddingService.retrieveSimilarDocuments(jdText, 2);
+            String jdContext = similarJDs.stream()
+                    .map(doc -> "Similar JD: " + doc.getContent())
+                    .collect(Collectors.joining("\n\n"));
+
+            String userPrompt = handleBuildUserPrompt(jdText, cvContent, jdContext);
 
             String aiResponseText = openRouterConfig.callModelWithSystemPrompt(systemPrompt, userPrompt);
+
             logger.info("========== AI RAW RESPONSE ==========");
             logger.info("Response length: {}", aiResponseText.length());
             logger.info("First 500 chars: {}", aiResponseText.substring(0, Math.min(500, aiResponseText.length())));
@@ -278,10 +315,10 @@ public class AIApi extends BaseApi {
         }
     }
 
-    private String handleBuildUserPrompt(String jdText, String cvContent) {
+    private String handleBuildUserPrompt(String jdText, String cvContent, String jdContext) {
         return String.format(
-                "Job Description:\n%s\n\nCV Content:\n%s\n\nReturn the parsed JD JSON and the analyze JSON.",
-                jdText, cvContent);
+                "Context from similar job descriptions:\n%s\n\nJob Description:\n%s\n\nCV Content:\n%s\n\nReturn the parsed JD JSON and the analyze JSON.",
+                jdContext, jdText, cvContent);
     }
 
     private String handleFormatCVForAnalysis(CVDto cvDto) {

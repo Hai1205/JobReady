@@ -5,7 +5,7 @@ import com.example.authservice.dtos.requests.*;
 import com.example.authservice.dtos.responses.*;
 import com.example.authservice.exceptions.OurException;
 import com.example.authservice.services.apis.AuthApi;
-import com.example.authservice.services.grpcs.UserGrpcClient;
+import com.example.authservice.services.grpcs.clients.UserGrpcClient;
 import com.example.authservice.services.reabbitmqs.producers.AuthProducer;
 import com.example.authservice.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;

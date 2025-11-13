@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Upload, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAIStore } from "@/stores/aiStore";
+import { useCVStore } from "@/stores/cvStore";
 
 interface CompactJobMatchProps {
   currentCV: ICV | null;
@@ -15,7 +16,6 @@ interface CompactJobMatchProps {
     suggestions: IAISuggestion[],
     matchScore?: number
   ) => void;
-  isQuickAnalyzing?: boolean;
 }
 
 /**
@@ -24,14 +24,20 @@ interface CompactJobMatchProps {
 export function CompactJobMatch({
   currentCV,
   onAnalysisComplete,
-  isQuickAnalyzing = false,
 }: CompactJobMatchProps) {
   const [jobDescription, setJobDescription] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [jdFile, setJdFile] = useState<File | null>(null);
   const [inputMethod, setInputMethod] = useState<"text" | "file">("text");
+  const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const { analyzeCVWithJD, handleSetAISuggestions } = useAIStore();
+  const {
+    analyzeCVWithJD,
+    handleSetAISuggestions,
+    handleSetIsAnalyzing,
+    isAnalyzing: globalIsAnalyzing,
+  } = useAIStore();
+  const { isLoading } = useCVStore();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -71,6 +77,7 @@ export function CompactJobMatch({
     }
 
     setIsAnalyzing(true);
+    handleSetIsAnalyzing(true);
 
     try {
       const response = await analyzeCVWithJD(
@@ -98,21 +105,13 @@ export function CompactJobMatch({
       // Store suggestions in CV store for AI Suggestions Sidebar
       handleSetAISuggestions(suggestions);
 
-      // Show detailed success message
-      const scoreText = score ? `${Math.round(score)}%` : "N/A";
-      const suggestionsText =
-        suggestions.length > 0
-          ? `\n📋 ${suggestions.length} gợi ý cải thiện`
-          : "";
-      const missingText =
-        missing.length > 0 ? `\n🔑 ${missing.length} từ khóa thiếu` : "";
+      // Store match score
+      setMatchScore(score);
 
-      toast.success(
-        `✅ Phân tích xong!\n🎯 Điểm khớp: ${scoreText}${suggestionsText}${missingText}\n\n💡 Xem tab "Gợi Ý"`,
-        {
-          autoClose: 4000,
-        }
-      );
+      // Show success message
+      toast.success(`✅ Phân tích hoàn tất! Xem kết quả bên dưới`, {
+        autoClose: 2000,
+      });
 
       if (onAnalysisComplete) {
         onAnalysisComplete(suggestions, score);
@@ -122,6 +121,7 @@ export function CompactJobMatch({
       toast.error("Đã xảy ra lỗi khi phân tích");
     } finally {
       setIsAnalyzing(false);
+      handleSetIsAnalyzing(false);
     }
   };
 
@@ -211,11 +211,43 @@ export function CompactJobMatch({
         </div>
       )}
 
+      {/* Match Score Display */}
+      {matchScore !== undefined && (
+        <div className="p-3 rounded-lg bg-muted border">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium">Điểm Tương Đồng:</span>
+            <span
+              className={`text-lg font-bold ${
+                matchScore >= 80
+                  ? "text-green-600"
+                  : matchScore >= 60
+                  ? "text-yellow-600"
+                  : "text-red-600"
+              }`}
+            >
+              {Math.round(matchScore)}%
+            </span>
+          </div>
+          <div className="mt-1 h-2 bg-background rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all ${
+                matchScore >= 80
+                  ? "bg-green-600"
+                  : matchScore >= 60
+                  ? "bg-yellow-600"
+                  : "bg-red-600"
+              }`}
+              style={{ width: `${matchScore}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <Button
         onClick={handleAnalyze}
         disabled={
-          isAnalyzing ||
-          isQuickAnalyzing ||
+          globalIsAnalyzing ||
+          isLoading ||
           (inputMethod === "text" && !jobDescription.trim()) ||
           (inputMethod === "file" && !jdFile)
         }

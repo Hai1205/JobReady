@@ -2,6 +2,7 @@ package com.example.aiservice.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.apache.pdfbox.Loader;
 
 import java.io.InputStream;
 import java.io.BufferedReader;
@@ -35,7 +36,8 @@ public class JobDescriptionParserService {
     }
 
     private String extractTextFromPdf(InputStream in) throws Exception {
-        try (PDDocument document = PDDocument.load(in)) {
+        // PDFBox 3.x API - use Loader.loadPDF instead of PDDocument.load
+        try (PDDocument document = Loader.loadPDF(in.readAllBytes())) {
             PDFTextStripper stripper = new PDFTextStripper();
             String text = stripper.getText(document);
             return cleanText(text);

@@ -15,6 +15,7 @@ interface IAIDataResponse {
 export interface IAIStore extends IBaseStore {
 	aiSuggestions: IAISuggestion[]
 	jobDescription: string
+	isAnalyzing: boolean
 
 	analyzeCV: (
 		title: string,
@@ -41,12 +42,14 @@ export interface IAIStore extends IBaseStore {
 	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void;
 	handleSetJobDescription: (jd: string) => void;
 	handleApplySuggestion: (id: string) => void;
+	handleSetIsAnalyzing: (isAnalyzing: boolean) => void;
 }
 
 const storeName = "ai";
 const initialState = {
 	aiSuggestions: [],
 	jobDescription: "",
+	isAnalyzing: false,
 };
 
 export const useAIStore = createStore<IAIStore>(
@@ -148,6 +151,10 @@ export const useAIStore = createStore<IAIStore>(
 
 			const sectionName = getSectionDisplayName(suggestion.section);
 			toast.success(`✅ Đã áp dụng gợi ý cho "${sectionName}"`);
+		},
+
+		handleSetIsAnalyzing: (isAnalyzing: boolean): void => {
+			set({ isAnalyzing });
 		},
 
 		reset: () => {
