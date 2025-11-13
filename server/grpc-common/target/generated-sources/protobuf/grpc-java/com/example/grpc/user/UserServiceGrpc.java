@@ -297,6 +297,130 @@ public final class UserServiceGrpc {
     return getResetPasswordMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.user.GetUserStatsRequest,
+      com.example.grpc.user.GetUserStatsResponse> getGetUserStatsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetUserStats",
+      requestType = com.example.grpc.user.GetUserStatsRequest.class,
+      responseType = com.example.grpc.user.GetUserStatsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.user.GetUserStatsRequest,
+      com.example.grpc.user.GetUserStatsResponse> getGetUserStatsMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.user.GetUserStatsRequest, com.example.grpc.user.GetUserStatsResponse> getGetUserStatsMethod;
+    if ((getGetUserStatsMethod = UserServiceGrpc.getGetUserStatsMethod) == null) {
+      synchronized (UserServiceGrpc.class) {
+        if ((getGetUserStatsMethod = UserServiceGrpc.getGetUserStatsMethod) == null) {
+          UserServiceGrpc.getGetUserStatsMethod = getGetUserStatsMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.user.GetUserStatsRequest, com.example.grpc.user.GetUserStatsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetUserStats"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUserStatsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUserStatsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserServiceMethodDescriptorSupplier("GetUserStats"))
+              .build();
+        }
+      }
+    }
+    return getGetUserStatsMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.user.GetUsersByStatusRequest,
+      com.example.grpc.user.GetUsersByStatusResponse> getGetUsersByStatusMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetUsersByStatus",
+      requestType = com.example.grpc.user.GetUsersByStatusRequest.class,
+      responseType = com.example.grpc.user.GetUsersByStatusResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.user.GetUsersByStatusRequest,
+      com.example.grpc.user.GetUsersByStatusResponse> getGetUsersByStatusMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.user.GetUsersByStatusRequest, com.example.grpc.user.GetUsersByStatusResponse> getGetUsersByStatusMethod;
+    if ((getGetUsersByStatusMethod = UserServiceGrpc.getGetUsersByStatusMethod) == null) {
+      synchronized (UserServiceGrpc.class) {
+        if ((getGetUsersByStatusMethod = UserServiceGrpc.getGetUsersByStatusMethod) == null) {
+          UserServiceGrpc.getGetUsersByStatusMethod = getGetUsersByStatusMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.user.GetUsersByStatusRequest, com.example.grpc.user.GetUsersByStatusResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetUsersByStatus"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUsersByStatusRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUsersByStatusResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserServiceMethodDescriptorSupplier("GetUsersByStatus"))
+              .build();
+        }
+      }
+    }
+    return getGetUsersByStatusMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.user.GetUsersCreatedInRangeRequest,
+      com.example.grpc.user.GetUsersCreatedInRangeResponse> getGetUsersCreatedInRangeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetUsersCreatedInRange",
+      requestType = com.example.grpc.user.GetUsersCreatedInRangeRequest.class,
+      responseType = com.example.grpc.user.GetUsersCreatedInRangeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.user.GetUsersCreatedInRangeRequest,
+      com.example.grpc.user.GetUsersCreatedInRangeResponse> getGetUsersCreatedInRangeMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.user.GetUsersCreatedInRangeRequest, com.example.grpc.user.GetUsersCreatedInRangeResponse> getGetUsersCreatedInRangeMethod;
+    if ((getGetUsersCreatedInRangeMethod = UserServiceGrpc.getGetUsersCreatedInRangeMethod) == null) {
+      synchronized (UserServiceGrpc.class) {
+        if ((getGetUsersCreatedInRangeMethod = UserServiceGrpc.getGetUsersCreatedInRangeMethod) == null) {
+          UserServiceGrpc.getGetUsersCreatedInRangeMethod = getGetUsersCreatedInRangeMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.user.GetUsersCreatedInRangeRequest, com.example.grpc.user.GetUsersCreatedInRangeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetUsersCreatedInRange"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUsersCreatedInRangeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUsersCreatedInRangeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserServiceMethodDescriptorSupplier("GetUsersCreatedInRange"))
+              .build();
+        }
+      }
+    }
+    return getGetUsersCreatedInRangeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.user.GetRecentUsersRequest,
+      com.example.grpc.user.GetRecentUsersResponse> getGetRecentUsersMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetRecentUsers",
+      requestType = com.example.grpc.user.GetRecentUsersRequest.class,
+      responseType = com.example.grpc.user.GetRecentUsersResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.user.GetRecentUsersRequest,
+      com.example.grpc.user.GetRecentUsersResponse> getGetRecentUsersMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.user.GetRecentUsersRequest, com.example.grpc.user.GetRecentUsersResponse> getGetRecentUsersMethod;
+    if ((getGetRecentUsersMethod = UserServiceGrpc.getGetRecentUsersMethod) == null) {
+      synchronized (UserServiceGrpc.class) {
+        if ((getGetRecentUsersMethod = UserServiceGrpc.getGetRecentUsersMethod) == null) {
+          UserServiceGrpc.getGetRecentUsersMethod = getGetRecentUsersMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.user.GetRecentUsersRequest, com.example.grpc.user.GetRecentUsersResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetRecentUsers"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetRecentUsersRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetRecentUsersResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserServiceMethodDescriptorSupplier("GetRecentUsers"))
+              .build();
+        }
+      }
+    }
+    return getGetRecentUsersMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -437,6 +561,46 @@ public final class UserServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.user.ResetPasswordResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getResetPasswordMethod(), responseObserver);
     }
+
+    /**
+     * <pre>
+     * Get user statistics
+     * </pre>
+     */
+    default void getUserStats(com.example.grpc.user.GetUserStatsRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetUserStatsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUserStatsMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get users by status
+     * </pre>
+     */
+    default void getUsersByStatus(com.example.grpc.user.GetUsersByStatusRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetUsersByStatusResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUsersByStatusMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get users created in date range
+     * </pre>
+     */
+    default void getUsersCreatedInRange(com.example.grpc.user.GetUsersCreatedInRangeRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetUsersCreatedInRangeResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUsersCreatedInRangeMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get recent users
+     * </pre>
+     */
+    default void getRecentUsers(com.example.grpc.user.GetRecentUsersRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetRecentUsersResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetRecentUsersMethod(), responseObserver);
+    }
   }
 
   /**
@@ -570,6 +734,50 @@ public final class UserServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getResetPasswordMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Get user statistics
+     * </pre>
+     */
+    public void getUserStats(com.example.grpc.user.GetUserStatsRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetUserStatsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetUserStatsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get users by status
+     * </pre>
+     */
+    public void getUsersByStatus(com.example.grpc.user.GetUsersByStatusRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetUsersByStatusResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetUsersByStatusMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get users created in date range
+     * </pre>
+     */
+    public void getUsersCreatedInRange(com.example.grpc.user.GetUsersCreatedInRangeRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetUsersCreatedInRangeResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetUsersCreatedInRangeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get recent users
+     * </pre>
+     */
+    public void getRecentUsers(com.example.grpc.user.GetRecentUsersRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetRecentUsersResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetRecentUsersMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -679,6 +887,46 @@ public final class UserServiceGrpc {
     public com.example.grpc.user.ResetPasswordResponse resetPassword(com.example.grpc.user.ResetPasswordRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getResetPasswordMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get user statistics
+     * </pre>
+     */
+    public com.example.grpc.user.GetUserStatsResponse getUserStats(com.example.grpc.user.GetUserStatsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetUserStatsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get users by status
+     * </pre>
+     */
+    public com.example.grpc.user.GetUsersByStatusResponse getUsersByStatus(com.example.grpc.user.GetUsersByStatusRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetUsersByStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get users created in date range
+     * </pre>
+     */
+    public com.example.grpc.user.GetUsersCreatedInRangeResponse getUsersCreatedInRange(com.example.grpc.user.GetUsersCreatedInRangeRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetUsersCreatedInRangeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get recent users
+     * </pre>
+     */
+    public com.example.grpc.user.GetRecentUsersResponse getRecentUsers(com.example.grpc.user.GetRecentUsersRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetRecentUsersMethod(), getCallOptions(), request);
     }
   }
 
@@ -799,6 +1047,50 @@ public final class UserServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getResetPasswordMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Get user statistics
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.user.GetUserStatsResponse> getUserStats(
+        com.example.grpc.user.GetUserStatsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetUserStatsMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Get users by status
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.user.GetUsersByStatusResponse> getUsersByStatus(
+        com.example.grpc.user.GetUsersByStatusRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetUsersByStatusMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Get users created in date range
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.user.GetUsersCreatedInRangeResponse> getUsersCreatedInRange(
+        com.example.grpc.user.GetUsersCreatedInRangeRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetUsersCreatedInRangeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Get recent users
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.user.GetRecentUsersResponse> getRecentUsers(
+        com.example.grpc.user.GetRecentUsersRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetRecentUsersMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_FIND_USER_BY_ID = 0;
@@ -810,6 +1102,10 @@ public final class UserServiceGrpc {
   private static final int METHODID_CHANGE_PASSWORD = 6;
   private static final int METHODID_FORGOT_PASSWORD = 7;
   private static final int METHODID_RESET_PASSWORD = 8;
+  private static final int METHODID_GET_USER_STATS = 9;
+  private static final int METHODID_GET_USERS_BY_STATUS = 10;
+  private static final int METHODID_GET_USERS_CREATED_IN_RANGE = 11;
+  private static final int METHODID_GET_RECENT_USERS = 12;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -863,6 +1159,22 @@ public final class UserServiceGrpc {
         case METHODID_RESET_PASSWORD:
           serviceImpl.resetPassword((com.example.grpc.user.ResetPasswordRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.user.ResetPasswordResponse>) responseObserver);
+          break;
+        case METHODID_GET_USER_STATS:
+          serviceImpl.getUserStats((com.example.grpc.user.GetUserStatsRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.user.GetUserStatsResponse>) responseObserver);
+          break;
+        case METHODID_GET_USERS_BY_STATUS:
+          serviceImpl.getUsersByStatus((com.example.grpc.user.GetUsersByStatusRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.user.GetUsersByStatusResponse>) responseObserver);
+          break;
+        case METHODID_GET_USERS_CREATED_IN_RANGE:
+          serviceImpl.getUsersCreatedInRange((com.example.grpc.user.GetUsersCreatedInRangeRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.user.GetUsersCreatedInRangeResponse>) responseObserver);
+          break;
+        case METHODID_GET_RECENT_USERS:
+          serviceImpl.getRecentUsers((com.example.grpc.user.GetRecentUsersRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.user.GetRecentUsersResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -945,6 +1257,34 @@ public final class UserServiceGrpc {
               com.example.grpc.user.ResetPasswordRequest,
               com.example.grpc.user.ResetPasswordResponse>(
                 service, METHODID_RESET_PASSWORD)))
+        .addMethod(
+          getGetUserStatsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.user.GetUserStatsRequest,
+              com.example.grpc.user.GetUserStatsResponse>(
+                service, METHODID_GET_USER_STATS)))
+        .addMethod(
+          getGetUsersByStatusMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.user.GetUsersByStatusRequest,
+              com.example.grpc.user.GetUsersByStatusResponse>(
+                service, METHODID_GET_USERS_BY_STATUS)))
+        .addMethod(
+          getGetUsersCreatedInRangeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.user.GetUsersCreatedInRangeRequest,
+              com.example.grpc.user.GetUsersCreatedInRangeResponse>(
+                service, METHODID_GET_USERS_CREATED_IN_RANGE)))
+        .addMethod(
+          getGetRecentUsersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.user.GetRecentUsersRequest,
+              com.example.grpc.user.GetRecentUsersResponse>(
+                service, METHODID_GET_RECENT_USERS)))
         .build();
   }
 
@@ -1002,6 +1342,10 @@ public final class UserServiceGrpc {
               .addMethod(getChangePasswordMethod())
               .addMethod(getForgotPasswordMethod())
               .addMethod(getResetPasswordMethod())
+              .addMethod(getGetUserStatsMethod())
+              .addMethod(getGetUsersByStatusMethod())
+              .addMethod(getGetUsersCreatedInRangeMethod())
+              .addMethod(getGetRecentUsersMethod())
               .build();
         }
       }

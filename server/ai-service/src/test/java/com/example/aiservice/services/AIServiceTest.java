@@ -2,7 +2,7 @@ package com.example.aiservice.services;
 
 import com.example.aiservice.configs.OpenRouterConfig;
 import com.example.aiservice.dtos.responses.Response;
-import com.example.aiservice.services.apis.AIService;
+import com.example.aiservice.services.apis.AIApi;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +21,7 @@ class AIServiceTest {
     private PromptBuilderService promptBuilderService;
 
     @InjectMocks
-    private AIService aiService;
+    private AIApi aiService;
 
     @Test
     void testAnalyzeCV_NullCV() {

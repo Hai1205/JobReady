@@ -7,9 +7,11 @@ import { HighlightableTextarea } from "@/components/comons/cv-builder/Highlighta
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";
+import { useAIStore } from "@/stores/aiStore";
 
 export function ExperienceStep() {
-  const { currentCV, handleUpdateCV, aiSuggestions } = useCVStore();
+  const { currentCV, handleUpdateCV } = useCVStore();
+  const { aiSuggestions } = useAIStore();
 
   if (!currentCV) {
     return <div>Loading...</div>;

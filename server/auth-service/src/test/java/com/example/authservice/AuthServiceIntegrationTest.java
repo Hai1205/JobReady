@@ -2,7 +2,7 @@ package com.example.authservice;
 
 import com.example.authservice.dtos.requests.LoginRequest;
 import com.example.authservice.dtos.responses.Response;
-import com.example.authservice.services.apis.AuthService;
+import com.example.authservice.services.apis.AuthApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ class AuthServiceIntegrationTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private AuthService authService;
+    private AuthApi authService;
 
     @Test
     @WithMockUser

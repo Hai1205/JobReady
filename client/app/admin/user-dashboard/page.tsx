@@ -16,20 +16,26 @@ import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 import { UserFilter } from "@/components/comons/admin/userDashboard/UserFilter";
 import { UserTable } from "@/components/comons/admin/userDashboard/UserTable";
 import { ExtendedUserData } from "@/components/comons/admin/userDashboard/constant";
-import DeleteConfirmationDialog from "@/components/comons/layout/DeleteConfirmationDialog";
+import TableDashboardSkeleton from "@/components/comons/layout/TableDashboardSkeleton";
+import ConfirmationDialog from "@/components/comons/layout/ConfirmationDialog";
 
 export type UserFilterType = "status" | "role";
 const userInitialFilters = { status: [] as string[], role: [] as string[] };
 
 function UserDashboardPage() {
-  const { usersTable, getAllUsers, createUser, updateUser, deleteUser } =
-    useUserStore();
+  const {
+    usersTable,
+    fetchAllUsersInBackground,
+    createUser,
+    updateUser,
+    deleteUser,
+    isLoading: storeLoading,
+  } = useUserStore();
   const { resetPassword } = useAuthStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isUpdateUserOpen, setIsUpdateUserOpen] = useState(false);
 
@@ -39,17 +45,10 @@ function UserDashboardPage() {
   }>(userInitialFilters);
   const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-
-    await getAllUsers();
-
-    setIsLoading(false);
-  }, [getAllUsers]);
-
   useEffect(() => {
-    fetchData();
-  }, [getAllUsers]);
+    // Fetch users in background
+    fetchAllUsersInBackground();
+  }, []);
 
   const filterData = useCallback(
     (query: string, filters: { status: string[]; role: string[] }) => {
@@ -121,7 +120,7 @@ function UserDashboardPage() {
   const handleRefresh = () => {
     setActiveFilters(userInitialFilters);
     setSearchQuery("");
-    fetchData();
+    fetchAllUsersInBackground();
   };
 
   const [openMenuFilters, setOpenMenuFilters] = useState(false);
@@ -133,6 +132,15 @@ function UserDashboardPage() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<IUser | null>(null);
+
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [userToResetPassword, setUserToResetPassword] = useState<IUser | null>(
+    null
+  );
+
+  // Combined dialog state
+  const isDialogOpen = deleteDialogOpen || resetPasswordDialogOpen;
+  const isDeleteDialog = deleteDialogOpen;
 
   const defaultUser: ExtendedUserData = {
     id: "",
@@ -227,11 +235,30 @@ function UserDashboardPage() {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (userToDelete) {
+  const onResetPassword = async (user: IUser) => {
+    setUserToResetPassword(user);
+    setResetPasswordDialogOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setDeleteDialogOpen(false);
+      setResetPasswordDialogOpen(false);
+      setUserToDelete(null);
+      setUserToResetPassword(null);
+    }
+  };
+
+  const handleDialogConfirm = async () => {
+    if (isDeleteDialog && userToDelete) {
       await deleteUser(userToDelete.id);
       setDeleteDialogOpen(false);
       setUserToDelete(null);
+    } else if (!isDeleteDialog && userToResetPassword) {
+      await resetPassword(userToResetPassword.email);
+      toast.success("Password reset email sent successfully");
+      setResetPasswordDialogOpen(false);
+      setUserToResetPassword(null);
     }
   };
 
@@ -240,14 +267,10 @@ function UserDashboardPage() {
     setIsUpdateUserOpen(true);
   };
 
-  const onResetPassword = async (user: IUser) => {
-    if (!user) {
-      return;
-    }
-
-    await resetPassword(user?.email);
-    toast.success("Password reset email sent successfully");
-  };
+  // Show skeleton loading when there's no cached data
+  if (storeLoading && usersTable.length === 0) {
+    return <TableDashboardSkeleton />;
+  }
 
   return (
     <div className="space-y-4">
@@ -336,7 +359,7 @@ function UserDashboardPage() {
 
           <UserTable
             users={filteredUsers}
-            isLoading={isLoading}
+            isLoading={storeLoading && usersTable.length === 0}
             onUpdate={onUpdate}
             onDelete={onDelete}
             onResetPassword={onResetPassword}
@@ -344,11 +367,21 @@ function UserDashboardPage() {
         </Card>
       </div>
 
-      <DeleteConfirmationDialog
-        open={deleteDialogOpen}
-        description="Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn người dùng và loại bỏ nó khỏi máy chủ của chúng tôi."
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={handleDeleteConfirm}
+      <ConfirmationDialog
+        open={deleteDialogOpen || resetPasswordDialogOpen}
+        onOpenChange={handleDialogClose}
+        title={isDeleteDialog ? "Delete User" : "Đặt lại mật khẩu"}
+        description={
+          isDeleteDialog
+            ? "Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn người dùng và loại bỏ nó khỏi máy chủ của chúng tôi."
+            : `Bạn có muốn gửi email đặt lại mật khẩu cho ${
+                userToResetPassword?.fullname || userToResetPassword?.email
+              }?`
+        }
+        confirmText={isDeleteDialog ? "Delete" : "Gửi email"}
+        cancelText="Hủy"
+        isDestructive={isDeleteDialog}
+        onConfirm={handleDialogConfirm}
       />
     </div>
   );

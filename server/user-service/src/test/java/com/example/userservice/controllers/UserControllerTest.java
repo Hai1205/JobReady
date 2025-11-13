@@ -3,7 +3,7 @@ package com.example.userservice.controllers;
 import com.example.userservice.dtos.UserDto;
 import com.example.userservice.dtos.requests.CreateUserRequest;
 import com.example.userservice.dtos.response.Response;
-import com.example.userservice.services.apis.UserService;
+import com.example.userservice.services.apis.UserApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ class UserControllerTest {
         private MockMvc mockMvc;
 
         @MockBean
-        private UserService userService;
+        private UserApi userService;
 
         @MockBean
         private com.example.securitycommon.jwt.JwtTokenProvider jwtTokenProvider;

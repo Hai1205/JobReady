@@ -3,7 +3,7 @@ package com.example.authservice.controllers;
 import com.example.authservice.dtos.UserDto;
 import com.example.authservice.dtos.requests.*;
 import com.example.authservice.dtos.responses.Response;
-import com.example.authservice.services.apis.AuthService;
+import com.example.authservice.services.apis.AuthApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -73,7 +73,7 @@ class AuthControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AuthService authService;
+    private AuthApi authService;
 
     @MockBean
     private JwtTokenProvider tokenProvider;

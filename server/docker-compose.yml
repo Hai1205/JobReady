@@ -104,6 +104,25 @@ services:
     networks:
       - app-network
 
+  stats-service:
+    build:
+      context: .
+      dockerfile: stats-service/Dockerfile
+    container_name: stats-service
+    env_file:
+      - ./stats-service/.env
+    ports:
+      - "8087:8087"
+    depends_on:
+      discovery-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      cv-service:
+        condition: service_started
+    networks:
+      - app-network
+
 volumes:
   rabbitmq_data:
 

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Upload, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
-import { useCVStore } from "@/stores/cvStore";
+import { useAIStore } from "@/stores/aiStore";
 
 interface CompactJobMatchProps {
   currentCV: ICV | null;
@@ -31,7 +31,7 @@ export function CompactJobMatch({
   const [jdFile, setJdFile] = useState<File | null>(null);
   const [inputMethod, setInputMethod] = useState<"text" | "file">("text");
 
-  const { analyzeCVWithJD, handleSetAISuggestions } = useCVStore();
+  const { analyzeCVWithJD, handleSetAISuggestions } = useAIStore();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];

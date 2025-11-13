@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Upload, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
-import { useCVStore } from "@/stores/cvStore";
+import { useAIStore } from "@/stores/aiStore";
 import { JobDescriptionMatchResult } from "./JobDescriptionMatchResult";
 
 interface JobDescriptionImportProps {
@@ -41,7 +41,7 @@ export function JobDescriptionImport({
   const [analyzeSummary, setAnalyzeSummary] = useState<string>("");
 
   const { analyzeCVWithJD, handleSetAISuggestions, handleSetJobDescription } =
-    useCVStore();
+    useAIStore();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];

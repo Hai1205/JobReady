@@ -6,8 +6,9 @@ import com.example.cvservice.dtos.responses.Response;
 import com.example.cvservice.entities.CV;
 import com.example.cvservice.mappers.CVMapper;
 import com.example.cvservice.repositoryies.*;
-import com.example.cvservice.services.apis.CVService;
-import com.example.cvservice.services.grpcs.UserGrpcClient;
+import com.example.cvservice.services.apis.CVApi;
+import com.example.cvservice.services.grpcs.clients.UserGrpcClient;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +47,7 @@ class CVServiceTest {
     private UserGrpcClient userGrpcClient;
 
     @InjectMocks
-    private CVService cvService;
+    private CVApi cvService;
 
     private CV mockCV;
     private CVDto mockCVDto;

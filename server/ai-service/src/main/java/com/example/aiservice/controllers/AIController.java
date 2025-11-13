@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.aiservice.dtos.responses.Response;
-import com.example.aiservice.services.apis.AIService;
+import com.example.aiservice.services.apis.AIApi;
 
 @RestController
 @RequestMapping("/api/v1/ai")
 public class AIController {
 
     @Autowired
-    private AIService aiService;
+    private AIApi aiService;
 
     @PostMapping("/analyze")
     @PreAuthorize("hasAnyAuthority('admin','user')")

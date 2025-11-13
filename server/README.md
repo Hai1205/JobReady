@@ -106,6 +106,7 @@ mvn clean install -pl auth-service
 mvn clean install -pl mail-service
 mvn clean install -pl cv-service
 mvn clean install -pl ai-service
+mvn clean install -pl stats-service
 ```
 
 ### 4. Chạy Services
@@ -125,6 +126,7 @@ mvn spring-boot:run -pl auth-service
 mvn spring-boot:run -pl mail-service
 mvn spring-boot:run -pl cv-service
 mvn spring-boot:run -pl ai-service
+mvn spring-boot:run -pl stats-service
 ```
 
 ### 5. Kiểm tra Services

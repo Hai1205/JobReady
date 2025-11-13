@@ -25,7 +25,12 @@ import static org.junit.jupiter.api.Assertions.*;
         "spring.datasource.driver-class-name=org.h2.Driver",
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.jpa.show-sql=true"
+        "spring.jpa.show-sql=true",
+        "spring.autoconfigure.exclude=org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration",
+        "eureka.client.enabled=false",
+        "spring.cloud.discovery.enabled=false",
+        "grpc.client.user-service.enable-keep-alive=false",
+        "spring.main.allow-bean-definition-overriding=true"
 })
 @Transactional
 class CVRepositoryTest {

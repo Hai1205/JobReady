@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.cv";
+option java_outer_classname = "CVServiceProto";
+
+package cv;
+
+// CV Service Definition
+service CVService {
+  // Get total CVs count
+  rpc GetTotalCVs(GetTotalCVsRequest) returns (GetTotalCVsResponse);
+  
+  // Get CVs by visibility
+  rpc GetCVsByVisibility(GetCVsByVisibilityRequest) returns (GetCVsByVisibilityResponse);
+  
+  // Get CVs created in date range
+  rpc GetCVsCreatedInRange(GetCVsCreatedInRangeRequest) returns (GetCVsCreatedInRangeResponse);
+  
+  // Get recent CVs
+  rpc GetRecentCVs(GetRecentCVsRequest) returns (GetRecentCVsResponse);
+}
+
+// Request Messages
+message GetTotalCVsRequest {
+}
+
+message GetCVsByVisibilityRequest {
+  bool is_visibility = 1;
+}
+
+message GetCVsCreatedInRangeRequest {
+  string start_date = 1; // ISO format
+  string end_date = 2;   // ISO format
+}
+
+message GetRecentCVsRequest {
+  int32 limit = 1;
+}
+
+// Response Messages
+message GetTotalCVsResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 total = 3;
+}
+
+message GetCVsByVisibilityResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 count = 3;
+}
+
+message GetCVsCreatedInRangeResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 count = 3;
+}
+
+message GetRecentCVsResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated CVInfo cvs = 3;
+}
+
+// CV Info
+message CVInfo {
+  string id = 1;
+  string title = 2;
+  string user_id = 3;
+  string created_at = 4;
+  bool is_visibility = 5;
+}

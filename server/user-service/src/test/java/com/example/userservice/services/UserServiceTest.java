@@ -6,7 +6,7 @@ import com.example.userservice.entities.User;
 import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
 import com.example.userservice.repositories.UserRepository;
-import com.example.userservice.services.apis.UserService;
+import com.example.userservice.services.apis.UserApi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ class UserServiceTest {
     private MultipartFile avatarFile;
 
     @InjectMocks
-    private UserService userService;
+    private UserApi userService;
 
     private User mockUser;
     private UserDto mockUserDto;

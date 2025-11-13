@@ -2,6 +2,7 @@ package com.example.cvservice.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,34 +17,36 @@ import com.example.securitycommon.handler.JsonAuthenticationEntryPoint;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@Profile("!test")
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final JsonAuthenticationEntryPoint authenticationEntryPoint;
-    private final JsonAccessDeniedHandler accessDeniedHandler;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final JsonAuthenticationEntryPoint authenticationEntryPoint;
+        private final JsonAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            JsonAuthenticationEntryPoint authenticationEntryPoint,
-            JsonAccessDeniedHandler accessDeniedHandler) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.authenticationEntryPoint = authenticationEntryPoint;
-        this.accessDeniedHandler = accessDeniedHandler;
-    }
+        public SecurityConfig(
+                        JwtAuthenticationFilter jwtAuthenticationFilter,
+                        JsonAuthenticationEntryPoint authenticationEntryPoint,
+                        JsonAccessDeniedHandler accessDeniedHandler) {
+                this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+                this.authenticationEntryPoint = authenticationEntryPoint;
+                this.accessDeniedHandler = accessDeniedHandler;
+        }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/cvs/health").permitAll()
-                        .anyRequest().authenticated())
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(csrf -> csrf.disable())
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/v1/cvs/health").permitAll()
+                                                .anyRequest().authenticated())
+                                .exceptionHandling(exception -> exception
+                                                .authenticationEntryPoint(authenticationEntryPoint)
+                                                .accessDeniedHandler(accessDeniedHandler))
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 }

@@ -36,7 +36,7 @@ export const getRefreshToken = (): string | null => {
 const axiosInstance = axios.create({
   baseURL: `${SERVER_URL}/api/v1`,
   withCredentials: true,
-  timeout: 10000, // Add a timeout to prevent hanging requests
+  timeout: 30000, // Add a timeout to prevent hanging requests
 });
 
 const getAccessToken = (item: string): string | null => {

@@ -1,7 +1,7 @@
 package com.example.userservice.controllers;
 
 import com.example.userservice.dtos.response.Response;
-import com.example.userservice.services.apis.UserService;
+import com.example.userservice.services.apis.UserApi;
 
 import java.util.UUID;
 
@@ -17,12 +17,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private UserApi userApi;
 
     @PostMapping
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> createUser(@RequestPart("data") String dataJson) {
-        Response response = userService.createUser(dataJson);
+        Response response = userApi.createUser(dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -30,7 +30,7 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> getAllUsers() {
-        Response response = userService.getAllUsers();
+        Response response = userApi.getAllUsers();
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -38,7 +38,7 @@ public class UserController {
     @GetMapping("/{userId}")
     @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> getUserById(@PathVariable("userId") UUID userId) {
-        Response response = userService.getUserById(userId);
+        Response response = userApi.getUserById(userId);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -49,7 +49,7 @@ public class UserController {
             @PathVariable("userId") UUID userId,
             @RequestPart("data") String dataJson,
             @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
-        Response response = userService.updateUser(userId, dataJson, avatar);
+        Response response = userApi.updateUser(userId, dataJson, avatar);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -57,7 +57,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> deleteUser(@PathVariable("userId") UUID userId) {
-        Response response = userService.deleteUser(userId);
+        Response response = userApi.deleteUser(userId);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

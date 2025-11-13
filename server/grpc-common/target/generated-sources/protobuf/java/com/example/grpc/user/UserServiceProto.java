@@ -61,6 +61,26 @@ public final class UserServiceProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_user_ResetPasswordRequest_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_GetUserStatsRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_GetUserStatsRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_GetUsersByStatusRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_GetUsersByStatusRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_GetUsersCreatedInRangeRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_GetUsersCreatedInRangeRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_GetRecentUsersRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_GetRecentUsersRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_user_UserResponse_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -70,6 +90,31 @@ public final class UserServiceProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_user_ResetPasswordResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_GetUserStatsResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_GetUserStatsResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_GetUsersByStatusResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_GetUsersByStatusResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_GetUsersCreatedInRangeResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_GetUsersCreatedInRangeResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_GetRecentUsersResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_GetRecentUsersResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_UserInfo_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_user_UserInfo_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
     internal_static_user_User_descriptor;
   static final 
@@ -97,32 +142,57 @@ public final class UserServiceProto {
       "current_password\030\002 \001(\t\022\024\n\014new_password\030\003" +
       " \001(\t\"<\n\025ForgotPasswordRequest\022\r\n\005email\030\001" +
       " \001(\t\022\024\n\014new_password\030\002 \001(\t\"%\n\024ResetPassw" +
-      "ordRequest\022\r\n\005email\030\001 \001(\t\"G\n\014UserRespons" +
-      "e\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\030\n\004user" +
-      "\030\003 \001(\0132\n.user.User\"L\n\025ResetPasswordRespo" +
-      "nse\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\024\n\014ne" +
-      "w_password\030\003 \001(\t\"\233\001\n\004User\022\n\n\002id\030\001 \001(\t\022\020\n" +
-      "\010username\030\002 \001(\t\022\r\n\005email\030\003 \001(\t\022\020\n\010fullna" +
-      "me\030\004 \001(\t\022\014\n\004role\030\005 \001(\t\022\016\n\006status\030\006 \001(\t\022\016" +
-      "\n\006avatar\030\007 \001(\t\022\022\n\ncreated_at\030\010 \001(\t\022\022\n\nup" +
-      "dated_at\030\t \001(\t2\361\004\n\013UserService\022=\n\014FindUs" +
-      "erById\022\031.user.FindUserByIdRequest\032\022.user" +
-      ".UserResponse\022C\n\017FindUserByEmail\022\034.user." +
-      "FindUserByEmailRequest\032\022.user.UserRespon" +
-      "se\022M\n\024FindUserByIdentifier\022!.user.FindUs" +
-      "erByIdentifierRequest\032\022.user.UserRespons" +
-      "e\0229\n\nCreateUser\022\027.user.CreateUserRequest" +
-      "\032\022.user.UserResponse\022=\n\014ActivateUser\022\031.u" +
-      "ser.ActivateUserRequest\032\022.user.UserRespo" +
-      "nse\022E\n\020AuthenticateUser\022\035.user.Authentic" +
-      "ateUserRequest\032\022.user.UserResponse\022A\n\016Ch" +
-      "angePassword\022\033.user.ChangePasswordReques" +
-      "t\032\022.user.UserResponse\022A\n\016ForgotPassword\022" +
-      "\033.user.ForgotPasswordRequest\032\022.user.User" +
-      "Response\022H\n\rResetPassword\022\032.user.ResetPa" +
-      "sswordRequest\032\033.user.ResetPasswordRespon" +
-      "seB+\n\025com.example.grpc.userB\020UserService" +
-      "ProtoP\001b\006proto3"
+      "ordRequest\022\r\n\005email\030\001 \001(\t\"\025\n\023GetUserStat" +
+      "sRequest\")\n\027GetUsersByStatusRequest\022\016\n\006s" +
+      "tatus\030\001 \001(\t\"E\n\035GetUsersCreatedInRangeReq" +
+      "uest\022\022\n\nstart_date\030\001 \001(\t\022\020\n\010end_date\030\002 \001" +
+      "(\t\"&\n\025GetRecentUsersRequest\022\r\n\005limit\030\001 \001" +
+      "(\005\"G\n\014UserResponse\022\014\n\004code\030\001 \001(\005\022\017\n\007mess" +
+      "age\030\002 \001(\t\022\030\n\004user\030\003 \001(\0132\n.user.User\"L\n\025R" +
+      "esetPasswordResponse\022\014\n\004code\030\001 \001(\005\022\017\n\007me" +
+      "ssage\030\002 \001(\t\022\024\n\014new_password\030\003 \001(\t\"\215\001\n\024Ge" +
+      "tUserStatsResponse\022\014\n\004code\030\001 \001(\005\022\017\n\007mess" +
+      "age\030\002 \001(\t\022\023\n\013total_users\030\003 \001(\003\022\024\n\014active" +
+      "_users\030\004 \001(\003\022\025\n\rpending_users\030\005 \001(\003\022\024\n\014b" +
+      "anned_users\030\006 \001(\003\"H\n\030GetUsersByStatusRes" +
+      "ponse\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\r\n\005" +
+      "count\030\003 \001(\003\"N\n\036GetUsersCreatedInRangeRes" +
+      "ponse\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\r\n\005" +
+      "count\030\003 \001(\003\"V\n\026GetRecentUsersResponse\022\014\n" +
+      "\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\035\n\005users\030\003 " +
+      "\003(\0132\016.user.UserInfo\"w\n\010UserInfo\022\n\n\002id\030\001 " +
+      "\001(\t\022\020\n\010username\030\002 \001(\t\022\r\n\005email\030\003 \001(\t\022\020\n\010" +
+      "fullname\030\004 \001(\t\022\014\n\004role\030\005 \001(\t\022\016\n\006status\030\006" +
+      " \001(\t\022\016\n\006avatar\030\007 \001(\t\"\233\001\n\004User\022\n\n\002id\030\001 \001(" +
+      "\t\022\020\n\010username\030\002 \001(\t\022\r\n\005email\030\003 \001(\t\022\020\n\010fu" +
+      "llname\030\004 \001(\t\022\014\n\004role\030\005 \001(\t\022\016\n\006status\030\006 \001" +
+      "(\t\022\016\n\006avatar\030\007 \001(\t\022\022\n\ncreated_at\030\010 \001(\t\022\022" +
+      "\n\nupdated_at\030\t \001(\t2\275\007\n\013UserService\022=\n\014Fi" +
+      "ndUserById\022\031.user.FindUserByIdRequest\032\022." +
+      "user.UserResponse\022C\n\017FindUserByEmail\022\034.u" +
+      "ser.FindUserByEmailRequest\032\022.user.UserRe" +
+      "sponse\022M\n\024FindUserByIdentifier\022!.user.Fi" +
+      "ndUserByIdentifierRequest\032\022.user.UserRes" +
+      "ponse\0229\n\nCreateUser\022\027.user.CreateUserReq" +
+      "uest\032\022.user.UserResponse\022=\n\014ActivateUser" +
+      "\022\031.user.ActivateUserRequest\032\022.user.UserR" +
+      "esponse\022E\n\020AuthenticateUser\022\035.user.Authe" +
+      "nticateUserRequest\032\022.user.UserResponse\022A" +
+      "\n\016ChangePassword\022\033.user.ChangePasswordRe" +
+      "quest\032\022.user.UserResponse\022A\n\016ForgotPassw" +
+      "ord\022\033.user.ForgotPasswordRequest\032\022.user." +
+      "UserResponse\022H\n\rResetPassword\022\032.user.Res" +
+      "etPasswordRequest\032\033.user.ResetPasswordRe" +
+      "sponse\022E\n\014GetUserStats\022\031.user.GetUserSta" +
+      "tsRequest\032\032.user.GetUserStatsResponse\022Q\n" +
+      "\020GetUsersByStatus\022\035.user.GetUsersByStatu" +
+      "sRequest\032\036.user.GetUsersByStatusResponse" +
+      "\022c\n\026GetUsersCreatedInRange\022#.user.GetUse" +
+      "rsCreatedInRangeRequest\032$.user.GetUsersC" +
+      "reatedInRangeResponse\022K\n\016GetRecentUsers\022" +
+      "\033.user.GetRecentUsersRequest\032\034.user.GetR" +
+      "ecentUsersResponseB+\n\025com.example.grpc.u" +
+      "serB\020UserServiceProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -182,20 +252,74 @@ public final class UserServiceProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_user_ResetPasswordRequest_descriptor,
         new java.lang.String[] { "Email", });
-    internal_static_user_UserResponse_descriptor =
+    internal_static_user_GetUserStatsRequest_descriptor =
       getDescriptor().getMessageTypes().get(9);
+    internal_static_user_GetUserStatsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_GetUserStatsRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_user_GetUsersByStatusRequest_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_user_GetUsersByStatusRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_GetUsersByStatusRequest_descriptor,
+        new java.lang.String[] { "Status", });
+    internal_static_user_GetUsersCreatedInRangeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_user_GetUsersCreatedInRangeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_GetUsersCreatedInRangeRequest_descriptor,
+        new java.lang.String[] { "StartDate", "EndDate", });
+    internal_static_user_GetRecentUsersRequest_descriptor =
+      getDescriptor().getMessageTypes().get(12);
+    internal_static_user_GetRecentUsersRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_GetRecentUsersRequest_descriptor,
+        new java.lang.String[] { "Limit", });
+    internal_static_user_UserResponse_descriptor =
+      getDescriptor().getMessageTypes().get(13);
     internal_static_user_UserResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_user_UserResponse_descriptor,
         new java.lang.String[] { "Code", "Message", "User", });
     internal_static_user_ResetPasswordResponse_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_user_ResetPasswordResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_user_ResetPasswordResponse_descriptor,
         new java.lang.String[] { "Code", "Message", "NewPassword", });
+    internal_static_user_GetUserStatsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(15);
+    internal_static_user_GetUserStatsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_GetUserStatsResponse_descriptor,
+        new java.lang.String[] { "Code", "Message", "TotalUsers", "ActiveUsers", "PendingUsers", "BannedUsers", });
+    internal_static_user_GetUsersByStatusResponse_descriptor =
+      getDescriptor().getMessageTypes().get(16);
+    internal_static_user_GetUsersByStatusResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_GetUsersByStatusResponse_descriptor,
+        new java.lang.String[] { "Code", "Message", "Count", });
+    internal_static_user_GetUsersCreatedInRangeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(17);
+    internal_static_user_GetUsersCreatedInRangeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_GetUsersCreatedInRangeResponse_descriptor,
+        new java.lang.String[] { "Code", "Message", "Count", });
+    internal_static_user_GetRecentUsersResponse_descriptor =
+      getDescriptor().getMessageTypes().get(18);
+    internal_static_user_GetRecentUsersResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_GetRecentUsersResponse_descriptor,
+        new java.lang.String[] { "Code", "Message", "Users", });
+    internal_static_user_UserInfo_descriptor =
+      getDescriptor().getMessageTypes().get(19);
+    internal_static_user_UserInfo_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_user_UserInfo_descriptor,
+        new java.lang.String[] { "Id", "Username", "Email", "Fullname", "Role", "Status", "Avatar", });
     internal_static_user_User_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_user_User_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_user_User_descriptor,

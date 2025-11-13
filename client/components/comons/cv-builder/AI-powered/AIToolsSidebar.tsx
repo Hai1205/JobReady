@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAIStore } from "@/stores/aiStore";
 import { useCVStore } from "@/stores/cvStore";
 import { CompactJobMatch } from "./CompactJobMatch";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,8 @@ import {
 export function AIToolsSidebar() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const { analyzeCV, handleSetAISuggestions, currentCV } = useCVStore();
+  const { analyzeCV, handleSetAISuggestions } = useAIStore();
+  const { currentCV } = useCVStore();
 
   const handleQuickAnalyze = async () => {
     if (!currentCV) {

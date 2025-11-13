@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
 import PageHeader from "@/components/comons/my-cvs/PageHeader";
-import DeleteConfirmationDialog from "@/components/comons/layout/DeleteConfirmationDialog";
-import LoadingPage from "@/components/comons/layout/LoadingPage";
+import UserCVsSkeleton from "@/components/comons/layout/UserCVsSkeleton";
 import UserCVsSection from "@/components/comons/my-cvs/UserCVsSection";
 import TemplateCVsSection from "@/components/comons/my-cvs/TemplateCVsSection";
+import ConfirmationDialog from "../layout/ConfirmationDialog";
 
 export default function MyCVsPageClient() {
   const { userAuth } = useAuthStore();
@@ -17,15 +17,16 @@ export default function MyCVsPageClient() {
     createCV,
     deleteCV,
     duplicateCV,
-    getUserCVs,
-    getAllCVs,
+    fetchUserCVsInBackground,
+    fetchAllCVsInBackground,
     handleGeneratePDF,
     handleSetCurrentCV,
     userCVs,
+    CVsTable,
+    isLoadingUserCVs,
   } = useCVStore();
 
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const [templateCVs, setTemplateCVs] = useState<ICV[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<string | null>(null);
@@ -33,22 +34,18 @@ export default function MyCVsPageClient() {
   useEffect(() => {
     const loadData = async () => {
       if (userAuth) {
-        await getUserCVs(userAuth.id);
+        await fetchUserCVsInBackground(userAuth.id);
       }
-      await loadTemplateCVs();
-      setLoading(false);
+      await fetchAllCVsInBackground();
     };
     loadData();
-  }, [userAuth, router]);
+  }, [userAuth]);
 
-  const loadTemplateCVs = async () => {
-    const response = await getAllCVs();
-    if (response?.data) {
-      const allCvs = response.data.cvs || [];
-      const publicCvs = allCvs.filter((cv) => cv.isVisibility === true);
-      setTemplateCVs(publicCvs);
-    }
-  };
+  useEffect(() => {
+    // Filter public CVs from CVsTable
+    const publicCvs = CVsTable.filter((cv) => cv.isVisibility === true);
+    setTemplateCVs(publicCvs);
+  }, [CVsTable]);
 
   const handleCreate = async () => {
     await createCV(userAuth?.id || "");
@@ -87,8 +84,9 @@ export default function MyCVsPageClient() {
     return null;
   }
 
-  if (loading) {
-    return <LoadingPage />;
+  // Show loading only when there's no cached data
+  if (isLoadingUserCVs && userCVs.length === 0) {
+    return <UserCVsSkeleton />;
   }
 
   return (
@@ -113,7 +111,7 @@ export default function MyCVsPageClient() {
         </div>
       </div>
 
-      <DeleteConfirmationDialog
+      <ConfirmationDialog
         open={deleteDialogOpen}
         description={deleteDialogDescription}
         onOpenChange={setDeleteDialogOpen}

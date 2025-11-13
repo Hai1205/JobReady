@@ -32,8 +32,9 @@
         <module>mail-service</module>
         <module>user-service</module>
         <module>cv-service</module>
-        <!-- <module>chat-service</module> -->
         <module>ai-service</module>
+        <module>stats-service</module>
+        <!-- <module>chat-service</module> -->
     </modules>
 
     <dependencyManagement>

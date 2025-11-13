@@ -34,6 +34,18 @@ service UserService {
   
   // Reset password
   rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+  
+  // Get user statistics
+  rpc GetUserStats(GetUserStatsRequest) returns (GetUserStatsResponse);
+  
+  // Get users by status
+  rpc GetUsersByStatus(GetUsersByStatusRequest) returns (GetUsersByStatusResponse);
+  
+  // Get users created in date range
+  rpc GetUsersCreatedInRange(GetUsersCreatedInRangeRequest) returns (GetUsersCreatedInRangeResponse);
+  
+  // Get recent users
+  rpc GetRecentUsers(GetRecentUsersRequest) returns (GetRecentUsersResponse);
 }
 
 // Request Messages
@@ -80,6 +92,22 @@ message ResetPasswordRequest {
   string email = 1;
 }
 
+message GetUserStatsRequest {
+}
+
+message GetUsersByStatusRequest {
+  string status = 1;
+}
+
+message GetUsersCreatedInRangeRequest {
+  string start_date = 1; // ISO format
+  string end_date = 2;   // ISO format
+}
+
+message GetRecentUsersRequest {
+  int32 limit = 1;
+}
+
 // Response Messages
 message UserResponse {
   int32 code = 1;
@@ -91,6 +119,44 @@ message ResetPasswordResponse {
   int32 code = 1;
   string message = 2;
   string new_password = 3;
+}
+
+message GetUserStatsResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 total_users = 3;
+  int64 active_users = 4;
+  int64 pending_users = 5;
+  int64 banned_users = 6;
+}
+
+message GetUsersByStatusResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 count = 3;
+}
+
+message GetUsersCreatedInRangeResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 count = 3;
+}
+
+message GetRecentUsersResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated UserInfo users = 3;
+}
+
+// User Info for lists
+message UserInfo {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string fullname = 4;
+  string role = 5;
+  string status = 6;
+  string avatar = 7;
 }
 
 // User Entity

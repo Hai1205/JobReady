@@ -1,14 +1,21 @@
 package com.example.cvservice.controllers;
 
 import com.example.cvservice.dtos.responses.Response;
-import com.example.cvservice.services.apis.CVService;
+import com.example.cvservice.services.apis.CVApi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -23,14 +30,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Integration Tests for CVController
  * Tests REST endpoints with Spring Security and MockMvc
  */
-@WebMvcTest(CVController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestPropertySource(properties = {
+        "spring.autoconfigure.exclude=org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration",
+        "eureka.client.enabled=false",
+        "spring.cloud.discovery.enabled=false",
+        "grpc.client.user-service.enable-keep-alive=false",
+        "spring.main.allow-bean-definition-overriding=true"
+})
 class CVControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private CVService cvService;
+    private CVApi cvService;
 
     private UUID userId;
     private UUID cvId;
@@ -275,5 +290,21 @@ class CVControllerTest {
         mockMvc.perform(post("/api/v1/cvs/users/{userId}", userId)
                 .with(csrf()))
                 .andExpect(status().isOk());
+    }
+}
+
+@Configuration
+@EnableWebSecurity
+class TestSecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/cvs/health").permitAll()
+                        .anyRequest().authenticated());
+
+        return http.build();
     }
 }

@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.cvservice.dtos.responses.Response;
-import com.example.cvservice.services.apis.CVService;
+import com.example.cvservice.services.apis.CVApi;
 
 @RestController
 @RequestMapping("/api/v1/cvs")
 public class CVController {
 
     @Autowired
-    private CVService cvService;
+    private CVApi cvService;
 
     @PostMapping("/users/{userId}")
     public ResponseEntity<Response> createCV(@PathVariable("userId") UUID userId) {

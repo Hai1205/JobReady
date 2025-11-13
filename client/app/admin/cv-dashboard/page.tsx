@@ -11,24 +11,25 @@ import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
 import { CVFilter } from "@/components/comons/admin/cvDashboard/CVFilter";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
-import DeleteConfirmationDialog from "@/components/comons/layout/DeleteConfirmationDialog";
+import TableDashboardSkeleton from "@/components/comons/layout/TableDashboardSkeleton";
+import ConfirmationDialog from "@/components/comons/layout/ConfirmationDialog";
 
 export type CvFilterType = "visibility";
 
 export default function CVDashboardPage() {
   const {
     CVsTable,
-    getAllCVs,
+    fetchAllCVsInBackground,
     createCV,
     deleteCV,
     handleGeneratePDF,
     handleSetCurrentCV,
+    isLoadingAllCVs,
   } = useCVStore();
   const { userAuth } = useAuthStore();
 
   const router = useRouter();
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCVs, setFilteredCVs] = useState<ICV[]>([]);
 
@@ -41,17 +42,10 @@ export default function CVDashboardPage() {
     visibility?: string[];
   }>(initialFilters);
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-
-    await getAllCVs();
-
-    setIsLoading(false);
-  }, [getAllCVs]);
-
   useEffect(() => {
-    fetchData();
-  }, [getAllCVs]);
+    // Fetch CVs in background
+    fetchAllCVsInBackground();
+  }, []);
 
   // Function to filter data based on query and activeFilters
   const filterData = useCallback(
@@ -152,8 +146,13 @@ export default function CVDashboardPage() {
   const handleRefresh = () => {
     setActiveFilters(initialFilters);
     setSearchQuery("");
-    fetchData();
+    fetchAllCVsInBackground();
   };
+
+  // Show skeleton loading when there's no cached data
+  if (isLoadingAllCVs && CVsTable.length === 0) {
+    return <TableDashboardSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
@@ -207,7 +206,7 @@ export default function CVDashboardPage() {
 
           <CVTable
             CVs={filteredCVs}
-            isLoading={isLoading}
+            isLoading={isLoadingAllCVs && CVsTable.length === 0}
             onUpdate={onUpdate}
             onDownload={onDownload}
             onDelete={onDelete}
@@ -215,7 +214,7 @@ export default function CVDashboardPage() {
         </Card>
       </div>
 
-      <DeleteConfirmationDialog
+      <ConfirmationDialog
         open={deleteDialogOpen}
         description="Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn CV và loại bỏ nó khỏi máy chủ của chúng tôi."
         onOpenChange={setDeleteDialogOpen}

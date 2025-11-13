@@ -8,8 +8,8 @@ import com.example.cvservice.exceptions.OurException;
 import com.example.cvservice.mappers.CVMapper;
 import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.CloudinaryService;
-import com.example.cvservice.services.apis.CVService;
-import com.example.cvservice.services.grpcs.UserGrpcClient;
+import com.example.cvservice.services.apis.CVApi;
+import com.example.cvservice.services.grpcs.clients.UserGrpcClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@ class CVServiceTest {
     private ObjectMapper objectMapper;
 
     @InjectMocks
-    private CVService cvService;
+    private CVApi cvService;
     private UUID userId;
     private UUID cvId;
     private UserDto userDto;

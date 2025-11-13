@@ -1,7 +1,7 @@
 package com.example.userservice.initializers;
 
 import com.example.userservice.dtos.UserDto;
-import com.example.userservice.services.apis.UserService;
+import com.example.userservice.services.apis.UserApi;
 
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +13,7 @@ public class RootUserInitializer implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(RootUserInitializer.class);
 
-    private final UserService userService;
+    private final UserApi userService;
 
     @Value("${ROOT_EMAIL}")
     private String rootEmail;
@@ -33,7 +33,7 @@ public class RootUserInitializer implements CommandLineRunner {
     @Value("${ROOT_STATUS}")
     private String rootStatus;
 
-    public RootUserInitializer(UserService userService) {
+    public RootUserInitializer(UserApi userService) {
         this.userService = userService;
     }
 

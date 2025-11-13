@@ -6,7 +6,7 @@ import { Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AISuggestionsList } from "./AISuggestionsList";
 import { AIToolsSidebar } from "./AIToolsSidebar";
-import { useCVStore } from "@/stores/cvStore";
+import { useAIStore } from "@/stores/aiStore";
 import { Badge } from "@/components/ui/badge";
 
 /**
@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
  * Bao gồm Quick Analyze, Job Match Analysis, và AI Suggestions
  */
 export function AIPanel() {
-  const { aiSuggestions } = useCVStore();
+  const { aiSuggestions } = useAIStore();
   const [activeTab, setActiveTab] = useState("tools");
   const [previousSuggestionsCount, setPreviousSuggestionsCount] = useState(0);
 

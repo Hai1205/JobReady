@@ -8,11 +8,13 @@ import { Card } from "@/components/ui/card";
 import { HighlightableTextarea } from "@/components/comons/cv-builder/HighlightableTextarea";
 import { Upload, X } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";
+import { useAIStore } from "@/stores/aiStore";
 import { useRef } from "react";
 import { toast } from "react-toastify";
 
 export function PersonalInfoStep() {
-  const { currentCV, handleUpdateCV, aiSuggestions } = useCVStore();
+  const { currentCV, handleUpdateCV } = useCVStore();
+  const { aiSuggestions } = useAIStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!currentCV) {

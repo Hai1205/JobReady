@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCVStore } from "@/stores/cvStore";
+import { useAIStore } from "@/stores/aiStore";
 import { JobDescriptionImport } from "../JobDescriptionImport";
 import { AISuggestionsList } from "./AISuggestionsList";
 import { Button } from "@/components/ui/button";
@@ -32,13 +33,9 @@ export function AIFeaturesTab() {
     content: string;
   } | null>(null);
 
-  const {
-    analyzeCV,
-    handleSetAISuggestions,
-    improveCV,
-    currentCV,
-    handleUpdateCV,
-  } = useCVStore();
+  const { analyzeCV, handleSetAISuggestions, improveCV } = useAIStore();
+
+  const { currentCV, handleUpdateCV } = useCVStore();
 
   const handleQuickAnalyze = async () => {
     if (!currentCV) {

@@ -87,10 +87,25 @@ declare global {
         benefits: string[]
     }
 
-    interface IStats {
-        totalCVs?: number
-        totalUsers?: number
-        [key: string]: number | undefined
+    export interface IDashboardStats {
+        totalUsers: number;
+        activeUsers: number;
+        pendingUsers: number;
+        bannedUsers: number;
+        usersCreatedThisMonth: number;
+        totalCVs: number;
+        publicCVs: number;
+        privateCVs: number;
+        cvsCreatedThisMonth: number;
+        recentActivities: IActivityInfo[];
+    }
+
+    export interface IActivityInfo {
+        id: string;
+        type: string;
+        description: string;
+        timestamp: string;
+        userId: string;
     }
 }
 export { };

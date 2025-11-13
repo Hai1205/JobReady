@@ -3,21 +3,11 @@ import { createStore, IBaseStore } from "@/lib/initialStore";
 import { renderCVToHTMLAsync } from "@/components/comons/cv-builder/CVRenderer";
 import { toast } from "react-toastify";
 import { testFormData } from "@/lib/utils";
-import { applySuggestionToCV, getSectionDisplayName } from "@/lib/suggestionApplier";
 import { exportCustomHTML, exportToPDF } from "@/services/pdfExportService";
 
 interface ICVDataResponse {
 	cv: ICV,
 	cvs: ICV[],
-}
-
-interface IAIDataResponse {
-	suggestions: IAISuggestion[],
-	analyze: IAnalyzeResult,
-	improvedSection: string,
-	matchScore: number,
-	missingKeywords?: string[],
-	parsedJobDescription?: IJobDescriptionResult,
 }
 
 export interface ICVStore extends IBaseStore {
@@ -26,11 +16,15 @@ export interface ICVStore extends IBaseStore {
 	userCVs: ICV[]
 	CVsTable: ICV[]
 	currentStep: number
-	aiSuggestions: IAISuggestion[]
-	jobDescription: string
+	lastFetchTimeAllCVs: number | null
+	lastFetchTimeUserCVs: number | null
+	isLoadingAllCVs: boolean
+	isLoadingUserCVs: boolean
 
 	getAllCVs: () => Promise<IApiResponse<ICVDataResponse>>;
+	fetchAllCVsInBackground: () => Promise<void>;
 	getUserCVs: (userId: string) => Promise<IApiResponse<ICVDataResponse>>;
+	fetchUserCVsInBackground: (userId: string) => Promise<void>;
 	getCV: (
 		cvId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
@@ -55,34 +49,10 @@ export interface ICVStore extends IBaseStore {
 	duplicateCV: (
 		cvId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
-	analyzeCV: (
-		title: string,
-		personalInfo: IPersonalInfo,
-		experiences: IExperience[],
-		educations: IEducation[],
-		skills: string[],
-	) => Promise<IApiResponse<IAIDataResponse>>;
-	analyzeCVWithJD: (
-		jobDescription: string,
-		jdFile: File | null,
-		language: string,
-		title: string,
-		personalInfo: IPersonalInfo,
-		experiences: IExperience[],
-		educations: IEducation[],
-		skills: string[],
-	) => Promise<IApiResponse<IAIDataResponse>>;
-	improveCV: (
-		section: string,
-		content: string,
-	) => Promise<IApiResponse<IAIDataResponse>>;
 
 	handleSetCurrentCV: (cv: ICV | null) => void;
 	handleUpdateCV: (cvData: Partial<ICV>) => void;
 	handleSetCurrentStep: (step: number) => void;
-	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void;
-	handleSetJobDescription: (jd: string) => void;
-	handleApplySuggestion: (id: string) => void;
 	handleClearCVList: () => void;
 	handleGeneratePDF: (cv: ICV, htmlContent?: string) => void;
 	handleAddCVToUserCVs: (cv: ICV) => void;
@@ -97,9 +67,14 @@ const initialState = {
 	userCVs: [],
 	CVsTable: [],
 	currentStep: 0,
-	aiSuggestions: [],
-	jobDescription: "",
+	lastFetchTimeAllCVs: null as number | null,
+	lastFetchTimeUserCVs: null as number | null,
+	isLoadingAllCVs: false,
+	isLoadingUserCVs: false,
 };
+
+// Cache expiration time: 3 minutes
+const CACHE_DURATION = 3 * 60 * 1000;
 
 export const useCVStore = createStore<ICVStore>(
 	storeName,
@@ -110,24 +85,101 @@ export const useCVStore = createStore<ICVStore>(
 				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs`);
 
 				if (res.data && res.data.success && res.data.cvs) {
-					set({ CVsTable: res.data.cvs });
+					set({
+						CVsTable: res.data.cvs,
+						lastFetchTimeAllCVs: Date.now()
+					});
 				}
 
 				return res;
 			});
 		},
 
+		fetchAllCVsInBackground: async (): Promise<void> => {
+			const state = get();
+			const now = Date.now();
+
+			// Check if cache is still valid
+			if (state.CVsTable.length > 0 && state.lastFetchTimeAllCVs) {
+				const cacheAge = now - state.lastFetchTimeAllCVs;
+				if (cacheAge < CACHE_DURATION) {
+					console.log("All CVs cache is still valid, skipping fetch");
+					return;
+				}
+			}
+
+			// Check if already loading
+			if (state.isLoadingAllCVs) {
+				return;
+			}
+
+			set({ isLoadingAllCVs: true });
+
+			try {
+				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs`);
+
+				if (res.data && res.data.success && res.data.cvs) {
+					set({
+						CVsTable: res.data.cvs,
+						lastFetchTimeAllCVs: Date.now()
+					});
+				}
+			} catch (error) {
+				console.error("Failed to fetch all CVs in background:", error);
+			} finally {
+				set({ isLoadingAllCVs: false });
+			}
+		},
+
 		getUserCVs: async (userId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
 				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs/users/${userId}`);
-				console.log("User CVs:", res);
 
 				if (res.data && res.data.success && res.data.cvs) {
-					set({ userCVs: res.data.cvs });
+					set({
+						userCVs: res.data.cvs,
+						lastFetchTimeUserCVs: Date.now()
+					});
 				}
 
 				return res;
 			});
+		},
+
+		fetchUserCVsInBackground: async (userId: string): Promise<void> => {
+			const state = get();
+			const now = Date.now();
+
+			// Check if cache is still valid
+			if (state.userCVs.length > 0 && state.lastFetchTimeUserCVs) {
+				const cacheAge = now - state.lastFetchTimeUserCVs;
+				if (cacheAge < CACHE_DURATION) {
+					console.log("User CVs cache is still valid, skipping fetch");
+					return;
+				}
+			}
+
+			// Check if already loading
+			if (state.isLoadingUserCVs) {
+				return;
+			}
+
+			set({ isLoadingUserCVs: true });
+
+			try {
+				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs/users/${userId}`);
+
+				if (res.data && res.data.success && res.data.cvs) {
+					set({
+						userCVs: res.data.cvs,
+						lastFetchTimeUserCVs: Date.now()
+					});
+				}
+			} catch (error) {
+				console.error("Failed to fetch user CVs in background:", error);
+			} finally {
+				set({ isLoadingUserCVs: false });
+			}
 		},
 
 		getCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
@@ -213,72 +265,6 @@ export const useCVStore = createStore<ICVStore>(
 			});
 		},
 
-		analyzeCV: async (
-			title: string,
-			personalInfo: IPersonalInfo,
-			experiences: IExperience[],
-			educations: IEducation[],
-			skills: string[],): Promise<IApiResponse<IAIDataResponse>> => {
-			const formData = new FormData();
-			formData.append("data", JSON.stringify({
-				title,
-				personalInfo,
-				experiences,
-				educations,
-				skills,
-			}));
-
-			return await get().handleRequest(async () => {
-				const res = await handleRequest<IAIDataResponse>(EHttpType.POST, `/ai/analyze`, formData);
-				console.log("Analyze CV Response:", res);
-				return res;
-			});
-		},
-
-		analyzeCVWithJD: async (
-			jobDescription: string,
-			jdFile: File | null,
-			language: string = "vi",
-			title: string,
-			personalInfo: IPersonalInfo,
-			experiences: IExperience[],
-			educations: IEducation[],
-			skills: string[],
-		): Promise<IApiResponse<IAIDataResponse>> => {
-			const formData = new FormData();
-			formData.append("data", JSON.stringify({
-				jobDescription,
-				language,
-				title,
-				personalInfo,
-				experiences,
-				educations,
-				skills,
-			}));
-			if (jdFile) formData.append("jdFile", jdFile);
-
-			return await get().handleRequest(async () => {
-				const res = await handleRequest<IAIDataResponse>(EHttpType.POST, `/ai/analyze-with-jd`, formData);
-				console.log("Analyze CV with JD Response:", res);
-				return res;
-			});
-		},
-
-		improveCV: async (
-			section: string,
-			content: string
-		): Promise<IApiResponse<IAIDataResponse>> => {
-			const formData = new FormData();
-			formData.append("data", JSON.stringify({
-				section,
-				content,
-			}));
-
-			return await get().handleRequest(async () => {
-				return await handleRequest<IAIDataResponse>(EHttpType.POST, `/ai/improve`, formData);
-			});
-		},
-
 		handleUpdateCV: (cvData: Partial<ICV>) => {
 			const currentState = get();
 			set({
@@ -294,46 +280,7 @@ export const useCVStore = createStore<ICVStore>(
 			set({ currentStep: step });
 		},
 
-		handleSetJobDescription: (jd: string): void => {
-			set({ jobDescription: jd });
-		},
-
-		handleSetAISuggestions: (suggestions: IAISuggestion[]): void => {
-			set({ aiSuggestions: suggestions });
-		},
-
-		handleApplySuggestion: (id: string): void => {
-			const currentState = get();
-			const suggestion = currentState.aiSuggestions.find(s => s.id === id);
-
-			if (!suggestion) {
-				toast.error("Không tìm thấy gợi ý");
-				return;
-			}
-
-			// Apply the suggestion to the appropriate CV state
-			const updatedCVCreate = applySuggestionToCV(currentState.currentCV, suggestion);
-
-			// Check if any CV was updated
-			if (!updatedCVCreate) {
-				toast.warning(`Không thể áp dụng gợi ý cho phần "${suggestion.section}"`);
-				return;
-			}
-
-			// Mark suggestion as applied
-			const updatedSuggestions = currentState.aiSuggestions.map(s =>
-				s.id === id ? { ...s, applied: true } : s
-			);
-
-			// Update state
-			set({
-				aiSuggestions: updatedSuggestions,
-				currentCV: updatedCVCreate
-			} as Partial<ICVStore>);
-
-			const sectionName = getSectionDisplayName(suggestion.section);
-			toast.success(`✅ Đã áp dụng gợi ý cho "${sectionName}"`);
-		}, handleClearCVList: (): void => {
+		handleClearCVList: (): void => {
 			set({ cvList: [] });
 		},
 

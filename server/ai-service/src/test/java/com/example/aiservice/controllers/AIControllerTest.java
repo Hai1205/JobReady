@@ -1,7 +1,7 @@
 package com.example.aiservice.controllers;
 
 import com.example.aiservice.dtos.responses.Response;
-import com.example.aiservice.services.apis.AIService;
+import com.example.aiservice.services.apis.AIApi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ class AIControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AIService aiService;
+    private AIApi aiService;
 
     private Response mockResponse;
 

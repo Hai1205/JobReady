@@ -1,6 +1,8 @@
 "use client";
 
+import { useAIStore } from "@/stores/aiStore";
 import { useCVStore } from "@/stores/cvStore";
+import { applySuggestionToCV } from "@/lib/suggestionApplier";
 import {
   Card,
   CardContent,
@@ -21,10 +23,19 @@ export function AISuggestionsList({
   onApplySuggestion,
   isApplying = false,
 }: AISuggestionsListProps) {
-  const { aiSuggestions, handleApplySuggestion } = useCVStore();
+  const { aiSuggestions, handleApplySuggestion } = useAIStore();
+  const { currentCV, handleUpdateCV } = useCVStore();
 
   const handleApply = (suggestion: IAISuggestion) => {
+    // Apply suggestion to CV
+    const updatedCV = applySuggestionToCV(currentCV, suggestion);
+    if (updatedCV) {
+      handleUpdateCV(updatedCV);
+    }
+
+    // Mark as applied in AI store
     handleApplySuggestion(suggestion.id);
+
     if (onApplySuggestion) {
       onApplySuggestion(suggestion);
     }

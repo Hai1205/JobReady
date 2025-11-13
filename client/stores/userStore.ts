@@ -12,8 +12,11 @@ export interface IUserStore extends IBaseStore {
 	user: IUser | null;
 	users: IUser[];
 	usersTable: IUser[];
+	lastFetchTime: number | null;
+	isLoading: boolean;
 
 	getAllUsers: () => Promise<IApiResponse<IUserDataResponse>>;
+	fetchAllUsersInBackground: () => Promise<void>;
 	getUser: (
 		userId: string
 	) => Promise<IApiResponse<IUserDataResponse>>;
@@ -46,7 +49,12 @@ const initialState = {
 	user: null,
 	users: [],
 	usersTable: [],
+	lastFetchTime: null as number | null,
+	isLoading: false,
 };
+
+// Cache expiration time: 3 minutes
+const CACHE_DURATION = 3 * 60 * 1000;
 
 export const useUserStore = createStore<IUserStore>(
 	storeName,
@@ -57,11 +65,50 @@ export const useUserStore = createStore<IUserStore>(
 				const res = await handleRequest<IUserDataResponse>(EHttpType.GET, `/users`);
 
 				if (res.data && res.data.success && res.data.users) {
-					set({ usersTable: res.data.users });
+					set({
+						usersTable: res.data.users,
+						lastFetchTime: Date.now()
+					});
 				}
 
 				return res;
 			});
+		},
+
+		fetchAllUsersInBackground: async (): Promise<void> => {
+			const state = get();
+			const now = Date.now();
+
+			// Check if cache is still valid
+			if (state.usersTable.length > 0 && state.lastFetchTime) {
+				const cacheAge = now - state.lastFetchTime;
+				if (cacheAge < CACHE_DURATION) {
+					console.log("Users cache is still valid, skipping fetch");
+					return;
+				}
+			}
+
+			// Check if already loading
+			if (state.isLoading) {
+				return;
+			}
+
+			set({ isLoading: true });
+
+			try {
+				const res = await handleRequest<IUserDataResponse>(EHttpType.GET, `/users`);
+
+				if (res.data && res.data.success && res.data.users) {
+					set({
+						usersTable: res.data.users,
+						lastFetchTime: Date.now()
+					});
+				}
+			} catch (error) {
+				console.error("Failed to fetch users in background:", error);
+			} finally {
+				set({ isLoading: false });
+			}
 		},
 
 		getUser: async (userId: string): Promise<IApiResponse<IUserDataResponse>> => {
