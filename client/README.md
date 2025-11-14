@@ -336,11 +336,17 @@ EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
+### Check error
+
+```bash
+npx tsc --noEmit
+```
+
 ### Manual Build
 
 ```bash
 npm run build
-npm run export  # Static export nếu cần
+npm run export
 ```
 
 ## 🔧 Development Scripts
@@ -453,4 +459,3 @@ This project is licensed under the MIT License.
 ---
 
 **Made with ❤️ by JobReady Team**
-<!-- npx tsc --noEmit -->

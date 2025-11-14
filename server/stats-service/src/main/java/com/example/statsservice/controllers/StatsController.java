@@ -15,10 +15,18 @@ public class StatsController {
     @Autowired
     private StatsApi statsService;
 
-    @GetMapping("/dashboard")
+    @GetMapping("/")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> getDashboardStats() {
         Response response = statsService.getDashboardStats();
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/report")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<Response> getStatsReport() {
+        Response response = statsService.getStatsReport();
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

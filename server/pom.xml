@@ -26,6 +26,7 @@
         <spring-ai.version>1.0.0-M3</spring-ai.version>
         <postgresql.version>42.7.3</postgresql.version>
         <pgvector.version>0.1.4</pgvector.version>
+        <jasperreports.version>6.21.3</jasperreports.version>
         <tika.version>2.9.1</tika.version>
     </properties>
 
@@ -177,6 +178,13 @@
                 <groupId>com.pgvector</groupId>
                 <artifactId>pgvector</artifactId>
                 <version>${pgvector.version}</version>
+            </dependency>
+
+            <!-- JasperReports -->
+            <dependency>
+                <groupId>net.sf.jasperreports</groupId>
+                <artifactId>jasperreports</artifactId>
+                <version>${jasperreports.version}</version>
             </dependency>
 
             <!-- Apache Tika for document parsing -->

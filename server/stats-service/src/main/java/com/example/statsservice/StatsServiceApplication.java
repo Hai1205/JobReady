@@ -9,7 +9,8 @@ import com.example.securitycommon.config.SecurityCommonAutoConfiguration;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-// @ComponentScan(basePackages = { "com.example.statsservice", "com.example.securitycommon" })
+// @ComponentScan(basePackages = { "com.example.statsservice",
+// "com.example.securitycommon" })
 @Import(SecurityCommonAutoConfiguration.class)
 public class StatsServiceApplication {
     public static void main(String[] args) {

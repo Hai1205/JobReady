@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Card,
@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Users,
   Eye,
@@ -16,8 +17,10 @@ import {
   TrendingUp,
   Clock,
   UserPlus,
+  Download,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/comons/admin/DashboardHeader";
+import { ReportViewerDialog } from "@/components/comons/admin/ReportViewerDialog";
 import { useStatsStore } from "@/stores/statsStore";
 import { toast } from "react-toastify";
 import DashboardSkeleton from "@/components/comons/layout/DashboardSkeleton";
@@ -25,6 +28,7 @@ import DashboardSkeleton from "@/components/comons/layout/DashboardSkeleton";
 function AdminDashboardPage() {
   const { dashboardStats, fetchDashboardStatsInBackground, isLoading } =
     useStatsStore();
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   useEffect(() => {
     // Fetch stats in background
@@ -48,7 +52,16 @@ function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader title="Dashboard" />
+      <DashboardHeader title="Dashboard">
+        <Button
+          onClick={() => setShowReportDialog(true)}
+          className="gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg shadow-blue-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105"
+          size="sm"
+        >
+          <Eye className="h-4 w-4" />
+          View Report
+        </Button>
+      </DashboardHeader>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -182,6 +195,12 @@ function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Report Viewer Dialog */}
+      <ReportViewerDialog
+        open={showReportDialog}
+        onOpenChange={setShowReportDialog}
+      />
     </div>
   );
 }

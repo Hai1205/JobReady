@@ -157,22 +157,7 @@ export const useCVStore = createStore<ICVStore>(
 				return;
 			}
 
-			set({ isLoadingAllCVs: true });
-
-			try {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs`);
-
-				if (res.data && res.data.success && res.data.cvs) {
-					set({
-						CVsTable: res.data.cvs,
-						lastFetchTimeAllCVs: Date.now()
-					});
-				}
-			} catch (error) {
-				console.error("Failed to fetch all CVs in background:", error);
-			} finally {
-				set({ isLoadingAllCVs: false });
-			}
+			get().getAllCVs();
 		},
 
 		getUserCVs: async (userId: string): Promise<IApiResponse<ICVDataResponse>> => {
@@ -208,22 +193,7 @@ export const useCVStore = createStore<ICVStore>(
 				return;
 			}
 
-			set({ isLoadingUserCVs: true });
-
-			try {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs/users/${userId}`);
-
-				if (res.data && res.data.success && res.data.cvs) {
-					set({
-						userCVs: res.data.cvs,
-						lastFetchTimeUserCVs: Date.now()
-					});
-				}
-			} catch (error) {
-				console.error("Failed to fetch user CVs in background:", error);
-			} finally {
-				set({ isLoadingUserCVs: false });
-			}
+			get().getUserCVs(userId);
 		},
 
 		getCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {

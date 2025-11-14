@@ -13,7 +13,6 @@ export interface IUserStore extends IBaseStore {
 	users: IUser[];
 	usersTable: IUser[];
 	lastFetchTime: number | null;
-	isLoading: boolean;
 
 	getAllUsers: () => Promise<IApiResponse<IUserDataResponse>>;
 	fetchAllUsersInBackground: () => Promise<void>;
@@ -50,7 +49,6 @@ const initialState = {
 	users: [],
 	usersTable: [],
 	lastFetchTime: null as number | null,
-	isLoading: false,
 };
 
 // Cache expiration time: 3 minutes
@@ -93,22 +91,7 @@ export const useUserStore = createStore<IUserStore>(
 				return;
 			}
 
-			set({ isLoading: true });
-
-			try {
-				const res = await handleRequest<IUserDataResponse>(EHttpType.GET, `/users`);
-
-				if (res.data && res.data.success && res.data.users) {
-					set({
-						usersTable: res.data.users,
-						lastFetchTime: Date.now()
-					});
-				}
-			} catch (error) {
-				console.error("Failed to fetch users in background:", error);
-			} finally {
-				set({ isLoading: false });
-			}
+			await get().getAllUsers();
 		},
 
 		getUser: async (userId: string): Promise<IApiResponse<IUserDataResponse>> => {

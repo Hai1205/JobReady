@@ -16,6 +16,7 @@ public class Response {
     private String message;
 
     private DashboardStatsDto dashboardStats;
+    private byte[] statsReport;
 
     // Pagination and stats
     private Object pagination;

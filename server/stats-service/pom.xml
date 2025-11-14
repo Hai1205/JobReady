@@ -98,6 +98,11 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+        </dependency>
+
         <!-- Testing Tools -->
         <!-- Spring Boot testing framework -->
         <dependency>

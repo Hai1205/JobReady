@@ -1,26 +1,31 @@
-import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
+import { BASE_URL, EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, IBaseStore } from "@/lib/initialStore";
 
 export interface IStatsResponse {
-	dashboardStats: IDashboardStats;
+	dashboardStats?: IDashboardStats;
+	statsReport?: string | Uint8Array; // Can be Base64 string or byte array
 }
 
 export interface IStatsStore extends IBaseStore {
 	// Cached data
 	dashboardStats: IDashboardStats | null;
-	lastFetchTime: number | null;
-	isLoading: boolean;
+	statsReport: Blob | null;
+	lastStatsFetchTime: number | null;
+	lastReportFetchTime: number | null;
 
 	// Actions
 	getDashboardStats: () => Promise<IApiResponse<IStatsResponse>>;
+	getStatsReport: (forceRefresh?: boolean) => Promise<Blob | null>;
 	fetchDashboardStatsInBackground: () => Promise<void>;
+	fetchReportInBackground: () => Promise<void>;
 }
 
 const storeName = "stats";
 const initialState = {
-	dashboardStats: null as IDashboardStats | null,
-	lastFetchTime: null as number | null,
-	isLoading: false,
+	dashboardStats: null,
+	statsReport: null,
+	lastStatsFetchTime: null,
+	lastReportFetchTime: null,
 };
 
 // Cache expiration time: 5 minutes
@@ -32,27 +37,71 @@ export const useStatsStore = createStore<IStatsStore>(
 	(set, get) => ({
 		getDashboardStats: async (): Promise<IApiResponse<IStatsResponse>> => {
 			return await get().handleRequest(async () => {
-				const res = await handleRequest<IStatsResponse>(EHttpType.GET, `/stats/dashboard`);
+				const res = await handleRequest<IStatsResponse>(EHttpType.GET, `/stats/`);
 
 				// Cache the result in store
 				if (res.data && res.data.success) {
 					set({
 						dashboardStats: res.data.dashboardStats,
-						lastFetchTime: Date.now()
+						lastStatsFetchTime: Date.now()
 					});
-				}
-
-				return res;
+				} return res;
 			});
 		},
 
+		getStatsReport: async (forceRefresh: boolean = false): Promise<Blob | null> => {
+			const state = get();
+			const now = Date.now();
+
+			// Return cached report if available and not forcing refresh
+			if (!forceRefresh && state.statsReport && state.lastReportFetchTime) {
+				const cacheAge = now - state.lastReportFetchTime;
+				if (cacheAge < CACHE_DURATION) {
+					console.log("Using cached report");
+					return state.statsReport;
+				}
+			}
+
+				// Use handleRequest to get the report data
+				const res = await handleRequest<IStatsResponse>(EHttpType.GET, `/stats/report`);
+
+				if (res.data?.statsReport) {
+					let blob: Blob;
+
+					// Check if statsReport is a Base64 string or byte array
+					if (typeof res.data.statsReport === 'string') {
+						// Decode Base64 string to binary
+						const binaryString = atob(res.data.statsReport);
+						const bytes = new Uint8Array(binaryString.length);
+						for (let i = 0; i < binaryString.length; i++) {
+							bytes[i] = binaryString.charCodeAt(i);
+						}
+						blob = new Blob([bytes], { type: 'application/pdf' });
+					} else if (Array.isArray(res.data.statsReport)) {
+						// Convert byte array to Blob
+						const uint8Array = new Uint8Array(res.data.statsReport);
+						blob = new Blob([uint8Array], { type: 'application/pdf' });
+					} else {
+						return null;
+					}
+
+					set({
+						statsReport: blob,
+						lastReportFetchTime: Date.now(),
+					});
+					return blob;
+				}
+
+				return null;
+		}, 
+		
 		fetchDashboardStatsInBackground: async (): Promise<void> => {
 			const state = get();
 			const now = Date.now();
 
 			// Check if cache is still valid
-			if (state.dashboardStats && state.lastFetchTime) {
-				const cacheAge = now - state.lastFetchTime;
+			if (state.dashboardStats && state.lastStatsFetchTime) {
+				const cacheAge = now - state.lastStatsFetchTime;
 				if (cacheAge < CACHE_DURATION) {
 					console.log("Stats cache is still valid, skipping fetch");
 					return;
@@ -64,25 +113,30 @@ export const useStatsStore = createStore<IStatsStore>(
 				return;
 			}
 
-			set({ isLoading: true });
-
-			try {
-				const res = await handleRequest<IStatsResponse>(EHttpType.GET, `/stats/dashboard`);
-
-				if (res.data && res.data.success) {
-					set({
-						dashboardStats: res.data.dashboardStats,
-						lastFetchTime: Date.now()
-					});
-				}
-			} catch (error) {
-				console.error("Failed to fetch stats in background:", error);
-			} finally {
-				set({ isLoading: false });
-			}
+			await get().getDashboardStats();
 		},
 
-		reset: () => {
+		fetchReportInBackground: async (): Promise<void> => {
+			const state = get();
+			const now = Date.now();
+
+			// Check if cache is still valid
+			if (state.statsReport && state.lastReportFetchTime) {
+				const cacheAge = now - state.lastReportFetchTime;
+				if (cacheAge < CACHE_DURATION) {
+					console.log("Report cache is still valid, skipping fetch");
+					return;
+				}
+			}
+
+			// Check if already loading
+			if (state.isLoading) {
+				return;
+			}
+
+			// Refresh report in background without showing loading
+			await get().getStatsReport(true);
+		}, reset: () => {
 			set({ ...initialState });
 		},
 	}),

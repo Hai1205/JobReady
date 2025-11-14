@@ -33,8 +33,10 @@ export const getRefreshToken = (): string | null => {
     sessionStorage.getItem('refresh_token');
 };
 
+export const BASE_URL = `${SERVER_URL}/api/v1`;
+
 const axiosInstance = axios.create({
-  baseURL: `${SERVER_URL}/api/v1`,
+  baseURL: BASE_URL,
   withCredentials: true,
   timeout: 30000, // Add a timeout to prevent hanging requests
 });
