@@ -25,6 +25,10 @@ private static final long serialVersionUID = 0L;
     title_ = "";
     userId_ = "";
     createdAt_ = "";
+    experiences_ = java.util.Collections.emptyList();
+    educations_ = java.util.Collections.emptyList();
+    skills_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
   }
 
   @java.lang.Override
@@ -47,6 +51,7 @@ private static final long serialVersionUID = 0L;
             com.example.grpc.cv.CVInfo.class, com.example.grpc.cv.CVInfo.Builder.class);
   }
 
+  private int bitField0_;
   public static final int ID_FIELD_NUMBER = 1;
   @SuppressWarnings("serial")
   private volatile java.lang.Object id_ = "";
@@ -214,6 +219,151 @@ private static final long serialVersionUID = 0L;
     return isVisibility_;
   }
 
+  public static final int PERSONAL_INFO_FIELD_NUMBER = 6;
+  private com.example.grpc.cv.PersonalInfo personalInfo_;
+  /**
+   * <code>.cv.PersonalInfo personal_info = 6;</code>
+   * @return Whether the personalInfo field is set.
+   */
+  @java.lang.Override
+  public boolean hasPersonalInfo() {
+    return ((bitField0_ & 0x00000001) != 0);
+  }
+  /**
+   * <code>.cv.PersonalInfo personal_info = 6;</code>
+   * @return The personalInfo.
+   */
+  @java.lang.Override
+  public com.example.grpc.cv.PersonalInfo getPersonalInfo() {
+    return personalInfo_ == null ? com.example.grpc.cv.PersonalInfo.getDefaultInstance() : personalInfo_;
+  }
+  /**
+   * <code>.cv.PersonalInfo personal_info = 6;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.cv.PersonalInfoOrBuilder getPersonalInfoOrBuilder() {
+    return personalInfo_ == null ? com.example.grpc.cv.PersonalInfo.getDefaultInstance() : personalInfo_;
+  }
+
+  public static final int EXPERIENCES_FIELD_NUMBER = 7;
+  @SuppressWarnings("serial")
+  private java.util.List<com.example.grpc.cv.Experience> experiences_;
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  @java.lang.Override
+  public java.util.List<com.example.grpc.cv.Experience> getExperiencesList() {
+    return experiences_;
+  }
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends com.example.grpc.cv.ExperienceOrBuilder> 
+      getExperiencesOrBuilderList() {
+    return experiences_;
+  }
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  @java.lang.Override
+  public int getExperiencesCount() {
+    return experiences_.size();
+  }
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.cv.Experience getExperiences(int index) {
+    return experiences_.get(index);
+  }
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.cv.ExperienceOrBuilder getExperiencesOrBuilder(
+      int index) {
+    return experiences_.get(index);
+  }
+
+  public static final int EDUCATIONS_FIELD_NUMBER = 8;
+  @SuppressWarnings("serial")
+  private java.util.List<com.example.grpc.cv.Education> educations_;
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  @java.lang.Override
+  public java.util.List<com.example.grpc.cv.Education> getEducationsList() {
+    return educations_;
+  }
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends com.example.grpc.cv.EducationOrBuilder> 
+      getEducationsOrBuilderList() {
+    return educations_;
+  }
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  @java.lang.Override
+  public int getEducationsCount() {
+    return educations_.size();
+  }
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.cv.Education getEducations(int index) {
+    return educations_.get(index);
+  }
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.cv.EducationOrBuilder getEducationsOrBuilder(
+      int index) {
+    return educations_.get(index);
+  }
+
+  public static final int SKILLS_FIELD_NUMBER = 9;
+  @SuppressWarnings("serial")
+  private com.google.protobuf.LazyStringArrayList skills_ =
+      com.google.protobuf.LazyStringArrayList.emptyList();
+  /**
+   * <code>repeated string skills = 9;</code>
+   * @return A list containing the skills.
+   */
+  public com.google.protobuf.ProtocolStringList
+      getSkillsList() {
+    return skills_;
+  }
+  /**
+   * <code>repeated string skills = 9;</code>
+   * @return The count of skills.
+   */
+  public int getSkillsCount() {
+    return skills_.size();
+  }
+  /**
+   * <code>repeated string skills = 9;</code>
+   * @param index The index of the element to return.
+   * @return The skills at the given index.
+   */
+  public java.lang.String getSkills(int index) {
+    return skills_.get(index);
+  }
+  /**
+   * <code>repeated string skills = 9;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the skills at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getSkillsBytes(int index) {
+    return skills_.getByteString(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -243,6 +393,18 @@ private static final long serialVersionUID = 0L;
     if (isVisibility_ != false) {
       output.writeBool(5, isVisibility_);
     }
+    if (((bitField0_ & 0x00000001) != 0)) {
+      output.writeMessage(6, getPersonalInfo());
+    }
+    for (int i = 0; i < experiences_.size(); i++) {
+      output.writeMessage(7, experiences_.get(i));
+    }
+    for (int i = 0; i < educations_.size(); i++) {
+      output.writeMessage(8, educations_.get(i));
+    }
+    for (int i = 0; i < skills_.size(); i++) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 9, skills_.getRaw(i));
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -267,6 +429,26 @@ private static final long serialVersionUID = 0L;
     if (isVisibility_ != false) {
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(5, isVisibility_);
+    }
+    if (((bitField0_ & 0x00000001) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(6, getPersonalInfo());
+    }
+    for (int i = 0; i < experiences_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(7, experiences_.get(i));
+    }
+    for (int i = 0; i < educations_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(8, educations_.get(i));
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < skills_.size(); i++) {
+        dataSize += computeStringSizeNoTag(skills_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getSkillsList().size();
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -293,6 +475,17 @@ private static final long serialVersionUID = 0L;
         .equals(other.getCreatedAt())) return false;
     if (getIsVisibility()
         != other.getIsVisibility()) return false;
+    if (hasPersonalInfo() != other.hasPersonalInfo()) return false;
+    if (hasPersonalInfo()) {
+      if (!getPersonalInfo()
+          .equals(other.getPersonalInfo())) return false;
+    }
+    if (!getExperiencesList()
+        .equals(other.getExperiencesList())) return false;
+    if (!getEducationsList()
+        .equals(other.getEducationsList())) return false;
+    if (!getSkillsList()
+        .equals(other.getSkillsList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -315,6 +508,22 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + IS_VISIBILITY_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getIsVisibility());
+    if (hasPersonalInfo()) {
+      hash = (37 * hash) + PERSONAL_INFO_FIELD_NUMBER;
+      hash = (53 * hash) + getPersonalInfo().hashCode();
+    }
+    if (getExperiencesCount() > 0) {
+      hash = (37 * hash) + EXPERIENCES_FIELD_NUMBER;
+      hash = (53 * hash) + getExperiencesList().hashCode();
+    }
+    if (getEducationsCount() > 0) {
+      hash = (37 * hash) + EDUCATIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getEducationsList().hashCode();
+    }
+    if (getSkillsCount() > 0) {
+      hash = (37 * hash) + SKILLS_FIELD_NUMBER;
+      hash = (53 * hash) + getSkillsList().hashCode();
+    }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -438,13 +647,21 @@ private static final long serialVersionUID = 0L;
 
     // Construct using com.example.grpc.cv.CVInfo.newBuilder()
     private Builder() {
-
+      maybeForceBuilderInitialization();
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
-
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessageV3
+              .alwaysUseFieldBuilders) {
+        getPersonalInfoFieldBuilder();
+        getExperiencesFieldBuilder();
+        getEducationsFieldBuilder();
+      }
     }
     @java.lang.Override
     public Builder clear() {
@@ -455,6 +672,27 @@ private static final long serialVersionUID = 0L;
       userId_ = "";
       createdAt_ = "";
       isVisibility_ = false;
+      personalInfo_ = null;
+      if (personalInfoBuilder_ != null) {
+        personalInfoBuilder_.dispose();
+        personalInfoBuilder_ = null;
+      }
+      if (experiencesBuilder_ == null) {
+        experiences_ = java.util.Collections.emptyList();
+      } else {
+        experiences_ = null;
+        experiencesBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000040);
+      if (educationsBuilder_ == null) {
+        educations_ = java.util.Collections.emptyList();
+      } else {
+        educations_ = null;
+        educationsBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000080);
+      skills_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
       return this;
     }
 
@@ -481,9 +719,31 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.example.grpc.cv.CVInfo buildPartial() {
       com.example.grpc.cv.CVInfo result = new com.example.grpc.cv.CVInfo(this);
+      buildPartialRepeatedFields(result);
       if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
+    }
+
+    private void buildPartialRepeatedFields(com.example.grpc.cv.CVInfo result) {
+      if (experiencesBuilder_ == null) {
+        if (((bitField0_ & 0x00000040) != 0)) {
+          experiences_ = java.util.Collections.unmodifiableList(experiences_);
+          bitField0_ = (bitField0_ & ~0x00000040);
+        }
+        result.experiences_ = experiences_;
+      } else {
+        result.experiences_ = experiencesBuilder_.build();
+      }
+      if (educationsBuilder_ == null) {
+        if (((bitField0_ & 0x00000080) != 0)) {
+          educations_ = java.util.Collections.unmodifiableList(educations_);
+          bitField0_ = (bitField0_ & ~0x00000080);
+        }
+        result.educations_ = educations_;
+      } else {
+        result.educations_ = educationsBuilder_.build();
+      }
     }
 
     private void buildPartial0(com.example.grpc.cv.CVInfo result) {
@@ -503,6 +763,18 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000010) != 0)) {
         result.isVisibility_ = isVisibility_;
       }
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000020) != 0)) {
+        result.personalInfo_ = personalInfoBuilder_ == null
+            ? personalInfo_
+            : personalInfoBuilder_.build();
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000100) != 0)) {
+        skills_.makeImmutable();
+        result.skills_ = skills_;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
 
     @java.lang.Override
@@ -572,6 +844,71 @@ private static final long serialVersionUID = 0L;
       if (other.getIsVisibility() != false) {
         setIsVisibility(other.getIsVisibility());
       }
+      if (other.hasPersonalInfo()) {
+        mergePersonalInfo(other.getPersonalInfo());
+      }
+      if (experiencesBuilder_ == null) {
+        if (!other.experiences_.isEmpty()) {
+          if (experiences_.isEmpty()) {
+            experiences_ = other.experiences_;
+            bitField0_ = (bitField0_ & ~0x00000040);
+          } else {
+            ensureExperiencesIsMutable();
+            experiences_.addAll(other.experiences_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.experiences_.isEmpty()) {
+          if (experiencesBuilder_.isEmpty()) {
+            experiencesBuilder_.dispose();
+            experiencesBuilder_ = null;
+            experiences_ = other.experiences_;
+            bitField0_ = (bitField0_ & ~0x00000040);
+            experiencesBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getExperiencesFieldBuilder() : null;
+          } else {
+            experiencesBuilder_.addAllMessages(other.experiences_);
+          }
+        }
+      }
+      if (educationsBuilder_ == null) {
+        if (!other.educations_.isEmpty()) {
+          if (educations_.isEmpty()) {
+            educations_ = other.educations_;
+            bitField0_ = (bitField0_ & ~0x00000080);
+          } else {
+            ensureEducationsIsMutable();
+            educations_.addAll(other.educations_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.educations_.isEmpty()) {
+          if (educationsBuilder_.isEmpty()) {
+            educationsBuilder_.dispose();
+            educationsBuilder_ = null;
+            educations_ = other.educations_;
+            bitField0_ = (bitField0_ & ~0x00000080);
+            educationsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getEducationsFieldBuilder() : null;
+          } else {
+            educationsBuilder_.addAllMessages(other.educations_);
+          }
+        }
+      }
+      if (!other.skills_.isEmpty()) {
+        if (skills_.isEmpty()) {
+          skills_ = other.skills_;
+          bitField0_ |= 0x00000100;
+        } else {
+          ensureSkillsIsMutable();
+          skills_.addAll(other.skills_);
+        }
+        onChanged();
+      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -623,6 +960,45 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000010;
               break;
             } // case 40
+            case 50: {
+              input.readMessage(
+                  getPersonalInfoFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00000020;
+              break;
+            } // case 50
+            case 58: {
+              com.example.grpc.cv.Experience m =
+                  input.readMessage(
+                      com.example.grpc.cv.Experience.parser(),
+                      extensionRegistry);
+              if (experiencesBuilder_ == null) {
+                ensureExperiencesIsMutable();
+                experiences_.add(m);
+              } else {
+                experiencesBuilder_.addMessage(m);
+              }
+              break;
+            } // case 58
+            case 66: {
+              com.example.grpc.cv.Education m =
+                  input.readMessage(
+                      com.example.grpc.cv.Education.parser(),
+                      extensionRegistry);
+              if (educationsBuilder_ == null) {
+                ensureEducationsIsMutable();
+                educations_.add(m);
+              } else {
+                educationsBuilder_.addMessage(m);
+              }
+              break;
+            } // case 66
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureSkillsIsMutable();
+              skills_.add(s);
+              break;
+            } // case 74
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -956,6 +1332,718 @@ private static final long serialVersionUID = 0L;
     public Builder clearIsVisibility() {
       bitField0_ = (bitField0_ & ~0x00000010);
       isVisibility_ = false;
+      onChanged();
+      return this;
+    }
+
+    private com.example.grpc.cv.PersonalInfo personalInfo_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.example.grpc.cv.PersonalInfo, com.example.grpc.cv.PersonalInfo.Builder, com.example.grpc.cv.PersonalInfoOrBuilder> personalInfoBuilder_;
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     * @return Whether the personalInfo field is set.
+     */
+    public boolean hasPersonalInfo() {
+      return ((bitField0_ & 0x00000020) != 0);
+    }
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     * @return The personalInfo.
+     */
+    public com.example.grpc.cv.PersonalInfo getPersonalInfo() {
+      if (personalInfoBuilder_ == null) {
+        return personalInfo_ == null ? com.example.grpc.cv.PersonalInfo.getDefaultInstance() : personalInfo_;
+      } else {
+        return personalInfoBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     */
+    public Builder setPersonalInfo(com.example.grpc.cv.PersonalInfo value) {
+      if (personalInfoBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        personalInfo_ = value;
+      } else {
+        personalInfoBuilder_.setMessage(value);
+      }
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     */
+    public Builder setPersonalInfo(
+        com.example.grpc.cv.PersonalInfo.Builder builderForValue) {
+      if (personalInfoBuilder_ == null) {
+        personalInfo_ = builderForValue.build();
+      } else {
+        personalInfoBuilder_.setMessage(builderForValue.build());
+      }
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     */
+    public Builder mergePersonalInfo(com.example.grpc.cv.PersonalInfo value) {
+      if (personalInfoBuilder_ == null) {
+        if (((bitField0_ & 0x00000020) != 0) &&
+          personalInfo_ != null &&
+          personalInfo_ != com.example.grpc.cv.PersonalInfo.getDefaultInstance()) {
+          getPersonalInfoBuilder().mergeFrom(value);
+        } else {
+          personalInfo_ = value;
+        }
+      } else {
+        personalInfoBuilder_.mergeFrom(value);
+      }
+      if (personalInfo_ != null) {
+        bitField0_ |= 0x00000020;
+        onChanged();
+      }
+      return this;
+    }
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     */
+    public Builder clearPersonalInfo() {
+      bitField0_ = (bitField0_ & ~0x00000020);
+      personalInfo_ = null;
+      if (personalInfoBuilder_ != null) {
+        personalInfoBuilder_.dispose();
+        personalInfoBuilder_ = null;
+      }
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     */
+    public com.example.grpc.cv.PersonalInfo.Builder getPersonalInfoBuilder() {
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return getPersonalInfoFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     */
+    public com.example.grpc.cv.PersonalInfoOrBuilder getPersonalInfoOrBuilder() {
+      if (personalInfoBuilder_ != null) {
+        return personalInfoBuilder_.getMessageOrBuilder();
+      } else {
+        return personalInfo_ == null ?
+            com.example.grpc.cv.PersonalInfo.getDefaultInstance() : personalInfo_;
+      }
+    }
+    /**
+     * <code>.cv.PersonalInfo personal_info = 6;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.example.grpc.cv.PersonalInfo, com.example.grpc.cv.PersonalInfo.Builder, com.example.grpc.cv.PersonalInfoOrBuilder> 
+        getPersonalInfoFieldBuilder() {
+      if (personalInfoBuilder_ == null) {
+        personalInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.example.grpc.cv.PersonalInfo, com.example.grpc.cv.PersonalInfo.Builder, com.example.grpc.cv.PersonalInfoOrBuilder>(
+                getPersonalInfo(),
+                getParentForChildren(),
+                isClean());
+        personalInfo_ = null;
+      }
+      return personalInfoBuilder_;
+    }
+
+    private java.util.List<com.example.grpc.cv.Experience> experiences_ =
+      java.util.Collections.emptyList();
+    private void ensureExperiencesIsMutable() {
+      if (!((bitField0_ & 0x00000040) != 0)) {
+        experiences_ = new java.util.ArrayList<com.example.grpc.cv.Experience>(experiences_);
+        bitField0_ |= 0x00000040;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.example.grpc.cv.Experience, com.example.grpc.cv.Experience.Builder, com.example.grpc.cv.ExperienceOrBuilder> experiencesBuilder_;
+
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public java.util.List<com.example.grpc.cv.Experience> getExperiencesList() {
+      if (experiencesBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(experiences_);
+      } else {
+        return experiencesBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public int getExperiencesCount() {
+      if (experiencesBuilder_ == null) {
+        return experiences_.size();
+      } else {
+        return experiencesBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public com.example.grpc.cv.Experience getExperiences(int index) {
+      if (experiencesBuilder_ == null) {
+        return experiences_.get(index);
+      } else {
+        return experiencesBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder setExperiences(
+        int index, com.example.grpc.cv.Experience value) {
+      if (experiencesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExperiencesIsMutable();
+        experiences_.set(index, value);
+        onChanged();
+      } else {
+        experiencesBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder setExperiences(
+        int index, com.example.grpc.cv.Experience.Builder builderForValue) {
+      if (experiencesBuilder_ == null) {
+        ensureExperiencesIsMutable();
+        experiences_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        experiencesBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder addExperiences(com.example.grpc.cv.Experience value) {
+      if (experiencesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExperiencesIsMutable();
+        experiences_.add(value);
+        onChanged();
+      } else {
+        experiencesBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder addExperiences(
+        int index, com.example.grpc.cv.Experience value) {
+      if (experiencesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExperiencesIsMutable();
+        experiences_.add(index, value);
+        onChanged();
+      } else {
+        experiencesBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder addExperiences(
+        com.example.grpc.cv.Experience.Builder builderForValue) {
+      if (experiencesBuilder_ == null) {
+        ensureExperiencesIsMutable();
+        experiences_.add(builderForValue.build());
+        onChanged();
+      } else {
+        experiencesBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder addExperiences(
+        int index, com.example.grpc.cv.Experience.Builder builderForValue) {
+      if (experiencesBuilder_ == null) {
+        ensureExperiencesIsMutable();
+        experiences_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        experiencesBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder addAllExperiences(
+        java.lang.Iterable<? extends com.example.grpc.cv.Experience> values) {
+      if (experiencesBuilder_ == null) {
+        ensureExperiencesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, experiences_);
+        onChanged();
+      } else {
+        experiencesBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder clearExperiences() {
+      if (experiencesBuilder_ == null) {
+        experiences_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
+      } else {
+        experiencesBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public Builder removeExperiences(int index) {
+      if (experiencesBuilder_ == null) {
+        ensureExperiencesIsMutable();
+        experiences_.remove(index);
+        onChanged();
+      } else {
+        experiencesBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public com.example.grpc.cv.Experience.Builder getExperiencesBuilder(
+        int index) {
+      return getExperiencesFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public com.example.grpc.cv.ExperienceOrBuilder getExperiencesOrBuilder(
+        int index) {
+      if (experiencesBuilder_ == null) {
+        return experiences_.get(index);  } else {
+        return experiencesBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public java.util.List<? extends com.example.grpc.cv.ExperienceOrBuilder> 
+         getExperiencesOrBuilderList() {
+      if (experiencesBuilder_ != null) {
+        return experiencesBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(experiences_);
+      }
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public com.example.grpc.cv.Experience.Builder addExperiencesBuilder() {
+      return getExperiencesFieldBuilder().addBuilder(
+          com.example.grpc.cv.Experience.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public com.example.grpc.cv.Experience.Builder addExperiencesBuilder(
+        int index) {
+      return getExperiencesFieldBuilder().addBuilder(
+          index, com.example.grpc.cv.Experience.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .cv.Experience experiences = 7;</code>
+     */
+    public java.util.List<com.example.grpc.cv.Experience.Builder> 
+         getExperiencesBuilderList() {
+      return getExperiencesFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.example.grpc.cv.Experience, com.example.grpc.cv.Experience.Builder, com.example.grpc.cv.ExperienceOrBuilder> 
+        getExperiencesFieldBuilder() {
+      if (experiencesBuilder_ == null) {
+        experiencesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            com.example.grpc.cv.Experience, com.example.grpc.cv.Experience.Builder, com.example.grpc.cv.ExperienceOrBuilder>(
+                experiences_,
+                ((bitField0_ & 0x00000040) != 0),
+                getParentForChildren(),
+                isClean());
+        experiences_ = null;
+      }
+      return experiencesBuilder_;
+    }
+
+    private java.util.List<com.example.grpc.cv.Education> educations_ =
+      java.util.Collections.emptyList();
+    private void ensureEducationsIsMutable() {
+      if (!((bitField0_ & 0x00000080) != 0)) {
+        educations_ = new java.util.ArrayList<com.example.grpc.cv.Education>(educations_);
+        bitField0_ |= 0x00000080;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.example.grpc.cv.Education, com.example.grpc.cv.Education.Builder, com.example.grpc.cv.EducationOrBuilder> educationsBuilder_;
+
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public java.util.List<com.example.grpc.cv.Education> getEducationsList() {
+      if (educationsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(educations_);
+      } else {
+        return educationsBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public int getEducationsCount() {
+      if (educationsBuilder_ == null) {
+        return educations_.size();
+      } else {
+        return educationsBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public com.example.grpc.cv.Education getEducations(int index) {
+      if (educationsBuilder_ == null) {
+        return educations_.get(index);
+      } else {
+        return educationsBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder setEducations(
+        int index, com.example.grpc.cv.Education value) {
+      if (educationsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEducationsIsMutable();
+        educations_.set(index, value);
+        onChanged();
+      } else {
+        educationsBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder setEducations(
+        int index, com.example.grpc.cv.Education.Builder builderForValue) {
+      if (educationsBuilder_ == null) {
+        ensureEducationsIsMutable();
+        educations_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        educationsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder addEducations(com.example.grpc.cv.Education value) {
+      if (educationsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEducationsIsMutable();
+        educations_.add(value);
+        onChanged();
+      } else {
+        educationsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder addEducations(
+        int index, com.example.grpc.cv.Education value) {
+      if (educationsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEducationsIsMutable();
+        educations_.add(index, value);
+        onChanged();
+      } else {
+        educationsBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder addEducations(
+        com.example.grpc.cv.Education.Builder builderForValue) {
+      if (educationsBuilder_ == null) {
+        ensureEducationsIsMutable();
+        educations_.add(builderForValue.build());
+        onChanged();
+      } else {
+        educationsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder addEducations(
+        int index, com.example.grpc.cv.Education.Builder builderForValue) {
+      if (educationsBuilder_ == null) {
+        ensureEducationsIsMutable();
+        educations_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        educationsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder addAllEducations(
+        java.lang.Iterable<? extends com.example.grpc.cv.Education> values) {
+      if (educationsBuilder_ == null) {
+        ensureEducationsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, educations_);
+        onChanged();
+      } else {
+        educationsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder clearEducations() {
+      if (educationsBuilder_ == null) {
+        educations_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000080);
+        onChanged();
+      } else {
+        educationsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public Builder removeEducations(int index) {
+      if (educationsBuilder_ == null) {
+        ensureEducationsIsMutable();
+        educations_.remove(index);
+        onChanged();
+      } else {
+        educationsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public com.example.grpc.cv.Education.Builder getEducationsBuilder(
+        int index) {
+      return getEducationsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public com.example.grpc.cv.EducationOrBuilder getEducationsOrBuilder(
+        int index) {
+      if (educationsBuilder_ == null) {
+        return educations_.get(index);  } else {
+        return educationsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public java.util.List<? extends com.example.grpc.cv.EducationOrBuilder> 
+         getEducationsOrBuilderList() {
+      if (educationsBuilder_ != null) {
+        return educationsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(educations_);
+      }
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public com.example.grpc.cv.Education.Builder addEducationsBuilder() {
+      return getEducationsFieldBuilder().addBuilder(
+          com.example.grpc.cv.Education.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public com.example.grpc.cv.Education.Builder addEducationsBuilder(
+        int index) {
+      return getEducationsFieldBuilder().addBuilder(
+          index, com.example.grpc.cv.Education.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .cv.Education educations = 8;</code>
+     */
+    public java.util.List<com.example.grpc.cv.Education.Builder> 
+         getEducationsBuilderList() {
+      return getEducationsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.example.grpc.cv.Education, com.example.grpc.cv.Education.Builder, com.example.grpc.cv.EducationOrBuilder> 
+        getEducationsFieldBuilder() {
+      if (educationsBuilder_ == null) {
+        educationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            com.example.grpc.cv.Education, com.example.grpc.cv.Education.Builder, com.example.grpc.cv.EducationOrBuilder>(
+                educations_,
+                ((bitField0_ & 0x00000080) != 0),
+                getParentForChildren(),
+                isClean());
+        educations_ = null;
+      }
+      return educationsBuilder_;
+    }
+
+    private com.google.protobuf.LazyStringArrayList skills_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+    private void ensureSkillsIsMutable() {
+      if (!skills_.isModifiable()) {
+        skills_ = new com.google.protobuf.LazyStringArrayList(skills_);
+      }
+      bitField0_ |= 0x00000100;
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @return A list containing the skills.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getSkillsList() {
+      skills_.makeImmutable();
+      return skills_;
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @return The count of skills.
+     */
+    public int getSkillsCount() {
+      return skills_.size();
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @param index The index of the element to return.
+     * @return The skills at the given index.
+     */
+    public java.lang.String getSkills(int index) {
+      return skills_.get(index);
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the skills at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getSkillsBytes(int index) {
+      return skills_.getByteString(index);
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @param index The index to set the value at.
+     * @param value The skills to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSkills(
+        int index, java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      ensureSkillsIsMutable();
+      skills_.set(index, value);
+      bitField0_ |= 0x00000100;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @param value The skills to add.
+     * @return This builder for chaining.
+     */
+    public Builder addSkills(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      ensureSkillsIsMutable();
+      skills_.add(value);
+      bitField0_ |= 0x00000100;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @param values The skills to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllSkills(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureSkillsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, skills_);
+      bitField0_ |= 0x00000100;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSkills() {
+      skills_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000100);;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string skills = 9;</code>
+     * @param value The bytes of the skills to add.
+     * @return This builder for chaining.
+     */
+    public Builder addSkillsBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      ensureSkillsIsMutable();
+      skills_.add(value);
+      bitField0_ |= 0x00000100;
       onChanged();
       return this;
     }

@@ -6,6 +6,7 @@ import com.example.cvservice.dtos.ExperienceDto;
 import com.example.cvservice.entities.CV;
 import com.example.cvservice.entities.Education;
 import com.example.cvservice.entities.Experience;
+import com.example.cvservice.entities.PersonalInfo;
 
 import org.springframework.stereotype.Component;
 
@@ -30,34 +31,55 @@ public class CVMapper {
     public CVDto toDto(CV cv) {
         if (cv == null)
             return null;
+        
+        System.out.println("=== CVMapper.toDto START ===");
+        System.out.println("CV ID: " + cv.getId());
+        System.out.println("CV Title: " + cv.getTitle());
+        System.out.println("CV Color: " + cv.getColor());
+        System.out.println("CV Template: " + cv.getTemplate());
+        System.out.println("CV IsVisibility: " + cv.getIsVisibility());
+        System.out.println("CV Skills: " + (cv.getSkills() != null ? cv.getSkills().size() : "NULL"));
+        System.out.println("CV PersonalInfo: " + (cv.getPersonalInfo() != null ? "NOT NULL" : "NULL"));
+        
         CVDto dto = new CVDto();
         dto.setId(cv.getId());
         dto.setUserId(cv.getUserId());
         dto.setTitle(cv.getTitle());
 
         // Always set personalInfo, even if null (client will handle it)
-        dto.setPersonalInfo(personalInfoMapper.toDto(cv.getPersonalInfo()));
+        PersonalInfo pi = cv.getPersonalInfo();
+        System.out.println("PersonalInfo before mapping: " + (pi != null ? "NOT NULL - " + pi.getEmail() : "NULL"));
+        dto.setPersonalInfo(personalInfoMapper.toDto(pi));
+        System.out.println("PersonalInfo after mapping: " + (dto.getPersonalInfo() != null ? "NOT NULL" : "NULL"));
 
         // Return empty list instead of null for experiences
         List<ExperienceDto> experiences = java.util.Collections.emptyList();
-        if (cv.getExperiences() != null && !cv.getExperiences().isEmpty()) {
-            experiences = cv.getExperiences().stream()
+        List<Experience> expEntities = cv.getExperiences();
+        System.out.println("Experiences entities: " + (expEntities != null ? expEntities.size() : "NULL"));
+        if (expEntities != null && !expEntities.isEmpty()) {
+            experiences = expEntities.stream()
                     .map(experienceMapper::toDto)
                     .collect(Collectors.toList());
         }
         dto.setExperiences(experiences);
+        System.out.println("Experiences DTOs: " + experiences.size());
 
         // Return empty list instead of null for educations
         List<EducationDto> educations = java.util.Collections.emptyList();
-        if (cv.getEducations() != null && !cv.getEducations().isEmpty()) {
-            educations = cv.getEducations().stream()
+        List<Education> eduEntities = cv.getEducations();
+        System.out.println("Educations entities: " + (eduEntities != null ? eduEntities.size() : "NULL"));
+        if (eduEntities != null && !eduEntities.isEmpty()) {
+            educations = eduEntities.stream()
                     .map(educationMapper::toDto)
                     .collect(Collectors.toList());
         }
         dto.setEducations(educations);
+        System.out.println("Educations DTOs: " + educations.size());
 
         // Return empty list instead of null for skills
-        dto.setSkills(cv.getSkills() != null ? cv.getSkills() : java.util.Collections.emptyList());
+        List<String> skills = cv.getSkills();
+        System.out.println("Skills from entity: " + (skills != null ? skills.size() + " items" : "NULL"));
+        dto.setSkills(skills != null ? skills : java.util.Collections.emptyList());
 
         dto.setIsVisibility(cv.getIsVisibility() != null ? cv.getIsVisibility() : false);
 
@@ -67,6 +89,13 @@ public class CVMapper {
         dto.setCreatedAt(cv.getCreatedAt() != null ? cv.getCreatedAt().toString() : null);
         dto.setUpdatedAt(cv.getUpdatedAt() != null ? cv.getUpdatedAt().toString() : null);
 
+        System.out.println("=== CVMapper.toDto END ===");
+        System.out.println("DTO Color: " + dto.getColor());
+        System.out.println("DTO Template: " + dto.getTemplate());
+        System.out.println("DTO IsVisibility: " + dto.getIsVisibility());
+        System.out.println("DTO Skills: " + (dto.getSkills() != null ? dto.getSkills().size() : "NULL"));
+        System.out.println("DTO PersonalInfo: " + (dto.getPersonalInfo() != null ? "NOT NULL" : "NULL"));
+        
         return dto;
     }
 
@@ -99,9 +128,9 @@ public class CVMapper {
             }
         }
 
-        cv.setColor(dto.getColor());
-        cv.setTemplate(dto.getTemplate());
-        cv.setIsVisibility(dto.getIsVisibility());
+        cv.setColor(dto.getColor() != null ? dto.getColor() : "#3498db");
+        cv.setTemplate(dto.getTemplate() != null ? dto.getTemplate() : "modern");
+        cv.setIsVisibility(dto.getIsVisibility() != null ? dto.getIsVisibility() : false);
 
         if (dto.getUpdatedAt() != null) {
             try {

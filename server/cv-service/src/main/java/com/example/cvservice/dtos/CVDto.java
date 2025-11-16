@@ -21,4 +21,9 @@ public class CVDto {
     private String template;
     private String createdAt;
     private String updatedAt;
+
+    public CVDto(UUID userId, String title) {
+        this.userId = userId;
+        this.title = title;
+    }
 }

@@ -76,6 +76,9 @@ class CVControllerTest {
 
     @Test
     void testCreateCV_Unauthorized() throws Exception {
+        // Arrange
+        when(cvService.createCV(userId)).thenReturn(new Response(401, "Unauthorized"));
+
         // Act & Assert
         mockMvc.perform(post("/api/v1/cvs/users/{userId}", userId)
                 .with(csrf()))
@@ -114,6 +117,9 @@ class CVControllerTest {
 
     @Test
     void testGetCVById_Unauthorized() throws Exception {
+        // Arrange
+        when(cvService.getCVById(cvId)).thenReturn(new Response(401, "Unauthorized"));
+
         // Act & Assert
         mockMvc.perform(get("/api/v1/cvs/{cvId}", cvId))
                 .andExpect(status().isUnauthorized());
@@ -136,6 +142,9 @@ class CVControllerTest {
 
     @Test
     void testGetUserCVs_Unauthorized() throws Exception {
+        // Arrange
+        when(cvService.getUserCVs(userId)).thenReturn(new Response(401, "Unauthorized"));
+
         // Act & Assert
         mockMvc.perform(get("/api/v1/cvs/users/{userId}", userId))
                 .andExpect(status().isUnauthorized());
@@ -188,6 +197,7 @@ class CVControllerTest {
         // Arrange
         String jsonData = "{\"title\":\"Updated CV\"}";
         MockMultipartFile dataFile = new MockMultipartFile("data", "", "application/json", jsonData.getBytes());
+        when(cvService.updateCV(eq(cvId), eq(jsonData), any())).thenReturn(new Response(401, "Unauthorized"));
 
         // Act & Assert
         mockMvc.perform(multipart("/api/v1/cvs/{cvId}", cvId)

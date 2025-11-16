@@ -14,13 +14,15 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -29,16 +31,24 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.TestPropertySource;
+
 /**
  * Test class cho RAG endpoints
  * Note: Cần có PostgreSQL + pgvector đang chạy để test
  */
-@SpringBootTest
+@WebMvcTest(RAGController.class)
 @AutoConfigureMockMvc
 @EnableAutoConfiguration(exclude = {
         org.springframework.ai.autoconfigure.vectorstore.pgvector.PgVectorStoreAutoConfiguration.class
 })
 @Import(TestSecurityConfig.class)
+@TestPropertySource(properties = {
+        "OPENROUTER_API_URL=https://openrouter.ai/api/v1/chat/completions",
+        "OPENROUTER_API_KEY=test-key",
+        "OPENROUTER_API_MODEL=gpt-3.5-turbo"
+})
 public class RAGControllerIntegrationTest {
 
     @Autowired
@@ -52,6 +62,15 @@ public class RAGControllerIntegrationTest {
 
     @MockBean
     private VectorStore vectorStore;
+
+    @MockBean
+    private com.example.aiservice.configs.OpenRouterConfig openRouterConfig;
+
+    @MockBean
+    private DocumentService documentService;
+
+    @MockBean
+    private RAGService ragService;
 
     @Test
     public void testUploadDocument() throws Exception {
@@ -106,6 +125,9 @@ public class RAGControllerIntegrationTest {
         ChatResponse mockChatResponse = new ChatResponse(List.of(new Generation("Mocked answer")));
         when(chatModel.call(any(Prompt.class))).thenReturn(mockChatResponse);
 
+        // Mock RAG service
+        when(ragService.query(anyString(), anyString())).thenReturn("Mocked answer");
+
         String jsonRequest = """
                 {
                     "question": "What is Java?",
@@ -126,6 +148,11 @@ public class RAGControllerIntegrationTest {
         // Mock vector store search
         List<Document> mockDocuments = List.of(new Document("Mock content"));
         doReturn(mockDocuments).when(vectorStore).similaritySearch(any(SearchRequest.class));
+
+        // Mock RAG service
+        when(ragService.getRelevantDocuments(anyString(), anyString()))
+                .thenReturn(List.of(Map.of("content", "Mock content")));
+
         String jsonRequest = """
                 {
                     "query": "programming",

@@ -40,6 +40,6 @@ class AIServiceTest {
 
         // Assert
         assertEquals(500, response.getStatusCode());
-        assertTrue(response.getMessage().startsWith("Error") || response.getMessage().contains("JSON"));
+        assertTrue(response.getMessage().contains("Unrecognized token") || response.getMessage().contains("JSON"));
     }
 }

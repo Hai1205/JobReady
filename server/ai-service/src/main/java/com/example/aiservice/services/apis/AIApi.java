@@ -10,6 +10,9 @@ import com.example.aiservice.dtos.responses.AIResponseDto;
 import com.example.aiservice.dtos.responses.Response;
 import com.example.aiservice.exceptions.OurException;
 import com.example.aiservice.services.*;
+import com.example.aiservice.services.grpcs.clients.*;
+import com.example.grpc.cv.CVInfo;
+import com.example.grpc.cv.CreateCVResponse;
 import com.fasterxml.jackson.databind.*;
 
 import java.util.List;
@@ -23,18 +26,21 @@ public class AIApi extends BaseApi {
     private final EmbeddingService embeddingService;
     private final PromptBuilderService promptBuilderService;
     private final ObjectMapper objectMapper;
-    private final JobDescriptionParserService jobDescriptionParserService;
+    private final FileParserService fileParserService;
+    private final CVGrpcClient cvGrpcClient;
 
     public AIApi(
             OpenRouterConfig openRouterConfig,
             EmbeddingService embeddingService,
             PromptBuilderService promptBuilderService,
-            JobDescriptionParserService jobDescriptionParserService) {
+            FileParserService fileParserService,
+            CVGrpcClient cvGrpcClient) {
         this.openRouterConfig = openRouterConfig;
         this.embeddingService = embeddingService;
         this.promptBuilderService = promptBuilderService;
         this.objectMapper = new ObjectMapper();
-        this.jobDescriptionParserService = jobDescriptionParserService;
+        this.fileParserService = fileParserService;
+        this.cvGrpcClient = cvGrpcClient;
     }
 
     public Response improveCV(String dataJson) {
@@ -104,6 +110,8 @@ public class AIApi extends BaseApi {
         Response response = new Response();
 
         try {
+            fileParserService.validatePDFFile(jdFile);
+
             AnalyzeCVWithJDRequest request = objectMapper.readValue(dataJson, AnalyzeCVWithJDRequest.class);
             String language = request.getLanguage();
 
@@ -144,13 +152,98 @@ public class AIApi extends BaseApi {
         }
     }
 
+    public Response importCV(UUID userId, MultipartFile file) {
+        Response response = new Response();
+
+        try {
+            fileParserService.validatePDFFile(file);
+
+            String cvText = fileParserService.extractTextFromFile(file);
+            logger.debug("Extracted CV Text: " + cvText);
+
+            CVDto cvDto = fileParserService.parseCVWithAI(cvText);
+            logger.debug("Extract CV" + cvDto);
+
+            CreateCVResponse createCVResponse = cvGrpcClient.createCV(
+            userId.toString(),
+            cvDto.getTitle(),
+            toPersonalInfo(cvDto.getPersonalInfo()),
+            toExperiences(cvDto.getExperiences()),
+            toEducations(cvDto.getEducations()),
+            cvDto.getSkills());
+
+            CVDto savedCV = toCVDto(createCVResponse.getCv());
+            logger.debug("Saved CV" + savedCV);
+
+            response.setStatusCode(201);
+            response.setMessage("CV created successfully");
+            response.setCv(savedCV);
+            logger.debug("createCV response prepared for userId={} cvId={}", userId,
+            savedCV.getId());
+            return response;
+        } catch (OurException e) {
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return buildErrorResponse(500, "Error creating CV: " + e.getMessage());
+        }
+    }
+
+    private CVDto toCVDto(CVInfo cv) {
+        PersonalInfoDto personalInfo = null;
+        if (cv.hasPersonalInfo()) {
+            com.example.grpc.cv.PersonalInfo pi = cv.getPersonalInfo();
+            personalInfo = new PersonalInfoDto(
+                    pi.getId().isEmpty() ? null : UUID.fromString(pi.getId()),
+                    pi.getFullname(),
+                    pi.getEmail(),
+                    pi.getPhone(),
+                    pi.getLocation(),
+                    pi.getSummary(),
+                    pi.getAvatarUrl(),
+                    pi.getAvatarPublicId());
+        }
+
+        List<ExperienceDto> experiences = cv.getExperiencesList().stream()
+                .map(exp -> new ExperienceDto(
+                        exp.getId().isEmpty() ? null : UUID.fromString(exp.getId()),
+                        exp.getCompany(),
+                        exp.getPosition(),
+                        exp.getStartDate(),
+                        exp.getEndDate(),
+                        exp.getDescription()))
+                .collect(Collectors.toList());
+
+        List<EducationDto> educations = cv.getEducationsList().stream()
+                .map(edu -> new EducationDto(
+                        edu.getId().isEmpty() ? null : UUID.fromString(edu.getId()),
+                        edu.getSchool(),
+                        edu.getDegree(),
+                        edu.getField(),
+                        edu.getStartDate(),
+                        edu.getEndDate()))
+                .collect(Collectors.toList());
+
+        List<String> skills = new ArrayList<>(cv.getSkillsList());
+
+        return CVDto.builder()
+                .id(cv.getId().isEmpty() ? null : UUID.fromString(cv.getId()))
+                .userId(UUID.fromString(cv.getUserId()))
+                .title(cv.getTitle())
+                .personalInfo(personalInfo)
+                .experiences(experiences)
+                .educations(educations)
+                .skills(skills)
+                .build();
+    }
+
     private String handleExtractJobDescriptionText(MultipartFile jdFile, String jobDescription) {
         if (jdFile == null || jdFile.isEmpty()) {
             return jobDescription;
         }
 
         try {
-            return jobDescriptionParserService.extractTextFromFile(jdFile);
+            return fileParserService.extractTextFromFile(jdFile);
         } catch (Exception ex) {
             System.err.println("Error extracting JD file: " + ex.getMessage());
             return jobDescription;
@@ -465,5 +558,48 @@ public class AIApi extends BaseApi {
         }
 
         return trimmed;
+    }
+
+    private com.example.grpc.cv.PersonalInfo toPersonalInfo(PersonalInfoDto pi) {
+        return com.example.grpc.cv.PersonalInfo.newBuilder()
+                .setId(pi.getId() != null ? pi.getId().toString() : "")
+                .setFullname(pi.getFullname())
+                .setEmail(pi.getEmail())
+                .setPhone(pi.getPhone())
+                .setLocation(pi.getLocation())
+                .setSummary(pi.getSummary() != null ? pi.getSummary() : "")
+                .setAvatarUrl(pi.getAvatarUrl() != null ? pi.getAvatarUrl() : "")
+                .setAvatarPublicId(pi.getAvatarPublicId() != null ? pi.getAvatarPublicId() : "")
+                .build();
+    }
+
+    private List<com.example.grpc.cv.Experience> toExperiences(List<ExperienceDto> exps) {
+        return exps.stream().map(this::toExperience).collect(Collectors.toList());
+    }
+
+    private com.example.grpc.cv.Experience toExperience(ExperienceDto exp) {
+        return com.example.grpc.cv.Experience.newBuilder()
+                .setId(exp.getId() != null ? exp.getId().toString() : "")
+                .setCompany(exp.getCompany())
+                .setPosition(exp.getPosition())
+                .setStartDate(exp.getStartDate())
+                .setEndDate(exp.getEndDate())
+                .setDescription(exp.getDescription())
+                .build();
+    }
+
+    private List<com.example.grpc.cv.Education> toEducations(List<EducationDto> edus) {
+        return edus.stream().map(this::toEducation).collect(Collectors.toList());
+    }
+
+    private com.example.grpc.cv.Education toEducation(EducationDto edu) {
+        return com.example.grpc.cv.Education.newBuilder()
+                .setId(edu.getId() != null ? edu.getId().toString() : "")
+                .setSchool(edu.getSchool())
+                .setDegree(edu.getDegree())
+                .setField(edu.getField())
+                .setStartDate(edu.getStartDate())
+                .setEndDate(edu.getEndDate())
+                .build();
     }
 }

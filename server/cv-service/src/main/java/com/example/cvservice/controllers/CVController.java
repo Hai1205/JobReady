@@ -53,7 +53,8 @@ public class CVController {
     }
 
     @PatchMapping("/{cvId}")
-    public ResponseEntity<Response> updateCV(@PathVariable("cvId") UUID cvId,
+    public ResponseEntity<Response> updateCV(
+            @PathVariable("cvId") UUID cvId,
             @RequestPart("data") String dataJson,
             @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
         Response response = cvService.updateCV(cvId, dataJson, avatar);

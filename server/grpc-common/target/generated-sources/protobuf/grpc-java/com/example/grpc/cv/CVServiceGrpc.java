@@ -142,6 +142,37 @@ public final class CVServiceGrpc {
     return getGetRecentCVsMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.cv.CreateCVRequest,
+      com.example.grpc.cv.CreateCVResponse> getCreateCVMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateCV",
+      requestType = com.example.grpc.cv.CreateCVRequest.class,
+      responseType = com.example.grpc.cv.CreateCVResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.cv.CreateCVRequest,
+      com.example.grpc.cv.CreateCVResponse> getCreateCVMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.cv.CreateCVRequest, com.example.grpc.cv.CreateCVResponse> getCreateCVMethod;
+    if ((getCreateCVMethod = CVServiceGrpc.getCreateCVMethod) == null) {
+      synchronized (CVServiceGrpc.class) {
+        if ((getCreateCVMethod = CVServiceGrpc.getCreateCVMethod) == null) {
+          CVServiceGrpc.getCreateCVMethod = getCreateCVMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.cv.CreateCVRequest, com.example.grpc.cv.CreateCVResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateCV"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.cv.CreateCVRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.cv.CreateCVResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CVServiceMethodDescriptorSupplier("CreateCV"))
+              .build();
+        }
+      }
+    }
+    return getCreateCVMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -232,6 +263,16 @@ public final class CVServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.cv.GetRecentCVsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetRecentCVsMethod(), responseObserver);
     }
+
+    /**
+     * <pre>
+     * Create a new CV
+     * </pre>
+     */
+    default void createCV(com.example.grpc.cv.CreateCVRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.cv.CreateCVResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateCVMethod(), responseObserver);
+    }
   }
 
   /**
@@ -310,6 +351,17 @@ public final class CVServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetRecentCVsMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Create a new CV
+     * </pre>
+     */
+    public void createCV(com.example.grpc.cv.CreateCVRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.cv.CreateCVResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateCVMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -369,6 +421,16 @@ public final class CVServiceGrpc {
     public com.example.grpc.cv.GetRecentCVsResponse getRecentCVs(com.example.grpc.cv.GetRecentCVsRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetRecentCVsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a new CV
+     * </pre>
+     */
+    public com.example.grpc.cv.CreateCVResponse createCV(com.example.grpc.cv.CreateCVRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateCVMethod(), getCallOptions(), request);
     }
   }
 
@@ -434,12 +496,24 @@ public final class CVServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetRecentCVsMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Create a new CV
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.cv.CreateCVResponse> createCV(
+        com.example.grpc.cv.CreateCVRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateCVMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_TOTAL_CVS = 0;
   private static final int METHODID_GET_CVS_BY_VISIBILITY = 1;
   private static final int METHODID_GET_CVS_CREATED_IN_RANGE = 2;
   private static final int METHODID_GET_RECENT_CVS = 3;
+  private static final int METHODID_CREATE_CV = 4;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -473,6 +547,10 @@ public final class CVServiceGrpc {
         case METHODID_GET_RECENT_CVS:
           serviceImpl.getRecentCVs((com.example.grpc.cv.GetRecentCVsRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.cv.GetRecentCVsResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_CV:
+          serviceImpl.createCV((com.example.grpc.cv.CreateCVRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.cv.CreateCVResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -520,6 +598,13 @@ public final class CVServiceGrpc {
               com.example.grpc.cv.GetRecentCVsRequest,
               com.example.grpc.cv.GetRecentCVsResponse>(
                 service, METHODID_GET_RECENT_CVS)))
+        .addMethod(
+          getCreateCVMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.cv.CreateCVRequest,
+              com.example.grpc.cv.CreateCVResponse>(
+                service, METHODID_CREATE_CV)))
         .build();
   }
 
@@ -572,6 +657,7 @@ public final class CVServiceGrpc {
               .addMethod(getGetCVsByVisibilityMethod())
               .addMethod(getGetCVsCreatedInRangeMethod())
               .addMethod(getGetRecentCVsMethod())
+              .addMethod(getCreateCVMethod())
               .build();
         }
       }

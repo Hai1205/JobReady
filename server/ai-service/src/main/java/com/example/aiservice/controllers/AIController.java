@@ -1,5 +1,7 @@
 package com.example.aiservice.controllers;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +19,7 @@ public class AIController {
     private AIApi aiService;
 
     @PostMapping("/analyze")
-    // @PreAuthorize("hasAnyAuthority('admin','user')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> analyzeCV(@RequestPart("data") String dataJson) {
         Response response = aiService.analyzeCV(dataJson);
 
@@ -25,7 +27,7 @@ public class AIController {
     }
 
     @PostMapping("/improve")
-    // @PreAuthorize("hasAnyAuthority('admin','user')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> improveCV(@RequestPart("data") String dataJson) {
         Response response = aiService.improveCV(dataJson);
 
@@ -33,10 +35,19 @@ public class AIController {
     }
 
     @PostMapping("/analyze-with-jd")
-    // @PreAuthorize("hasAnyAuthority('admin','user')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> analyzeCVWithJobDescription(@RequestPart("data") String dataJson,
             @RequestPart(value = "jdFile", required = false) MultipartFile jdFile) {
         Response response = aiService.analyzeCVWithJobDescription(dataJson, jdFile);
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/users/{userId}/import")
+    public ResponseEntity<Response> importCV(
+            @PathVariable("userId") UUID userId,
+            @RequestPart(value = "file", required = true) MultipartFile file) {
+        Response response = aiService.importCV(userId, file);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

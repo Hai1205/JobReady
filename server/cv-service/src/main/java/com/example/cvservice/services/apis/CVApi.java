@@ -2,6 +2,7 @@ package com.example.cvservice.services.apis;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.cvservice.dtos.*;
 import com.example.cvservice.dtos.requests.*;
@@ -50,6 +51,7 @@ public class CVApi extends BaseApi {
         this.objectMapper = new ObjectMapper();
     }
 
+    @Transactional(readOnly = true)
     public CVDto handleGetCVById(UUID cvId) {
         logger.debug("Fetching CV by id={}", cvId);
         CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
@@ -57,76 +59,133 @@ public class CVApi extends BaseApi {
         return cvMapper.toDto(cv);
     }
 
-    public CVDto handleDuplicateCV(
-            UUID userId,
-            String title,
-            PersonalInfoDto personalInfoDto,
-            MultipartFile avatar,
-            List<ExperienceDto> experiencesDto,
-            List<EducationDto> educationsDto,
-            List<String> skills,
-            Boolean isVisibility,
-            String color,
-            String template) {
-        logger.info("Creating CV for userId={} title='{}' experiencesCount={} educationsCount={}", userId, title,
-                experiencesDto == null ? 0 : experiencesDto.size(), educationsDto == null ? 0 : educationsDto.size());
+    @Transactional
+    public CVDto handleCreateCV(
+        UUID userId,
+        String title,
+        PersonalInfoDto personalInfoDto,
+        MultipartFile avatar,
+        List<ExperienceDto> experiencesDto,
+        List<EducationDto> educationsDto,
+        List<String> skills,
+        Boolean isVisibility,
+        String color,
+        String template) {
 
-        UserDto user = userGrpcClient.findUserById(userId);
+    logger.info("Creating CV for userId={} title='{}' experiencesCount={} educationsCount={}",
+            userId, title,
+            experiencesDto == null ? 0 : experiencesDto.size(),
+            educationsDto == null ? 0 : educationsDto.size());
 
-        if (user == null) {
-            logger.warn("User not found when creating CV: userId={}", userId);
-            throw new OurException("User not found", 404);
-        }
+    UserDto user = validateUser(userId);
+    personalInfoDto = ensurePersonalInfoDto(personalInfoDto);
 
-        if (personalInfoDto == null) {
-            personalInfoDto = new PersonalInfoDto();
-        }
+    List<ExperienceDto> safeExperiences = ensureExperienceList(experiencesDto);
+    List<EducationDto> safeEducations = ensureEducationList(educationsDto);
+    boolean visibility = ensureVisibility(isVisibility);
 
-        if (experiencesDto == null || experiencesDto.isEmpty()) {
-            experiencesDto = new ArrayList<>();
-        }
+    CV cv = new CV(userId, title, skills, visibility, color, template);
 
-        if (educationsDto == null || educationsDto.isEmpty()) {
-            educationsDto = new ArrayList<>();
-        }
+    PersonalInfo personalInfo = buildPersonalInfo(personalInfoDto, avatar);
+    cv.setPersonalInfo(personalInfo);
 
-        if (isVisibility == null) {
-            isVisibility = false;
-        }
+    cv.setExperiences(buildExperiences(safeExperiences));
+    cv.setEducations(buildEducations(safeEducations));
 
-        CV cv = new CV(userId, title, skills, isVisibility, color, template);
+    CV saved = cvRepository.save(cv);
+    logger.info("Created CV id={} for userId={}", saved.getId(), saved.getUserId());
 
-        PersonalInfo personalInfo = new PersonalInfo(personalInfoDto);
-        if (avatar != null && !avatar.isEmpty()) {
-            var uploadResult = cloudinaryService.uploadImage(avatar);
-            if (uploadResult.containsKey("error")) {
-                throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
-            }
+    return cvMapper.toDto(saved);
+}
 
-            personalInfo.setAvatarUrl((String) uploadResult.get("url"));
-            personalInfo.setAvatarPublicId((String) uploadResult.get("publicId"));
-        }
-        personalInfoRepository.save(personalInfo);
-        logger.debug("Saved personal info for CV (email={})", personalInfo.getEmail());
-        cv.setPersonalInfo(personalInfo);
-
-        List<Experience> experiences = experiencesDto.stream()
-                .map(Experience::new)
-                .peek(experienceRepository::save)
-                .collect(Collectors.toList());
-
-        List<Education> educations = educationsDto.stream()
-                .map(Education::new)
-                .peek(educationRepository::save)
-                .collect(Collectors.toList());
-
-        cv.setExperiences(experiences);
-        cv.setEducations(educations);
-
-        CV savedCV = cvRepository.save(cv);
-        logger.info("Created CV id={} for userId={}", savedCV.getId(), savedCV.getUserId());
-        return cvMapper.toDto(savedCV);
+private UserDto validateUser(UUID userId) {
+    UserDto user = userGrpcClient.findUserById(userId);
+    if (user == null) {
+        logger.warn("User not found when creating CV: userId={}", userId);
+        throw new OurException("User not found", 404);
     }
+    return user;
+}
+
+private PersonalInfoDto ensurePersonalInfoDto(PersonalInfoDto dto) {
+    return dto != null ? dto : new PersonalInfoDto();
+}
+
+private List<ExperienceDto> ensureExperienceList(List<ExperienceDto> list) {
+    return (list == null || list.isEmpty()) ? new ArrayList<>() : list;
+}
+
+private List<EducationDto> ensureEducationList(List<EducationDto> list) {
+    return (list == null || list.isEmpty()) ? new ArrayList<>() : list;
+}
+
+private List<EducationDto> ensureEducationList(List<EducationDto> list) {
+    return (list == null || list.isEmpty()) ? new ArrayList<>() : list;
+}
+
+private boolean ensureVisibility(Boolean isVisibility) {
+    return isVisibility != null ? isVisibility : false;
+}
+
+private PersonalInfo buildPersonalInfo(PersonalInfoDto dto, MultipartFile avatar) {
+    PersonalInfo personalInfo = new PersonalInfo();
+    personalInfo.setFullname(dto.getFullname());
+    personalInfo.setEmail(dto.getEmail());
+    personalInfo.setPhone(dto.getPhone());
+    personalInfo.setLocation(dto.getLocation());
+    personalInfo.setSummary(dto.getSummary());
+
+    if (avatar != null && !avatar.isEmpty()) {
+        var upload = cloudinaryService.uploadImage(avatar);
+
+        if (upload.containsKey("error")) {
+            throw new RuntimeException("Failed to upload avatar: " + upload.get("error"));
+        }
+
+        personalInfo.setAvatarUrl((String) upload.get("url"));
+        personalInfo.setAvatarPublicId((String) upload.get("publicId"));
+    } else if (dto.getAvatarUrl() != null) {
+        // preserve avatar URL when duplicating
+        personalInfo.setAvatarUrl(dto.getAvatarUrl());
+    }
+
+    logger.debug("Created personal info for CV (email={})", personalInfo.getEmail());
+    return personalInfo;
+}
+
+private List<Experience> buildExperiences(List<ExperienceDto> dtoList) {
+    List<Experience> experiences = dtoList.stream()
+            .map(dto -> {
+                Experience exp = new Experience();
+                exp.setCompany(dto.getCompany());
+                exp.setPosition(dto.getPosition());
+                exp.setStartDate(dto.getStartDate());
+                exp.setEndDate(dto.getEndDate());
+                exp.setDescription(dto.getDescription());
+                return exp;
+            })
+            .collect(Collectors.toList());
+
+    logger.debug("Created {} experiences for CV", experiences.size());
+    return experiences;
+}
+
+private List<Education> buildEducations(List<EducationDto> dtoList) {
+    List<Education> educations = dtoList.stream()
+            .map(dto -> {
+                Education edu = new Education();
+                edu.setSchool(dto.getSchool());
+                edu.setDegree(dto.getDegree());
+                edu.setField(dto.getField());
+                edu.setStartDate(dto.getStartDate());
+                edu.setEndDate(dto.getEndDate());
+                return edu;
+            })
+            .collect(Collectors.toList());
+
+    logger.debug("Created {} educations for CV", educations.size());
+    return educations;
+}
 
     public Response createCV(UUID userId) {
         Response response = new Response();
@@ -139,11 +198,11 @@ public class CVApi extends BaseApi {
                 throw new OurException("User not found", 404);
             }
 
-            CV savedCV = cvRepository.save(new CV(userId, "Untitled CV"));
+            CVDto savedCV = handleCreateCV(userId, "Untitled CV", null, null, null, null, null, null, null, null);
 
             response.setStatusCode(201);
             response.setMessage("CV created successfully");
-            response.setCv(cvMapper.toDto(savedCV));
+            response.setCv(savedCV);
             logger.debug("createCV response prepared for userId={} cvId={}", userId, savedCV.getId());
             return response;
         } catch (OurException e) {
@@ -154,9 +213,59 @@ public class CVApi extends BaseApi {
         }
     }
 
+    // public CVDto handleCreateCV(CVDto cv) {
+    //     CV cvEntity = cvMapper.toEntity(cv);
+    //     CV savedCV = cvRepository.save(cvEntity);
+    //     return cvMapper.toDto(savedCV);
+    // }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<CVDto> handleGetAllCVs() {
         return cvRepository.findAll().stream()
                 .map(cvMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public long handleGetTotalCVs() {
+        return cvRepository.count();
+    }
+
+    public List<CVDto> handleGetCVsByVisibility(boolean isVisibility) {
+        return cvRepository.findAll().stream()
+                .filter(cv -> cv.getIsVisibility()
+                        .equals(isVisibility))
+                .map(cvMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public long handleGetCVsCountByVisibility(boolean isVisibility) {
+        return cvRepository.findAll().stream()
+                .filter(cv -> cv.getIsVisibility().equals(isVisibility))
+                .count();
+    }
+
+    public List<CVDto> handleGetCVsCreatedInRange(Instant startDate, Instant endDate) {
+        return cvRepository.findAll().stream()
+                .filter(cv -> cv.getCreatedAt() != null &&
+                        !cv.getCreatedAt().isBefore(startDate) &&
+                        !cv.getCreatedAt().isAfter(endDate))
+                .map(cvMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public long handleGetCVsCountCreatedInRange(Instant startDate, Instant endDate) {
+        return cvRepository.findAll().stream()
+                .filter(cv -> cv.getCreatedAt() != null &&
+                        !cv.getCreatedAt().isBefore(startDate) &&
+                        !cv.getCreatedAt().isAfter(endDate))
+                .count();
+    }
+
+    public List<CVDto> handleGetRecentCVs(int limit) {
+        return cvRepository.findAll().stream()
+                .map(cvMapper::toDto)
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .limit(limit)
                 .collect(Collectors.toList());
     }
 
@@ -194,6 +303,7 @@ public class CVApi extends BaseApi {
         }
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<CVDto> handleGetUserCVs(UUID userId) {
         UserDto user = userGrpcClient.findUserById(userId);
         if (user == null) {
@@ -249,6 +359,7 @@ public class CVApi extends BaseApi {
         }
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public CVDto handleUpdateCV(UUID cvId,
             String title,
             PersonalInfoDto personalInfoDto,
@@ -395,7 +506,7 @@ public class CVApi extends BaseApi {
         logger.info("Duplicating CV id={}", cvId);
         CVDto existingCV = handleGetCVById(cvId);
 
-        CVDto newCV = handleDuplicateCV(
+        CVDto newCV = handleCreateCV(
                 existingCV.getUserId(),
                 existingCV.getTitle() + " (Copy)",
                 existingCV.getPersonalInfo(),

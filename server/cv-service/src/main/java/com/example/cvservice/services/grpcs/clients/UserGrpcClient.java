@@ -23,7 +23,7 @@ public class UserGrpcClient {
             UserResponse response = userServiceStub.findUserById(request);
 
             if (response.getCode() == 200 && response.hasUser()) {
-                return convertToUserDto(response.getUser());
+                return toUserDto(response.getUser());
             }
             return null;
         } catch (StatusRuntimeException e) {
@@ -32,7 +32,7 @@ public class UserGrpcClient {
         }
     }
 
-    private UserDto convertToUserDto(User protoUser) {
+    private UserDto toUserDto(User protoUser) {
         UserDto userDto = new UserDto();
         userDto.setId(UUID.fromString(protoUser.getId()));
         userDto.setUsername(protoUser.getUsername());

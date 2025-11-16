@@ -61,4 +61,92 @@ public interface CVInfoOrBuilder extends
    * @return The isVisibility.
    */
   boolean getIsVisibility();
+
+  /**
+   * <code>.cv.PersonalInfo personal_info = 6;</code>
+   * @return Whether the personalInfo field is set.
+   */
+  boolean hasPersonalInfo();
+  /**
+   * <code>.cv.PersonalInfo personal_info = 6;</code>
+   * @return The personalInfo.
+   */
+  com.example.grpc.cv.PersonalInfo getPersonalInfo();
+  /**
+   * <code>.cv.PersonalInfo personal_info = 6;</code>
+   */
+  com.example.grpc.cv.PersonalInfoOrBuilder getPersonalInfoOrBuilder();
+
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  java.util.List<com.example.grpc.cv.Experience> 
+      getExperiencesList();
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  com.example.grpc.cv.Experience getExperiences(int index);
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  int getExperiencesCount();
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  java.util.List<? extends com.example.grpc.cv.ExperienceOrBuilder> 
+      getExperiencesOrBuilderList();
+  /**
+   * <code>repeated .cv.Experience experiences = 7;</code>
+   */
+  com.example.grpc.cv.ExperienceOrBuilder getExperiencesOrBuilder(
+      int index);
+
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  java.util.List<com.example.grpc.cv.Education> 
+      getEducationsList();
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  com.example.grpc.cv.Education getEducations(int index);
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  int getEducationsCount();
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  java.util.List<? extends com.example.grpc.cv.EducationOrBuilder> 
+      getEducationsOrBuilderList();
+  /**
+   * <code>repeated .cv.Education educations = 8;</code>
+   */
+  com.example.grpc.cv.EducationOrBuilder getEducationsOrBuilder(
+      int index);
+
+  /**
+   * <code>repeated string skills = 9;</code>
+   * @return A list containing the skills.
+   */
+  java.util.List<java.lang.String>
+      getSkillsList();
+  /**
+   * <code>repeated string skills = 9;</code>
+   * @return The count of skills.
+   */
+  int getSkillsCount();
+  /**
+   * <code>repeated string skills = 9;</code>
+   * @param index The index of the element to return.
+   * @return The skills at the given index.
+   */
+  java.lang.String getSkills(int index);
+  /**
+   * <code>repeated string skills = 9;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the skills at the given index.
+   */
+  com.google.protobuf.ByteString
+      getSkillsBytes(int index);
 }

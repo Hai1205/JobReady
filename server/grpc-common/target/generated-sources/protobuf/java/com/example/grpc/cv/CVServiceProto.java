@@ -36,6 +36,11 @@ public final class CVServiceProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cv_GetRecentCVsRequest_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cv_CreateCVRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cv_CreateCVRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cv_GetTotalCVsResponse_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -56,10 +61,30 @@ public final class CVServiceProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cv_GetRecentCVsResponse_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cv_CreateCVResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cv_CreateCVResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cv_CVInfo_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cv_CVInfo_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cv_PersonalInfo_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cv_PersonalInfo_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cv_Experience_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cv_Experience_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cv_Education_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cv_Education_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -74,26 +99,47 @@ public final class CVServiceProto {
       "visibility\030\001 \001(\010\"C\n\033GetCVsCreatedInRange" +
       "Request\022\022\n\nstart_date\030\001 \001(\t\022\020\n\010end_date\030" +
       "\002 \001(\t\"$\n\023GetRecentCVsRequest\022\r\n\005limit\030\001 " +
-      "\001(\005\"C\n\023GetTotalCVsResponse\022\014\n\004code\030\001 \001(\005" +
-      "\022\017\n\007message\030\002 \001(\t\022\r\n\005total\030\003 \001(\003\"J\n\032GetC" +
-      "VsByVisibilityResponse\022\014\n\004code\030\001 \001(\005\022\017\n\007" +
-      "message\030\002 \001(\t\022\r\n\005count\030\003 \001(\003\"L\n\034GetCVsCr" +
-      "eatedInRangeResponse\022\014\n\004code\030\001 \001(\005\022\017\n\007me" +
-      "ssage\030\002 \001(\t\022\r\n\005count\030\003 \001(\003\"N\n\024GetRecentC" +
-      "VsResponse\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(" +
-      "\t\022\027\n\003cvs\030\003 \003(\0132\n.cv.CVInfo\"_\n\006CVInfo\022\n\n\002" +
-      "id\030\001 \001(\t\022\r\n\005title\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\t" +
-      "\022\022\n\ncreated_at\030\004 \001(\t\022\025\n\ris_visibility\030\005 " +
-      "\001(\0102\276\002\n\tCVService\022>\n\013GetTotalCVs\022\026.cv.Ge" +
-      "tTotalCVsRequest\032\027.cv.GetTotalCVsRespons" +
-      "e\022S\n\022GetCVsByVisibility\022\035.cv.GetCVsByVis" +
-      "ibilityRequest\032\036.cv.GetCVsByVisibilityRe" +
-      "sponse\022Y\n\024GetCVsCreatedInRange\022\037.cv.GetC" +
-      "VsCreatedInRangeRequest\032 .cv.GetCVsCreat" +
-      "edInRangeResponse\022A\n\014GetRecentCVs\022\027.cv.G" +
-      "etRecentCVsRequest\032\030.cv.GetRecentCVsResp" +
-      "onseB\'\n\023com.example.grpc.cvB\016CVServicePr" +
-      "otoP\001b\006proto3"
+      "\001(\005\"\262\001\n\017CreateCVRequest\022\017\n\007user_id\030\001 \001(\t" +
+      "\022\r\n\005title\030\002 \001(\t\022\'\n\rpersonal_info\030\003 \001(\0132\020" +
+      ".cv.PersonalInfo\022#\n\013experiences\030\004 \003(\0132\016." +
+      "cv.Experience\022!\n\neducations\030\005 \003(\0132\r.cv.E" +
+      "ducation\022\016\n\006skills\030\006 \003(\t\"C\n\023GetTotalCVsR" +
+      "esponse\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\r" +
+      "\n\005total\030\003 \001(\003\"J\n\032GetCVsByVisibilityRespo" +
+      "nse\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\r\n\005co" +
+      "unt\030\003 \001(\003\"L\n\034GetCVsCreatedInRangeRespons" +
+      "e\022\014\n\004code\030\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\r\n\005coun" +
+      "t\030\003 \001(\003\"N\n\024GetRecentCVsResponse\022\014\n\004code\030" +
+      "\001 \001(\005\022\017\n\007message\030\002 \001(\t\022\027\n\003cvs\030\003 \003(\0132\n.cv" +
+      ".CVInfo\"I\n\020CreateCVResponse\022\014\n\004code\030\001 \001(" +
+      "\005\022\017\n\007message\030\002 \001(\t\022\026\n\002cv\030\003 \001(\0132\n.cv.CVIn" +
+      "fo\"\340\001\n\006CVInfo\022\n\n\002id\030\001 \001(\t\022\r\n\005title\030\002 \001(\t" +
+      "\022\017\n\007user_id\030\003 \001(\t\022\022\n\ncreated_at\030\004 \001(\t\022\025\n" +
+      "\ris_visibility\030\005 \001(\010\022\'\n\rpersonal_info\030\006 " +
+      "\001(\0132\020.cv.PersonalInfo\022#\n\013experiences\030\007 \003" +
+      "(\0132\016.cv.Experience\022!\n\neducations\030\010 \003(\0132\r" +
+      ".cv.Education\022\016\n\006skills\030\t \003(\t\"\233\001\n\014Person" +
+      "alInfo\022\n\n\002id\030\001 \001(\t\022\020\n\010fullname\030\002 \001(\t\022\r\n\005" +
+      "email\030\003 \001(\t\022\r\n\005phone\030\004 \001(\t\022\020\n\010location\030\005" +
+      " \001(\t\022\017\n\007summary\030\006 \001(\t\022\022\n\navatar_url\030\007 \001(" +
+      "\t\022\030\n\020avatar_public_id\030\010 \001(\t\"v\n\nExperienc" +
+      "e\022\n\n\002id\030\001 \001(\t\022\017\n\007company\030\002 \001(\t\022\020\n\010positi" +
+      "on\030\003 \001(\t\022\022\n\nstart_date\030\004 \001(\t\022\020\n\010end_date" +
+      "\030\005 \001(\t\022\023\n\013description\030\006 \001(\t\"l\n\tEducation" +
+      "\022\n\n\002id\030\001 \001(\t\022\016\n\006school\030\002 \001(\t\022\016\n\006degree\030\003" +
+      " \001(\t\022\r\n\005field\030\004 \001(\t\022\022\n\nstart_date\030\005 \001(\t\022" +
+      "\020\n\010end_date\030\006 \001(\t2\365\002\n\tCVService\022>\n\013GetTo" +
+      "talCVs\022\026.cv.GetTotalCVsRequest\032\027.cv.GetT" +
+      "otalCVsResponse\022S\n\022GetCVsByVisibility\022\035." +
+      "cv.GetCVsByVisibilityRequest\032\036.cv.GetCVs" +
+      "ByVisibilityResponse\022Y\n\024GetCVsCreatedInR" +
+      "ange\022\037.cv.GetCVsCreatedInRangeRequest\032 ." +
+      "cv.GetCVsCreatedInRangeResponse\022A\n\014GetRe" +
+      "centCVs\022\027.cv.GetRecentCVsRequest\032\030.cv.Ge" +
+      "tRecentCVsResponse\0225\n\010CreateCV\022\023.cv.Crea" +
+      "teCVRequest\032\024.cv.CreateCVResponseB\'\n\023com" +
+      ".example.grpc.cvB\016CVServiceProtoP\001b\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -123,36 +169,66 @@ public final class CVServiceProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cv_GetRecentCVsRequest_descriptor,
         new java.lang.String[] { "Limit", });
-    internal_static_cv_GetTotalCVsResponse_descriptor =
+    internal_static_cv_CreateCVRequest_descriptor =
       getDescriptor().getMessageTypes().get(4);
+    internal_static_cv_CreateCVRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cv_CreateCVRequest_descriptor,
+        new java.lang.String[] { "UserId", "Title", "PersonalInfo", "Experiences", "Educations", "Skills", });
+    internal_static_cv_GetTotalCVsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(5);
     internal_static_cv_GetTotalCVsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cv_GetTotalCVsResponse_descriptor,
         new java.lang.String[] { "Code", "Message", "Total", });
     internal_static_cv_GetCVsByVisibilityResponse_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_cv_GetCVsByVisibilityResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cv_GetCVsByVisibilityResponse_descriptor,
         new java.lang.String[] { "Code", "Message", "Count", });
     internal_static_cv_GetCVsCreatedInRangeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_cv_GetCVsCreatedInRangeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cv_GetCVsCreatedInRangeResponse_descriptor,
         new java.lang.String[] { "Code", "Message", "Count", });
     internal_static_cv_GetRecentCVsResponse_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_cv_GetRecentCVsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cv_GetRecentCVsResponse_descriptor,
         new java.lang.String[] { "Code", "Message", "Cvs", });
+    internal_static_cv_CreateCVResponse_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_cv_CreateCVResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cv_CreateCVResponse_descriptor,
+        new java.lang.String[] { "Code", "Message", "Cv", });
     internal_static_cv_CVInfo_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_cv_CVInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cv_CVInfo_descriptor,
-        new java.lang.String[] { "Id", "Title", "UserId", "CreatedAt", "IsVisibility", });
+        new java.lang.String[] { "Id", "Title", "UserId", "CreatedAt", "IsVisibility", "PersonalInfo", "Experiences", "Educations", "Skills", });
+    internal_static_cv_PersonalInfo_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_cv_PersonalInfo_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cv_PersonalInfo_descriptor,
+        new java.lang.String[] { "Id", "Fullname", "Email", "Phone", "Location", "Summary", "AvatarUrl", "AvatarPublicId", });
+    internal_static_cv_Experience_descriptor =
+      getDescriptor().getMessageTypes().get(12);
+    internal_static_cv_Experience_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cv_Experience_descriptor,
+        new java.lang.String[] { "Id", "Company", "Position", "StartDate", "EndDate", "Description", });
+    internal_static_cv_Education_descriptor =
+      getDescriptor().getMessageTypes().get(13);
+    internal_static_cv_Education_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cv_Education_descriptor,
+        new java.lang.String[] { "Id", "School", "Degree", "Field", "StartDate", "EndDate", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

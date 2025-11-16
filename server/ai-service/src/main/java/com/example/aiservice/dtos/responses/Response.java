@@ -16,6 +16,7 @@ public class Response {
     private int statusCode;
     private String message;
 
+    private CVDto cv;
     private AnalyzeResultDto analyze;
     private String improvedSection;
     private List<AISuggestionDto> suggestions;

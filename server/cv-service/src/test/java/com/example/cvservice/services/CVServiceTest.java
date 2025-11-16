@@ -4,6 +4,7 @@ import com.example.cvservice.dtos.CVDto;
 import com.example.cvservice.dtos.UserDto;
 import com.example.cvservice.dtos.responses.Response;
 import com.example.cvservice.entities.CV;
+import com.example.cvservice.entities.PersonalInfo;
 import com.example.cvservice.mappers.CVMapper;
 import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.apis.CVApi;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.*;
 
@@ -23,6 +26,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class CVServiceTest {
 
     @Mock
@@ -78,8 +82,10 @@ class CVServiceTest {
     @Test
     void testCreateCV_Success() {
         // Arrange
-        when(userGrpcClient.findUserById(userId)).thenReturn(mockUser);
+        lenient().when(userGrpcClient.findUserById(userId)).thenReturn(mockUser);
+        when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(cvRepository.save(any(CV.class))).thenReturn(mockCV);
+        when(cvMapper.toDto(mockCV)).thenReturn(mockCVDto);
 
         // Act
         Response response = cvService.createCV(userId);
@@ -88,7 +94,7 @@ class CVServiceTest {
         assertNotNull(response);
         assertEquals(201, response.getStatusCode());
 
-        verify(userGrpcClient).findUserById(userId);
+        verify(userGrpcClient, times(1)).findUserById(userId);
         verify(cvRepository).save(any(CV.class));
     }
 

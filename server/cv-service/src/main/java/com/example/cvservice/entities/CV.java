@@ -26,6 +26,9 @@ public class CV {
     public CV(UUID userId, String title) {
         this.userId = userId;
         this.title = title;
+        this.isVisibility = false;
+        this.color = "#3498db";
+        this.template = "modern";
     }
 
     public CV(UUID userId, String title, List<String> skills, Boolean isVisibility, String color, String template) {

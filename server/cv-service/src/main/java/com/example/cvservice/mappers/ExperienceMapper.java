@@ -5,8 +5,6 @@ import com.example.cvservice.entities.Experience;
 
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 public class ExperienceMapper {
 
@@ -27,7 +25,9 @@ public class ExperienceMapper {
         if (experienceDto == null)
             return null;
         Experience e = new Experience();
-        e.setId(experienceDto.getId() != null ? experienceDto.getId() : UUID.randomUUID());
+        if (experienceDto.getId() != null) {
+            e.setId(experienceDto.getId());
+        }
         e.setCompany(experienceDto.getCompany());
         e.setPosition(experienceDto.getPosition());
         e.setStartDate(experienceDto.getStartDate());

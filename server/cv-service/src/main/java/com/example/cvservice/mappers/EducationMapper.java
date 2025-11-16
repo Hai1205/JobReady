@@ -5,8 +5,6 @@ import com.example.cvservice.entities.Education;
 
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 public class EducationMapper {
 
@@ -27,7 +25,9 @@ public class EducationMapper {
         if (educationDto == null)
             return null;
         Education e = new Education();
-        e.setId(educationDto.getId() != null ? educationDto.getId() : UUID.randomUUID());
+        if (educationDto.getId() != null) {
+            e.setId(educationDto.getId());
+        }
         e.setSchool(educationDto.getSchool());
         e.setDegree(educationDto.getDegree());
         e.setField(educationDto.getField());
