@@ -2,8 +2,10 @@ import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, IBaseStore } from "@/lib/initialStore";
 import { applySuggestionToCV, getSectionDisplayName } from "@/lib/suggestionApplier";
 import { toast } from "react-toastify";
+import { useCVStore } from "./cvStore";
 
 interface IAIDataResponse {
+	cv: ICV,
 	suggestions: IAISuggestion[],
 	analyze: IAnalyzeResult,
 	improvedSection: string,
@@ -37,6 +39,10 @@ export interface IAIStore extends IBaseStore {
 	improveCV: (
 		section: string,
 		content: string,
+	) => Promise<IApiResponse<IAIDataResponse>>;
+	importCV: (
+		userId: string,
+		file: File | null,
 	) => Promise<IApiResponse<IAIDataResponse>>;
 
 	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void;
@@ -119,6 +125,26 @@ export const useAIStore = createStore<IAIStore>(
 
 			return await get().handleRequest(async () => {
 				return await handleRequest<IAIDataResponse>(EHttpType.POST, `/ai/improve`, formData);
+			});
+		},
+
+		importCV: async (
+			userId: string,
+			file: File | null,
+		): Promise<IApiResponse<IAIDataResponse>> => {
+			const formData = new FormData();
+			formData.append("file", file as Blob);
+
+			return await get().handleRequest(async () => {
+				const res = await handleRequest<IAIDataResponse>(EHttpType.POST, `/ai/users/${userId}/import`, formData);
+
+				const { success, cv } = res.data || {};
+
+				if (success && cv) {
+					useCVStore.getState().handleSetCurrentCV(cv);
+				}
+
+				return res;
 			});
 		},
 

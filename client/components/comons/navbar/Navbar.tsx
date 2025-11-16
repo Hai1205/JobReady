@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/authStore";
+import { useCVStore } from "@/stores/cvStore";
 import { Sun, Moon } from "lucide-react";
 import { NavbarLogo } from "./NavbarLogo";
 import { NavbarLinks } from "./NavbarLinks";
@@ -13,6 +14,7 @@ import { NavbarMobileMenu } from "./NavbarMobileMenu";
 
 export function Navbar() {
   const authStore = useAuthStore();
+  const { createCV } = useCVStore();
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
@@ -26,9 +28,14 @@ export function Navbar() {
   const isAdmin = authStore?.isAdmin || false;
   const logout = authStore?.logout || (() => {});
 
+  const handleCreate = async () => {
+    await createCV(userAuth?.id || "");
+    router.push("/cv-builder");
+  };
+
   const navLinks = [
     { href: "/", label: "Trang Chủ" },
-    { href: "/cv-builder", label: "Tạo CV" },
+    { href: "/cv-builder", label: "Tạo CV", onClick: handleCreate },
     { href: "/my-cvs", label: "CV Của Tôi" },
   ];
   const allNavLinks = isAdmin

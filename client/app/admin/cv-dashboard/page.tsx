@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import TableDashboardSkeleton from "@/components/comons/layout/TableDashboardSkeleton";
 import ConfirmationDialog from "@/components/comons/layout/ConfirmationDialog";
+import ImportFileDialog from "@/components/comons/my-cvs/ImportFileDialog";
+import { useAIStore } from "@/stores/aiStore";
 
 export type CvFilterType = "visibility";
 
@@ -27,6 +29,7 @@ export default function CVDashboardPage() {
     isLoadingAllCVs,
   } = useCVStore();
   const { userAuth } = useAuthStore();
+  const { importCV } = useAIStore();
 
   const router = useRouter();
 
@@ -149,6 +152,25 @@ export default function CVDashboardPage() {
     fetchAllCVsInBackground();
   };
 
+  const handleImport = async (file: File | null) => {
+    try {
+      const res = await importCV(userAuth?.id || "", file);
+      console.log("Import CV result:", res);
+
+      if (res.data && res.data.success) {
+        console.log("Navigating to cv-builder...");
+        router.push("/cv-builder");
+        return true;
+      }
+
+      console.log("Import failed or no CV data");
+      return false;
+    } catch (error) {
+      console.error("Import error:", error);
+      return false;
+    }
+  };
+
   // Show skeleton loading when there's no cached data
   if (isLoadingAllCVs && CVsTable.length === 0) {
     return <TableDashboardSkeleton />;
@@ -163,7 +185,9 @@ export default function CVDashboardPage() {
           router.push(`/cv-builder`);
         }}
         createButtonText="Create CV"
-      />
+      >
+        <ImportFileDialog onImport={handleImport} />
+      </DashboardHeader>
 
       <div className="space-y-6">
         <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">

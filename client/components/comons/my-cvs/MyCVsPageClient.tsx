@@ -9,6 +9,7 @@ import UserCVsSkeleton from "@/components/comons/layout/UserCVsSkeleton";
 import UserCVsSection from "@/components/comons/my-cvs/UserCVsSection";
 import TemplateCVsSection from "@/components/comons/my-cvs/TemplateCVsSection";
 import ConfirmationDialog from "../layout/ConfirmationDialog";
+import { useAIStore } from "@/stores/aiStore";
 
 export default function MyCVsPageClient() {
   const { userAuth } = useAuthStore();
@@ -24,6 +25,8 @@ export default function MyCVsPageClient() {
     CVsTable,
     isLoadingUserCVs,
   } = useCVStore();
+
+  const { importCV } = useAIStore();
 
   const router = useRouter();
   const [templateCVs, setTemplateCVs] = useState<ICV[]>([]);
@@ -49,6 +52,25 @@ export default function MyCVsPageClient() {
   const handleCreate = async () => {
     await createCV(userAuth?.id || "");
     router.push("/cv-builder");
+  };
+
+  const handleImport = async (file: File | null) => {
+    try {
+      const res = await importCV(userAuth?.id || "", file);
+      console.log("Import CV result:", res);
+
+      if (res.data && res.data.success) {
+        console.log("Navigating to cv-builder...");
+        router.push("/cv-builder");
+        return true;
+      }
+
+      console.log("Import failed or no CV data");
+      return false;
+    } catch (error) {
+      console.error("Import error:", error);
+      return false;
+    }
   };
 
   const handleEdit = (cv: ICV) => {
@@ -90,7 +112,7 @@ export default function MyCVsPageClient() {
     <div className="min-h-screen flex items-center justify-center py-12">
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8">
-          <PageHeader onCreateNew={handleCreate} />
+          <PageHeader onCreateNew={handleCreate} onImport={handleImport} />
 
           <UserCVsSection
             userCVs={userCVs}

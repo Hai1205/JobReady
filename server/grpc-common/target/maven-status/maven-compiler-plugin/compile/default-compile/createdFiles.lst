@@ -16,6 +16,8 @@ com\example\grpc\user\UserServiceGrpc$UserServiceMethodDescriptorSupplier.class
 com\example\grpc\user\UserServiceGrpc$2.class
 com\example\grpc\user\UserServiceGrpc$UserServiceBaseDescriptorSupplier.class
 com\example\grpc\cv\CVServiceGrpc$2.class
+com\example\grpc\user\UserResponseOrBuilder.class
+com\example\grpc\user\UserServiceProto.class
 com\example\grpc\user\UserServiceGrpc$3.class
 com\example\grpc\user\UserServiceGrpc$MethodHandlers.class
 com\example\grpc\user\UserServiceGrpc.class

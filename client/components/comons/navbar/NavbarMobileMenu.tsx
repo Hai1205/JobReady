@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavbarMobileMenuProps {
   pathname: string;
-  links: { href: string; label: string }[];
+  links: { href: string; label: string; onClick?: () => void }[];
   userAuth: IUser | null;
   isAdmin: boolean;
   open: boolean;
@@ -87,7 +87,13 @@ export const NavbarMobileMenu = ({
           <Link
             key={`${link.href}-${link.label}`}
             href={link.href}
-            onClick={() => onOpenChange(false)}
+            onClick={(e) => {
+              if (link.onClick) {
+                e.preventDefault();
+                link.onClick();
+              }
+              onOpenChange(false);
+            }}
             className={cn(
               "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200",
               pathname === link.href
