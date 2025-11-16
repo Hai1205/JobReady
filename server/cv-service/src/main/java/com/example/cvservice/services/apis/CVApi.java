@@ -29,17 +29,26 @@ public class CVApi extends BaseApi {
     private final ObjectMapper objectMapper;
     private final CloudinaryService cloudinaryService;
     private final UserGrpcClient userGrpcClient;
+    private final ExperienceRepository experienceRepository;
+    private final EducationRepository educationRepository;
+    private final PersonalInfoRepository personalInfoRepository;
 
     public CVApi(
             CVRepository cvRepository,
             CloudinaryService cloudinaryService,
             CVMapper cvMapper,
-            UserGrpcClient userGrpcClient) {
+            UserGrpcClient userGrpcClient,
+            ExperienceRepository experienceRepository,
+            EducationRepository educationRepository,
+            PersonalInfoRepository personalInfoRepository) {
         this.cvRepository = cvRepository;
         this.cvMapper = cvMapper;
         this.cloudinaryService = cloudinaryService;
         this.userGrpcClient = userGrpcClient;
         this.objectMapper = new ObjectMapper();
+        this.experienceRepository = experienceRepository;
+        this.educationRepository = educationRepository;
+        this.personalInfoRepository = personalInfoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -478,10 +487,24 @@ public class CVApi extends BaseApi {
         }
     }
 
+    @Transactional
     public boolean handleDeleteCV(UUID cvId) {
-        handleGetCVById(cvId);
+        CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
 
-        cvRepository.deleteById(cvId);
+        // Delete avatar from Cloudinary if exists
+        if (cv.getPersonalInfo() != null && cv.getPersonalInfo().getAvatarPublicId() != null) {
+            cloudinaryService.deleteImage(cv.getPersonalInfo().getAvatarPublicId());
+        }
+
+        // Delete related entities
+        if (cv.getPersonalInfo() != null) {
+            personalInfoRepository.delete(cv.getPersonalInfo());
+        }
+        experienceRepository.deleteAll(cv.getExperiences());
+        educationRepository.deleteAll(cv.getEducations());
+
+        // Delete the CV
+        cvRepository.delete(cv);
         return true;
     }
 
