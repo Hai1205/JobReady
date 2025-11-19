@@ -57,11 +57,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!-- Eureka client for service registration and discovery -->
-        <dependency>
+        <!-- Eureka client for service registration and discovery - REPLACED by Kubernetes Service Discovery -->
+        <!-- <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
+        </dependency> -->
         <!-- Actuator for monitoring and health endpoints -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

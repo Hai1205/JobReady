@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stats-service
+  namespace: jobready
+  labels:
+    app: stats-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stats-service
+  template:
+    metadata:
+      labels:
+        app: stats-service
+    spec:
+      containers:
+        - name: stats-service
+          image: stats-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8087
+              name: http
+          env:
+            - name: SERVER_PORT
+              value: "8087"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8087
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8087
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "125m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+      volumes:
+        - name: config
+          configMap:
+            name: stats-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stats-service
+  namespace: jobready
+  labels:
+    app: stats-service
+spec:
+  type: ClusterIP
+  selector:
+    app: stats-service
+  ports:
+    - port: 8087
+      targetPort: 8087
+      protocol: TCP
+      name: http

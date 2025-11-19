@@ -1,16 +1,4 @@
 services:
-  discovery-service:
-    build:
-      context: ..
-      dockerfile: server/discovery-service/Dockerfile
-    container_name: discovery-service
-    env_file:
-      - ./discovery-service/.env
-    ports:
-      - "8761:8761"
-    networks:
-      - app-network
-
   gateway-service:
     build:
       context: ..
@@ -20,8 +8,6 @@ services:
       - ./gateway-service/.env
     ports:
       - "8080:8080"
-    depends_on:
-      - discovery-service
     networks:
       - app-network
 
@@ -34,9 +20,6 @@ services:
       - ./user-service/.env
     ports:
       - "8083:8083"
-    depends_on:
-      discovery-service:
-        condition: service_started
     networks:
       - app-network
 
@@ -50,7 +33,6 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - discovery-service
       - user-service
     networks:
       - app-network
@@ -64,8 +46,6 @@ services:
       - ./mail-service/.env
     ports:
       - "8086:8086"
-    depends_on:
-      - discovery-service
     networks:
       - app-network
 
@@ -79,8 +59,6 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      discovery-service:
-        condition: service_started
       user-service:
         condition: service_started
     networks:
@@ -96,8 +74,6 @@ services:
     ports:
       - "8085:8085"
     depends_on:
-      discovery-service:
-        condition: service_started
       cv-service:
         condition: service_started
     networks:
@@ -113,8 +89,6 @@ services:
     ports:
       - "8087:8087"
     depends_on:
-      discovery-service:
-        condition: service_started
       user-service:
         condition: service_started
       cv-service:

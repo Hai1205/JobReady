@@ -35,7 +35,6 @@
         <module>rabbit-common</module>
         <module>grpc-common</module>
         <module>redis-common</module>
-        <module>discovery-service</module>
         <module>gateway-service</module>
         <module>auth-service</module>
         <module>mail-service</module>

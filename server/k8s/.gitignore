@@ -1,0 +1,23 @@
+# Kubernetes Secrets - NEVER commit actual secrets!
+secrets.yaml
+*-secret.yaml
+*.secret.yaml
+
+# Environment-specific overrides that might contain sensitive data
+*-override.yaml
+*.override.yaml
+
+# Local development files
+*.local.yaml
+.env
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

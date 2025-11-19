@@ -33,12 +33,6 @@
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
 
-        <!-- Eureka Client for service discovery -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
-
         <!-- WebFlux for reactive programming and non-blocking I/O -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

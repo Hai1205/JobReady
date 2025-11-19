@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cv-service
+  namespace: jobready
+  labels:
+    app: cv-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cv-service
+  template:
+    metadata:
+      labels:
+        app: cv-service
+    spec:
+      containers:
+        - name: cv-service
+          image: cv-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8084
+              name: http
+            - containerPort: 9091
+              name: grpc
+          env:
+            - name: SERVER_PORT
+              value: "8084"
+            - name: GRPC_SERVER_PORT
+              value: "9091"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: url
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8084
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8084
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: config
+          configMap:
+            name: cv-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cv-service
+  namespace: jobready
+  labels:
+    app: cv-service
+spec:
+  type: ClusterIP
+  selector:
+    app: cv-service
+  ports:
+    - port: 8084
+      targetPort: 8084
+      protocol: TCP
+      name: http
+    - port: 9091
+      targetPort: 9091
+      protocol: TCP
+      name: grpc
