@@ -424,6 +424,18 @@ const nextConfig = {
 };
 ```
 
+### E2E Tests (có thể thêm Cypress hoặc Playwright)
+
+```bash
+npm run test:e2e
+```
+
+### Linting
+
+```bash
+npm run lint
+```
+
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
