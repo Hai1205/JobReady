@@ -37,6 +37,9 @@ public class FileParserService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Validate file for Import CV - Only PDF is supported
+     */
     public void validatePDFFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new OurException("File is required", 400);
@@ -44,7 +47,37 @@ public class FileParserService {
 
         String filename = file.getOriginalFilename();
         if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
-            throw new OurException("Only PDF files are supported", 400);
+            throw new OurException("Only PDF files are supported for CV import", 400);
+        }
+
+        // Check file size (max 10MB)
+        long maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.getSize() > maxSize) {
+            throw new OurException("File size must not exceed 10MB", 400);
+        }
+    }
+
+    /**
+     * Validate file for Analyze with JD - Both PDF and Word (.docx) are supported
+     */
+    public void validateDocumentFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new OurException("File is required", 400);
+        }
+
+        String filename = file.getOriginalFilename();
+        if (filename == null) {
+            throw new OurException("Invalid filename", 400);
+        }
+
+        String lowerFilename = filename.toLowerCase();
+        boolean isValidFormat = lowerFilename.endsWith(".pdf") ||
+                lowerFilename.endsWith(".docx") ||
+                lowerFilename.endsWith(".doc");
+
+        if (!isValidFormat) {
+            throw new OurException("Only PDF and Word (.docx, .doc) files are supported for job description analysis",
+                    400);
         }
 
         // Check file size (max 10MB)

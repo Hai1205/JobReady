@@ -11,8 +11,8 @@ import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
 import com.example.userservice.repositories.UserRepository;
 import com.example.userservice.services.CloudinaryService;
-import com.example.securitycommon.model.AuthenticatedUser;
-import com.example.securitycommon.util.SecurityUtils;
+import com.example.securitycommon.utils.SecurityUtils;
+import com.example.securitycommon.models.AuthenticatedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Value;

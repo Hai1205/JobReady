@@ -1,4 +1,4 @@
-import { BASE_URL, EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
+import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, IBaseStore } from "@/lib/initialStore";
 
 export interface IStatsResponse {
@@ -50,51 +50,50 @@ export const useStatsStore = createStore<IStatsStore>(
 		},
 
 		getStatsReport: async (forceRefresh: boolean = false): Promise<Blob | null> => {
-			const state = get();
 			const now = Date.now();
 
 			// Return cached report if available and not forcing refresh
-			if (!forceRefresh && state.statsReport && state.lastReportFetchTime) {
-				const cacheAge = now - state.lastReportFetchTime;
+			if (!forceRefresh && get().statsReport && get().lastReportFetchTime) {
+				const cacheAge = now - (get().lastReportFetchTime || 0);
 				if (cacheAge < CACHE_DURATION) {
 					console.log("Using cached report");
-					return state.statsReport;
+					return get().statsReport;
 				}
 			}
 
-				// Use handleRequest to get the report data
-				const res = await handleRequest<IStatsResponse>(EHttpType.GET, `/stats/report`);
+			// Use handleRequest to get the report data
+			const res = await handleRequest<IStatsResponse>(EHttpType.GET, `/stats/report`);
 
-				if (res.data?.statsReport) {
-					let blob: Blob;
+			if (res.data?.statsReport) {
+				let blob: Blob;
 
-					// Check if statsReport is a Base64 string or byte array
-					if (typeof res.data.statsReport === 'string') {
-						// Decode Base64 string to binary
-						const binaryString = atob(res.data.statsReport);
-						const bytes = new Uint8Array(binaryString.length);
-						for (let i = 0; i < binaryString.length; i++) {
-							bytes[i] = binaryString.charCodeAt(i);
-						}
-						blob = new Blob([bytes], { type: 'application/pdf' });
-					} else if (Array.isArray(res.data.statsReport)) {
-						// Convert byte array to Blob
-						const uint8Array = new Uint8Array(res.data.statsReport);
-						blob = new Blob([uint8Array], { type: 'application/pdf' });
-					} else {
-						return null;
+				// Check if statsReport is a Base64 string or byte array
+				if (typeof res.data.statsReport === 'string') {
+					// Decode Base64 string to binary
+					const binaryString = atob(res.data.statsReport);
+					const bytes = new Uint8Array(binaryString.length);
+					for (let i = 0; i < binaryString.length; i++) {
+						bytes[i] = binaryString.charCodeAt(i);
 					}
-
-					set({
-						statsReport: blob,
-						lastReportFetchTime: Date.now(),
-					});
-					return blob;
+					blob = new Blob([bytes], { type: 'application/pdf' });
+				} else if (Array.isArray(res.data.statsReport)) {
+					// Convert byte array to Blob
+					const uint8Array = new Uint8Array(res.data.statsReport);
+					blob = new Blob([uint8Array], { type: 'application/pdf' });
+				} else {
+					return null;
 				}
 
-				return null;
-		}, 
-		
+				set({
+					statsReport: blob,
+					lastReportFetchTime: Date.now(),
+				});
+				return blob;
+			}
+
+			return null;
+		},
+
 		fetchDashboardStatsInBackground: async (): Promise<void> => {
 			const state = get();
 			const now = Date.now();

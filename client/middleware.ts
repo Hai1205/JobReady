@@ -36,7 +36,29 @@ export function middleware(request: NextRequest) {
     }
 
     // Get the authentication token from cookies (try multiple possible cookie names)
-    const authToken = request.cookies.get('access_token')?.value;
+    let authToken = request.cookies.get('access_token')?.value;
+
+    // Also check if token exists in the Cookie header directly
+    if (!authToken) {
+        const cookieHeader = request.headers.get('cookie');
+        if (cookieHeader) {
+            const cookies = cookieHeader.split(';').map(c => c.trim());
+            const accessTokenCookie = cookies.find(c => c.startsWith('access_token='));
+            if (accessTokenCookie) {
+                authToken = accessTokenCookie.split('=')[1];
+            }
+        }
+    }
+
+    // Decode token if it's URL encoded
+    if (authToken) {
+        try {
+            authToken = decodeURIComponent(authToken);
+        } catch (e) {
+            // If decodeURIComponent fails, use the original token
+            console.log('Token is not URL encoded, using as-is');
+        }
+    }
 
     // Parse the user authentication status
     let isAuthenticated = false
@@ -46,8 +68,28 @@ export function middleware(request: NextRequest) {
     if (authToken) {
         try {
             // Decode JWT payload (second part)
-            const payload = authToken.split('.')[1]
-            const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
+            const parts = authToken.split('.');
+            if (parts.length !== 3) {
+                throw new Error('Invalid JWT format - must have 3 parts')
+            }
+
+            const payload = parts[1];
+            if (!payload) {
+                throw new Error('Invalid token format - missing payload')
+            }
+
+            // Decode Base64URL properly
+            // Base64URL uses - instead of +, and _ instead of /
+            let base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+
+            // Add padding if needed
+            while (base64.length % 4) {
+                base64 += '='
+            }
+
+            // Decode base64
+            const jsonPayload = atob(base64)
+            const decodedPayload = JSON.parse(jsonPayload)
 
             // Check if token is valid and not expired
             const currentTime = Math.floor(Date.now() / 1000)
@@ -56,10 +98,12 @@ export function middleware(request: NextRequest) {
                 isAuthenticated = !!decodedPayload.userId || !!decodedPayload.id || !!decodedPayload.sub
                 userRole = decodedPayload.role
                 isAdmin = userRole === 'admin'
+            } else {
+                console.log('Token expired:', { exp: decodedPayload.exp, now: currentTime })
             }
         } catch (error) {
             // If parsing fails, user is not authenticated
-            console.error('Error parsing auth token:', error)
+            console.error('Error parsing auth token:', error, { tokenPreview: authToken?.substring(0, 20) })
             isAuthenticated = false
             isAdmin = false
         }
@@ -68,7 +112,7 @@ export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname
 
     // Debug logging for development
-    if (process.env.NODE_ENV === 'development') {
+    // if (process.env.NODE_ENV === 'development') {
         console.log('Middleware Debug:', {
             pathname,
             isAuthenticated,
@@ -76,7 +120,7 @@ export function middleware(request: NextRequest) {
             userRole,
             hasToken: !!authToken,
         })
-    }
+    // }
 
     // Check if user is on mobile (simplified check based on user agent)
     const userAgent = request.headers.get('user-agent') || ''

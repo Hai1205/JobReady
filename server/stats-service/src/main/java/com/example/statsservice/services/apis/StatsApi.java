@@ -2,6 +2,7 @@ package com.example.statsservice.services.apis;
 
 import com.example.grpc.user.*;
 import com.example.grpc.cv.*;
+import com.example.rediscommon.services.RedisService;
 import com.example.statsservice.dtos.ActivityDto;
 import com.example.statsservice.dtos.DashboardStatsDto;
 import com.example.statsservice.dtos.reponses.Response;
@@ -32,27 +33,62 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class StatsApi extends BaseApi {
 
     private final UserGrpcClient userGrpcClient;
     private final CVGrpcClient cvGrpcClient;
+    private final RedisService redisService;
 
     @Value("${LOGO_PATH}")
     private String logoPath;
 
     public StatsApi(
             UserGrpcClient userGrpcClient,
-            CVGrpcClient cvGrpcClient) {
+            CVGrpcClient cvGrpcClient,
+            RedisService redisService) {
         this.userGrpcClient = userGrpcClient;
         this.cvGrpcClient = cvGrpcClient;
+        this.redisService = redisService;
     }
 
     /**
-     * Handle get dashboard statistics - internal logic
+     * Get dashboard statistics from cache or compute if not available
      */
-    public DashboardStatsDto handleGetDashboardStats() {
+    private DashboardStatsDto getDashboardStatsFromCacheOrCompute() {
+        String cacheKey = "dashboard_stats";
+
+        // Try to get from cache first
+        if (redisService.hasKey(cacheKey)) {
+            logger.info("Retrieving dashboard statistics from Redis cache");
+            try {
+                return (DashboardStatsDto) redisService.get(cacheKey);
+            } catch (Exception e) {
+                logger.warn("Failed to retrieve dashboard stats from cache, computing fresh data: {}", e.getMessage());
+            }
+        }
+
+        // Compute fresh data
+        logger.info("Computing fresh dashboard statistics");
+        DashboardStatsDto stats = computeDashboardStats();
+
+        // Cache the result for 10 minutes
+        try {
+            redisService.set(cacheKey, stats, 10, TimeUnit.MINUTES);
+            logger.info("Dashboard statistics cached in Redis for 10 minutes");
+        } catch (Exception e) {
+            logger.warn("Failed to cache dashboard stats: {}", e.getMessage());
+        }
+
+        return stats;
+    }
+
+    /**
+     * Compute dashboard statistics from gRPC calls
+     */
+    private DashboardStatsDto computeDashboardStats() {
         logger.info("Fetching dashboard statistics...");
 
         // Get user statistics
@@ -103,7 +139,7 @@ public class StatsApi extends BaseApi {
         logger.info("Generating dashboard statistics report...");
 
         // Fetch dashboard stats from your service
-        DashboardStatsDto dashboardStats = handleGetDashboardStats();
+        DashboardStatsDto dashboardStats = getDashboardStatsFromCacheOrCompute();
 
         // Load the report template
         ClassPathResource templateResource = new ClassPathResource("reports/dashboard-report.jrxml");
@@ -143,7 +179,7 @@ public class StatsApi extends BaseApi {
         Response response = new Response();
 
         try {
-            DashboardStatsDto stats = handleGetDashboardStats();
+            DashboardStatsDto stats = getDashboardStatsFromCacheOrCompute();
 
             response.setStatusCode(200);
             response.setMessage("Dashboard statistics retrieved successfully");

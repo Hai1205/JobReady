@@ -1,9 +1,16 @@
 package com.example.authservice;
 
+import com.example.authservice.controllers.AuthController;
 import com.example.authservice.dtos.requests.LoginRequest;
 import com.example.authservice.dtos.responses.Response;
 import com.example.authservice.services.apis.AuthApi;
+import com.example.rediscommon.services.RedisService;
+import com.example.securitycommon.handlers.JsonAccessDeniedHandler;
+import com.example.securitycommon.handlers.JsonAuthenticationEntryPoint;
+import com.example.securitycommon.jwts.JwtTokenProvider;
+import com.example.authservice.services.reabbitmqs.producers.AuthProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Integration Tests for Auth Service
  * Tests the full application context and API endpoints
  */
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class AuthServiceIntegrationTest {
@@ -37,6 +44,24 @@ class AuthServiceIntegrationTest {
 
     @MockBean
     private AuthApi authService;
+
+    @MockBean
+    private RedisService redisService;
+
+    @MockBean
+    private com.example.securitycommon.jwts.JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private com.example.securitycommon.handlers.JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
+
+    @MockBean
+    private com.example.securitycommon.handlers.JsonAccessDeniedHandler jsonAccessDeniedHandler;
+
+    @MockBean
+    private com.example.authservice.services.reabbitmqs.producers.AuthProducer authProducer;
+
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
     @Test
     @WithMockUser

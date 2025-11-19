@@ -307,7 +307,10 @@ public class CVApi extends BaseApi {
             return new ArrayList<>();
         }
 
-        return cvs.stream().map(cvMapper::toDto).collect(Collectors.toList());
+        return cvs.stream()
+                .map(cvMapper::toDto)
+                .sorted((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()))
+                .collect(Collectors.toList());
     }
 
     public Response getUserCVs(UUID userId) {
@@ -441,7 +444,10 @@ public class CVApi extends BaseApi {
             existing.getSkills().addAll(skills);
         }
 
-        existing.setIsVisibility(isVisibility);
+        // Only update isVisibility if provided
+        if (isVisibility != null) {
+            existing.setIsVisibility(isVisibility);
+        }
 
         existing.setUpdatedAt(Instant.now());
 

@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(com.example.securitycommon.config.SecurityCommonAutoConfiguration.class)
+@Import(com.example.securitycommon.configs.SecurityConfig.class)
 class UserServiceIntegrationTest {
 
     @Autowired

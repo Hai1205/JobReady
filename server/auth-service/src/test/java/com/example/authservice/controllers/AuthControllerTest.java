@@ -1,5 +1,6 @@
 package com.example.authservice.controllers;
 
+import com.example.authservice.controllers.AuthController;
 import com.example.authservice.dtos.UserDto;
 import com.example.authservice.dtos.requests.*;
 import com.example.authservice.dtos.responses.Response;
@@ -13,61 +14,29 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-import java.util.Arrays;
 import java.util.UUID;
 
-import com.example.securitycommon.handler.JsonAuthenticationEntryPoint;
-import com.example.securitycommon.handler.JsonAccessDeniedHandler;
-import com.example.securitycommon.jwt.JwtTokenProvider;
-
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.method.HandlerMethod;
-
-import java.util.Map;
-
-@SpringBootTest(classes = com.example.authservice.AuthServiceApplication.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@EnableAutoConfiguration(exclude = {
-        org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration.class
-})
-@ContextConfiguration(classes = { AuthController.class, AuthControllerTest.TestConfig.class })
-@TestPropertySource(properties = {
-        "logging.level.org.springframework.web=DEBUG",
-        "logging.level.org.springframework.security=DEBUG",
-        "logging.level.org.springframework.web.servlet=DEBUG",
-        "spring.main.allow-bean-definition-overriding=true"
-})
+@ActiveProfiles("test")
 class AuthControllerTest {
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @Autowired
     private MockMvc mockMvc;
@@ -76,13 +45,19 @@ class AuthControllerTest {
     private AuthApi authService;
 
     @MockBean
-    private JwtTokenProvider tokenProvider;
+    private com.example.securitycommon.jwts.JwtTokenProvider tokenProvider;
 
     @MockBean
-    private JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
+    private com.example.securitycommon.handlers.JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
 
     @MockBean
-    private JsonAccessDeniedHandler jsonAccessDeniedHandler;
+    private com.example.securitycommon.handlers.JsonAccessDeniedHandler jsonAccessDeniedHandler;
+
+    @MockBean
+    private com.example.rediscommon.services.RedisService redisService;
+
+    @MockBean
+    private org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory;
 
     private ObjectMapper objectMapper;
     private Response successResponse;
@@ -308,32 +283,6 @@ class AuthControllerTest {
     }
 
     @Test
-    void testControllerBeanExists() {
-        String[] beanNames = applicationContext.getBeanNamesForType(AuthController.class);
-        System.out.println("AuthController beans: " + Arrays.toString(beanNames));
-
-        String[] allBeans = applicationContext.getBeanDefinitionNames();
-        Arrays.stream(allBeans)
-                .filter(name -> name.toLowerCase().contains("controller") || name.toLowerCase().contains("auth"))
-                .forEach(name -> System.out.println("Bean: " + name));
-
-        // Print request mappings
-        RequestMappingHandlerMapping handlerMapping = applicationContext.getBean("requestMappingHandlerMapping",
-                RequestMappingHandlerMapping.class);
-        Map<RequestMappingInfo, HandlerMethod> handlerMethods = handlerMapping.getHandlerMethods();
-        System.out.println("Request Mappings:");
-        for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : handlerMethods.entrySet()) {
-            RequestMappingInfo mappingInfo = entry.getKey();
-            HandlerMethod handlerMethod = entry.getValue();
-            System.out.println("Mapping: " + mappingInfo + " -> " + handlerMethod);
-        }
-
-        assertThat(beanNames.length).isGreaterThan(0);
-        AuthController controller = applicationContext.getBean(AuthController.class);
-        assertThat(controller).isNotNull();
-    }
-
-    @Test
     @WithMockUser
     void testHealth_Success() throws Exception {
         // Act & Assert
@@ -343,34 +292,5 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.message").value("Auth Service is running"));
-    }
-
-    @Configuration
-    @ComponentScan(basePackages = "com.example.authservice.controllers")
-    static class TestConfig {
-        @Bean
-        public ConnectionFactory connectionFactory() {
-            return mock(ConnectionFactory.class);
-        }
-
-        @Bean
-        public RabbitTemplate rabbitTemplate() {
-            return mock(RabbitTemplate.class);
-        }
-
-        @Bean
-        public MessageConverter jsonMessageConverter() {
-            return mock(MessageConverter.class);
-        }
-
-        @Bean
-        public org.springframework.amqp.rabbit.connection.ConnectionNameStrategy connectionNameStrategy() {
-            return mock(org.springframework.amqp.rabbit.connection.ConnectionNameStrategy.class);
-        }
-
-        @Bean
-        public org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory<?> rabbitListenerContainerFactory() {
-            return mock(org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory.class);
-        }
     }
 }

@@ -57,9 +57,7 @@ export const useAuthStore = createStore<IAuthStore>(
 				console.log("Registration res:", res);
 				return res;
 			});
-		},
-
-		login: async (identifier: string, password: string): Promise<IApiResponse<IAuthDataResponse>> => {
+		}, login: async (identifier: string, password: string): Promise<IApiResponse<IAuthDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				identifier,
@@ -79,9 +77,7 @@ export const useAuthStore = createStore<IAuthStore>(
 
 				return res;
 			});
-		},
-
-		logout: async (): Promise<IApiResponse> => {
+		}, logout: async (): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
 				const res = await handleRequest(EHttpType.POST, `/auth/logout`);
 
@@ -112,11 +108,8 @@ export const useAuthStore = createStore<IAuthStore>(
 
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.POST, `/auth/verify-otp/${identifier}`, formData);
-
 			});
-		},
-
-		resetPassword: async (email: string): Promise<IApiResponse> => {
+		}, resetPassword: async (email: string): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
 				return await handleRequest(EHttpType.PATCH, `/auth/reset-password/${email}`, {});
 			});
@@ -147,9 +140,7 @@ export const useAuthStore = createStore<IAuthStore>(
 				console.log("Change password res:", res);
 				return res;
 			});
-		},
-
-		handleSetUserAuth: (user: IUser): void => {
+		}, handleSetUserAuth: (user: IUser): void => {
 			if (user) {
 				set({
 					userAuth: user,

@@ -1,2 +1,2 @@
-com\example\rediscommon\config\RedisConfig.class
-com\example\rediscommon\service\RedisCacheService.class
+com\example\rediscommon\configs\RedisConfig.class
+com\example\rediscommon\services\RedisService.class

@@ -18,7 +18,11 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(Arrays.asList(allowedOrigin));
+        
+        // Split by comma to support multiple origins
+        String[] origins = allowedOrigin.split(",");
+        corsConfig.setAllowedOrigins(Arrays.asList(origins));
+        
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfig.setAllowedHeaders(Arrays.asList("*"));
         corsConfig.setAllowCredentials(true); // Allow credentials

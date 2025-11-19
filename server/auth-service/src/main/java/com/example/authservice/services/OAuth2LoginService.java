@@ -1,7 +1,6 @@
 package com.example.authservice.services;
 
 import com.example.authservice.dtos.OAuth2UserDto;
-import com.example.authservice.utils.JwtUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +15,9 @@ public class OAuth2LoginService {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2LoginService.class);
 
-    private JwtUtil jwtUtil;
+    private JwtService jwtUtil;
 
-    public OAuth2LoginService(JwtUtil jwtUtil) {
+    public OAuth2LoginService(JwtService jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 

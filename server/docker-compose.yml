@@ -1,10 +1,8 @@
-version: '3.9'
-
 services:
   discovery-service:
     build:
-      context: .
-      dockerfile: discovery-service/Dockerfile
+      context: ..
+      dockerfile: server/discovery-service/Dockerfile
     container_name: discovery-service
     env_file:
       - ./discovery-service/.env
@@ -15,8 +13,8 @@ services:
 
   gateway-service:
     build:
-      context: .
-      dockerfile: gateway-service/Dockerfile
+      context: ..
+      dockerfile: server/gateway-service/Dockerfile
     container_name: gateway-service
     env_file:
       - ./gateway-service/.env
@@ -29,16 +27,14 @@ services:
 
   user-service:
     build:
-      context: .
-      dockerfile: user-service/Dockerfile
+      context: ..
+      dockerfile: server/user-service/Dockerfile
     container_name: user-service
     env_file:
       - ./user-service/.env
     ports:
       - "8083:8083"
     depends_on:
-      mysql:
-        condition: service_healthy
       discovery-service:
         condition: service_started
     networks:
@@ -46,8 +42,8 @@ services:
 
   auth-service:
     build:
-      context: .
-      dockerfile: auth-service/Dockerfile
+      context: ..
+      dockerfile: server/auth-service/Dockerfile
     container_name: auth-service
     env_file:
       - ./auth-service/.env
@@ -55,18 +51,19 @@ services:
       - "8082:8082"
     depends_on:
       - discovery-service
+      - user-service
     networks:
       - app-network
   
   mail-service:
     build:
-      context: .
-      dockerfile: mail-service/Dockerfile
+      context: ..
+      dockerfile: server/mail-service/Dockerfile
     container_name: mail-service
     env_file:
       - ./mail-service/.env
     ports:
-      - "8082:8082"
+      - "8086:8086"
     depends_on:
       - discovery-service
     networks:
@@ -74,25 +71,25 @@ services:
 
   cv-service:
     build:
-      context: .
-      dockerfile: cv-service/Dockerfile
+      context: ..
+      dockerfile: server/cv-service/Dockerfile
     container_name: cv-service
     env_file:
       - ./cv-service/.env
     ports:
       - "8084:8084"
     depends_on:
-      mysql:
-        condition: service_healthy
       discovery-service:
+        condition: service_started
+      user-service:
         condition: service_started
     networks:
       - app-network
 
   ai-service:
     build:
-      context: .
-      dockerfile: ai-service/Dockerfile
+      context: ..
+      dockerfile: server/ai-service/Dockerfile
     container_name: ai-service
     env_file:
       - ./ai-service/.env
@@ -101,13 +98,15 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
+      cv-service:
+        condition: service_started
     networks:
       - app-network
 
   stats-service:
     build:
-      context: .
-      dockerfile: stats-service/Dockerfile
+      context: ..
+      dockerfile: server/stats-service/Dockerfile
     container_name: stats-service
     env_file:
       - ./stats-service/.env

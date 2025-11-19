@@ -42,13 +42,13 @@ class UserControllerTest {
         private UserApi userService;
 
         @MockBean
-        private com.example.securitycommon.jwt.JwtTokenProvider jwtTokenProvider;
+        private com.example.securitycommon.jwts.JwtTokenProvider jwtTokenProvider;
 
         @MockBean
-        private com.example.securitycommon.handler.JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
+        private com.example.securitycommon.handlers.JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
 
         @MockBean
-        private com.example.securitycommon.handler.JsonAccessDeniedHandler jsonAccessDeniedHandler;
+        private com.example.securitycommon.handlers.JsonAccessDeniedHandler jsonAccessDeniedHandler;
 
         private ObjectMapper objectMapper;
         private Response successResponse;

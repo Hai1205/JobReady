@@ -4,10 +4,10 @@ import com.example.authservice.dtos.*;
 import com.example.authservice.dtos.requests.*;
 import com.example.authservice.dtos.responses.*;
 import com.example.authservice.exceptions.OurException;
+import com.example.authservice.services.JwtService;
 import com.example.authservice.services.OtpService;
 import com.example.authservice.services.grpcs.clients.UserGrpcClient;
 import com.example.authservice.services.reabbitmqs.producers.AuthProducer;
-import com.example.authservice.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
@@ -22,13 +22,13 @@ import java.util.Map;
 @Service
 public class AuthApi extends BaseApi {
 
-    private JwtUtil jwtUtil;
+    private JwtService jwtUtil;
     private UserGrpcClient userGrpcClient;
     private AuthProducer authProducer;
     private OtpService otpService;
     private final ObjectMapper objectMapper;
 
-    public AuthApi(JwtUtil jwtUtil, UserGrpcClient userGrpcClient, AuthProducer authProducer,
+    public AuthApi(JwtService jwtUtil, UserGrpcClient userGrpcClient, AuthProducer authProducer,
             OtpService otpService) {
         this.jwtUtil = jwtUtil;
         this.userGrpcClient = userGrpcClient;

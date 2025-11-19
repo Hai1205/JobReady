@@ -9,11 +9,11 @@ WORKDIR /workspace
 COPY . .
 
 # build jar for this module and its reactor dependencies (skip tests)
-RUN mvn -f pom.xml -pl mail-service -am -B -DskipTests package
+RUN mvn -f server/pom.xml -pl mail-service -am -B -DskipTests package
 
 # find the built jar (module target)
-RUN ls -lah mail-service/target || true
-RUN JAR_FILE=$(ls mail-service/target/*.jar | head -n 1) && echo "Jar: $JAR_FILE" && cp $JAR_FILE /workspace/app.jar
+RUN ls -lah server/mail-service/target || true
+RUN JAR_FILE=$(ls server/mail-service/target/*.jar | head -n 1) && echo "Jar: $JAR_FILE" && cp $JAR_FILE /workspace/app.jar
 
 # -------- runtime stage --------
 FROM eclipse-temurin:21-jre-jammy

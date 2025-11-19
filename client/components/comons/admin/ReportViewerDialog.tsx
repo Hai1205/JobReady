@@ -25,9 +25,11 @@ export function ReportViewerDialog({
   const { getStatsReport, fetchReportInBackground, isLoading, statsReport } =
     useStatsStore();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (open) {
+      setLoadError(false);
       loadReport();
       // Refresh report in background for next time
       fetchReportInBackground();
@@ -58,11 +60,14 @@ export function ReportViewerDialog({
         }
         const url = URL.createObjectURL(blob);
         setPdfUrl(url);
+        setLoadError(false);
       } else {
+        setLoadError(true);
         toast.error("Failed to load report");
       }
     } catch (error) {
       console.error("Error loading report:", error);
+      setLoadError(true);
       toast.error("Failed to load report");
     }
   };
@@ -99,7 +104,7 @@ export function ReportViewerDialog({
         </DialogHeader>
 
         <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-          {isLoading ? (
+          {isLoading || (!pdfUrl && !loadError) ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -128,7 +133,7 @@ export function ReportViewerDialog({
                 </Button>
               </div>
             </>
-          ) : (
+          ) : loadError ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
@@ -140,7 +145,7 @@ export function ReportViewerDialog({
                 </Button>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>

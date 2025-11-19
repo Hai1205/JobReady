@@ -78,29 +78,24 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.58.0</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.58.0</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.58.0</version>
         </dependency>
         <!-- gRPC shared communication module -->
         <dependency>
             <groupId>com.example</groupId>
             <artifactId>grpc-common</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <!-- gRPC Spring Boot Starter -->
         <dependency>
             <groupId>net.devh</groupId>
             <artifactId>grpc-client-spring-boot-starter</artifactId>
-            <version>2.15.0.RELEASE</version>
         </dependency>
 
         <!-- Security and Authentication -->
@@ -108,7 +103,6 @@
         <dependency>
             <groupId>com.example</groupId>
             <artifactId>security-common</artifactId>
-            <version>1.0.0</version>
         </dependency>
 
         <!-- Spring AI Dependencies -->

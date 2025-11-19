@@ -23,7 +23,6 @@ export default function MyCVsPageClient() {
     handleSetCurrentCV,
     userCVs,
     CVsTable,
-    isLoadingUserCVs,
   } = useCVStore();
 
   const { importCV } = useAIStore();
@@ -32,14 +31,20 @@ export default function MyCVsPageClient() {
   const [templateCVs, setTemplateCVs] = useState<ICV[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<string | null>(null);
+  const [isLoadingUserCVs, setIsLoadingUserCVs] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
+      setIsLoadingUserCVs(true);
+
       if (userAuth) {
         await fetchUserCVsInBackground(userAuth.id);
       }
       await fetchAllCVsInBackground();
+
+      setIsLoadingUserCVs(false);
     };
+
     loadData();
   }, [userAuth]);
 
@@ -104,7 +109,7 @@ export default function MyCVsPageClient() {
   }
 
   // Show loading only when there's no cached data
-  if (isLoadingUserCVs && userCVs.length === 0) {
+  if (isLoadingUserCVs) {
     return <UserCVsSkeleton />;
   }
 
@@ -135,6 +140,7 @@ export default function MyCVsPageClient() {
         description={deleteDialogDescription}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
+        isDestructive={true}
       />
     </div>
   );

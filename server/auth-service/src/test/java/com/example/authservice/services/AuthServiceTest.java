@@ -7,7 +7,7 @@ import com.example.authservice.exceptions.OurException;
 import com.example.authservice.services.apis.AuthApi;
 import com.example.authservice.services.grpcs.clients.UserGrpcClient;
 import com.example.authservice.services.reabbitmqs.producers.AuthProducer;
-import com.example.authservice.utils.JwtUtil;
+import com.example.authservice.services.OtpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
@@ -31,7 +31,7 @@ import java.util.UUID;
 class AuthServiceTest {
 
     @Mock
-    private JwtUtil jwtUtil;
+    private JwtService jwtUtil;
 
     @Mock
     private UserGrpcClient userGrpcClient;

@@ -9,9 +9,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.example.securitycommon.filter.JwtAuthenticationFilter;
-import com.example.securitycommon.handler.JsonAccessDeniedHandler;
-import com.example.securitycommon.handler.JsonAuthenticationEntryPoint;
+import com.example.securitycommon.filters.JwtAuthenticationFilter;
+import com.example.securitycommon.handlers.JsonAccessDeniedHandler;
+import com.example.securitycommon.handlers.JsonAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity

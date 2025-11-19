@@ -110,7 +110,8 @@ public class AIApi extends BaseApi {
         Response response = new Response();
 
         try {
-            fileParserService.validatePDFFile(jdFile);
+            // Use validateDocumentFile for analyze with JD - supports PDF and Word
+            fileParserService.validateDocumentFile(jdFile);
 
             AnalyzeCVWithJDRequest request = objectMapper.readValue(dataJson, AnalyzeCVWithJDRequest.class);
             String language = request.getLanguage();
@@ -165,12 +166,12 @@ public class AIApi extends BaseApi {
             logger.debug("Extract CV" + cvDto);
 
             CreateCVResponse createCVResponse = cvGrpcClient.createCV(
-            userId.toString(),
-            cvDto.getTitle(),
-            toPersonalInfo(cvDto.getPersonalInfo()),
-            toExperiences(cvDto.getExperiences()),
-            toEducations(cvDto.getEducations()),
-            cvDto.getSkills());
+                    userId.toString(),
+                    cvDto.getTitle(),
+                    toPersonalInfo(cvDto.getPersonalInfo()),
+                    toExperiences(cvDto.getExperiences()),
+                    toEducations(cvDto.getEducations()),
+                    cvDto.getSkills());
 
             CVDto savedCV = toCVDto(createCVResponse.getCv());
             logger.debug("Saved CV" + savedCV);
@@ -179,7 +180,7 @@ public class AIApi extends BaseApi {
             response.setMessage("CV created successfully");
             response.setCv(savedCV);
             logger.debug("createCV response prepared for userId={} cvId={}", userId,
-            savedCV.getId());
+                    savedCV.getId());
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());

@@ -9,11 +9,11 @@ WORKDIR /workspace
 COPY . .
 
 # build jar for this module and its reactor dependencies (skip tests)
-RUN mvn -f pom.xml -pl stats-service -am -B -DskipTests package
+RUN mvn -f server/pom.xml -pl stats-service -am -B -DskipTests package
 
 # find the built jar (module target)
-RUN ls -lah stats-service/target || true
-RUN JAR_FILE=$(ls stats-service/target/*.jar | head -n 1) && echo "Jar: $JAR_FILE" && cp $JAR_FILE /workspace/app.jar
+RUN ls -lah server/stats-service/target || true
+RUN JAR_FILE=$(ls server/stats-service/target/*.jar | head -n 1) && echo "Jar: $JAR_FILE" && cp $JAR_FILE /workspace/app.jar
 
 # -------- runtime stage --------
 FROM eclipse-temurin:21-jre-jammy
@@ -31,4 +31,4 @@ EXPOSE 8087
 # JVM options can be adjusted via env JAVA_OPTS
 ENV JAVA_OPTS="-Xss512k -Xms256m -Xmx512m"
 
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar /app.jar" ]
+ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar /app/app.jar" ]

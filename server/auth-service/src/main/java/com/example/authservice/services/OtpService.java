@@ -1,39 +1,45 @@
 package com.example.authservice.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import com.example.rediscommon.services.RedisService;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * OTP Service using Redis for temporary storage
+ * Provides OTP generation, validation and management
+ */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class OtpService {
-
-    private static final Logger logger = LoggerFactory.getLogger(OtpService.class);
 
     private static final String OTP_PREFIX = "OTP_";
     private static final int OTP_EXPIRATION = 3; // 3 minutes
     private static final int OTP_LENGTH = 6;
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisService redisService;
 
-    public OtpService(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
-
+    /**
+     * Generate and save OTP for an email
+     */
     public String generateOtp(String email) {
         try {
             String otp = generateRandomOtp(OTP_LENGTH);
             saveOtp(email, otp);
             return otp;
         } catch (Exception e) {
-            logger.error("Error generating OTP for email: {}", email, e);
+            log.error("Error generating OTP for email: {}", email, e);
             throw new RuntimeException("Failed to generate OTP: " + e.getMessage());
         }
     }
 
+    /**
+     * Generate random numeric OTP
+     */
     private String generateRandomOtp(int length) {
         StringBuilder otp = new StringBuilder();
         Random random = new Random();
@@ -45,64 +51,79 @@ public class OtpService {
         return otp.toString();
     }
 
+    /**
+     * Save OTP to Redis with expiration
+     */
     public void saveOtp(String email, String otp) {
         try {
             String key = OTP_PREFIX + email;
-            redisTemplate.opsForValue().set(key, otp);
-            redisTemplate.expire(key, OTP_EXPIRATION, TimeUnit.MINUTES);
-            logger.info("OTP saved for email: {}, expires in {} minutes", email, OTP_EXPIRATION);
+            redisService.set(key, otp, OTP_EXPIRATION, TimeUnit.MINUTES);
+            log.info("OTP saved for email: {}, expires in {} minutes", email, OTP_EXPIRATION);
         } catch (Exception e) {
-            logger.error("Error saving OTP for email: {}", email, e);
+            log.error("Error saving OTP for email: {}", email, e);
             throw new RuntimeException("Failed to save OTP: " + e.getMessage());
         }
     }
 
     /**
-     * Xác thực OTP cho email cụ thể
+     * Validate OTP for specific email
      */
     public boolean validateOtp(String email, String otp) {
         try {
             String key = OTP_PREFIX + email;
-            Object savedOtp = redisTemplate.opsForValue().get(key);
+            Object savedOtp = redisService.get(key);
 
             if (savedOtp != null && savedOtp.toString().equals(otp)) {
-                // Xóa OTP sau khi xác thực thành công
-                redisTemplate.delete(key);
-                logger.info("OTP verified successfully for email: {}", email);
+                // Delete OTP after successful validation
+                redisService.delete(key);
+                log.info("OTP verified successfully for email: {}", email);
                 return true;
             }
 
-            logger.warn("Invalid OTP for email: {}", email);
+            log.warn("Invalid OTP for email: {}", email);
             return false;
         } catch (Exception e) {
-            logger.error("Error verifying OTP for email: {}", email, e);
+            log.error("Error verifying OTP for email: {}", email, e);
             throw new RuntimeException("Failed to verify OTP: " + e.getMessage());
         }
     }
 
     /**
-     * Kiểm tra xem OTP có tồn tại không
+     * Check if OTP exists for an email
      */
     public boolean otpExists(String email) {
         try {
             String key = OTP_PREFIX + email;
-            return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+            return redisService.hasKey(key);
         } catch (Exception e) {
-            logger.error("Error checking OTP existence for email: {}", email, e);
+            log.error("Error checking OTP existence for email: {}", email, e);
             return false;
         }
     }
 
     /**
-     * Xóa OTP cho email cụ thể
+     * Delete OTP for specific email
      */
     public void deleteOtp(String email) {
         try {
             String key = OTP_PREFIX + email;
-            redisTemplate.delete(key);
-            logger.info("OTP deleted for email: {}", email);
+            redisService.delete(key);
+            log.info("OTP deleted for email: {}", email);
         } catch (Exception e) {
-            logger.error("Error deleting OTP for email: {}", email, e);
+            log.error("Error deleting OTP for email: {}", email, e);
+        }
+    }
+
+    /**
+     * Get remaining time for OTP in seconds
+     */
+    public Long getOtpExpireTime(String email) {
+        try {
+            String key = OTP_PREFIX + email;
+            return redisService.getExpire(key);
+        } catch (Exception e) {
+            log.error("Error getting OTP expire time for email: {}", email, e);
+            return null;
         }
     }
 }

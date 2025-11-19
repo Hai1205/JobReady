@@ -1,8 +1,8 @@
-com\example\securitycommon\jwt\JwtTokenProvider.class
-com\example\securitycommon\handler\JsonAccessDeniedHandler.class
-com\example\securitycommon\handler\JsonAuthenticationEntryPoint.class
-com\example\securitycommon\filter\JwtAuthenticationFilter.class
-com\example\securitycommon\model\AuthenticatedUser.class
-com\example\securitycommon\util\SecurityUtils.class
-com\example\securitycommon\config\SecurityCommonAutoConfiguration.class
-com\example\securitycommon\exception\JwtValidationException.class
+com\example\securitycommon\filters\JwtAuthenticationFilter.class
+com\example\securitycommon\handlers\JsonAuthenticationEntryPoint.class
+com\example\securitycommon\jwts\JwtTokenProvider.class
+com\example\securitycommon\exceptions\JwtValidationException.class
+com\example\securitycommon\models\AuthenticatedUser.class
+com\example\securitycommon\utils\SecurityUtils.class
+com\example\securitycommon\configs\SecurityConfig.class
+com\example\securitycommon\handlers\JsonAccessDeniedHandler.class
