@@ -10,10 +10,10 @@ import java.util.TimeZone;
 
 @SpringBootApplication
 @Import(SecurityConfig.class)
-public class AiserviceApplication {
+public class AIServiceApplication {
     public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
-        SpringApplication.run(AiserviceApplication.class, args);
+        SpringApplication.run(AIServiceApplication.class, args);
     }
 }
