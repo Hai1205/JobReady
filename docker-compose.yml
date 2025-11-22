@@ -1,11 +1,11 @@
 services:
   gateway-service:
     build:
-      context: ..
+      context: .
       dockerfile: server/gateway-service/Dockerfile
     container_name: gateway-service
     env_file:
-      - ./gateway-service/.env
+      - server/gateway-service/.env
     ports:
       - "8080:8080"
     networks:
@@ -13,11 +13,11 @@ services:
 
   user-service:
     build:
-      context: ..
+      context: .
       dockerfile: server/user-service/Dockerfile
     container_name: user-service
     env_file:
-      - ./user-service/.env
+      - server/user-service/.env
     ports:
       - "8083:8083"
     networks:
@@ -25,11 +25,11 @@ services:
 
   auth-service:
     build:
-      context: ..
+      context: .
       dockerfile: server/auth-service/Dockerfile
     container_name: auth-service
     env_file:
-      - ./auth-service/.env
+      - server/auth-service/.env
     ports:
       - "8082:8082"
     depends_on:
@@ -39,11 +39,11 @@ services:
   
   mail-service:
     build:
-      context: ..
+      context: .
       dockerfile: server/mail-service/Dockerfile
     container_name: mail-service
     env_file:
-      - ./mail-service/.env
+      - server/mail-service/.env
     ports:
       - "8086:8086"
     networks:
@@ -51,11 +51,11 @@ services:
 
   cv-service:
     build:
-      context: ..
+      context: .
       dockerfile: server/cv-service/Dockerfile
     container_name: cv-service
     env_file:
-      - ./cv-service/.env
+      - server/cv-service/.env
     ports:
       - "8084:8084"
     depends_on:
@@ -66,11 +66,11 @@ services:
 
   ai-service:
     build:
-      context: ..
+      context: .
       dockerfile: server/ai-service/Dockerfile
     container_name: ai-service
     env_file:
-      - ./ai-service/.env
+      - server/ai-service/.env
     ports:
       - "8085:8085"
     depends_on:
@@ -81,11 +81,11 @@ services:
 
   stats-service:
     build:
-      context: ..
+      context: .
       dockerfile: server/stats-service/Dockerfile
     container_name: stats-service
     env_file:
-      - ./stats-service/.env
+      - server/stats-service/.env
     ports:
       - "8087:8087"
     depends_on:
@@ -93,6 +93,18 @@ services:
         condition: service_started
       cv-service:
         condition: service_started
+    networks:
+      - app-network
+
+  client:
+    build:
+      context: client/
+      dockerfile: Dockerfile
+    container_name: client
+    env_file:
+      - client/.env
+    ports:
+      - "3000:3000"
     networks:
       - app-network
 

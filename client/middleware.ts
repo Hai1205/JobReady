@@ -11,13 +11,26 @@ import type { NextRequest } from 'next/server'
  * 4. If user is on mobile and tries to access /admin or /auth -> redirect to /
  */
 export function middleware(request: NextRequest) {
+    const pathname = request.nextUrl.pathname
+
+    // Skip middleware for special paths that should not be protected
+    if (
+        pathname.startsWith('/.well-known') ||
+        pathname.startsWith('/_next') ||
+        pathname.startsWith('/api') ||
+        pathname.includes('/favicon') ||
+        pathname.includes('.') && !pathname.endsWith('/') // Skip files with extensions
+    ) {
+        return NextResponse.next()
+    }
+
     const response = NextResponse.next()
 
     // Add performance headers for faster loading
     response.headers.set('X-DNS-Prefetch-Control', 'on')
 
     // Enable early hints for critical resources
-    if (request.nextUrl.pathname === '/') {
+    if (pathname === '/') {
         response.headers.set('Link', [
             '</images/logo.png>; rel=preload; as=image',
             '<https://fonts.googleapis.com>; rel=preconnect',
@@ -26,7 +39,7 @@ export function middleware(request: NextRequest) {
     }
 
     // Optimize for static assets
-    if (request.nextUrl.pathname.startsWith('/_next/static/')) {
+    if (pathname.startsWith('/_next/static/')) {
         response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
     }
 
@@ -109,17 +122,17 @@ export function middleware(request: NextRequest) {
         }
     }
 
-    const pathname = request.nextUrl.pathname
-
     // Debug logging for development
     // if (process.env.NODE_ENV === 'development') {
-        console.log('Middleware Debug:', {
-            pathname,
-            isAuthenticated,
-            isAdmin,
-            userRole,
-            hasToken: !!authToken,
-        })
+    console.log('Middleware Debug:', {
+        pathname,
+        isAuthenticated,
+        isAdmin,
+        userRole,
+        hasToken: !!authToken,
+        tokenPreview: authToken ? authToken.substring(0, 30) + '...' : 'NO TOKEN',
+        allCookies: request.cookies.getAll().map(c => c.name),
+    })
     // }
 
     // Check if user is on mobile (simplified check based on user agent)
@@ -132,36 +145,26 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
-    // Check if user is accessing admin routes
+    if (
+        // pathname.startsWith('/cv-builder') ||
+        // pathname.startsWith('/my-cvs') ||
+        pathname.startsWith('/settings')
+    ) {
+        if (!isAuthenticated) {
+            return NextResponse.redirect(new URL('/auth/login', request.url))
+        }
+    }
     if (pathname.startsWith('/admin')) {
-        // If not authenticated, redirect to login page
         if (!isAuthenticated) {
             return NextResponse.redirect(new URL('/auth/login', request.url))
         }
 
-        // If authenticated but not admin, redirect to home page
         if (!isAdmin) {
             return NextResponse.redirect(new URL('/', request.url))
         }
     }
-    if (pathname.startsWith('/cv-builder')) {
-        if (!isAuthenticated) {
-            return NextResponse.redirect(new URL('/auth/login', request.url))
-        }
-    }
-    if (pathname.startsWith('/my-cvs')) {
-        // If not authenticated, redirect to login page
-        if (!isAuthenticated) {
-            return NextResponse.redirect(new URL('/auth/login', request.url))
-        }
-    }
-    if (pathname.startsWith('/settings')) {
-        if (!isAuthenticated) {
-            return NextResponse.redirect(new URL('/auth/login', request.url))
-        }
-    }
 
-    // Check if authenticated user is trying to access auth pages
+    // Check if authenticated us    er is trying to access auth pages
     if (isAuthenticated && pathname.startsWith('/auth')) {
         // Redirect authenticated users away from auth pages
         // If admin, redirect to admin dashboard, otherwise to home
@@ -177,10 +180,10 @@ export const config = {
         /*
          * Match all request paths except for the ones starting with:
          * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
+         * - _next (Next.js internal)
+         * - static files (public folder)
+         * - .well-known (special paths)
          */
-        '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        '/((?!api|_next|static|.*\\..*|.well-known).*)',
     ],
 }

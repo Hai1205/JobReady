@@ -62,7 +62,8 @@ public class FileParserService {
      */
     public void validateDocumentFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new OurException("File is required", 400);
+            // File is optional for analyze with JD, so we don't throw error
+            return;
         }
 
         String filename = file.getOriginalFilename();

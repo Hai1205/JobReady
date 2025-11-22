@@ -110,8 +110,10 @@ public class AIApi extends BaseApi {
         Response response = new Response();
 
         try {
-            // Use validateDocumentFile for analyze with JD - supports PDF and Word
-            fileParserService.validateDocumentFile(jdFile);
+            // Validate file only if it's provided
+            if (jdFile != null && !jdFile.isEmpty()) {
+                fileParserService.validateDocumentFile(jdFile);
+            }
 
             AnalyzeCVWithJDRequest request = objectMapper.readValue(dataJson, AnalyzeCVWithJDRequest.class);
             String language = request.getLanguage();
