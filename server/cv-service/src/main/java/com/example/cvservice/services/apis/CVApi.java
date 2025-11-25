@@ -253,8 +253,23 @@ public class CVApi extends BaseApi {
                 .count();
     }
 
+    @Transactional(readOnly = true)
     public List<CVDto> handleGetRecentCVs(int limit) {
-        return cvRepository.findAll().stream()
+        List<CV> cvs = cvRepository.findAll();
+        // Force initialization of lazy collections within transaction
+        cvs.forEach(cv -> {
+            if (cv.getSkills() != null) {
+                cv.getSkills().size();
+            }
+            if (cv.getExperiences() != null) {
+                cv.getExperiences().size();
+            }
+            if (cv.getEducations() != null) {
+                cv.getEducations().size();
+            }
+        });
+        
+        return cvs.stream()
                 .map(cvMapper::toDto)
                 .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .limit(limit)

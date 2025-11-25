@@ -75,7 +75,6 @@ kubectl get pods -n jobready -w
 
 - **Frontend**: http://localhost:3000
 - **API Gateway**: http://localhost:8080
-- **RabbitMQ Management**: http://localhost:15672
 
 ## 🎯 Tính năng chính
 

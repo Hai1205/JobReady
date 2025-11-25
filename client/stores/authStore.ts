@@ -4,6 +4,8 @@ import Cookies from 'js-cookie';
 import { EUserRole } from "@/types/enum";
 import { useCVStore } from "./cvStore";
 import { useUserStore } from "./userStore";
+import { useStatsStore } from "./statsStore";
+import { useAIStore } from "./aiStore";
 
 interface IAuthDataResponse {
 	user: IUser;
@@ -68,11 +70,18 @@ export const useAuthStore = createStore<IAuthStore>(
 				const res = await handleRequest<IAuthDataResponse>(EHttpType.POST, `/auth/login`, formData);
 				const { success, user } = res.data || {};
 
-				if (success) {
+				if (success && user) {
 					set({
 						userAuth: user,
 						isAdmin: user?.role === EUserRole.ADMIN,
 					});
+
+					if (user?.role === EUserRole.ADMIN) {
+						useStatsStore.getState().fetchDashboardStatsInBackground();
+						useCVStore.getState().fetchAllCVsInBackground();
+						useUserStore.getState().fetchAllUsersInBackground();
+					}
+					useCVStore.getState().fetchUserCVsInBackground(user.id);
 				}
 
 				return res;
@@ -153,7 +162,9 @@ export const useAuthStore = createStore<IAuthStore>(
 			set({ ...initialState });
 			useCVStore.getState().reset();
 			useUserStore.getState().reset();
+			useStatsStore.getState().reset();
+			useAIStore.getState().reset();
 		},
 	}),
-	{ storageType: EStorageType.LOCAL }
+	{ storageType: EStorageType.COOKIE }
 );

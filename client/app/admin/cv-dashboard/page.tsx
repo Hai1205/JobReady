@@ -4,17 +4,18 @@ import { useCallback, useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { CVTable } from "@/components/comons/admin/cvDashboard/CVTable";
-import { DashboardHeader } from "@/components/comons/admin/DashboardHeader";
+import { CVTable } from "@/components/commons/admin/cvDashboard/CVTable";
+import { DashboardHeader } from "@/components/commons/admin/DashboardHeader";
 import { useCVStore } from "@/stores/cvStore";
-import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
-import { CVFilter } from "@/components/comons/admin/cvDashboard/CVFilter";
+import { TableSearch } from "@/components/commons/admin/adminTable/TableSearch";
+import { CVFilter } from "@/components/commons/admin/cvDashboard/CVFilter";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
-import TableDashboardSkeleton from "@/components/comons/layout/TableDashboardSkeleton";
-import ConfirmationDialog from "@/components/comons/layout/ConfirmationDialog";
-import ImportFileDialog from "@/components/comons/my-cvs/ImportFileDialog";
+import TableDashboardSkeleton from "@/components/commons/layout/TableDashboardSkeleton";
+import ConfirmationDialog from "@/components/commons/layout/ConfirmationDialog";
+import ImportFileDialog from "@/components/commons/my-cvs/ImportFileDialog";
 import { useAIStore } from "@/stores/aiStore";
+import { EUserRole } from "@/types/enum";
 
 export type CvFilterType = "visibility";
 
@@ -26,12 +27,24 @@ export default function CVDashboardPage() {
     deleteCV,
     handleGeneratePDF,
     handleSetCurrentCV,
-    isLoadingAllCVs,
+    getAllCVs,
+    isLoading,
   } = useCVStore();
   const { userAuth } = useAuthStore();
   const { importCV } = useAIStore();
 
   const router = useRouter();
+
+  // Security check: redirect to login if not authenticated or not admin
+  useEffect(() => {
+    if (!userAuth) {
+      router.push("/auth/login");
+    } else if (userAuth.role !== EUserRole.ADMIN) {
+      router.push("/");
+    }
+  }, [userAuth]);
+
+  if (!userAuth || userAuth.role !== EUserRole.ADMIN) return null;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCVs, setFilteredCVs] = useState<ICV[]>([]);
@@ -149,7 +162,7 @@ export default function CVDashboardPage() {
   const handleRefresh = () => {
     setActiveFilters(initialFilters);
     setSearchQuery("");
-    fetchAllCVsInBackground();
+    getAllCVs();
   };
 
   const handleImport = async (file: File | null) => {
@@ -171,8 +184,8 @@ export default function CVDashboardPage() {
     }
   };
 
-  // Show skeleton loading when there's no cached data
-  if (isLoadingAllCVs && CVsTable.length === 0) {
+  // Show skeleton loading when fetching (even if cache empty)
+  if (isLoading && CVsTable.length === 0) {
     return <TableDashboardSkeleton />;
   }
 
@@ -230,7 +243,7 @@ export default function CVDashboardPage() {
 
           <CVTable
             CVs={filteredCVs}
-            isLoading={isLoadingAllCVs && CVsTable.length === 0}
+            isLoading={isLoading}
             onUpdate={onUpdate}
             onDownload={onDownload}
             onDelete={onDelete}

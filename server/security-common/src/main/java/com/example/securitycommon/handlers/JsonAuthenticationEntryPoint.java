@@ -27,7 +27,7 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
         
         Map<String, Object> data = new HashMap<>();
         data.put("statusCode", 401);
-        data.put("message", "Unauthorized - Authentication required");
+        data.put("message", "Vui lòng đăng nhập để tiếp tục.");
         data.put("error", authException.getMessage());
         data.put("path", request.getRequestURI());
         

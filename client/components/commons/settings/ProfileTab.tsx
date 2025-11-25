@@ -46,8 +46,8 @@ export default function ProfileTab({
       <div className="flex flex-col items-center gap-4 pb-6 border-b border-border/50">
         <div className="relative group">
           <Avatar className="h-32 w-32 border-4 border-primary/20 shadow-lg">
-            {previewAvatar && (
-              <AvatarImage src={previewAvatar} className="object-cover" />
+            {(previewAvatar || userAuth?.avatarUrl) && (
+              <AvatarImage src={previewAvatar || userAuth?.avatarUrl} className="object-cover" />
             )}
             <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-primary to-secondary text-primary-foreground">
               {data?.fullname?.charAt(0).toUpperCase() || "U"}

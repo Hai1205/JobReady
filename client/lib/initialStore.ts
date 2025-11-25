@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import { create } from "zustand";
-import { persist, createJSONStorage, PersistOptions } from "zustand/middleware";
+import { persist, createJSONStorage, PersistOptions, PersistStorage } from "zustand/middleware";
+import Cookies from 'js-cookie';
 
 export interface IBaseStore {
   isLoading: boolean;
@@ -24,8 +25,28 @@ type TVariables = Record<string, unknown>;
 export enum EStorageType {
   LOCAL = "LOCAL",
   SESSION = "SESSION",
-  COOKIE = "COOKIE"
+  COOKIE = "COOKIE",
 }
+
+const createCookieStorage = <T>(): PersistStorage<T> => ({
+  getItem: (name: string) => {
+    try {
+      const value = Cookies.get(name);
+      return value ? JSON.parse(value) : null;
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name: string, value: any) => {
+    try {
+      Cookies.set(name, JSON.stringify(value), { expires: 7 });
+    } catch {
+    }
+  },
+  removeItem: (name: string) => {
+    Cookies.remove(name);
+  },
+});
 
 export function createStore<T extends IBaseStore, U = TVariables>(
   storeName: string,
@@ -37,10 +58,17 @@ export function createStore<T extends IBaseStore, U = TVariables>(
   }
 ) {
   const storageType = options?.storageType ?? EStorageType.SESSION;
-  const storage =
-    storageType === EStorageType.SESSION
-      ? createJSONStorage<T>(() => sessionStorage)
-      : createJSONStorage<T>(() => localStorage);
+  const storage = (() => {
+    switch (storageType) {
+      case EStorageType.SESSION:
+        return createJSONStorage<T>(() => sessionStorage);
+      case EStorageType.COOKIE:
+        return createCookieStorage<T>();
+      case EStorageType.LOCAL:
+      default:
+        return createJSONStorage<T>(() => localStorage);
+    }
+  })();
 
   return create<T>()(
     persist(

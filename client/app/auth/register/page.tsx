@@ -262,11 +262,11 @@ const RegisterPage: React.FC = () => {
 
       <div className="text-xs text-muted-foreground text-center">
         Bằng việc đăng ký, bạn đồng ý với{" "}
-        <Link href="/terms" className="text-primary hover:underline">
+        <Link href="/terms-of-service" className="text-primary hover:underline">
           Điều khoản sử dụng
         </Link>{" "}
         và{" "}
-        <Link href="/privacy" className="text-primary hover:underline">
+        <Link href="/privacy-policy" className="text-primary hover:underline">
           Chính sách bảo mật
         </Link>{" "}
         của chúng tôi.

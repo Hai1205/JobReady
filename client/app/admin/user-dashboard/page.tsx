@@ -9,15 +9,15 @@ import { EUserRole, EUserStatus } from "@/types/enum";
 import { useUserStore } from "@/stores/userStore";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "react-toastify";
-import { DashboardHeader } from "@/components/comons/admin/DashboardHeader";
-import CreateUserDialog from "@/components/comons/admin/userDashboard/CreateUserDialog";
-import UpdateUserDialog from "@/components/comons/admin/userDashboard/UpdateUserDialog";
-import { TableSearch } from "@/components/comons/admin/adminTable/TableSearch";
-import { UserFilter } from "@/components/comons/admin/userDashboard/UserFilter";
-import { UserTable } from "@/components/comons/admin/userDashboard/UserTable";
-import { ExtendedUserData } from "@/components/comons/admin/userDashboard/constant";
-import TableDashboardSkeleton from "@/components/comons/layout/TableDashboardSkeleton";
-import ConfirmationDialog from "@/components/comons/layout/ConfirmationDialog";
+import { DashboardHeader } from "@/components/commons/admin/DashboardHeader";
+import CreateUserDialog from "@/components/commons/admin/userDashboard/CreateUserDialog";
+import UpdateUserDialog from "@/components/commons/admin/userDashboard/UpdateUserDialog";
+import { TableSearch } from "@/components/commons/admin/adminTable/TableSearch";
+import { UserFilter } from "@/components/commons/admin/userDashboard/UserFilter";
+import { UserTable } from "@/components/commons/admin/userDashboard/UserTable";
+import { ExtendedUserData } from "@/components/commons/admin/userDashboard/constant";
+import TableDashboardSkeleton from "@/components/commons/layout/TableDashboardSkeleton";
+import ConfirmationDialog from "@/components/commons/layout/ConfirmationDialog";
 
 export type UserFilterType = "status" | "role";
 const userInitialFilters = { status: [] as string[], role: [] as string[] };
@@ -29,7 +29,8 @@ function UserDashboardPage() {
     createUser,
     updateUser,
     deleteUser,
-    isLoading: storeLoading,
+    getAllUsers,
+    isLoading,
   } = useUserStore();
   const { resetPassword } = useAuthStore();
 
@@ -59,7 +60,8 @@ function UserDashboardPage() {
         results = results.filter(
           (user) =>
             user.fullname.toLowerCase().includes(searchTerms) ||
-            user.email.toLowerCase().includes(searchTerms)
+            user.email.toLowerCase().includes(searchTerms) ||
+            user.username.toLowerCase().includes(searchTerms)
         );
       }
 
@@ -120,7 +122,7 @@ function UserDashboardPage() {
   const handleRefresh = () => {
     setActiveFilters(userInitialFilters);
     setSearchQuery("");
-    fetchAllUsersInBackground();
+    getAllUsers();
   };
 
   const [openMenuFilters, setOpenMenuFilters] = useState(false);
@@ -139,7 +141,6 @@ function UserDashboardPage() {
   );
 
   // Combined dialog state
-  const isDialogOpen = deleteDialogOpen || resetPasswordDialogOpen;
   const isDeleteDialog = deleteDialogOpen;
 
   const defaultUser: ExtendedUserData = {
@@ -240,11 +241,12 @@ function UserDashboardPage() {
   const handleDialogConfirm = async () => {
     if (isDeleteDialog && userToDelete) {
       await deleteUser(userToDelete.id);
+      toast.success("Xóa người dùng thành công!");
       setDeleteDialogOpen(false);
       setUserToDelete(null);
     } else if (!isDeleteDialog && userToResetPassword) {
+      toast.success("Đã gửi mật khẩu mới về email của người dùng!");  
       await resetPassword(userToResetPassword.email);
-      toast.success("Password reset email sent successfully");
       setResetPasswordDialogOpen(false);
       setUserToResetPassword(null);
     }
@@ -256,7 +258,7 @@ function UserDashboardPage() {
   };
 
   // Show skeleton loading when there's no cached data
-  if (storeLoading && usersTable.length === 0) {
+  if (isLoading) {
     return <TableDashboardSkeleton />;
   }
 
@@ -347,7 +349,7 @@ function UserDashboardPage() {
 
           <UserTable
             users={filteredUsers}
-            isLoading={storeLoading && usersTable.length === 0}
+            isLoading={isLoading}
             onUpdate={onUpdate}
             onDelete={onDelete}
             onResetPassword={onResetPassword}

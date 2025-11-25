@@ -1,12 +1,13 @@
 import type React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/comons/layout/ThemeProvider";
-import { TokenRefresher } from "@/components/comons/layout/TokenRefresher";
-import { CookieMonitor } from "@/components/comons/layout/CookieMonitor";
+import { ThemeProvider } from "@/components/commons/layout/ThemeProvider";
+import { TokenRefresher } from "@/components/commons/layout/TokenRefresher";
+import { CookieMonitor } from "@/components/commons/layout/CookieMonitor";
 import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Navbar } from "@/components/comons/navbar/Navbar";
+import { Navbar } from "@/components/commons/navbar/Navbar";
+import Footer from "@/components/commons/layout/Footer";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -49,6 +50,7 @@ export default function RootLayout({
 
           <Navbar />
           <main className="min-h-screen">{children}</main>
+          <Footer />
 
           <ToastContainer
             position="bottom-right"

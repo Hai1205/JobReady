@@ -60,7 +60,7 @@ export function AIToolsSidebar() {
 
       console.log("AIToolsSidebar extracted suggestions:", suggestions);
 
-      if (suggestions.length >= 0) {
+      if (suggestions.length > 0) {
         handleSetAISuggestions(suggestions);
         const score = responseData?.matchScore;
         setMatchScore(score);

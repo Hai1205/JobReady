@@ -1,7 +1,7 @@
 "use client";
 
-import CVCard from "@/components/comons/my-cvs/CVCard";
-import EmptyState from "@/components/comons/my-cvs/EmptyState";
+import CVCard from "@/components/commons/my-cvs/CVCard";
+import EmptyState from "@/components/commons/my-cvs/EmptyState";
 
 interface Props {
   userCVs: ICV[];

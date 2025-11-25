@@ -24,6 +24,7 @@ import { EducationStep } from "./steps/EducationStep";
 import { useState } from "react";
 import { ColorThemeSelector } from "./ColorThemeSelector";
 import { TemplateSelector } from "./TemplateSelector";
+import { useRouter } from "next/navigation";
 
 const steps = [
   { id: 0, title: "Personal Info", component: PersonalInfoStep },
@@ -35,6 +36,7 @@ const steps = [
 
 export function CVBuilderWizard() {
   const { userAuth } = useAuthStore();
+  const router = useRouter();
   const {
     isLoading,
     currentStep,
@@ -46,6 +48,12 @@ export function CVBuilderWizard() {
   const { isAnalyzing } = useAIStore();
 
   const [isCustomizationExpanded, setIsCustomizationExpanded] = useState(false);
+
+  // Security check: redirect to login if not authenticated
+  if (!userAuth) {
+    router.push("/auth/login");
+    return null;
+  }
 
   const CurrentStepComponent = steps[currentStep].component;
 

@@ -98,7 +98,7 @@ export function CompactJobMatch({
         backendData?.analyze?.suggestions || backendData?.suggestions || [];
 
       const score = backendData?.matchScore;
-      const missing = backendData?.missingKeywords || [];
+      // const missing = backendData?.missingKeywords || [];
 
       console.log("CompactJobMatch - suggestions:", suggestions);
 
@@ -109,9 +109,9 @@ export function CompactJobMatch({
       setMatchScore(score);
 
       // Show success message
-      toast.success(`✅ Phân tích hoàn tất! Xem kết quả bên dưới`, {
-        autoClose: 2000,
-      });
+      // toast.success(`✅ Phân tích hoàn tất! Xem kết quả bên dưới`, {
+      //   autoClose: 2000,
+      // });
 
       if (onAnalysisComplete) {
         onAnalysisComplete(suggestions, score);

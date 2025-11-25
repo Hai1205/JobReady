@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
-import PageHeader from "@/components/comons/my-cvs/PageHeader";
-import UserCVsSkeleton from "@/components/comons/layout/UserCVsSkeleton";
-import UserCVsSection from "@/components/comons/my-cvs/UserCVsSection";
-import TemplateCVsSection from "@/components/comons/my-cvs/TemplateCVsSection";
+import PageHeader from "@/components/commons/my-cvs/PageHeader";
+import UserCVsSkeleton from "@/components/commons/layout/UserCVsSkeleton";
+import UserCVsSection from "@/components/commons/my-cvs/UserCVsSection";
+import TemplateCVsSection from "@/components/commons/my-cvs/TemplateCVsSection";
 import ConfirmationDialog from "../layout/ConfirmationDialog";
-import { useAIStore } from "@/stores/aiStore";
+import { toast } from "react-toastify";
 
 export default function MyCVsPageClient() {
   const { userAuth } = useAuthStore();
@@ -23,29 +23,20 @@ export default function MyCVsPageClient() {
     handleSetCurrentCV,
     userCVs,
     CVsTable,
+    isLoadingUserCVs,
+    importCV,
   } = useCVStore();
-
-  const { importCV } = useAIStore();
 
   const router = useRouter();
   const [templateCVs, setTemplateCVs] = useState<ICV[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<string | null>(null);
-  const [isLoadingUserCVs, setIsLoadingUserCVs] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoadingUserCVs(true);
-
-      if (userAuth) {
-        await fetchUserCVsInBackground(userAuth.id);
-      }
-      await fetchAllCVsInBackground();
-
-      setIsLoadingUserCVs(false);
-    };
-
-    loadData();
+    if (userAuth) {
+      fetchUserCVsInBackground(userAuth.id);
+    }
+    fetchAllCVsInBackground();
   }, [userAuth]);
 
   useEffect(() => {
@@ -55,8 +46,8 @@ export default function MyCVsPageClient() {
   }, [CVsTable]);
 
   const handleCreate = async () => {
-    await createCV(userAuth?.id || "");
     router.push("/cv-builder");
+    await createCV(userAuth?.id || "");
   };
 
   const handleImport = async (file: File | null) => {
@@ -66,6 +57,7 @@ export default function MyCVsPageClient() {
 
       if (res.data && res.data.success) {
         console.log("Navigating to cv-builder...");
+        toast.success("Import CV thành công!");
         router.push("/cv-builder");
         return true;
       }
@@ -92,6 +84,7 @@ export default function MyCVsPageClient() {
     if (!cvToDelete) return;
 
     await deleteCV(cvToDelete);
+    toast.success("Xóa CV thành công!");
     setDeleteDialogOpen(false);
     setCvToDelete(null);
   };
@@ -104,9 +97,11 @@ export default function MyCVsPageClient() {
   const deleteDialogDescription =
     "Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn CV của bạn và loại bỏ nó khỏi máy chủ của chúng tôi.";
 
-  if (!userAuth) {
-    return null;
-  }
+  useEffect(() => {
+    if (!userAuth) {
+      router.push("/auth/login");
+    }
+  }, [userAuth]);
 
   // Show loading only when there's no cached data
   if (isLoadingUserCVs) {

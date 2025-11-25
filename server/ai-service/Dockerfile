@@ -1,5 +1,5 @@
-# multi-stage Dockerfile for Spring Boot (Maven + OpenJDK 21)
-# Place this Dockerfile in each service folder (discovery, gateway, auth, user)
+# multi-stage Dockerfile for Spring Boot (Maven + OpenJDK 17)
+# Place this Dockerfile in each service folder (discovery, gateway, auth, cv)
 
 # -------- build stage --------
 FROM maven:3.9.4-eclipse-temurin-21 as build
@@ -19,7 +19,7 @@ RUN JAR_FILE=$(ls server/ai-service/target/*.jar | head -n 1) && echo "Jar: $JAR
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
-# Add a non-root user for safety (optional)
+# Add a non-root ai for safety (optional)
 RUN useradd -m appuser
 USER appuser
 

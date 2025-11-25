@@ -11,9 +11,8 @@ import com.example.aiservice.dtos.responses.Response;
 import com.example.aiservice.exceptions.OurException;
 import com.example.aiservice.services.*;
 import com.example.aiservice.services.grpcs.clients.*;
-import com.example.grpc.cv.CVInfo;
-import com.example.grpc.cv.CreateCVResponse;
 import com.fasterxml.jackson.databind.*;
+import com.example.grpc.cv.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -195,7 +194,7 @@ public class AIApi extends BaseApi {
     private CVDto toCVDto(CVInfo cv) {
         PersonalInfoDto personalInfo = null;
         if (cv.hasPersonalInfo()) {
-            com.example.grpc.cv.PersonalInfo pi = cv.getPersonalInfo();
+            PersonalInfo pi = cv.getPersonalInfo();
             personalInfo = new PersonalInfoDto(
                     pi.getId().isEmpty() ? null : UUID.fromString(pi.getId()),
                     pi.getFullname(),
@@ -563,8 +562,8 @@ public class AIApi extends BaseApi {
         return trimmed;
     }
 
-    private com.example.grpc.cv.PersonalInfo toPersonalInfo(PersonalInfoDto pi) {
-        return com.example.grpc.cv.PersonalInfo.newBuilder()
+    private PersonalInfo toPersonalInfo(PersonalInfoDto pi) {
+        return PersonalInfo.newBuilder()
                 .setId(pi.getId() != null ? pi.getId().toString() : "")
                 .setFullname(pi.getFullname())
                 .setEmail(pi.getEmail())
@@ -576,12 +575,12 @@ public class AIApi extends BaseApi {
                 .build();
     }
 
-    private List<com.example.grpc.cv.Experience> toExperiences(List<ExperienceDto> exps) {
+    private List<Experience> toExperiences(List<ExperienceDto> exps) {
         return exps.stream().map(this::toExperience).collect(Collectors.toList());
     }
 
-    private com.example.grpc.cv.Experience toExperience(ExperienceDto exp) {
-        return com.example.grpc.cv.Experience.newBuilder()
+    private Experience toExperience(ExperienceDto exp) {
+        return Experience.newBuilder()
                 .setId(exp.getId() != null ? exp.getId().toString() : "")
                 .setCompany(exp.getCompany())
                 .setPosition(exp.getPosition())
@@ -591,12 +590,12 @@ public class AIApi extends BaseApi {
                 .build();
     }
 
-    private List<com.example.grpc.cv.Education> toEducations(List<EducationDto> edus) {
+    private List<Education> toEducations(List<EducationDto> edus) {
         return edus.stream().map(this::toEducation).collect(Collectors.toList());
     }
 
-    private com.example.grpc.cv.Education toEducation(EducationDto edu) {
-        return com.example.grpc.cv.Education.newBuilder()
+    private Education toEducation(EducationDto edu) {
+        return Education.newBuilder()
                 .setId(edu.getId() != null ? edu.getId().toString() : "")
                 .setSchool(edu.getSchool())
                 .setDegree(edu.getDegree())
