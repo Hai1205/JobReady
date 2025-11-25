@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -14,15 +15,16 @@ import { useAuthStore } from "@/stores/authStore";
 import { useUserStore } from "@/stores/userStore";
 import { toast } from "react-toastify";
 import { EUserRole, EUserStatus } from "@/types/enum";
-import ProfileTab from "@/components/comons/settings/ProfileTab";
-import SecurityTab from "@/components/comons/settings/SecurityTab";
-import NotificationsTab from "@/components/comons/settings/NotificationsTab";
-import PrivacyTab from "@/components/comons/settings/PrivacyTab";
+import ProfileTab from "@/components/commons/settings/ProfileTab";
+import SecurityTab from "@/components/commons/settings/SecurityTab";
+import NotificationsTab from "@/components/commons/settings/NotificationsTab";
+import PrivacyTab from "@/components/commons/settings/PrivacyTab";
 
 export default function SettingsPage() {
   const { userAuth, changePassword } = useAuthStore();
   const { updateUser } = useUserStore();
 
+  const router = useRouter();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string>("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -126,6 +128,13 @@ export default function SettingsPage() {
 
     setIsChangingPassword(false);
   };
+
+  // Security check: redirect to login if not authenticated
+  useEffect(() => {
+    if (!userAuth) {
+      router.push("/auth/login");
+    }
+  }, [userAuth]);
 
   if (!userAuth) return null;
 

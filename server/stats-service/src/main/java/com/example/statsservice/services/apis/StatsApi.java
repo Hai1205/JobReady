@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -86,36 +87,49 @@ public class StatsApi extends BaseApi {
     }
 
     /**
-     * Compute dashboard statistics from gRPC calls
+     * Compute dashboard statistics from gRPC calls (optimized with parallel
+     * execution)
      */
     private DashboardStatsDto computeDashboardStats() {
-        logger.info("Fetching dashboard statistics...");
-
-        // Get user statistics
-        GetUserStatsResponse userStatsResponse = userGrpcClient.getUserStats();
-
-        // Get CV statistics
-        GetTotalCVsResponse totalCVsResponse = cvGrpcClient.getTotalCVs();
-        GetCVsByVisibilityResponse publicCVsResponse = cvGrpcClient.getCVsByVisibility(true);
-        GetCVsByVisibilityResponse privateCVsResponse = cvGrpcClient.getCVsByVisibility(false);
+        logger.info("Fetching dashboard statistics with parallel execution...");
 
         // Get this month's date range
         YearMonth currentMonth = YearMonth.now();
         Instant startOfMonth = currentMonth.atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59).toInstant(ZoneOffset.UTC);
+        String startDateStr = startOfMonth.toString();
+        String endDateStr = endOfMonth.toString();
 
-        // Get users created this month
-        GetUsersCreatedInRangeResponse usersThisMonthResponse = userGrpcClient.getUsersCreatedInRange(
-                startOfMonth.toString(),
-                endOfMonth.toString());
+        // Execute all gRPC calls in parallel
+        CompletableFuture<GetUserStatsResponse> userStatsFuture = CompletableFuture
+                .supplyAsync(() -> userGrpcClient.getUserStats());
 
-        // Get CVs created this month
-        GetCVsCreatedInRangeResponse cvsThisMonthResponse = cvGrpcClient.getCVsCreatedInRange(
-                startOfMonth.toString(),
-                endOfMonth.toString());
+        CompletableFuture<GetTotalCVsResponse> totalCVsFuture = CompletableFuture
+                .supplyAsync(() -> cvGrpcClient.getTotalCVs());
 
-        // Get recent activities
-        List<ActivityDto> recentActivities = handleGetRecentActivities();
+        CompletableFuture<GetCVsByVisibilityResponse> publicCVsFuture = CompletableFuture
+                .supplyAsync(() -> cvGrpcClient.getCVsByVisibility(true));
+
+        CompletableFuture<GetCVsByVisibilityResponse> privateCVsFuture = CompletableFuture
+                .supplyAsync(() -> cvGrpcClient.getCVsByVisibility(false));
+
+        CompletableFuture<GetUsersCreatedInRangeResponse> usersThisMonthFuture = CompletableFuture
+                .supplyAsync(() -> userGrpcClient.getUsersCreatedInRange(startDateStr, endDateStr));
+
+        CompletableFuture<GetCVsCreatedInRangeResponse> cvsThisMonthFuture = CompletableFuture
+                .supplyAsync(() -> cvGrpcClient.getCVsCreatedInRange(startDateStr, endDateStr));
+
+        CompletableFuture<List<ActivityDto>> recentActivitiesFuture = CompletableFuture
+                .supplyAsync(() -> handleGetRecentActivities());
+
+        // Wait for all futures to complete and get results
+        GetUserStatsResponse userStatsResponse = userStatsFuture.join();
+        GetTotalCVsResponse totalCVsResponse = totalCVsFuture.join();
+        GetCVsByVisibilityResponse publicCVsResponse = publicCVsFuture.join();
+        GetCVsByVisibilityResponse privateCVsResponse = privateCVsFuture.join();
+        GetUsersCreatedInRangeResponse usersThisMonthResponse = usersThisMonthFuture.join();
+        GetCVsCreatedInRangeResponse cvsThisMonthResponse = cvsThisMonthFuture.join();
+        List<ActivityDto> recentActivities = recentActivitiesFuture.join();
 
         // Build dashboard stats
         DashboardStatsDto stats = DashboardStatsDto.builder()
@@ -256,7 +270,9 @@ public class StatsApi extends BaseApi {
                 }
             });
 
-            return activities.subList(0, Math.min(10, activities.size()));
+            // Convert subList to ArrayList to avoid Redis serialization issues
+            int limit = Math.min(10, activities.size());
+            return new ArrayList<>(activities.subList(0, limit));
         } catch (Exception e) {
             logger.warn("Error fetching recent activities: {}", e.getMessage());
             return activities; // Return partial results

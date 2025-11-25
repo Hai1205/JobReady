@@ -85,11 +85,17 @@ function findChromeOnMac(): string {
  * Tìm Chrome trên Linux
  */
 function findChromeOnLinux(): string {
+    // Kiểm tra biến môi trường PUPPETEER_EXECUTABLE_PATH trước (cho Docker/Alpine)
+    const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    if (envPath && existsSync(envPath)) {
+        return envPath;
+    }
+
     const possiblePaths = [
+        "/usr/bin/chromium-browser", // Alpine Linux
+        "/usr/bin/chromium",         // Alpine Linux alternative
         "/usr/bin/google-chrome",
         "/usr/bin/google-chrome-stable",
-        "/usr/bin/chromium-browser",
-        "/usr/bin/chromium",
         "/snap/bin/chromium",
     ];
 
@@ -100,7 +106,7 @@ function findChromeOnLinux(): string {
     }
 
     // Thử tìm bằng which command
-    for (const binary of ["google-chrome", "google-chrome-stable", "chromium-browser", "chromium"]) {
+    for (const binary of ["chromium-browser", "chromium", "google-chrome", "google-chrome-stable"]) {
         try {
             const result = execSync(`which ${binary}`, { encoding: "utf-8" }).trim();
             if (result && existsSync(result)) {

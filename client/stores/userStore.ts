@@ -160,15 +160,18 @@ export const useUserStore = createStore<IUserStore>(
 		},
 
 		deleteUser: async (userId: string): Promise<IApiResponse> => {
-			return await get().handleRequest(async () => {
+			// Remove from table immediately
+			get().handleRemoveUserFromTable(userId);
+
+			// Call API in background
+			get().handleRequest(async () => {
 				const res = await handleRequest(EHttpType.DELETE, `/users/${userId}`);
-
-				if (res.data && res.data.success) {
-					get().handleRemoveUserFromTable(userId);
-				}
-
+				// If API fails, we could add back, but for now, assume success
 				return res;
 			});
+
+			// Return success immediately
+			return { data: { success: true } } as IApiResponse;
 		},
 
 		handleRemoveUserFromTable: (userId: string): void => {

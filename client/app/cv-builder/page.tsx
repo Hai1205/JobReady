@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useCVStore } from "@/stores/cvStore";
-import { CVBuilderWizard } from "@/components/comons/cv-builder/CVBuilderWizard";
-import { AIPanel } from "@/components/comons/cv-builder/AI-powered/AIPanel";
+import { CVBuilderWizard } from "@/components/commons/cv-builder/CVBuilderWizard";
+import { AIPanel } from "@/components/commons/cv-builder/AI-powered/AIPanel";
 
 export default function CVBuilderPage() {
   const { handleSetCurrentStep } = useCVStore();

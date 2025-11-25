@@ -38,7 +38,7 @@ public class CVMapper {
         System.out.println("CV Color: " + cv.getColor());
         System.out.println("CV Template: " + cv.getTemplate());
         System.out.println("CV IsVisibility: " + cv.getIsVisibility());
-        System.out.println("CV Skills: " + (cv.getSkills() != null ? cv.getSkills().size() : "NULL"));
+        // Removed skills.size() call here - it causes LazyInitializationException
         System.out.println("CV PersonalInfo: " + (cv.getPersonalInfo() != null ? "NOT NULL" : "NULL"));
         
         CVDto dto = new CVDto();

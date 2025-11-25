@@ -19,16 +19,32 @@ import {
   UserPlus,
   Download,
 } from "lucide-react";
-import { DashboardHeader } from "@/components/comons/admin/DashboardHeader";
-import { ReportViewerDialog } from "@/components/comons/admin/ReportViewerDialog";
+import { DashboardHeader } from "@/components/commons/admin/DashboardHeader";
+import { ReportViewerDialog } from "@/components/commons/admin/ReportViewerDialog";
 import { useStatsStore } from "@/stores/statsStore";
 import { toast } from "react-toastify";
-import DashboardSkeleton from "@/components/comons/layout/DashboardSkeleton";
+import DashboardSkeleton from "@/components/commons/layout/DashboardSkeleton";
+import { useAuthStore } from "@/stores/authStore";
+import { useRouter } from "next/navigation";
+import { EUserRole } from "@/types/enum";
 
 function AdminDashboardPage() {
-  const { dashboardStats, fetchDashboardStatsInBackground, isLoading } =
+  const { dashboardStats, fetchDashboardStatsInBackground, isLoading, error } =
     useStatsStore();
+  const { userAuth } = useAuthStore();
+  const router = useRouter();
   const [showReportDialog, setShowReportDialog] = useState(false);
+
+  // Security check: redirect to login if not authenticated or not admin
+  useEffect(() => {
+    if (!userAuth) {
+      router.push("/auth/login");
+    } else if (userAuth.role !== EUserRole.ADMIN) {
+      router.push("/");
+    }
+  }, [userAuth]);
+
+  if (!userAuth || userAuth.role !== EUserRole.ADMIN) return null;
 
   useEffect(() => {
     // Fetch stats in background
@@ -43,9 +59,27 @@ function AdminDashboardPage() {
   if (!dashboardStats) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted-foreground">
-          Failed to load dashboard statistics
-        </p>
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">
+            Failed to load dashboard statistics.
+          </p>
+          {error && <p className="text-sm text-destructive mb-4">{error}</p>}
+          <div className="flex items-center justify-center gap-3">
+            <Button
+              onClick={() => fetchDashboardStatsInBackground()}
+              className="px-4"
+            >
+              Retry
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => window.location.reload()}
+              className="px-4"
+            >
+              Refresh page
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

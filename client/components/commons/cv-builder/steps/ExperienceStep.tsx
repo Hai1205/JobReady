@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { HighlightableTextarea } from "@/components/comons/cv-builder/HighlightableTextarea";
+import { HighlightableTextarea } from "@/components/commons/cv-builder/HighlightableTextarea";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";

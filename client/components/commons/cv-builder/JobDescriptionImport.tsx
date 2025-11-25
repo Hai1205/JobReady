@@ -152,12 +152,12 @@ export function JobDescriptionImport({
       const missingText =
         missing.length > 0 ? `\n🔑 ${missing.length} từ khóa còn thiếu` : "";
 
-      toast.success(
-        `✅ Phân tích hoàn tất!\n🎯 Điểm khớp: ${scoreText}${suggestionsText}${missingText}\n\n💡 Xem chi tiết trong tab "Gợi Ý"`,
-        {
-          autoClose: 5000,
-        }
-      );
+      // toast.success(
+      //   `✅ Phân tích hoàn tất!\n🎯 Điểm khớp: ${scoreText}${suggestionsText}${missingText}\n\n💡 Xem chi tiết trong tab "Gợi Ý"`,
+      //   {
+      //     autoClose: 5000,
+      //   }
+      // );
 
       if (onAnalysisComplete) {
         onAnalysisComplete(suggestions, score);

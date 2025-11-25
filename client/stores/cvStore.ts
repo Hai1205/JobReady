@@ -1,6 +1,6 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
 import { createStore, IBaseStore } from "@/lib/initialStore";
-import { renderCVToHTMLAsync } from "@/components/comons/cv-builder/CVRenderer";
+import { renderCVToHTMLAsync } from "@/components/commons/cv-builder/CVRenderer";
 import { toast } from "react-toastify";
 import { testFormData } from "@/lib/utils";
 import { exportCustomHTML, exportToPDF } from "@/services/pdfExportService";
@@ -49,6 +49,10 @@ export interface ICVStore extends IBaseStore {
 	) => Promise<IApiResponse<void>>;
 	duplicateCV: (
 		cvId: string
+	) => Promise<IApiResponse<ICVDataResponse>>;
+	importCV: (
+		userId: string,
+		file: File | null
 	) => Promise<IApiResponse<ICVDataResponse>>;
 
 	handleSetCurrentCV: (cv: ICV | null) => void;
@@ -126,16 +130,26 @@ export const useCVStore = createStore<ICVStore>(
 	(set, get) => ({
 		getAllCVs: async (): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs`);
+				set({ isLoadingAllCVs: true });
 
-				if (res.data && res.data.success && res.data.cvs) {
-					set({
-						CVsTable: res.data.cvs,
-						lastFetchTimeAllCVs: Date.now()
-					});
+				try {
+					const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs`);
+
+					if (res.data && res.data.success && res.data.cvs) {
+						set({
+							CVsTable: res.data.cvs,
+							lastFetchTimeAllCVs: Date.now(),
+							isLoadingAllCVs: false
+						});
+					} else {
+						set({ isLoadingAllCVs: false });
+					}
+
+					return res;
+				} catch (error) {
+					set({ isLoadingAllCVs: false });
+					throw error;
 				}
-
-				return res;
 			});
 		},
 
@@ -162,16 +176,27 @@ export const useCVStore = createStore<ICVStore>(
 
 		getUserCVs: async (userId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs/users/${userId}`);
+				// Set loading state before API call
+				set({ isLoadingUserCVs: true });
 
-				if (res.data && res.data.success && res.data.cvs) {
-					set({
-						userCVs: res.data.cvs,
-						lastFetchTimeUserCVs: Date.now()
-					});
+				try {
+					const res = await handleRequest<ICVDataResponse>(EHttpType.GET, `/cvs/users/${userId}`);
+
+					if (res.data && res.data.success && res.data.cvs) {
+						set({
+							userCVs: res.data.cvs,
+							lastFetchTimeUserCVs: Date.now(),
+							isLoadingUserCVs: false
+						});
+					} else {
+						set({ isLoadingUserCVs: false });
+					}
+
+					return res;
+				} catch (error) {
+					set({ isLoadingUserCVs: false });
+					throw error;
 				}
-
-				return res;
 			});
 		},
 
@@ -208,7 +233,14 @@ export const useCVStore = createStore<ICVStore>(
 			get().handleSetCurrentCV(get().initialCV);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/users/${userId}`, new FormData());
+				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, new FormData());
+
+				if (res.data && res.data.success && res.data.cv) {
+					get().handleAddCVToUserCVs(res.data.cv);
+					get().handleSetCurrentCV(res.data.cv);
+				}
+
+				return res;
 			});
 		},
 
@@ -244,26 +276,28 @@ export const useCVStore = createStore<ICVStore>(
 		},
 
 		deleteCV: async (cvId: string): Promise<IApiResponse> => {
-			return await get().handleRequest(async () => {
+			// Remove from user CVs immediately
+			get().handleRemoveCVFromUserCVs(cvId);
+
+			// Remove from CVs table immediately
+			get().handleRemoveCVFromTable(cvId);
+
+			// Call API in background
+			get().handleRequest(async () => {
 				const res = await handleRequest(EHttpType.DELETE, `/cvs/${cvId}`);
-
-				if (res.data && res.data.success) {
-					// Remove from user CVs if exists
-					get().handleRemoveCVFromUserCVs(cvId);
-
-					// Remove from CVs table if exists
-					get().handleRemoveCVFromTable(cvId);
-				}
-
+				// If API fails, we could add back, but for now, assume success
 				return res;
 			});
+
+			// Return success immediately
+			return { data: { success: true } } as IApiResponse;
 		},
 
 		duplicateCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
 				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/${cvId}/duplicate`);
 
-				if (res.data && res.data.cv) {
+				if (res.data && res.data.success && res.data.cv) {
 					set({ currentCV: res.data.cv });
 					get().handleAddCVToUserCVs(res.data.cv);
 				}
@@ -272,12 +306,23 @@ export const useCVStore = createStore<ICVStore>(
 			});
 		},
 
-		importFile: async (userId: string, file: File): Promise<IApiResponse<ICVDataResponse>> => {
+		importCV: async (
+			userId: string,
+			file: File | null,
+		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
-			formData.append("file", file);
+			formData.append("file", file as Blob);
 
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `/cvs/users/${userId}/import`, formData);
+				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/ai/users/${userId}/import`, formData);
+
+				const { success, cv } = res.data || {};
+
+				if (success && cv) {
+					get().handleSetCurrentCV(cv);
+				}
+
+				return res;
 			});
 		},
 

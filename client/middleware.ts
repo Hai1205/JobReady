@@ -48,17 +48,32 @@ export function middleware(request: NextRequest) {
         response.headers.set('Server-Timing', 'middleware;dur=0')
     }
 
-    // Get the authentication token from cookies (try multiple possible cookie names)
+    // Get the authentication token from cookies
+    // First try to get access_token directly
     let authToken = request.cookies.get('access_token')?.value;
 
-    // Also check if token exists in the Cookie header directly
+    // If not found, try to get from auth-storage (Zustand store)
     if (!authToken) {
-        const cookieHeader = request.headers.get('cookie');
-        if (cookieHeader) {
-            const cookies = cookieHeader.split(';').map(c => c.trim());
-            const accessTokenCookie = cookies.find(c => c.startsWith('access_token='));
-            if (accessTokenCookie) {
-                authToken = accessTokenCookie.split('=')[1];
+        const authStorage = request.cookies.get('auth-storage')?.value;
+        if (authStorage) {
+            try {
+                const decoded = decodeURIComponent(authStorage);
+                const authData = JSON.parse(decoded);
+                // The auth store doesn't store token, so we need to check access_token cookie
+                // But we can check if userAuth exists to determine authentication status
+                if (authData?.state?.userAuth) {
+                    // User data exists in store, now check for actual token
+                    const cookieHeader = request.headers.get('cookie');
+                    if (cookieHeader) {
+                        const cookies = cookieHeader.split(';').map(c => c.trim());
+                        const accessTokenCookie = cookies.find(c => c.startsWith('access_token='));
+                        if (accessTokenCookie) {
+                            authToken = accessTokenCookie.split('=')[1];
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('Failed to parse auth-storage cookie');
             }
         }
     }
@@ -73,12 +88,32 @@ export function middleware(request: NextRequest) {
         }
     }
 
-    // Parse the user authentication status
+    // Parse the user authentication status from Zustand store
     let isAuthenticated = false
     let isAdmin = false
     let userRole = null
+    let userAuth = null
 
-    if (authToken) {
+    // Try to get user info from auth-storage first
+    const authStorage = request.cookies.get('auth-storage')?.value;
+    if (authStorage) {
+        try {
+            const decoded = decodeURIComponent(authStorage);
+            const authData = JSON.parse(decoded);
+            userAuth = authData?.state?.userAuth;
+
+            if (userAuth) {
+                isAuthenticated = true;
+                userRole = userAuth.role;
+                isAdmin = userRole === 'ADMIN' || userRole === 'admin';
+            }
+        } catch (e) {
+            console.log('Failed to parse auth-storage for user info');
+        }
+    }
+
+    // If we couldn't get user info from storage, try to decode JWT token
+    if (!isAuthenticated && authToken) {
         try {
             // Decode JWT payload (second part)
             const parts = authToken.split('.');
@@ -110,7 +145,7 @@ export function middleware(request: NextRequest) {
                 // Use userId from the decoded token (based on your JWT structure)
                 isAuthenticated = !!decodedPayload.userId || !!decodedPayload.id || !!decodedPayload.sub
                 userRole = decodedPayload.role
-                isAdmin = userRole === 'admin'
+                isAdmin = userRole === 'ADMIN' || userRole === 'admin'
             } else {
                 console.log('Token expired:', { exp: decodedPayload.exp, now: currentTime })
             }
@@ -123,17 +158,17 @@ export function middleware(request: NextRequest) {
     }
 
     // Debug logging for development
-    // if (process.env.NODE_ENV === 'development') {
     console.log('Middleware Debug:', {
         pathname,
         isAuthenticated,
         isAdmin,
         userRole,
         hasToken: !!authToken,
+        hasUserAuth: !!userAuth,
         tokenPreview: authToken ? authToken.substring(0, 30) + '...' : 'NO TOKEN',
         allCookies: request.cookies.getAll().map(c => c.name),
+        userInfo: userAuth ? { id: userAuth.id, role: userAuth.role, username: userAuth.username } : null,
     })
-    // }
 
     // Check if user is on mobile (simplified check based on user agent)
     const userAgent = request.headers.get('user-agent') || ''

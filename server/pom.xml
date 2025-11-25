@@ -19,7 +19,7 @@
         <jjwt.version>0.12.3</jjwt.version>
         <cloudinary.version>1.38.0</cloudinary.version>
         <pdfbox.version>3.0.1</pdfbox.version>
-        <poi.version>5.4.0</poi.version>
+        <poi.version>5.3.0</poi.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mapstruct-processor.version>1.5.5.Final</mapstruct-processor.version>
         <spring-dotenv.version>4.0.0</spring-dotenv.version>
@@ -28,6 +28,7 @@
         <pgvector.version>0.1.4</pgvector.version>
         <jasperreports.version>6.21.3</jasperreports.version>
         <tika.version>2.9.1</tika.version>
+        <commons-io.version>2.16.1</commons-io.version>
     </properties>
 
     <modules>
@@ -117,13 +118,6 @@
                 <version>${pdfbox.version}</version>
             </dependency>
 
-            <!-- Apache POI for DOCX parsing -->
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml</artifactId>
-                <version>${poi.version}</version>
-            </dependency>
-
             <!-- MapStruct for DTO and Entity mapping -->
             <dependency>
                 <groupId>org.mapstruct</groupId>
@@ -197,6 +191,25 @@
                 <groupId>org.apache.tika</groupId>
                 <artifactId>tika-parsers-standard-package</artifactId>
                 <version>${tika.version}</version>
+            </dependency>
+
+            <!-- Apache POI for Word document processing -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-full</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+
+            <!-- Apache Commons IO - Required for POI -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
             </dependency>
 
             <!-- gRPC Dependencies -->
