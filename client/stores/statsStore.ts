@@ -18,6 +18,8 @@ export interface IStatsStore extends IBaseStore {
 	getStatsReport: (forceRefresh?: boolean) => Promise<Blob | null>;
 	fetchDashboardStatsInBackground: () => Promise<void>;
 	fetchReportInBackground: () => Promise<void>;
+
+	handleGetStatsReport: (statsReport?: string | Uint8Array) => Promise<Blob | null>;
 }
 
 const storeName = "stats";
@@ -45,6 +47,8 @@ export const useStatsStore = createStore<IStatsStore>(
 						dashboardStats: res.data.dashboardStats,
 						lastStatsFetchTime: Date.now()
 					});
+
+					get().handleGetStatsReport(res.data.statsReport);
 				} return res;
 			});
 		},
@@ -64,34 +68,7 @@ export const useStatsStore = createStore<IStatsStore>(
 			// Use handleRequest to get the report data
 			const res = await handleRequest<IStatsResponse>(EHttpType.GET, `/stats/report`);
 
-			if (res.data?.statsReport) {
-				let blob: Blob;
-
-				// Check if statsReport is a Base64 string or byte array
-				if (typeof res.data.statsReport === 'string') {
-					// Decode Base64 string to binary
-					const binaryString = atob(res.data.statsReport);
-					const bytes = new Uint8Array(binaryString.length);
-					for (let i = 0; i < binaryString.length; i++) {
-						bytes[i] = binaryString.charCodeAt(i);
-					}
-					blob = new Blob([bytes], { type: 'application/pdf' });
-				} else if (Array.isArray(res.data.statsReport)) {
-					// Convert byte array to Blob
-					const uint8Array = new Uint8Array(res.data.statsReport);
-					blob = new Blob([uint8Array], { type: 'application/pdf' });
-				} else {
-					return null;
-				}
-
-				set({
-					statsReport: blob,
-					lastReportFetchTime: Date.now(),
-				});
-				return blob;
-			}
-
-			return null;
+			return get().handleGetStatsReport(res.data?.statsReport);
 		},
 
 		fetchDashboardStatsInBackground: async (): Promise<void> => {
@@ -137,6 +114,37 @@ export const useStatsStore = createStore<IStatsStore>(
 			await get().getStatsReport(true);
 		}, reset: () => {
 			set({ ...initialState });
+		},
+
+		handleGetStatsReport: async (statsReport?: string | Uint8Array): Promise<Blob | null> => {
+			if (statsReport) {
+				let blob: Blob;
+
+				// Check if statsReport is a Base64 string or byte array
+				if (typeof statsReport === 'string') {
+					// Decode Base64 string to binary
+					const binaryString = atob(statsReport);
+					const bytes = new Uint8Array(binaryString.length);
+					for (let i = 0; i < binaryString.length; i++) {
+						bytes[i] = binaryString.charCodeAt(i);
+					}
+					blob = new Blob([bytes], { type: 'application/pdf' });
+				} else if (Array.isArray(statsReport)) {
+					// Convert byte array to Blob
+					const uint8Array = new Uint8Array(statsReport);
+					blob = new Blob([uint8Array], { type: 'application/pdf' });
+				} else {
+					return null;
+				}
+
+				set({
+					statsReport: blob,
+					lastReportFetchTime: Date.now(),
+				});
+				return blob;
+			}
+
+			return null;
 		},
 	}),
 );

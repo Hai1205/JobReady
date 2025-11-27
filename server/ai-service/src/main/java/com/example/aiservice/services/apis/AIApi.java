@@ -86,9 +86,7 @@ public class AIApi extends BaseApi {
 
             AIResponseDto aiResponse = handleAnalyzeCV(cvDto);
             AnalyzeResultDto analyzeResult = aiResponse.getAnalyzeResult();
-            List<AISuggestionDto> suggestions = analyzeResult != null && analyzeResult.getSuggestions() != null
-                    ? analyzeResult.getSuggestions()
-                    : aiResponse.getSuggestions();
+            List<AISuggestionDto> suggestions = analyzeResult.getSuggestions();
 
             response.setMessage("CV analyzed successfully");
             response.setAnalyze(analyzeResult);
@@ -208,42 +206,101 @@ public class AIApi extends BaseApi {
         }
     }
 
+    // public AIResponseDto handleAnalyzeCV(CVDto cv) {
+    // try {
+    // String systemPrompt = promptBuilderService.buildCVAnalysisPrompt();
+    // String cvContent = handleFormatCVForAnalysis(cv);
+
+    // // First, ingest the CV into vector store for future retrieval
+    // embeddingService.ingestCV(cvContent, cv.getTitle(), "user-" +
+    // UUID.randomUUID());
+
+    // // Retrieve similar CVs for context (RAG)
+    // List<EmbeddingService.Document> similarDocuments =
+    // embeddingService.retrieveSimilarDocuments(cvContent, 3);
+    // String context = similarDocuments.stream()
+    // .map(doc -> "Similar CV: " + doc.getContent())
+    // .collect(Collectors.joining("\n\n"));
+
+    // // Augment the prompt with retrieved context
+    // String augmentedPrompt = String.format(
+    // "Context from similar CVs:\n%s\n\nAnalyze this CV:\n\n%s",
+    // context, cvContent);
+
+    // String aiResponseText =
+    // openRouterConfig.callModelWithSystemPrompt(systemPrompt, augmentedPrompt);
+
+    // // Parse the analyze result as object
+    // AnalyzeResultDto analyzeResult = handleParseAnalyzeResult(aiResponseText);
+    // List<AISuggestionDto> suggestions = analyzeResult.getSuggestions() != null
+    // ? analyzeResult.getSuggestions()
+    // : new ArrayList<>();
+
+    // return AIResponseDto.builder()
+    // .analyzeResult(analyzeResult)
+    // .suggestions(suggestions)
+    // .build();
+    // } catch (OurException e) {
+    // logger.error("Error in analyzeCV: {}", e.getMessage(), e);
+    // throw e;
+    // } catch (Exception e) {
+    // logger.error("Unexpected error in analyzeCV: {}", e.getMessage(), e);
+    // throw new OurException("Failed to analyze CV", 500);
+    // }
+    // }
+
+    // public AIResponseDto handleImproveCV(String section, String content) {
+    // try {
+    // String systemPrompt = promptBuilderService.buildCVImprovementPrompt(
+    // section,
+    // "General position",
+    // List.of());
+
+    // // Retrieve similar CV sections for context
+    // List<EmbeddingService.Document> similarDocuments =
+    // embeddingService.retrieveSimilarDocuments(content, 2);
+    // String context = similarDocuments.stream()
+    // .map(doc -> "Example: " + doc.getContent())
+    // .collect(Collectors.joining("\n\n"));
+
+    // // Augment the prompt with retrieved context
+    // String augmentedPrompt = String.format(
+    // "Context from similar CV sections:\n%s\n\nImprove the following %s section of
+    // a CV:\n\n%s\n\nProvide only the improved version without explanations.",
+    // context, section, content);
+
+    // String improved = openRouterConfig.callModelWithSystemPrompt(systemPrompt,
+    // augmentedPrompt);
+
+    // return AIResponseDto.builder()
+    // .improved(improved)
+    // .build();
+    // } catch (OurException e) {
+    // logger.error("Error in improveCV: {}", e.getMessage(), e);
+    // throw e;
+    // } catch (Exception e) {
+    // logger.error("Unexpected error in improveCV: {}", e.getMessage(), e);
+    // throw new OurException("Failed to improve CV", 500);
+    // }
+    // }
+
     public AIResponseDto handleAnalyzeCV(CVDto cv) {
         try {
             String systemPrompt = promptBuilderService.buildCVAnalysisPrompt();
             String cvContent = handleFormatCVForAnalysis(cv);
 
-            // First, ingest the CV into vector store for future retrieval
-            embeddingService.ingestCV(cvContent, cv.getTitle(), "user-" + UUID.randomUUID());
+            String aiResponseText = openRouterConfig.callModelWithSystemPrompt(
+                    systemPrompt,
+                    cvContent);
 
-            // Retrieve similar CVs for context (RAG)
-            List<EmbeddingService.Document> similarDocuments = embeddingService.retrieveSimilarDocuments(cvContent, 3);
-            String context = similarDocuments.stream()
-                    .map(doc -> "Similar CV: " + doc.getContent())
-                    .collect(Collectors.joining("\n\n"));
-
-            // Augment the prompt with retrieved context
-            String augmentedPrompt = String.format(
-                    "Context from similar CVs:\n%s\n\nAnalyze this CV:\n\n%s",
-                    context, cvContent);
-
-            String aiResponseText = openRouterConfig.callModelWithSystemPrompt(systemPrompt, augmentedPrompt);
-
-            // Parse the analyze result as object
             AnalyzeResultDto analyzeResult = handleParseAnalyzeResult(aiResponseText);
-            List<AISuggestionDto> suggestions = analyzeResult.getSuggestions() != null
-                    ? analyzeResult.getSuggestions()
-                    : new ArrayList<>();
 
             return AIResponseDto.builder()
                     .analyzeResult(analyzeResult)
-                    .suggestions(suggestions)
+                    .suggestions(analyzeResult.getSuggestions())
                     .build();
-        } catch (OurException e) {
-            logger.error("Error in analyzeCV: {}", e.getMessage(), e);
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error in analyzeCV: {}", e.getMessage(), e);
+            logger.error("Error in analyzeCV: {}", e.getMessage(), e);
             throw new OurException("Failed to analyze CV", 500);
         }
     }
@@ -251,52 +308,129 @@ public class AIApi extends BaseApi {
     public AIResponseDto handleImproveCV(String section, String content) {
         try {
             String systemPrompt = promptBuilderService.buildCVImprovementPrompt(
-                    section,
-                    "General position",
-                    List.of());
+                    section, "General position", List.of());
 
-            // Retrieve similar CV sections for context
-            List<EmbeddingService.Document> similarDocuments = embeddingService.retrieveSimilarDocuments(content, 2);
-            String context = similarDocuments.stream()
-                    .map(doc -> "Example: " + doc.getContent())
-                    .collect(Collectors.joining("\n\n"));
+            String improvedPrompt = String.format(
+                    "Improve the following %s section:\n\n%s",
+                    section, content);
 
-            // Augment the prompt with retrieved context
-            String augmentedPrompt = String.format(
-                    "Context from similar CV sections:\n%s\n\nImprove the following %s section of a CV:\n\n%s\n\nProvide only the improved version without explanations.",
-                    context, section, content);
-
-            String improved = openRouterConfig.callModelWithSystemPrompt(systemPrompt, augmentedPrompt);
+            String improved = openRouterConfig.callModelWithSystemPrompt(
+                    systemPrompt,
+                    improvedPrompt);
 
             return AIResponseDto.builder()
                     .improved(improved)
                     .build();
-        } catch (OurException e) {
-            logger.error("Error in improveCV: {}", e.getMessage(), e);
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error in improveCV: {}", e.getMessage(), e);
             throw new OurException("Failed to improve CV", 500);
         }
     }
 
+    // RAG version with vector store
+    // public AIResponseDto handleAnalyzeCVWithJobDescription(CVDto cv, String
+    // language, String jdText) {
+    // try {
+    // String cvContent = handleFormatCVForAnalysis(cv);
+
+    // // Ingest job description into vector store
+    // embeddingService.ingestJobDescription(jdText, "Job Description", "jd-" +
+    // UUID.randomUUID().toString());
+
+    // String systemPrompt = promptBuilderService.buildJobMatchPrompt(language !=
+    // null ? language : "vi");
+    // logger.info("jdText", jdText);
+
+    // // Retrieve similar job descriptions for context
+    // List<EmbeddingService.Document> similarJDs =
+    // embeddingService.retrieveSimilarDocuments(jdText, 2);
+    // String jdContext = similarJDs.stream()
+    // .map(doc -> "Similar JD: " + doc.getContent())
+    // .collect(Collectors.joining("\n\n"));
+
+    // String userPrompt = handleBuildUserPrompt(jdText, cvContent, jdContext);
+
+    // String aiResponseText =
+    // openRouterConfig.callModelWithSystemPrompt(systemPrompt, userPrompt);
+
+    // logger.info("========== AI RAW RESPONSE ==========");
+    // logger.info("Response length: {}", aiResponseText.length());
+    // logger.info("First 500 chars: {}", aiResponseText.substring(0, Math.min(500,
+    // aiResponseText.length())));
+    // logger.info("=====================================");
+
+    // String jsonContent = handleExtractJsonFromResponse(aiResponseText);
+    // logger.info("========== EXTRACTED JSON ==========");
+    // logger.info("JSON length: {}", jsonContent.length());
+    // logger.info("JSON content: {}", jsonContent);
+    // logger.info("====================================");
+
+    // JsonNode root = objectMapper.readTree(jsonContent);
+
+    // // Check if data is nested in "analysis" field
+    // JsonNode analysisNode = root.has("analysis") ? root.get("analysis") : root;
+    // JsonNode jdNode = root.has("jobDescription") ? root.get("jobDescription") :
+    // root;
+
+    // // Parse job description
+    // JobDescriptionResult jdResult = null;
+    // if (jdNode != null && jdNode.isObject()) {
+    // try {
+    // jdResult = objectMapper.treeToValue(jdNode, JobDescriptionResult.class);
+    // } catch (Exception e) {
+    // logger.warn("Failed to parse job description: {}", e.getMessage());
+    // }
+    // }
+
+    // Double matchScore = null;
+
+    // // Extract match score from analysis node
+    // if (analysisNode.has("overallMatchScore")) {
+    // matchScore = analysisNode.get("overallMatchScore").asDouble();
+    // } else if (analysisNode.has("matchScore")) {
+    // matchScore = analysisNode.get("matchScore").asDouble();
+    // }
+
+    // // Extract missing keywords from analysis node
+    // List<String> missingKeywords = new ArrayList<>();
+    // if (analysisNode.has("missingKeywords") &&
+    // analysisNode.get("missingKeywords").isArray()) {
+    // for (JsonNode n : analysisNode.get("missingKeywords")) {
+    // missingKeywords.add(n.asText());
+    // }
+    // }
+
+    // // Parse the analyze result from analysis node
+    // AnalyzeResultDto analyzeResult =
+    // handleParseAnalyzeResultFromNode(analysisNode);
+    // List<AISuggestionDto> suggestions = analyzeResult.getSuggestions() != null
+    // ? analyzeResult.getSuggestions()
+    // : new ArrayList<>();
+
+    // return AIResponseDto.builder()
+    // .jdResult(jdResult)
+    // .analyzeResult(analyzeResult)
+    // .matchScore(matchScore)
+    // .missingKeywords(missingKeywords)
+    // .suggestions(suggestions)
+    // .build();
+    // } catch (OurException e) {
+    // logger.error("Error in analyzeCVWithJobDescription: {}", e.getMessage(), e);
+    // throw e;
+    // } catch (Exception e) {
+    // logger.error("Unexpected error in analyzeCVWithJobDescription: {}",
+    // e.getMessage(), e);
+    // throw new OurException("Failed to analyze CV with Job Description", 500);
+    // }
+    // }
+
     public AIResponseDto handleAnalyzeCVWithJobDescription(CVDto cv, String language, String jdText) {
         try {
             String cvContent = handleFormatCVForAnalysis(cv);
-
-            // Ingest job description into vector store
-            embeddingService.ingestJobDescription(jdText, "Job Description", "jd-" + UUID.randomUUID().toString());
-
             String systemPrompt = promptBuilderService.buildJobMatchPrompt(language != null ? language : "vi");
-            logger.info("jdText", jdText);
 
-            // Retrieve similar job descriptions for context
-            List<EmbeddingService.Document> similarJDs = embeddingService.retrieveSimilarDocuments(jdText, 2);
-            String jdContext = similarJDs.stream()
-                    .map(doc -> "Similar JD: " + doc.getContent())
-                    .collect(Collectors.joining("\n\n"));
-
-            String userPrompt = handleBuildUserPrompt(jdText, cvContent, jdContext);
+            String userPrompt = String.format(
+                    "Job Description:\n%s\n\nCV Content:\n%s\n\nReturn the parsed JD JSON and the analyze JSON.",
+                    jdText, cvContent);
 
             String aiResponseText = openRouterConfig.callModelWithSystemPrompt(systemPrompt, userPrompt);
 
@@ -408,7 +542,7 @@ public class AIApi extends BaseApi {
         }
 
         // Skills
-        List<String> skills = cvDto.getSkills();    
+        List<String> skills = cvDto.getSkills();
         if (skills != null && !skills.isEmpty()) {
             sb.append("\nSkills:\n");
             sb.append(String.join(", ", skills)).append("\n");

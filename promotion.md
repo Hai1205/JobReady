@@ -17,6 +17,14 @@
   - **User Service:** Quản lý người dùng (MySQL), profile management, preferences.
   - **CV Service:** Xử lý CV với AI (PostgreSQL + pgvector), lưu trữ và xử lý dữ liệu CV vectorized.
   - **AI Service:** Tích hợp OpenRouter API, sử dụng Llama-3.2-3b-instruct model cho text analysis và suggestions.
+    ### Tích Hợp Spring AI (Tương Lai)
+    - **Hiện tại:** AI Service dùng code thủ công để gọi model AI (qua OpenRouter) và quản lý embeddings (vector biểu diễn văn bản) cho phân tích CV.
+    - **Spring AI là gì?** Một framework mới của Spring giúp tích hợp AI dễ dàng vào ứng dụng Spring Boot, như một "cầu nối" giữa code Java và các model AI.
+    - **Cách hoạt động đơn giản:**
+      - Thay thế code gọi AI thủ công bằng `ChatClient` (gọi model như GPT để phân tích CV).
+      - Thay thế quản lý embeddings bằng `EmbeddingModel` (tạo vector từ văn bản CV) và `VectorStore` (lưu trữ và tìm kiếm vector nhanh chóng).
+      - Ví dụ: Khi phân tích CV, Spring AI tự động tạo vector cho CV, lưu vào kho, tìm CV tương đồng, và gọi AI để đưa ra gợi ý – tất cả chỉ với vài dòng code!
+    - **Lợi ích:** Code sạch hơn, dễ bảo trì, tích hợp mượt mà với Spring (như dependency injection), hỗ trợ nhiều model AI (OpenAI, Claude), và cải thiện hiệu suất cho tính năng như Job Matching.
   - **Mail Service:** Gửi email thông báo (verification, notifications, password reset).
   - **Stats Service:** Thống kê và analytics, tracking user behavior và CV performance.
 - **Infrastructure:** Docker cho containerization, Kubernetes cho orchestration, RabbitMQ cho message queuing, Redis cho caching, MySQL/PostgreSQL cho databases.
