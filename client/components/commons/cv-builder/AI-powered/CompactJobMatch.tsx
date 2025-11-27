@@ -48,10 +48,12 @@ export function CompactJobMatch({
   useEffect(() => {
     if (externalFile) {
       setInputMethod("file");
-      if (processFile(externalFile)) {
-        toast.success("File đã được tải lên thành công!");
-        onExternalFileProcessed?.();
+      if (!processFile(externalFile)) {
+        toast.error("Tải file thất bại!");
+        return;
       }
+
+      onExternalFileProcessed?.();
     }
   }, [externalFile]);
 
@@ -108,8 +110,8 @@ export function CompactJobMatch({
     setIsDragging(false);
 
     const file = e.dataTransfer.files?.[0];
-    if (file && processFile(file)) {
-      toast.success("File đã được tải lên thành công!");
+    if (!file && !processFile(file)) {
+      toast.error("Tải file thất bại!");
     }
   };
 

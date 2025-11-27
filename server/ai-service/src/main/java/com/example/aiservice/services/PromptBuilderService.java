@@ -4,13 +4,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * PromptBuilderService - Tạo AI prompts theo GPT-5 framework
- * Framework: Vai trò → Nhiệm vụ → Ngữ cảnh → Định dạng đầu ra → Điều kiện
- * 
- * @author JobReady Team
- * @see AI_PROMPTS_OPTIMIZED.md
- */
 @Component
 public class PromptBuilderService {
 
