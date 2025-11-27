@@ -35,6 +35,8 @@ export const getRefreshToken = (): string | null => {
 
 export const BASE_URL = `${SERVER_URL}/api/v1`;
 
+console.log('🔍 SERVER_URL:', SERVER_URL);
+
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
