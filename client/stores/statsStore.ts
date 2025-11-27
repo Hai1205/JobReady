@@ -47,8 +47,6 @@ export const useStatsStore = createStore<IStatsStore>(
 						dashboardStats: res.data.dashboardStats,
 						lastStatsFetchTime: Date.now()
 					});
-
-					get().handleGetStatsReport(res.data.statsReport);
 				} return res;
 			});
 		},

@@ -191,12 +191,10 @@ public class StatsApi extends BaseApi {
 
         try {
             DashboardStatsDto stats = getDashboardStatsFromCacheOrCompute();
-            byte[] report = handleGetStatsReport();
 
             response.setStatusCode(200);
             response.setMessage("Dashboard statistics retrieved successfully");
             response.setDashboardStats(stats);
-            response.setStatsReport(report);
             return response;
         } catch (Exception e) {
             logger.error("Error fetching dashboard stats: {}", e.getMessage(), e);
