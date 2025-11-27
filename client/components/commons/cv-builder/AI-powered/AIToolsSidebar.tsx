@@ -14,11 +14,23 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+interface AIToolsSidebarProps {
+  externalFile?: File | null;
+  onExternalFileProcessed?: () => void;
+  accordionValue?: string;
+  onAccordionChange?: (value: string) => void;
+}
+
 /**
  * AIToolsSidebar - Compact sidebar version of AI tools
  * Includes Quick Analyze and Job Match Analysis in a compact format
  */
-export function AIToolsSidebar() {
+export function AIToolsSidebar({
+  externalFile,
+  onExternalFileProcessed,
+  accordionValue,
+  onAccordionChange,
+}: AIToolsSidebarProps) {
   const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -134,7 +146,13 @@ export function AIToolsSidebar() {
       </Button>
 
       {/* Accordion for advanced features */}
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        value={accordionValue}
+        onValueChange={onAccordionChange}
+      >
         <AccordionItem value="job-match">
           <AccordionTrigger className="text-sm font-medium">
             Phân Tích Với Mô Tả Công Việc
@@ -145,6 +163,8 @@ export function AIToolsSidebar() {
               onAnalysisComplete={(suggestions) => {
                 toast.success("Phân tích hoàn tất!");
               }}
+              externalFile={externalFile}
+              onExternalFileProcessed={onExternalFileProcessed}
             />
           </AccordionContent>
         </AccordionItem>

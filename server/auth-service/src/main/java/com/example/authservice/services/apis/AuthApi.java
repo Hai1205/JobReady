@@ -6,8 +6,8 @@ import com.example.authservice.dtos.responses.*;
 import com.example.authservice.exceptions.OurException;
 import com.example.authservice.services.JwtService;
 import com.example.authservice.services.OtpService;
-import com.example.authservice.services.grpcs.clients.UserGrpcClient;
-import com.example.authservice.services.reabbitmqs.producers.AuthProducer;
+import com.example.authservice.services.feigns.UserFeignClient;
+import com.example.authservice.services.rabbitmqs.producers.AuthProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
@@ -23,15 +23,15 @@ import java.util.Map;
 public class AuthApi extends BaseApi {
 
     private JwtService jwtUtil;
-    private UserGrpcClient userGrpcClient;
+    private UserFeignClient userFeignClient;
     private AuthProducer authProducer;
     private OtpService otpService;
     private final ObjectMapper objectMapper;
 
-    public AuthApi(JwtService jwtUtil, UserGrpcClient userGrpcClient, AuthProducer authProducer,
+    public AuthApi(JwtService jwtUtil, UserFeignClient userFeignClient, AuthProducer authProducer,
             OtpService otpService) {
         this.jwtUtil = jwtUtil;
-        this.userGrpcClient = userGrpcClient;
+        this.userFeignClient = userFeignClient;
         this.authProducer = authProducer;
         this.otpService = otpService;
         this.objectMapper = new ObjectMapper();
@@ -47,7 +47,7 @@ public class AuthApi extends BaseApi {
             String identifier = request.getIdentifier();
             String password = request.getPassword();
 
-            UserDto user = userGrpcClient.authenticateUser(identifier, password);
+            UserDto user = userFeignClient.authenticateUser(identifier, password).getUser();
 
             if (user == null) {
                 logger.warn("Login failed: Invalid credentials for username or email: {}", identifier);
@@ -149,7 +149,8 @@ public class AuthApi extends BaseApi {
             String password = request.getPassword();
             String fullname = request.getFullname();
 
-            UserDto user = userGrpcClient.createUser(username, email, password, fullname);
+            UserCreateRequest userCreateRequest = new UserCreateRequest(username, email, password, fullname);
+            UserDto user = userFeignClient.createUser(userCreateRequest).getUser();
 
             response.setMessage("Registration successful");
             response.setUser(user);
@@ -181,7 +182,7 @@ public class AuthApi extends BaseApi {
                 throw new OurException("Request data is required", 400);
             }
 
-            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
+            UserDto user = userFeignClient.findUserByIdentifier(identifier).getUser();
 
             if (user == null) {
                 logger.warn("OTP verification failed: User not found for identifier: {}", identifier);
@@ -206,7 +207,7 @@ public class AuthApi extends BaseApi {
             }
 
             if (request.getIsActivation() != null && request.getIsActivation()) {
-                userGrpcClient.activateUser(email);
+                userFeignClient.activateUser(email);
                 logger.info("User account activated for email: {}", email);
             }
 
@@ -228,7 +229,7 @@ public class AuthApi extends BaseApi {
         Response response = new Response();
 
         try {
-            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
+            UserDto user = userFeignClient.findUserByIdentifier(identifier).getUser();
 
             if (user == null) {
                 logger.warn("OTP send failed: User not found for identifier: {}", identifier);
@@ -277,13 +278,15 @@ public class AuthApi extends BaseApi {
             }
 
             // Check if user exists
-            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
+            UserDto user = userFeignClient.findUserByIdentifier(identifier).getUser();
             if (user == null) {
                 logger.warn("Password change failed: User not found for identifier: {}", identifier);
                 throw new OurException("User not found", 404);
             }
 
-            UserDto updatedUser = userGrpcClient.changePassword(identifier, currentPassword, newPassword);
+            ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(currentPassword, newPassword, confirmPassword);
+            String requestJson = objectMapper.writeValueAsString(changePasswordRequest);
+            UserDto updatedUser = userFeignClient.changePassword(identifier, requestJson).getUser();
             if (updatedUser == null) {
                 logger.warn("Password change failed: Invalid current password for identifier: {}", identifier);
                 throw new OurException("Invalid current password.");
@@ -313,13 +316,9 @@ public class AuthApi extends BaseApi {
                 throw new OurException("Email is required", 400);
             }
 
-            String newPassword = userGrpcClient.resetPassword(email);
-
-            if (newPassword == null) {
-                logger.warn("Password reset failed: Unable to reset password for email: {}", email);
-                throw new OurException("Unable to reset password. User may not exist.", 404);
-            }
-
+            Response resetResponse = userFeignClient.resetPassword(email);
+            String newPassword = (String) resetResponse.getAdditionalData().get("newPassword");
+            
             authProducer.sendMailResetPassword(email, newPassword);
 
             response.setMessage("Password reset email sent successfully!");
@@ -340,7 +339,7 @@ public class AuthApi extends BaseApi {
         Response response = new Response();
 
         try {
-            UserDto user = userGrpcClient.findUserByIdentifier(identifier);
+            UserDto user = userFeignClient.findUserByIdentifier(identifier).getUser();
 
             if (user == null) {
                 logger.warn("Forgot password failed: User not found for identifier: {}", identifier);
@@ -357,7 +356,9 @@ public class AuthApi extends BaseApi {
                 throw new OurException("Password does not match.");
             }
 
-            userGrpcClient.forgotPassword(email, newPassword);
+            ForgotPasswordRequest forgotPasswordRequest = new ForgotPasswordRequest(newPassword, rePassword);
+            String requestJson = objectMapper.writeValueAsString(forgotPasswordRequest);
+            userFeignClient.forgotPassword(email, requestJson);
 
             response.setMessage("Password updated successfully!");
             logger.info("Password updated successfully via forgot password for email: {}", email);
@@ -433,7 +434,7 @@ public class AuthApi extends BaseApi {
             }
 
             // Find user
-            UserDto user = userGrpcClient.findUserByEmail(email);
+            UserDto user = userFeignClient.findUserByEmail(email).getUser();
 
             if (user == null) {
                 logger.warn("Token refresh failed: User not found for email: {}", email);

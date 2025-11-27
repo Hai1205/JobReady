@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,8 @@ interface CompactJobMatchProps {
     suggestions: IAISuggestion[],
     matchScore?: number
   ) => void;
+  externalFile?: File | null;
+  onExternalFileProcessed?: () => void;
 }
 
 /**
@@ -24,12 +26,15 @@ interface CompactJobMatchProps {
 export function CompactJobMatch({
   currentCV,
   onAnalysisComplete,
+  externalFile,
+  onExternalFileProcessed,
 }: CompactJobMatchProps) {
   const [jobDescription, setJobDescription] = useState("");
   const [jdFile, setJdFile] = useState<File | null>(null);
-  const [inputMethod, setInputMethod] = useState<"text" | "file">("text");
+  const [inputMethod, setInputMethod] = useState<"text" | "file">("file");
   const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const {
     analyzeCVWithJD,
@@ -39,10 +44,18 @@ export function CompactJobMatch({
   } = useAIStore();
   const { isLoading } = useCVStore();
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
+  // Handle external file drop from page level
+  useEffect(() => {
+    if (externalFile) {
+      setInputMethod("file");
+      if (processFile(externalFile)) {
+        toast.success("File đã được tải lên thành công!");
+        onExternalFileProcessed?.();
+      }
+    }
+  }, [externalFile]);
 
+  const processFile = (selectedFile: File) => {
     const validTypes = [
       "text/plain",
       "application/pdf",
@@ -50,7 +63,7 @@ export function CompactJobMatch({
     ];
     if (!validTypes.includes(selectedFile.type)) {
       toast.error("Chỉ hỗ trợ file TXT, PDF, DOCX");
-      return;
+      return false;
     }
 
     setJdFile(selectedFile);
@@ -62,6 +75,41 @@ export function CompactJobMatch({
         setJobDescription(text);
       };
       reader.readAsText(selectedFile);
+    }
+    return true;
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    processFile(selectedFile);
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file && processFile(file)) {
+      toast.success("File đã được tải lên thành công!");
     }
   };
 
@@ -136,21 +184,21 @@ export function CompactJobMatch({
           className="flex flex-col space-y-2"
         >
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="text" id="text-method" />
-            <Label
-              htmlFor="text-method"
-              className="text-xs font-normal cursor-pointer"
-            >
-              Nhập text mô tả công việc
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
             <RadioGroupItem value="file" id="file-method" />
             <Label
               htmlFor="file-method"
               className="text-xs font-normal cursor-pointer"
             >
               Tải file JD lên
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="text" id="text-method" />
+            <Label
+              htmlFor="text-method"
+              className="text-xs font-normal cursor-pointer"
+            >
+              Nhập text mô tả công việc
             </Label>
           </div>
         </RadioGroup>
@@ -170,18 +218,47 @@ export function CompactJobMatch({
               onChange={handleFileUpload}
               className="hidden"
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
+
+            {/* Drag and Drop Zone */}
+            <div
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className={`relative border-2 border-dashed rounded-lg p-4 transition-all cursor-pointer ${
+                isDragging
+                  ? "border-primary bg-primary/10 scale-105"
+                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+              }`}
               onClick={() =>
                 document.getElementById("jd-file-compact")?.click()
               }
-              className="w-full"
             >
-              <Upload className="mr-2 h-3 w-3" />
-              {jdFile ? jdFile.name.slice(0, 20) + "..." : "Chọn File"}
-            </Button>
+              <div className="flex flex-col items-center justify-center gap-2 text-center">
+                <Upload
+                  className={`h-8 w-8 transition-colors ${
+                    isDragging ? "text-primary" : "text-muted-foreground"
+                  }`}
+                />
+                <div>
+                  <p className="text-xs font-medium">
+                    {isDragging
+                      ? "Thả file vào đây"
+                      : jdFile
+                      ? jdFile.name
+                      : "Click để chọn file"}
+                  </p>
+                  {!isDragging && !jdFile && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      hoặc kéo thả file vào đây
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    TXT, PDF, DOCX
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ) : (

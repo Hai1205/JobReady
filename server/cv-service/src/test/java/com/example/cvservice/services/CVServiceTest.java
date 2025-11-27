@@ -8,7 +8,8 @@ import com.example.cvservice.entities.PersonalInfo;
 import com.example.cvservice.mappers.CVMapper;
 import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.apis.CVApi;
-import com.example.cvservice.services.grpcs.clients.UserGrpcClient;
+import com.example.cvservice.services.feigns.UserFeignClient;
+import com.example.cvservice.dtos.responses.Response;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class CVServiceTest {
     private CVMapper cvMapper;
 
     @Mock
-    private UserGrpcClient userGrpcClient;
+    private UserFeignClient userFeignClient;
 
     @InjectMocks
     private CVApi cvService;
@@ -56,6 +57,7 @@ class CVServiceTest {
     private CV mockCV;
     private CVDto mockCVDto;
     private UserDto mockUser;
+    private Response mockUserResponse;
     private UUID userId;
     private UUID cvId;
 
@@ -77,12 +79,17 @@ class CVServiceTest {
         mockUser = new UserDto();
         mockUser.setId(userId);
         mockUser.setEmail("test@example.com");
+
+        mockUserResponse = Response.builder()
+                .statusCode(200)
+                .user(mockUser)
+                .build();
     }
 
     @Test
     void testCreateCV_Success() {
         // Arrange
-        lenient().when(userGrpcClient.findUserById(userId)).thenReturn(mockUser);
+        lenient().when(userFeignClient.getUserById(userId.toString())).thenReturn(mockUserResponse);
         when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(cvRepository.save(any(CV.class))).thenReturn(mockCV);
         when(cvMapper.toDto(mockCV)).thenReturn(mockCVDto);
@@ -94,14 +101,18 @@ class CVServiceTest {
         assertNotNull(response);
         assertEquals(201, response.getStatusCode());
 
-        verify(userGrpcClient, times(1)).findUserById(userId);
+        verify(userFeignClient, times(2)).getUserById(userId.toString());
         verify(cvRepository).save(any(CV.class));
     }
 
     @Test
     void testCreateCV_UserNotFound() {
         // Arrange
-        when(userGrpcClient.findUserById(userId)).thenReturn(null);
+        Response nullUserResponse = Response.builder()
+                .statusCode(404)
+                .user(null)
+                .build();
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(nullUserResponse);
 
         // Act
         Response response = cvService.createCV(userId);
@@ -110,7 +121,7 @@ class CVServiceTest {
         assertNotNull(response);
         assertEquals(404, response.getStatusCode());
 
-        verify(userGrpcClient).findUserById(userId);
+        verify(userFeignClient).getUserById(userId.toString());
         verify(cvRepository, never()).save(any(CV.class));
     }
 

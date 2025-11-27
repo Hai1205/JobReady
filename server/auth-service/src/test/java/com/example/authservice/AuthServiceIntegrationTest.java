@@ -8,7 +8,7 @@ import com.example.rediscommon.services.RedisService;
 import com.example.securitycommon.handlers.JsonAccessDeniedHandler;
 import com.example.securitycommon.handlers.JsonAuthenticationEntryPoint;
 import com.example.securitycommon.jwts.JwtTokenProvider;
-import com.example.authservice.services.reabbitmqs.producers.AuthProducer;
+import com.example.authservice.services.rabbitmqs.producers.AuthProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@ class AuthServiceIntegrationTest {
     private com.example.securitycommon.handlers.JsonAccessDeniedHandler jsonAccessDeniedHandler;
 
     @MockBean
-    private com.example.authservice.services.reabbitmqs.producers.AuthProducer authProducer;
+    private com.example.authservice.services.rabbitmqs.producers.AuthProducer authProducer;
 
     @MockBean
     private RabbitTemplate rabbitTemplate;

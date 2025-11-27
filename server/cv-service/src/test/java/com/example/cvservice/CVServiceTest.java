@@ -9,7 +9,8 @@ import com.example.cvservice.mappers.CVMapper;
 import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.CloudinaryService;
 import com.example.cvservice.services.apis.CVApi;
-import com.example.cvservice.services.grpcs.clients.UserGrpcClient;
+import com.example.cvservice.services.feigns.UserFeignClient;
+import com.example.cvservice.dtos.responses.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class CVServiceTest {
     private CVMapper cvMapper;
 
     @Mock
-    private UserGrpcClient userGrpcClient;
+    private UserFeignClient userFeignClient;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -67,6 +68,7 @@ class CVServiceTest {
     private UUID userId;
     private UUID cvId;
     private UserDto userDto;
+    private Response userResponse;
     private CV cv;
     private CVDto cvDto;
     private PersonalInfoDto personalInfoDto;
@@ -81,6 +83,11 @@ class CVServiceTest {
         userDto = UserDto.builder()
                 .id(userId)
                 .email("test@example.com")
+                .build();
+
+        userResponse = Response.builder()
+                .statusCode(200)
+                .user(userDto)
                 .build();
 
         personalInfoDto = new PersonalInfoDto(null, "John Doe", "john@example.com", "1234567890", "New York",
@@ -105,8 +112,8 @@ class CVServiceTest {
                 .skills(Arrays.asList("Java", "Spring"))
                 .build();
 
-        // Setup AI gRPC client mocks with proper responses
-        // AI client mocks are set up in individual test methods to avoid
+        // Setup Feign client mocks with proper responses
+        // Feign client mocks are set up in individual test methods to avoid
         // UnnecessaryStubbingException
     }
 
@@ -143,7 +150,7 @@ class CVServiceTest {
         // Arrange
         lenient().when(cvRepository.findById(cvId)).thenReturn(Optional.of(cv));
         lenient().when(cvMapper.toDto(cv)).thenReturn(cvDto);
-        lenient().when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        lenient().when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         lenient().when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(educationRepository.save(any(Education.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -168,13 +175,20 @@ class CVServiceTest {
         // Arrange
         lenient().when(cvRepository.findById(cvId)).thenReturn(Optional.of(cv));
         lenient().when(cvMapper.toDto(cv)).thenReturn(cvDto);
-        lenient().when(userGrpcClient.findUserById(userId)).thenReturn(null);
+        Response nullUserResponse = Response.builder()
+                .statusCode(404)
+                .user(null)
+                .build();
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(nullUserResponse);
         lenient().when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(cvRepository.save(any(CV.class))).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(cvMapper.toDto(any(CV.class))).thenReturn(cvDto);
 
         // Act & Assert
-        assertDoesNotThrow(() -> cvService.handleDuplicateCV(cvId));
+        OurException exception = assertThrows(OurException.class,
+                () -> cvService.handleDuplicateCV(cvId));
+        assertEquals("User not found", exception.getMessage());
+        assertEquals(404, exception.getStatusCode());
     }
 
     @Test
@@ -182,7 +196,7 @@ class CVServiceTest {
         // Arrange
         lenient().when(cvRepository.findById(cvId)).thenReturn(Optional.of(cv));
         lenient().when(cvMapper.toDto(cv)).thenReturn(cvDto);
-        lenient().when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        lenient().when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         lenient().when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(educationRepository.save(any(Education.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -206,7 +220,7 @@ class CVServiceTest {
         // Arrange
         lenient().when(cvRepository.findById(cvId)).thenReturn(Optional.of(cv));
         lenient().when(cvMapper.toDto(cv)).thenReturn(cvDto);
-        lenient().when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        lenient().when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         lenient().when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         // Note: experienceRepository.save is stubbed since experiencesDto is from existing CV
         lenient().when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -231,7 +245,7 @@ class CVServiceTest {
         // Arrange
         lenient().when(cvRepository.findById(cvId)).thenReturn(Optional.of(cv));
         lenient().when(cvMapper.toDto(cv)).thenReturn(cvDto);
-        lenient().when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        lenient().when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         lenient().when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> invocation.getArgument(0));
         // Note: educationRepository.save is stubbed since educationsDto is from existing CV
@@ -257,7 +271,7 @@ class CVServiceTest {
         CV savedCv = new CV(userId, "Untitled CV");
         savedCv.setId(cvId);
 
-        lenient().when(userGrpcClient.findUserById(any(UUID.class))).thenReturn(userDto);
+        lenient().when(userFeignClient.getUserById(any(String.class))).thenReturn(userResponse);
         lenient().when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(cvRepository.save(any(CV.class))).thenReturn(savedCv);
         lenient().when(cvMapper.toDto(savedCv)).thenReturn(cvDto);
@@ -269,14 +283,18 @@ class CVServiceTest {
         assertEquals(201, response.getStatusCode());
         assertEquals("CV created successfully", response.getMessage());
         assertNotNull(response.getCv());
-        verify(userGrpcClient, times(1)).findUserById(any(UUID.class));
+        verify(userFeignClient, times(2)).getUserById(any(String.class));
         verify(cvRepository).save(any(CV.class));
     }
 
     @Test
     void testCreateCV_UserNotFound() {
         // Arrange
-        when(userGrpcClient.findUserById(userId)).thenReturn(null);
+        Response nullUserResponse = Response.builder()
+                .statusCode(404)
+                .user(null)
+                .build();
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(nullUserResponse);
 
         // Act
         Response response = cvService.createCV(userId);
@@ -335,7 +353,7 @@ class CVServiceTest {
     void testGetUserCVs_Success() {
         // Arrange
         List<CV> userCvs = Arrays.asList(cv);
-        when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         when(cvRepository.findAllByUserId(userId)).thenReturn(userCvs);
         when(cvMapper.toDto(cv)).thenReturn(cvDto);
 
@@ -352,7 +370,11 @@ class CVServiceTest {
     @Test
     void testGetUserCVs_UserNotFound() {
         // Arrange
-        when(userGrpcClient.findUserById(userId)).thenReturn(null);
+        Response nullUserResponse = Response.builder()
+                .statusCode(404)
+                .user(null)
+                .build();
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(nullUserResponse);
 
         // Act
         Response response = cvService.getUserCVs(userId);
@@ -487,7 +509,7 @@ class CVServiceTest {
 
         // Assert
         assertTrue(result);
-        verify(cvRepository).deleteById(cvId);
+        verify(cvRepository).delete(cv);
     }
 
     @Test
@@ -533,7 +555,7 @@ class CVServiceTest {
                 .skills(Arrays.asList("Java", "Spring"))
                 .build();
 
-        when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(educationRepository.save(any(Education.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -567,7 +589,7 @@ class CVServiceTest {
                 .skills(Arrays.asList("Java", "Spring"))
                 .build();
 
-        when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         when(personalInfoRepository.save(any(PersonalInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(educationRepository.save(any(Education.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -586,7 +608,11 @@ class CVServiceTest {
     @Test
     void testHandleGetUserCVs_UserNotFound() {
         // Arrange
-        when(userGrpcClient.findUserById(userId)).thenReturn(null);
+        Response nullUserResponse = Response.builder()
+                .statusCode(404)
+                .user(null)
+                .build();
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(nullUserResponse);
 
         // Act
         List<CVDto> result = cvService.handleGetUserCVs(userId);
@@ -599,7 +625,7 @@ class CVServiceTest {
     @Test
     void testHandleGetUserCVs_NoCVs() {
         // Arrange
-        when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         when(cvRepository.findAllByUserId(userId)).thenReturn(new ArrayList<>());
 
         // Act
@@ -614,7 +640,7 @@ class CVServiceTest {
     void testHandleGetUserCVs_WithCVs() {
         // Arrange
         List<CV> userCvs = Arrays.asList(cv);
-        when(userGrpcClient.findUserById(userId)).thenReturn(userDto);
+        when(userFeignClient.getUserById(userId.toString())).thenReturn(userResponse);
         when(cvRepository.findAllByUserId(userId)).thenReturn(userCvs);
         when(cvMapper.toDto(cv)).thenReturn(cvDto);
 

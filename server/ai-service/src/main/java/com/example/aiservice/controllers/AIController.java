@@ -19,6 +19,7 @@ public class AIController {
     private AIApi aiService;
 
     @PostMapping("/analyze")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> analyzeCV(@RequestPart("data") String dataJson) {
         Response response = aiService.analyzeCV(dataJson);
 
@@ -26,6 +27,7 @@ public class AIController {
     }
 
     @PostMapping("/improve")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> improveCV(@RequestPart("data") String dataJson) {
         Response response = aiService.improveCV(dataJson);
 
@@ -33,6 +35,7 @@ public class AIController {
     }
 
     @PostMapping("/analyze-with-jd")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> analyzeCVWithJobDescription(@RequestPart("data") String dataJson,
             @RequestPart(value = "jdFile", required = false) MultipartFile jdFile) {
         Response response = aiService.analyzeCVWithJobDescription(dataJson, jdFile);
@@ -41,6 +44,7 @@ public class AIController {
     }
 
     @PostMapping("/users/{userId}/import")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> importCV(
             @PathVariable("userId") UUID userId,
             @RequestPart(value = "file", required = true) MultipartFile file) {

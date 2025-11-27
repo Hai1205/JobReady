@@ -1,6 +1,6 @@
 package com.example.statsservice.controllers;
 
-import com.example.statsservice.dtos.reponses.Response;
+import com.example.statsservice.dtos.responses.Response;
 import com.example.statsservice.services.apis.StatsApi;
 
 import org.springframework.beans.factory.annotation.Autowired;

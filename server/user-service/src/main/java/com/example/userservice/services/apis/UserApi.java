@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -524,9 +525,6 @@ public class UserApi extends BaseApi {
         }
     }
 
-    /**
-     * Tìm user OAuth2 theo email, provider và providerId
-     */
     public UserDto handleFindOAuth2User(String email, String provider, String providerId) {
         try {
             logger.debug("Finding OAuth2 user: email={}, provider={}, providerId={}", email, provider, providerId);
@@ -635,7 +633,6 @@ public class UserApi extends BaseApi {
                 existingUser.setAvatarUrl(oauth2UserDto.getAvatarUrl());
             }
 
-            // Cập nhật provider info nếu chưa có
             if (existingUser.getOauthProvider() == null) {
                 existingUser.setOauthProvider(oauth2UserDto.getProvider());
                 existingUser.setOauthProviderId(oauth2UserDto.getProviderId());
@@ -805,6 +802,231 @@ public class UserApi extends BaseApi {
         } catch (Exception e) {
             logger.error("Error in handleGetRecentUsers: {}", e.getMessage(), e);
             throw new OurException("Failed to get recent users", 500);
+        }
+    }
+
+    public Response getUserStats() {
+        try {
+            long totalUsers = handleGetTotalUsers();
+            long activeUsers = handleGetUsersByStatus("active");
+            long pendingUsers = handleGetUsersByStatus("pending");
+            long bannedUsers = handleGetUsersByStatus("banned");
+
+            Response response = new Response(200, "User statistics retrieved successfully");
+            response.setAdditionalData(Map.of(
+                    "totalUsers", totalUsers,
+                    "activeUsers", activeUsers,
+                    "pendingUsers", pendingUsers,
+                    "bannedUsers", bannedUsers));
+            return response;
+        } catch (Exception e) {
+            logger.error("Error in getUserStats: {}", e.getMessage(), e);
+            return new Response(500, "Failed to get user statistics");
+        }
+    }
+
+    public Response getUsersByStatus(String status) {
+        try {
+            long count = handleGetUsersByStatus(status);
+            Response response = new Response(200, "Users by status retrieved successfully");
+            response.setAdditionalData(Map.of("count", count));
+            return response;
+        } catch (Exception e) {
+            logger.error("Error in getUsersByStatus: {}", e.getMessage(), e);
+            return new Response(500, "Failed to get users by status");
+        }
+    }
+
+    public Response getUsersCreatedInRange(String startDate, String endDate) {
+        try {
+            long count = handleGetUsersCreatedInRange(startDate, endDate);
+            Response response = new Response(200, "Users created in range retrieved successfully");
+            response.setAdditionalData(Map.of("count", count));
+            return response;
+        } catch (Exception e) {
+            logger.error("Error in getUsersCreatedInRange: {}", e.getMessage(), e);
+            return new Response(500, "Failed to get users created in range");
+        }
+    }
+
+    public Response getRecentUsers(int limit) {
+        try {
+            List<UserDto> recentUsers = handleGetRecentUsers(limit);
+            Response response = new Response(200, "Recent users retrieved successfully");
+            response.setUsers(recentUsers);
+            return response;
+        } catch (Exception e) {
+            logger.error("Error in getRecentUsers: {}", e.getMessage(), e);
+            return new Response(500, "Failed to get recent users");
+        }
+    }
+
+    public Response authenticateUser(String identifier, String password) {
+        logger.info("Authenticating user");
+        Response response = new Response();
+
+        try {
+            UserDto userDto = handleAuthenticateUser(identifier, password);
+
+            response.setStatusCode(200);
+            response.setMessage("User authenticated successfully");
+            response.setUser(userDto);
+            logger.info("User authentication completed successfully for identifier: {}", identifier);
+            return response;
+        } catch (OurException e) {
+            logger.error("User authentication failed with OurException: {}", e.getMessage());
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("User authentication failed with unexpected error", e);
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response findUserByIdentifier(String identifier) {
+        logger.info("Finding user by identifier: {}", identifier);
+        Response response = new Response();
+
+        try {
+            UserDto userDto = handleFindByIdentifier(identifier);
+
+            if (userDto == null) {
+                return buildErrorResponse(404, "User not found");
+            }
+
+            response.setStatusCode(200);
+            response.setMessage("User found successfully");
+            response.setUser(userDto);
+            logger.info("User found successfully for identifier: {}", identifier);
+            return response;
+        } catch (OurException e) {
+            logger.error("Find user by identifier failed with OurException: {}", e.getMessage());
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("Find user by identifier failed with unexpected error", e);
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response activateUser(String email) {
+        logger.info("Activating user: {}", email);
+        Response response = new Response();
+
+        try {
+            UserDto userDto = handleActivateUser(email);
+
+            response.setStatusCode(200);
+            response.setMessage("User activated successfully");
+            response.setUser(userDto);
+            logger.info("User activation completed successfully for email: {}", email);
+            return response;
+        } catch (OurException e) {
+            logger.error("User activation failed with OurException: {}", e.getMessage());
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("User activation failed with unexpected error", e);
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response changePassword(String identifier, String dataJson) {
+        logger.info("Changing password for identifier: {}", identifier);
+        Response response = new Response();
+
+        try {
+            ChangePasswordRequest request = objectMapper.readValue(dataJson, ChangePasswordRequest.class);
+            String currentPassword = request.getCurrentPassword();
+            String newPassword = request.getNewPassword();
+
+            UserDto userDto = handleChangePasswordUser(identifier, currentPassword, newPassword);
+
+            response.setStatusCode(200);
+            response.setMessage("Password changed successfully");
+            response.setUser(userDto);
+            logger.info("Password change completed successfully for identifier: {}", identifier);
+            return response;
+        } catch (OurException e) {
+            logger.error("Password change failed with OurException: {}", e.getMessage());
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("Password change failed with unexpected error", e);
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response resetPassword(String email) {
+        logger.info("Resetting password for email: {}", email);
+        Response response = new Response();
+
+        try {
+            String newPassword = handleResetPasswordUser(email);
+
+            response.setStatusCode(200);
+            response.setMessage("Password reset successfully");
+            response.setAdditionalData(Map.of("newPassword", newPassword));
+            logger.info("Password reset completed successfully for email: {}", email);
+            return response;
+        } catch (OurException e) {
+            logger.error("Password reset failed with OurException: {}", e.getMessage());
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("Password reset failed with unexpected error", e);
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response forgotPassword(String email, String dataJson) {
+        logger.info("Forgot password for email: {}", email);
+        Response response = new Response();
+
+        try {
+            ForgotPasswordRequest request = objectMapper.readValue(dataJson, ForgotPasswordRequest.class);
+            String newPassword = request.getPassword();
+
+            UserDto userDto = handleForgotPasswordUser(email, newPassword);
+
+            response.setStatusCode(200);
+            response.setMessage("Password updated successfully");
+            response.setUser(userDto);
+            logger.info("Forgot password completed successfully for email: {}", email);
+            return response;
+        } catch (OurException e) {
+            logger.error("Forgot password failed with OurException: {}", e.getMessage());
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("Forgot password failed with unexpected error", e);
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response findUserByEmail(String email) {
+        logger.info("Finding user by email: {}", email);
+        Response response = new Response();
+
+        try {
+            UserDto userDto = handleFindByEmail(email);
+
+            if (userDto == null) {
+                return buildErrorResponse(404, "User not found");
+            }
+
+            response.setStatusCode(200);
+            response.setMessage("User found successfully");
+            response.setUser(userDto);
+            logger.info("User found successfully for email: {}", email);
+            return response;
+        } catch (OurException e) {
+            logger.error("Find user by email failed with OurException: {}", e.getMessage());
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("Find user by email failed with unexpected error", e);
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
         }
     }
 }
