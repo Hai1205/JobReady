@@ -100,14 +100,22 @@ public class AuthApi extends BaseApi {
 
     private Cookie handleCreateHttpOnlyCookie(String name, String value, int maxAgeInSeconds) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(false); // Set to false to allow JavaScript access if needed
-        cookie.setSecure(false); // Set to false for localhost development (change to true in production with
-                                 // HTTPS)
-        cookie.setPath("/"); // Set the path to root to make it accessible across the domain
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
         cookie.setMaxAge(maxAgeInSeconds);
-        cookie.setAttribute("SameSite", "Lax"); // Add SameSite attribute for better compatibility
+        cookie.setAttribute("SameSite", "None");
         return cookie;
     }
+    // private Cookie handleCreateHttpOnlyCookie(String name, String value, int maxAgeInSeconds) {
+    //     Cookie cookie = new Cookie(name, value);
+    //     cookie.setHttpOnly(false);
+    //     cookie.setSecure(false);
+    //     cookie.setPath("/");
+    //     cookie.setMaxAge(maxAgeInSeconds);
+    //     cookie.setAttribute("SameSite", "Lax");
+    //     return cookie;
+    // }
 
     public Response validateToken(String token, String username) {
         logger.debug("Token validation attempt for username: {}", username);
