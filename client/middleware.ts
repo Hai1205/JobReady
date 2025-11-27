@@ -172,13 +172,13 @@ export function middleware(request: NextRequest) {
 
     // Check if user is on mobile (simplified check based on user agent)
     const userAgent = request.headers.get('user-agent') || ''
-    const isMobile = /mobile|android|iphone|ipad/i.test(userAgent)
+    // const isMobile = /mobile|android|iphone|ipad/i.test(userAgent)
 
     // TEMPORARILY DISABLED: If on mobile, redirect to home page for both admin and auth routes
     // ONLY redirect mobile users, not desktop users
-    if (isMobile && (pathname.startsWith('/admin') || pathname.startsWith('/auth'))) {
-        return NextResponse.redirect(new URL('/', request.url))
-    }
+    // if (isMobile && (pathname.startsWith('/admin') || pathname.startsWith('/auth'))) {
+    //     return NextResponse.redirect(new URL('/', request.url))
+    // }
 
     if (
         pathname.startsWith('/cv-builder') ||
