@@ -100,6 +100,9 @@ services:
     build:
       context: client/
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
+        - NEXT_PUBLIC_NODE_ENV=${NEXT_PUBLIC_NODE_ENV}
     container_name: client
     env_file:
       - client/.env
