@@ -27,7 +27,17 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Build the Next.js application
+# Accept build arguments for Next.js environment variables
+# These must be set at build time for Next.js to embed them
+# Values will be passed from Render environment variables
+ARG NEXT_PUBLIC_SERVER_URL
+ARG NEXT_PUBLIC_NODE_ENV
+
+# Set them as environment variables for the build
+ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+ENV NEXT_PUBLIC_NODE_ENV=$NEXT_PUBLIC_NODE_ENV
+
+# Build the Next.js application with environment variables embedded
 RUN npm run build
 
 # Expose the port the app runs on
