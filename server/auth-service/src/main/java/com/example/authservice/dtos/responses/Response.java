@@ -1,5 +1,6 @@
 package com.example.authservice.dtos.responses;
 
+import java.util.List;
 import java.util.Map;
 
 import com.example.authservice.dtos.UserDto;
@@ -15,6 +16,11 @@ public class Response {
     private int statusCode;
     private String message;
 
+    private String newPassword;
+    private List<UserDto> users;
+    private String token;
+    private String role;
+    private String status;
     private UserDto user;
     private Map<String, Object> additionalData;
 

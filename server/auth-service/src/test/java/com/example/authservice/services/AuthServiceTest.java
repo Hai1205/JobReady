@@ -5,8 +5,8 @@ import com.example.authservice.dtos.requests.*;
 import com.example.authservice.dtos.responses.*;
 import com.example.authservice.exceptions.OurException;
 import com.example.authservice.services.apis.AuthApi;
-import com.example.authservice.services.grpcs.clients.UserGrpcClient;
-import com.example.authservice.services.reabbitmqs.producers.AuthProducer;
+import com.example.authservice.services.feigns.UserFeignClient;
+import com.example.authservice.services.rabbitmqs.producers.AuthProducer;
 import com.example.authservice.services.OtpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +35,7 @@ class AuthServiceTest {
     private JwtService jwtUtil;
 
     @Mock
-    private UserGrpcClient userGrpcClient;
+    private UserFeignClient userFeignClient;
 
     @Mock
     private AuthProducer authProducer;
@@ -53,6 +54,7 @@ class AuthServiceTest {
 
     private ObjectMapper objectMapper;
     private UserDto mockUser;
+    private Response mockUserResponse;
 
     @BeforeEach
     void setUp() {
@@ -67,6 +69,10 @@ class AuthServiceTest {
         mockUser.setUsername("testuser");
         mockUser.setRole("user");
         mockUser.setStatus("active");
+
+        // Mock response containing user
+        mockUserResponse = new Response();
+        mockUserResponse.setUser(mockUser);
     }
 
     @Test
@@ -77,7 +83,8 @@ class AuthServiceTest {
         loginRequest.setPassword("password123");
         String dataJson = objectMapper.writeValueAsString(loginRequest);
 
-        when(userGrpcClient.authenticateUser(anyString(), anyString())).thenReturn(mockUser);
+        AuthenticateUserRequest authRequest = new AuthenticateUserRequest("testuser", "password123");
+        when(userFeignClient.authenticateUser("testuser", "password123")).thenReturn(mockUserResponse);
         when(jwtUtil.generateAccessToken(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn("access_token");
         when(jwtUtil.generateRefreshToken(anyString(), anyString(), anyString()))
@@ -92,7 +99,7 @@ class AuthServiceTest {
         assertEquals("Login successful", response.getMessage());
         assertNotNull(response.getUser());
 
-        verify(userGrpcClient).authenticateUser("testuser", "password123");
+        verify(userFeignClient).authenticateUser("testuser", "password123");
         verify(httpServletResponse, times(2)).addCookie(any(Cookie.class));
         verify(httpServletResponse).setHeader("X-Access-Token", "access_token");
         verify(httpServletResponse).setHeader("X-Refresh-Token", "refresh_token");
@@ -106,7 +113,10 @@ class AuthServiceTest {
         loginRequest.setPassword("wrongpassword");
         String dataJson = objectMapper.writeValueAsString(loginRequest);
 
-        when(userGrpcClient.authenticateUser(anyString(), anyString())).thenReturn(null);
+        AuthenticateUserRequest authRequest = new AuthenticateUserRequest("testuser", "wrongpassword");
+        Response nullResponse = new Response();
+        nullResponse.setUser(null);
+        when(userFeignClient.authenticateUser("testuser", "wrongpassword")).thenReturn(nullResponse);
 
         // Act
         Response response = authService.login(dataJson, httpServletResponse);
@@ -126,7 +136,10 @@ class AuthServiceTest {
         String dataJson = objectMapper.writeValueAsString(loginRequest);
 
         mockUser.setStatus("pending");
-        when(userGrpcClient.authenticateUser(anyString(), anyString())).thenReturn(mockUser);
+        Response pendingResponse = new Response();
+        pendingResponse.setUser(mockUser);
+        AuthenticateUserRequest authRequest = new AuthenticateUserRequest("testuser", "password123");
+        when(userFeignClient.authenticateUser("testuser", "password123")).thenReturn(pendingResponse);
 
         // Act
         Response response = authService.login(dataJson, httpServletResponse);
@@ -146,7 +159,10 @@ class AuthServiceTest {
         String dataJson = objectMapper.writeValueAsString(loginRequest);
 
         mockUser.setStatus("banned");
-        when(userGrpcClient.authenticateUser(anyString(), anyString())).thenReturn(mockUser);
+        Response bannedResponse = new Response();
+        bannedResponse.setUser(mockUser);
+        AuthenticateUserRequest authRequest = new AuthenticateUserRequest("testuser", "password123");
+        when(userFeignClient.authenticateUser("testuser", "password123")).thenReturn(bannedResponse);
 
         // Act
         Response response = authService.login(dataJson, httpServletResponse);
@@ -167,8 +183,10 @@ class AuthServiceTest {
         registerRequest.setFullname("New User");
         String dataJson = objectMapper.writeValueAsString(registerRequest);
 
-        when(userGrpcClient.createUser(anyString(), anyString(), anyString(), anyString()))
-                .thenReturn(mockUser);
+        UserCreateRequest createRequest = new UserCreateRequest("newuser", "newuser@example.com", "password123", "New User");
+        Response createResponse = new Response();
+        createResponse.setUser(mockUser);
+        when(userFeignClient.createUser(createRequest)).thenReturn(createResponse);
 
         // Act
         Response response = authService.register(dataJson);
@@ -179,7 +197,7 @@ class AuthServiceTest {
         assertEquals("Registration successful", response.getMessage());
         assertNotNull(response.getUser());
 
-        verify(userGrpcClient).createUser("newuser", "newuser@example.com", "password123", "New User");
+        verify(userFeignClient).createUser(createRequest);
     }
 
     @Test
@@ -223,7 +241,7 @@ class AuthServiceTest {
         String identifier = "test@example.com";
         String otp = "123456";
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
         when(otpService.generateOtp(anyString())).thenReturn(otp);
 
         // Act
@@ -234,7 +252,7 @@ class AuthServiceTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("OTP is sent!", response.getMessage());
 
-        verify(userGrpcClient).findUserByIdentifier(identifier);
+        verify(userFeignClient).findUserByIdentifier(identifier);
         verify(otpService).generateOtp(mockUser.getEmail());
         verify(authProducer).sendMailActivation(mockUser.getEmail(), otp);
     }
@@ -243,7 +261,9 @@ class AuthServiceTest {
     void testSendOTP_UserNotFound() {
         // Arrange
         String identifier = "nonexistent@example.com";
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
+        Response nullResponse = new Response();
+        nullResponse.setUser(null);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(nullResponse);
 
         // Act
         Response response = authService.sendOTP(identifier);
@@ -263,7 +283,7 @@ class AuthServiceTest {
         verifyRequest.setIsActivation(true);
         String dataJson = objectMapper.writeValueAsString(verifyRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
         when(otpService.validateOtp(anyString(), anyString())).thenReturn(true);
 
         // Act
@@ -275,7 +295,7 @@ class AuthServiceTest {
         assertEquals("Otp verified successfully!", response.getMessage());
 
         verify(otpService).validateOtp(mockUser.getEmail(), "123456");
-        verify(userGrpcClient).activateUser(mockUser.getEmail());
+        verify(userFeignClient).activateUser(mockUser.getEmail());
     }
 
     @Test
@@ -286,7 +306,7 @@ class AuthServiceTest {
         verifyRequest.setOtp("wrong_otp");
         String dataJson = objectMapper.writeValueAsString(verifyRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
         when(otpService.validateOtp(anyString(), anyString())).thenReturn(false);
 
         // Act
@@ -307,8 +327,10 @@ class AuthServiceTest {
         changePasswordRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
-        when(userGrpcClient.changePassword(identifier, "oldPassword", "newPassword")).thenReturn(mockUser);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
+        Response changeResponse = new Response();
+        changeResponse.setUser(mockUser);
+        when(userFeignClient.changePassword(eq(identifier), anyString())).thenReturn(changeResponse);
 
         // Act
         Response response = authService.changePassword(identifier, dataJson);
@@ -318,8 +340,8 @@ class AuthServiceTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("Password changed successfully!", response.getMessage());
 
-        verify(userGrpcClient).findUserByIdentifier(identifier);
-        verify(userGrpcClient).changePassword(identifier, "oldPassword", "newPassword");
+        verify(userFeignClient).findUserByIdentifier(identifier);
+        verify(userFeignClient).changePassword(eq(identifier), anyString());
     }
 
     @Test
@@ -332,7 +354,7 @@ class AuthServiceTest {
         changePasswordRequest.setConfirmPassword("differentPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
-        lenient().when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        lenient().when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
 
         // Act
         Response response = authService.changePassword(identifier, dataJson);
@@ -348,7 +370,9 @@ class AuthServiceTest {
         String email = "test@example.com";
         String newPassword = "newPassword123";
 
-        when(userGrpcClient.resetPassword(email)).thenReturn(newPassword);
+        Response resetResponse = new Response();
+        resetResponse.setAdditionalData(Map.of("newPassword", newPassword));
+        when(userFeignClient.resetPassword(email)).thenReturn(resetResponse);
 
         // Act
         Response response = authService.resetPassword(email);
@@ -358,7 +382,7 @@ class AuthServiceTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("Password reset email sent successfully!", response.getMessage());
 
-        verify(userGrpcClient).resetPassword(email);
+        verify(userFeignClient).resetPassword(email);
         verify(authProducer).sendMailResetPassword(email, newPassword);
     }
 
@@ -371,7 +395,7 @@ class AuthServiceTest {
         when(jwtUtil.validateRefreshToken(anyString())).thenReturn(true);
         when(jwtUtil.extractEmail(anyString())).thenReturn("test@example.com");
         when(jwtUtil.extractUserId(anyString())).thenReturn("1");
-        when(userGrpcClient.findUserByEmail(anyString())).thenReturn(mockUser);
+        when(userFeignClient.findUserByEmail(anyString())).thenReturn(mockUserResponse);
         when(jwtUtil.generateAccessToken(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn("new_access_token");
 
@@ -431,7 +455,7 @@ class AuthServiceTest {
         forgotRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(forgotRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
 
         // Act
         Response response = authService.forgotPassword(identifier, dataJson);
@@ -441,7 +465,7 @@ class AuthServiceTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("Password updated successfully!", response.getMessage());
 
-        verify(userGrpcClient).forgotPassword(mockUser.getEmail(), "newPassword");
+        verify(userFeignClient).forgotPassword(eq(mockUser.getEmail()), anyString());
     }
 
     @Test
@@ -453,7 +477,7 @@ class AuthServiceTest {
         forgotRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(forgotRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(null);
 
         // Act
         Response response = authService.forgotPassword(identifier, dataJson);
@@ -473,7 +497,7 @@ class AuthServiceTest {
         forgotRequest.setConfirmPassword("differentPassword");
         String dataJson = objectMapper.writeValueAsString(forgotRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
 
         // Act
         Response response = authService.forgotPassword(identifier, dataJson);
@@ -493,7 +517,7 @@ class AuthServiceTest {
         forgotRequest.setConfirmPassword("");
         String dataJson = objectMapper.writeValueAsString(forgotRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
 
         // Act
         Response response = authService.forgotPassword(identifier, dataJson);
@@ -514,7 +538,7 @@ class AuthServiceTest {
         registerRequest.setFullname("New User");
         String dataJson = objectMapper.writeValueAsString(registerRequest);
 
-        when(userGrpcClient.createUser(anyString(), anyString(), anyString(), anyString()))
+        when(userFeignClient.createUser(any(UserCreateRequest.class)))
                 .thenThrow(new OurException("Email already exists", 409));
 
         // Act
@@ -612,7 +636,7 @@ class AuthServiceTest {
         verifyRequest.setOtp("123456");
         String dataJson = objectMapper.writeValueAsString(verifyRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(null);
 
         // Act
         Response response = authService.verifyOTP(identifier, dataJson);
@@ -628,7 +652,7 @@ class AuthServiceTest {
         String identifier = "test@example.com";
         String dataJson = "{invalid";
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
 
         // Act
         Response response = authService.verifyOTP(identifier, dataJson);
@@ -649,7 +673,7 @@ class AuthServiceTest {
         changePasswordRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
-        when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(null);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(null);
 
         // Act
         Response response = authService.changePassword(identifier, dataJson);
@@ -669,7 +693,7 @@ class AuthServiceTest {
         changePasswordRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
-        lenient().when(userGrpcClient.findUserByIdentifier(identifier)).thenReturn(mockUser);
+        lenient().when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(mockUserResponse);
 
         // Act
         Response response = authService.changePassword(identifier, dataJson);
@@ -685,7 +709,7 @@ class AuthServiceTest {
         // Arrange
         String email = "nonexistent@example.com";
 
-        when(userGrpcClient.resetPassword(email)).thenThrow(new OurException("User not found", 404));
+        when(userFeignClient.resetPassword(email)).thenThrow(new OurException("User not found", 404));
 
         // Act
         Response response = authService.resetPassword(email);
@@ -733,7 +757,7 @@ class AuthServiceTest {
         when(jwtUtil.validateRefreshToken(anyString())).thenReturn(true);
         when(jwtUtil.extractEmail(anyString())).thenReturn("nonexistent@example.com");
         when(jwtUtil.extractUserId(anyString())).thenReturn("some-user-id");
-        when(userGrpcClient.findUserByEmail(anyString())).thenReturn(null);
+        when(userFeignClient.findUserByEmail(anyString())).thenReturn(null);
 
         // Act
         Response response = authService.refreshToken(

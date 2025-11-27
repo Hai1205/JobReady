@@ -30,7 +30,6 @@ function UserDashboardPage() {
     updateUser,
     deleteUser,
     getAllUsers,
-    isLoading,
   } = useUserStore();
   const { resetPassword } = useAuthStore();
 
@@ -39,6 +38,7 @@ function UserDashboardPage() {
   const [previewAvatar, setPreviewAvatar] = useState<string>("");
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isUpdateUserOpen, setIsUpdateUserOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [activeFilters, setActiveFilters] = useState<{
     status: string[];
@@ -47,8 +47,13 @@ function UserDashboardPage() {
   const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
 
   useEffect(() => {
-    // Fetch users in background
-    fetchAllUsersInBackground();
+    const fetchData = async () => {
+      setIsLoading(true);
+      await fetchAllUsersInBackground();
+      setIsLoading(false);
+    };
+
+    fetchData();
   }, []);
 
   const filterData = useCallback(

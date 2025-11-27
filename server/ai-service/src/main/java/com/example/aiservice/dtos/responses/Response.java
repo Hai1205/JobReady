@@ -17,6 +17,7 @@ public class Response {
     private String message;
 
     private CVDto cv;
+    private List<CVDto> cvs;
     private AnalyzeResultDto analyze;
     private String improvedSection;
     private List<AISuggestionDto> suggestions;

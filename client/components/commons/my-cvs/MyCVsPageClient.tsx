@@ -31,6 +31,9 @@ export default function MyCVsPageClient() {
   const [templateCVs, setTemplateCVs] = useState<ICV[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<string | null>(null);
+  const [isDraggingOnPage, setIsDraggingOnPage] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [droppedFile, setDroppedFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (userAuth) {
@@ -97,6 +100,43 @@ export default function MyCVsPageClient() {
   const deleteDialogDescription =
     "Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn CV của bạn và loại bỏ nó khỏi máy chủ của chúng tôi.";
 
+  // Page-level drag and drop handlers
+  const handlePageDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDraggingOnPage(true);
+    }
+  };
+
+  const handlePageDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only hide overlay if leaving the container entirely
+    if (e.currentTarget === e.target) {
+      setIsDraggingOnPage(false);
+    }
+  };
+
+  const handlePageDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handlePageDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOnPage(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type === "application/pdf") {
+      setDroppedFile(file);
+      setImportDialogOpen(true);
+    } else if (file) {
+      toast.error("Chỉ chấp nhận file PDF!");
+    }
+  };
+
   useEffect(() => {
     if (!userAuth) {
       router.push("/auth/login");
@@ -109,10 +149,55 @@ export default function MyCVsPageClient() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12">
+    <div
+      className="min-h-screen flex items-center justify-center py-12 relative"
+      onDragEnter={handlePageDragEnter}
+      onDragLeave={handlePageDragLeave}
+      onDragOver={handlePageDragOver}
+      onDrop={handlePageDrop}
+    >
+      {/* Drag Overlay */}
+      {isDraggingOnPage && (
+        <div className="fixed inset-0 bg-primary/10 backdrop-blur-sm z-40 flex items-center justify-center pointer-events-none">
+          <div className="bg-background border-2 border-dashed border-primary rounded-lg p-12 shadow-2xl">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
+                <svg
+                  className="w-10 h-10 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-primary mb-2">
+                  Thả file PDF vào đây
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  để import CV của bạn
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8">
-          <PageHeader onCreateNew={handleCreate} onImport={handleImport} />
+          <PageHeader
+            onCreateNew={handleCreate}
+            onImport={handleImport}
+            externalFile={droppedFile}
+            isImportDialogOpen={importDialogOpen}
+            onImportDialogOpenChange={setImportDialogOpen}
+          />
 
           <UserCVsSection
             userCVs={userCVs}

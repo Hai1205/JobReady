@@ -9,11 +9,23 @@ import { AIToolsSidebar } from "./AIToolsSidebar";
 import { useAIStore } from "@/stores/aiStore";
 import { Badge } from "@/components/ui/badge";
 
+interface AIPanelProps {
+  externalFile?: File | null;
+  onExternalFileProcessed?: () => void;
+  accordionValue?: string;
+  onAccordionChange?: (value: string) => void;
+}
+
 /**
  * AIPanel - Panel hiển thị tất cả tính năng AI ở sidebar
  * Bao gồm Quick Analyze, Job Match Analysis, và AI Suggestions
  */
-export function AIPanel() {
+export function AIPanel({
+  externalFile,
+  onExternalFileProcessed,
+  accordionValue,
+  onAccordionChange,
+}: AIPanelProps) {
   const { aiSuggestions } = useAIStore();
   const [activeTab, setActiveTab] = useState("tools");
   const [previousSuggestionsCount, setPreviousSuggestionsCount] = useState(0);
@@ -53,7 +65,12 @@ export function AIPanel() {
         </TabsList>
 
         <TabsContent value="tools" className="mt-4">
-          <AIToolsSidebar />
+          <AIToolsSidebar
+            externalFile={externalFile}
+            onExternalFileProcessed={onExternalFileProcessed}
+            accordionValue={accordionValue}
+            onAccordionChange={onAccordionChange}
+          />
         </TabsContent>
 
         <TabsContent value="suggestions" className="mt-4">

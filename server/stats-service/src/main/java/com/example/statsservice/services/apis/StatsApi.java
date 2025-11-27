@@ -1,15 +1,12 @@
 package com.example.statsservice.services.apis;
 
-import com.example.grpc.user.*;
-import com.example.grpc.cv.*;
 import com.example.rediscommon.services.RedisService;
 import com.example.statsservice.dtos.ActivityDto;
 import com.example.statsservice.dtos.DashboardStatsDto;
-import com.example.statsservice.dtos.reponses.Response;
-import com.example.statsservice.services.grpcs.clients.CVGrpcClient;
-import com.example.statsservice.services.grpcs.clients.UserGrpcClient;
+import com.example.statsservice.services.feigns.UserFeignClient;
+import com.example.statsservice.services.feigns.CVFeignClient;
+import com.example.statsservice.dtos.responses.Response;
 
-import io.grpc.StatusRuntimeException;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -39,19 +36,19 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class StatsApi extends BaseApi {
 
-    private final UserGrpcClient userGrpcClient;
-    private final CVGrpcClient cvGrpcClient;
+    private final UserFeignClient userFeignClient;
+    private final CVFeignClient cvFeignClient;
     private final RedisService redisService;
 
     @Value("${LOGO_PATH}")
     private String logoPath;
 
     public StatsApi(
-            UserGrpcClient userGrpcClient,
-            CVGrpcClient cvGrpcClient,
+            UserFeignClient userFeignClient,
+            CVFeignClient cvFeignClient,
             RedisService redisService) {
-        this.userGrpcClient = userGrpcClient;
-        this.cvGrpcClient = cvGrpcClient;
+        this.userFeignClient = userFeignClient;
+        this.cvFeignClient = cvFeignClient;
         this.redisService = redisService;
     }
 
@@ -100,48 +97,48 @@ public class StatsApi extends BaseApi {
         String startDateStr = startOfMonth.toString();
         String endDateStr = endOfMonth.toString();
 
-        // Execute all gRPC calls in parallel
-        CompletableFuture<GetUserStatsResponse> userStatsFuture = CompletableFuture
-                .supplyAsync(() -> userGrpcClient.getUserStats());
+        // Execute all Feign calls in parallel
+        CompletableFuture<Response> userStatsFuture = CompletableFuture
+                .supplyAsync(() -> userFeignClient.getUserStats());
 
-        CompletableFuture<GetTotalCVsResponse> totalCVsFuture = CompletableFuture
-                .supplyAsync(() -> cvGrpcClient.getTotalCVs());
+        CompletableFuture<Response> totalCVsFuture = CompletableFuture
+                .supplyAsync(() -> cvFeignClient.getTotalCVs());
 
-        CompletableFuture<GetCVsByVisibilityResponse> publicCVsFuture = CompletableFuture
-                .supplyAsync(() -> cvGrpcClient.getCVsByVisibility(true));
+        CompletableFuture<Response> publicCVsFuture = CompletableFuture
+                .supplyAsync(() -> cvFeignClient.getCVsByVisibility(true));
 
-        CompletableFuture<GetCVsByVisibilityResponse> privateCVsFuture = CompletableFuture
-                .supplyAsync(() -> cvGrpcClient.getCVsByVisibility(false));
+        CompletableFuture<Response> privateCVsFuture = CompletableFuture
+                .supplyAsync(() -> cvFeignClient.getCVsByVisibility(false));
 
-        CompletableFuture<GetUsersCreatedInRangeResponse> usersThisMonthFuture = CompletableFuture
-                .supplyAsync(() -> userGrpcClient.getUsersCreatedInRange(startDateStr, endDateStr));
+        CompletableFuture<Response> usersThisMonthFuture = CompletableFuture
+                .supplyAsync(() -> userFeignClient.getUsersCreatedInRange(startDateStr, endDateStr));
 
-        CompletableFuture<GetCVsCreatedInRangeResponse> cvsThisMonthFuture = CompletableFuture
-                .supplyAsync(() -> cvGrpcClient.getCVsCreatedInRange(startDateStr, endDateStr));
+        CompletableFuture<Response> cvsThisMonthFuture = CompletableFuture
+                .supplyAsync(() -> cvFeignClient.getCVsCreatedInRange(startDateStr, endDateStr));
 
         CompletableFuture<List<ActivityDto>> recentActivitiesFuture = CompletableFuture
                 .supplyAsync(() -> handleGetRecentActivities());
 
         // Wait for all futures to complete and get results
-        GetUserStatsResponse userStatsResponse = userStatsFuture.join();
-        GetTotalCVsResponse totalCVsResponse = totalCVsFuture.join();
-        GetCVsByVisibilityResponse publicCVsResponse = publicCVsFuture.join();
-        GetCVsByVisibilityResponse privateCVsResponse = privateCVsFuture.join();
-        GetUsersCreatedInRangeResponse usersThisMonthResponse = usersThisMonthFuture.join();
-        GetCVsCreatedInRangeResponse cvsThisMonthResponse = cvsThisMonthFuture.join();
+        Response userStatsResponse = userStatsFuture.join();
+        Response totalCVsResponse = totalCVsFuture.join();
+        Response publicCVsResponse = publicCVsFuture.join();
+        Response privateCVsResponse = privateCVsFuture.join();
+        Response usersThisMonthResponse = usersThisMonthFuture.join();
+        Response cvsThisMonthResponse = cvsThisMonthFuture.join();
         List<ActivityDto> recentActivities = recentActivitiesFuture.join();
 
         // Build dashboard stats
         DashboardStatsDto stats = DashboardStatsDto.builder()
-                .totalUsers(userStatsResponse.getTotalUsers())
-                .activeUsers(userStatsResponse.getActiveUsers())
-                .pendingUsers(userStatsResponse.getPendingUsers())
-                .bannedUsers(userStatsResponse.getBannedUsers())
-                .usersCreatedThisMonth(usersThisMonthResponse.getCount())
-                .totalCVs(totalCVsResponse.getTotal())
-                .publicCVs(publicCVsResponse.getCount())
-                .privateCVs(privateCVsResponse.getCount())
-                .cvsCreatedThisMonth(cvsThisMonthResponse.getCount())
+                .totalUsers(toLong(userStatsResponse.getAdditionalData().get("totalUsers")))
+                .activeUsers(toLong(userStatsResponse.getAdditionalData().get("activeUsers")))
+                .pendingUsers(toLong(userStatsResponse.getAdditionalData().get("pendingUsers")))
+                .bannedUsers(toLong(userStatsResponse.getAdditionalData().get("bannedUsers")))
+                .usersCreatedThisMonth(toLong(usersThisMonthResponse.getAdditionalData().get("count")))
+                .totalCVs(toLong(totalCVsResponse.getAdditionalData().get("total")))
+                .publicCVs(toLong(publicCVsResponse.getAdditionalData().get("count")))
+                .privateCVs(toLong(privateCVsResponse.getAdditionalData().get("count")))
+                .cvsCreatedThisMonth(toLong(cvsThisMonthResponse.getAdditionalData().get("count")))
                 .recentActivities(recentActivities)
                 .build();
 
@@ -199,9 +196,6 @@ public class StatsApi extends BaseApi {
             response.setMessage("Dashboard statistics retrieved successfully");
             response.setDashboardStats(stats);
             return response;
-        } catch (StatusRuntimeException e) {
-            logger.error("gRPC error fetching dashboard stats: {}", e.getMessage(), e);
-            return buildErrorResponse(500, "Failed to fetch dashboard statistics: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Error fetching dashboard stats: {}", e.getMessage(), e);
             return buildErrorResponse(500, "Failed to fetch dashboard statistics");
@@ -218,9 +212,6 @@ public class StatsApi extends BaseApi {
             response.setMessage("Stats report retrieved successfully");
             response.setStatsReport(report);
             return response;
-        } catch (StatusRuntimeException e) {
-            logger.error("gRPC error fetching dashboard stats: {}", e.getMessage(), e);
-            return buildErrorResponse(500, "Failed to fetch dashboard statistics: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Error fetching dashboard stats: {}", e.getMessage(), e);
             return buildErrorResponse(500, "Failed to fetch dashboard statistics");
@@ -232,30 +223,30 @@ public class StatsApi extends BaseApi {
 
         try {
             // Get recent users
-            GetRecentUsersResponse recentUsersResponse = userGrpcClient.getRecentUsers(5);
+            Response recentUsersResponse = userFeignClient.getRecentUsers(5);
 
             // Add user registration activities
-            for (UserInfo user : recentUsersResponse.getUsersList()) {
+            for (Map<String, Object> user : recentUsersResponse.getUsers()) {
                 activities.add(ActivityDto.builder()
-                        .id("user-" + user.getId())
+                        .id("user-" + user.get("id").toString())
                         .type("user_registered")
-                        .description("New user registered: " + user.getFullname())
+                        .description("New user registered: " + (String) user.get("fullname"))
                         .timestamp(Instant.now().toString()) // Since we don't have created_at
-                        .userId(user.getId())
+                        .userId(user.get("id").toString())
                         .build());
             }
 
             // Get recent CVs
-            GetRecentCVsResponse recentCVsResponse = cvGrpcClient.getRecentCVs(5);
+            Response recentCVsResponse = cvFeignClient.getRecentCVs(5);
 
             // Add CV creation activities
-            for (CVInfo cv : recentCVsResponse.getCvsList()) {
+            for (Map<String, Object> cv : recentCVsResponse.getCvs()) {
                 activities.add(ActivityDto.builder()
-                        .id("cv-" + cv.getId())
+                        .id("cv-" + cv.get("id").toString())
                         .type("cv_created")
-                        .description("New CV created: " + cv.getTitle())
-                        .timestamp(cv.getCreatedAt())
-                        .userId(cv.getUserId())
+                        .description("New CV created: " + (String) cv.get("title"))
+                        .timestamp((String) cv.get("createdAt"))
+                        .userId(cv.get("userId").toString())
                         .build());
             }
 
@@ -276,6 +267,30 @@ public class StatsApi extends BaseApi {
         } catch (Exception e) {
             logger.warn("Error fetching recent activities: {}", e.getMessage());
             return activities; // Return partial results
+        }
+    }
+
+    /**
+     * Safely convert Number to Long
+     */
+    private Long toLong(Object value) {
+        if (value == null) {
+            return 0L;
+        }
+        if (value instanceof Long) {
+            return (Long) value;
+        }
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        try {
+            return Long.parseLong(value.toString());
+        } catch (NumberFormatException e) {
+            logger.warn("Cannot convert {} to Long, returning 0", value);
+            return 0L;
         }
     }
 }

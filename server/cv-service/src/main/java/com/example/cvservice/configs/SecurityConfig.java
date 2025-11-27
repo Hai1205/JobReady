@@ -40,13 +40,11 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/v1/cvs/health").permitAll()
-                                                .anyRequest().authenticated())
+                                                .anyRequest().permitAll())
                                 .exceptionHandling(exception -> exception
                                                 .authenticationEntryPoint(authenticationEntryPoint)
                                                 .accessDeniedHandler(accessDeniedHandler))
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
                 return http.build();
         }
 }

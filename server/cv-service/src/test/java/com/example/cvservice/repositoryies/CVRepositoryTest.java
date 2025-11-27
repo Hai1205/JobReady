@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
         "spring.autoconfigure.exclude=org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration",
         "eureka.client.enabled=false",
         "spring.cloud.discovery.enabled=false",
-        "grpc.client.user-service.enable-keep-alive=false",
         "spring.main.allow-bean-definition-overriding=true"
 })
 @Transactional

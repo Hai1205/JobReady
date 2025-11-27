@@ -7,9 +7,18 @@ import ImportFileDialog from "./ImportFileDialog";
 interface PageHeaderProps {
   onCreateNew: () => void;
   onImport: (file: File | null) => Promise<boolean>;
+  externalFile?: File | null;
+  isImportDialogOpen?: boolean;
+  onImportDialogOpenChange?: (open: boolean) => void;
 }
 
-export default function PageHeader({ onCreateNew, onImport }: PageHeaderProps) {
+export default function PageHeader({
+  onCreateNew,
+  onImport,
+  externalFile,
+  isImportDialogOpen,
+  onImportDialogOpenChange,
+}: PageHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -21,7 +30,12 @@ export default function PageHeader({ onCreateNew, onImport }: PageHeaderProps) {
         </p>
       </div>
       <div className="flex gap-3">
-        <ImportFileDialog onImport={onImport} />
+        <ImportFileDialog
+          onImport={onImport}
+          externalFile={externalFile}
+          isExternalOpen={isImportDialogOpen}
+          onExternalOpenChange={onImportDialogOpenChange}
+        />
         <Button
           onClick={onCreateNew}
           className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-200 hover:scale-105"

@@ -12,11 +12,12 @@ import com.example.cvservice.exceptions.OurException;
 import com.example.cvservice.mappers.*;
 import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.CloudinaryService;
-import com.example.cvservice.services.grpcs.clients.UserGrpcClient;
+import com.example.cvservice.services.feigns.UserFeignClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class CVApi extends BaseApi {
     private final CVMapper cvMapper;
     private final ObjectMapper objectMapper;
     private final CloudinaryService cloudinaryService;
-    private final UserGrpcClient userGrpcClient;
+    private final UserFeignClient userFeignClient;
     private final ExperienceRepository experienceRepository;
     private final EducationRepository educationRepository;
     private final PersonalInfoRepository personalInfoRepository;
@@ -37,14 +38,14 @@ public class CVApi extends BaseApi {
             CVRepository cvRepository,
             CloudinaryService cloudinaryService,
             CVMapper cvMapper,
-            UserGrpcClient userGrpcClient,
+            UserFeignClient userFeignClient,
             ExperienceRepository experienceRepository,
             EducationRepository educationRepository,
             PersonalInfoRepository personalInfoRepository) {
         this.cvRepository = cvRepository;
         this.cvMapper = cvMapper;
         this.cloudinaryService = cloudinaryService;
-        this.userGrpcClient = userGrpcClient;
+        this.userFeignClient = userFeignClient;
         this.objectMapper = new ObjectMapper();
         this.experienceRepository = experienceRepository;
         this.educationRepository = educationRepository;
@@ -101,7 +102,7 @@ public class CVApi extends BaseApi {
     }
 
     private UserDto validateUser(UUID userId) {
-        UserDto user = userGrpcClient.findUserById(userId);
+        UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
         if (user == null) {
             logger.warn("User not found when creating CV: userId={}", userId);
             throw new OurException("User not found", 404);
@@ -189,19 +190,58 @@ public class CVApi extends BaseApi {
         Response response = new Response();
 
         try {
-            UserDto user = userGrpcClient.findUserById(userId);
+            UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
 
             if (user == null) {
                 logger.warn("User not found when creating CV: userId={}", userId);
                 throw new OurException("User not found", 404);
             }
 
-            CVDto savedCV = handleCreateCV(userId, "Untitled CV", null, null, null, null, null, null, null, null);
+                // CVCreateRequest request = objectMapper.readValue(dataJson, CVCreateRequest.class);
+                // CVDto savedCV = handleCreateCV(userId, request.getTitle(), request.getPersonalInfo(),
+                //         null, request.getExperiences(), request.getEducations(), request.getSkills(),
+                //         request.getIsVisibility(), request.getColor(), request.getTemplate());
 
-            response.setStatusCode(201);
-            response.setMessage("CV created successfully");
-            response.setCv(savedCV);
-            logger.debug("createCV response prepared for userId={} cvId={}", userId, savedCV.getId());
+                // response.setStatusCode(201);
+                // response.setMessage("CV created successfully");
+                // response.setCv(savedCV);
+                // logger.debug("createCV response prepared for userId={} cvId={}", userId, savedCV.getId());
+
+                CVDto savedCV = handleCreateCV(userId, "Untitled CV", null, null, null, null, null, null, null, null);
+
+                response.setStatusCode(201);
+                response.setMessage("CV created successfully");
+                response.setCv(savedCV);
+                logger.debug("createCV response prepared for userId={} cvId={}", userId, savedCV.getId());
+            return response;
+        } catch (OurException e) {
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return buildErrorResponse(500, "Error creating CV: " + e.getMessage());
+        }
+    }
+
+    public Response importCV(UUID userId, String dataJson) {
+        Response response = new Response();
+
+        try {
+            UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+
+            if (user == null) {
+                logger.warn("User not found when creating CV: userId={}", userId);
+                throw new OurException("User not found", 404);
+            }
+
+                CVCreateRequest request = objectMapper.readValue(dataJson, CVCreateRequest.class);
+                CVDto savedCV = handleCreateCV(userId, request.getTitle(), request.getPersonalInfo(),
+                        null, request.getExperiences(), request.getEducations(), request.getSkills(),
+                        request.getIsVisibility(), request.getColor(), request.getTemplate());
+
+                response.setStatusCode(201);
+                response.setMessage("CV imported successfully");
+                response.setCv(savedCV);
+                logger.debug("importCV response prepared for userId={} cvId={}", userId, savedCV.getId());
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -280,10 +320,10 @@ public class CVApi extends BaseApi {
         Response response = new Response();
 
         try {
-            List<CVDto> cvDtos = handleGetAllCVs();
+            List<CVDto> cvsDto = handleGetAllCVs();
 
             response.setMessage("Get all cvs successfully");
-            response.setCvs(cvDtos);
+            response.setCvs(cvsDto);
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -312,7 +352,7 @@ public class CVApi extends BaseApi {
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<CVDto> handleGetUserCVs(UUID userId) {
-        UserDto user = userGrpcClient.findUserById(userId);
+        UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
         if (user == null) {
             return new ArrayList<>();
         }
@@ -369,7 +409,7 @@ public class CVApi extends BaseApi {
         }
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public CVDto handleUpdateCV(UUID cvId,
             String title,
             PersonalInfoDto personalInfoDto,
@@ -581,6 +621,56 @@ public class CVApi extends BaseApi {
         } catch (Exception e) {
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response getTotalCVs() {
+        try {
+            long total = handleGetTotalCVs();
+            Response response = new Response(200, "Total CVs retrieved successfully");
+            response.setAdditionalData(Map.of("total", total));
+            return response;
+        } catch (Exception e) {
+            logger.error("Error in getTotalCVs: {}", e.getMessage(), e);
+            return new Response(500, "Failed to get total CVs");
+        }
+    }
+
+    public Response getCVsByVisibility(boolean visibility) {
+        try {
+            long count = handleGetCVsCountByVisibility(visibility);
+            Response response = new Response(200, "CVs by visibility retrieved successfully");
+            response.setAdditionalData(Map.of("count", count));
+            return response;
+        } catch (Exception e) {
+            logger.error("Error in getCVsByVisibility: {}", e.getMessage(), e);
+            return new Response(500, "Failed to get CVs by visibility");
+        }
+    }
+
+    public Response getCVsCreatedInRange(String startDate, String endDate) {
+        try {
+            Instant start = Instant.parse(startDate);
+            Instant end = Instant.parse(endDate);
+            long count = handleGetCVsCountCreatedInRange(start, end);
+            Response response = new Response(200, "CVs created in range retrieved successfully");
+            response.setAdditionalData(Map.of("count", count));
+            return response;
+        } catch (Exception e) {
+            logger.error("Error in getCVsCreatedInRange: {}", e.getMessage(), e);
+            return new Response(500, "Failed to get CVs created in range");
+        }
+    }
+
+    public Response getRecentCVs(int limit) {
+        try {
+            List<CVDto> recentCVs = handleGetRecentCVs(limit);
+            Response response = new Response(200, "Recent CVs retrieved successfully");
+            response.setCvs(recentCVs);
+            return response;
+        } catch (Exception e) {
+            logger.error("Error in getRecentCVs: {}", e.getMessage(), e);
+            return new Response(500, "Failed to get recent CVs");
         }
     }
 }

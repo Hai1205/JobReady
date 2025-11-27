@@ -81,6 +81,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> refreshToken(
             @RequestBody(required = false) RefreshTokenRequest refreshTokenRequest,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
@@ -93,6 +94,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> logout(HttpServletResponse httpServletResponse) {
         Response response = authApi.logout(httpServletResponse);
 

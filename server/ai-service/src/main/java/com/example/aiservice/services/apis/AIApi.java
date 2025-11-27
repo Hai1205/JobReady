@@ -10,9 +10,8 @@ import com.example.aiservice.dtos.responses.AIResponseDto;
 import com.example.aiservice.dtos.responses.Response;
 import com.example.aiservice.exceptions.OurException;
 import com.example.aiservice.services.*;
-import com.example.aiservice.services.grpcs.clients.*;
+import com.example.aiservice.services.feigns.CVFeignClient;
 import com.fasterxml.jackson.databind.*;
-import com.example.grpc.cv.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,20 +25,20 @@ public class AIApi extends BaseApi {
     private final PromptBuilderService promptBuilderService;
     private final ObjectMapper objectMapper;
     private final FileParserService fileParserService;
-    private final CVGrpcClient cvGrpcClient;
+    private final CVFeignClient cvFeignClient;
 
     public AIApi(
             OpenRouterConfig openRouterConfig,
             EmbeddingService embeddingService,
             PromptBuilderService promptBuilderService,
             FileParserService fileParserService,
-            CVGrpcClient cvGrpcClient) {
+            CVFeignClient cvFeignClient) {
         this.openRouterConfig = openRouterConfig;
         this.embeddingService = embeddingService;
         this.promptBuilderService = promptBuilderService;
         this.objectMapper = new ObjectMapper();
         this.fileParserService = fileParserService;
-        this.cvGrpcClient = cvGrpcClient;
+        this.cvFeignClient = cvFeignClient;
     }
 
     public Response improveCV(String dataJson) {
@@ -109,7 +108,6 @@ public class AIApi extends BaseApi {
         Response response = new Response();
 
         try {
-            // Validate file only if it's provided
             if (jdFile != null && !jdFile.isEmpty()) {
                 fileParserService.validateDocumentFile(jdFile);
             }
@@ -166,15 +164,21 @@ public class AIApi extends BaseApi {
             CVDto cvDto = fileParserService.parseCVWithAI(cvText);
             logger.debug("Extract CV" + cvDto);
 
-            CreateCVResponse createCVResponse = cvGrpcClient.createCV(
-                    userId.toString(),
-                    cvDto.getTitle(),
-                    toPersonalInfo(cvDto.getPersonalInfo()),
-                    toExperiences(cvDto.getExperiences()),
-                    toEducations(cvDto.getEducations()),
-                    cvDto.getSkills());
+            CVCreateRequest cvCreateRequest = CVCreateRequest.builder()
+                    .title(cvDto.getTitle())
+                    .personalInfo(cvDto.getPersonalInfo())
+                    .experiences(cvDto.getExperiences())
+                    .educations(cvDto.getEducations())
+                    .skills(cvDto.getSkills())
+                    .build();
 
-            CVDto savedCV = toCVDto(createCVResponse.getCv());
+            String dataJson = objectMapper.writeValueAsString(cvCreateRequest);
+
+            Response createCVResponse = cvFeignClient.importCV(
+                    userId.toString(),
+                    dataJson);
+
+            CVDto savedCV = createCVResponse.getCv();
             logger.debug("Saved CV" + savedCV);
 
             response.setStatusCode(201);
@@ -189,54 +193,6 @@ public class AIApi extends BaseApi {
             e.printStackTrace();
             return buildErrorResponse(500, "Error creating CV: " + e.getMessage());
         }
-    }
-
-    private CVDto toCVDto(CVInfo cv) {
-        PersonalInfoDto personalInfo = null;
-        if (cv.hasPersonalInfo()) {
-            PersonalInfo pi = cv.getPersonalInfo();
-            personalInfo = new PersonalInfoDto(
-                    pi.getId().isEmpty() ? null : UUID.fromString(pi.getId()),
-                    pi.getFullname(),
-                    pi.getEmail(),
-                    pi.getPhone(),
-                    pi.getLocation(),
-                    pi.getSummary(),
-                    pi.getAvatarUrl(),
-                    pi.getAvatarPublicId());
-        }
-
-        List<ExperienceDto> experiences = cv.getExperiencesList().stream()
-                .map(exp -> new ExperienceDto(
-                        exp.getId().isEmpty() ? null : UUID.fromString(exp.getId()),
-                        exp.getCompany(),
-                        exp.getPosition(),
-                        exp.getStartDate(),
-                        exp.getEndDate(),
-                        exp.getDescription()))
-                .collect(Collectors.toList());
-
-        List<EducationDto> educations = cv.getEducationsList().stream()
-                .map(edu -> new EducationDto(
-                        edu.getId().isEmpty() ? null : UUID.fromString(edu.getId()),
-                        edu.getSchool(),
-                        edu.getDegree(),
-                        edu.getField(),
-                        edu.getStartDate(),
-                        edu.getEndDate()))
-                .collect(Collectors.toList());
-
-        List<String> skills = new ArrayList<>(cv.getSkillsList());
-
-        return CVDto.builder()
-                .id(cv.getId().isEmpty() ? null : UUID.fromString(cv.getId()))
-                .userId(UUID.fromString(cv.getUserId()))
-                .title(cv.getTitle())
-                .personalInfo(personalInfo)
-                .experiences(experiences)
-                .educations(educations)
-                .skills(skills)
-                .build();
     }
 
     private String handleExtractJobDescriptionText(MultipartFile jdFile, String jobDescription) {
@@ -420,21 +376,20 @@ public class AIApi extends BaseApi {
         StringBuilder sb = new StringBuilder();
 
         // Personal Info
-        if (cvDto.getPersonalInfo() != null) {
-            PersonalInfoDto pi = cvDto.getPersonalInfo();
+        PersonalInfoDto pi = cvDto.getPersonalInfo();
+        if (pi != null) {
             sb.append("Name: ").append(pi.getFullname()).append("\n");
             sb.append("Email: ").append(pi.getEmail()).append("\n");
             sb.append("Phone: ").append(pi.getPhone()).append("\n");
             sb.append("Location: ").append(pi.getLocation()).append("\n");
-            if (pi.getSummary() != null && !pi.getSummary().isEmpty()) {
-                sb.append("\nProfessional Summary:\n").append(pi.getSummary()).append("\n");
-            }
+            sb.append("\nProfessional Summary:\n").append(pi.getSummary()).append("\n");
         }
 
         // Experience
-        if (cvDto.getExperiences() != null && !cvDto.getExperiences().isEmpty()) {
+        List<ExperienceDto> exps = cvDto.getExperiences();
+        if (exps != null && !exps.isEmpty()) {
             sb.append("\nWork Experience:\n");
-            for (ExperienceDto exp : cvDto.getExperiences()) {
+            for (ExperienceDto exp : exps) {
                 sb.append("- ").append(exp.getPosition()).append(" at ").append(exp.getCompany())
                         .append(" (").append(exp.getStartDate()).append(" - ").append(exp.getEndDate()).append(")\n");
                 sb.append("  ").append(exp.getDescription()).append("\n");
@@ -442,9 +397,10 @@ public class AIApi extends BaseApi {
         }
 
         // Education
-        if (cvDto.getEducations() != null && !cvDto.getEducations().isEmpty()) {
+        List<EducationDto> edus = cvDto.getEducations();
+        if (edus != null && !edus.isEmpty()) {
             sb.append("\nEducation:\n");
-            for (EducationDto edu : cvDto.getEducations()) {
+            for (EducationDto edu : edus) {
                 sb.append("- ").append(edu.getDegree()).append(" in ").append(edu.getField())
                         .append(" from ").append(edu.getSchool())
                         .append(" (").append(edu.getStartDate()).append(" - ").append(edu.getEndDate()).append(")\n");
@@ -452,9 +408,10 @@ public class AIApi extends BaseApi {
         }
 
         // Skills
-        if (cvDto.getSkills() != null && !cvDto.getSkills().isEmpty()) {
+        List<String> skills = cvDto.getSkills();    
+        if (skills != null && !skills.isEmpty()) {
             sb.append("\nSkills:\n");
-            sb.append(String.join(", ", cvDto.getSkills())).append("\n");
+            sb.append(String.join(", ", skills)).append("\n");
         }
 
         return sb.toString();
@@ -560,48 +517,5 @@ public class AIApi extends BaseApi {
         }
 
         return trimmed;
-    }
-
-    private PersonalInfo toPersonalInfo(PersonalInfoDto pi) {
-        return PersonalInfo.newBuilder()
-                .setId(pi.getId() != null ? pi.getId().toString() : "")
-                .setFullname(pi.getFullname())
-                .setEmail(pi.getEmail())
-                .setPhone(pi.getPhone())
-                .setLocation(pi.getLocation())
-                .setSummary(pi.getSummary() != null ? pi.getSummary() : "")
-                .setAvatarUrl(pi.getAvatarUrl() != null ? pi.getAvatarUrl() : "")
-                .setAvatarPublicId(pi.getAvatarPublicId() != null ? pi.getAvatarPublicId() : "")
-                .build();
-    }
-
-    private List<Experience> toExperiences(List<ExperienceDto> exps) {
-        return exps.stream().map(this::toExperience).collect(Collectors.toList());
-    }
-
-    private Experience toExperience(ExperienceDto exp) {
-        return Experience.newBuilder()
-                .setId(exp.getId() != null ? exp.getId().toString() : "")
-                .setCompany(exp.getCompany())
-                .setPosition(exp.getPosition())
-                .setStartDate(exp.getStartDate())
-                .setEndDate(exp.getEndDate())
-                .setDescription(exp.getDescription())
-                .build();
-    }
-
-    private List<Education> toEducations(List<EducationDto> edus) {
-        return edus.stream().map(this::toEducation).collect(Collectors.toList());
-    }
-
-    private Education toEducation(EducationDto edu) {
-        return Education.newBuilder()
-                .setId(edu.getId() != null ? edu.getId().toString() : "")
-                .setSchool(edu.getSchool())
-                .setDegree(edu.getDegree())
-                .setField(edu.getField())
-                .setStartDate(edu.getStartDate())
-                .setEndDate(edu.getEndDate())
-                .build();
     }
 }

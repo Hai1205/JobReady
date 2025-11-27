@@ -81,10 +81,36 @@ const VerificationPage: React.FC = () => {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
-      const prevInput = document.getElementById(`digit-${index - 1}`);
-      if (prevInput) prevInput.focus();
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Backspace") {
+      if (otp[index] === "" && index > 0) {
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        inputRefs.current[index - 1]?.focus();
+        return;
+      }
+
+      const newOtp = [...otp];
+      newOtp[index] = "";
+      setOtp(newOtp);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      } else {
+        inputRefs.current[5]?.focus();
+      }
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      if (index < 5) {
+        inputRefs.current[index + 1]?.focus();
+      } else {
+        inputRefs.current[0]?.focus();
+      }
     }
   };
 
@@ -119,7 +145,9 @@ const VerificationPage: React.FC = () => {
     }
 
     if (!isActivation) {
-      router.push(`/auth/reset-password/?identifier=${encodeURIComponent(identifier)}`);
+      router.push(
+        `/auth/reset-password/?identifier=${encodeURIComponent(identifier)}`
+      );
     } else {
       toast.success("Xác thực tài khoản thành công");
       router.push("/auth/login");
@@ -159,7 +187,8 @@ const VerificationPage: React.FC = () => {
         </div>
         <h1 className="text-2xl font-bold tracking-tight">Nhập mã xác thực</h1>
         <p className="text-muted-foreground">
-          Chúng tôi đã gửi mã OTP gồm 6 chữ số về tài khoản <strong>{identifier}</strong>
+          Chúng tôi đã gửi mã OTP gồm 6 chữ số về tài khoản{" "}
+          <strong>{identifier}</strong>
         </p>
         <p className="text-sm text-muted-foreground">
           Vui lòng nhập mã để{" "}

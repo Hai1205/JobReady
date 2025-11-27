@@ -181,8 +181,8 @@ export function middleware(request: NextRequest) {
     }
 
     if (
-        // pathname.startsWith('/cv-builder') ||
-        // pathname.startsWith('/my-cvs') ||
+        pathname.startsWith('/cv-builder') ||
+        pathname.startsWith('/my-cvs') ||
         pathname.startsWith('/settings')
     ) {
         if (!isAuthenticated) {

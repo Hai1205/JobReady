@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.cvservice.dtos.CVDto;
+import com.example.cvservice.dtos.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.*;
@@ -16,6 +17,11 @@ public class Response {
     private int statusCode;
     private String message;
 
+    private UserDto user;
+    private List<UserDto> users;
+    private String token;
+    private String role;
+    private String status;
     private CVDto cv;
     private List<CVDto> cvs;
     private CVDto experience;
