@@ -197,16 +197,6 @@ public class CVApi extends BaseApi {
                 throw new OurException("User not found", 404);
             }
 
-                // CVCreateRequest request = objectMapper.readValue(dataJson, CVCreateRequest.class);
-                // CVDto savedCV = handleCreateCV(userId, request.getTitle(), request.getPersonalInfo(),
-                //         null, request.getExperiences(), request.getEducations(), request.getSkills(),
-                //         request.getIsVisibility(), request.getColor(), request.getTemplate());
-
-                // response.setStatusCode(201);
-                // response.setMessage("CV created successfully");
-                // response.setCv(savedCV);
-                // logger.debug("createCV response prepared for userId={} cvId={}", userId, savedCV.getId());
-
                 CVDto savedCV = handleCreateCV(userId, "Untitled CV", null, null, null, null, null, null, null, null);
 
                 response.setStatusCode(201);

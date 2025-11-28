@@ -18,7 +18,7 @@ import com.example.authservice.dtos.responses.Response;
 public interface UserFeignClient {
 
     @PostMapping("/api/v1/users")
-    Response createUser(@RequestBody UserCreateRequest request);
+    Response createUser(@RequestBody String dataJson);
 
     @GetMapping("/api/v1/users/{userId}")
     Response getUserById(@PathVariable("userId") String userId);

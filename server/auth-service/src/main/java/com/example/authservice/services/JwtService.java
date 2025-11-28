@@ -1,7 +1,6 @@
 package com.example.authservice.services;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -30,10 +29,8 @@ public class JwtService {
     private String publicKeyStr;
     private PublicKey publicKey;
 
-    // Access Token: 5 giờ (ngắn hạn)
-    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 5; // 5 hours
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15; // 15 minutes
 
-    // Refresh Token: 7 ngày (dài hạn)
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7 days
 
     @PostConstruct
@@ -44,10 +41,8 @@ public class JwtService {
 
     private Key getKey(String key, boolean isPrivate) {
         try {
-            // Loại bỏ tất cả các khoảng trắng và xuống dòng từ khóa
             String cleanedKey = key.replaceAll("\\s", "");
 
-            // Giải mã Base64
             byte[] decoded;
             try {
                 decoded = Base64.getDecoder().decode(cleanedKey);
@@ -80,14 +75,6 @@ public class JwtService {
         }
     }
 
-    /**
-     * Tạo Access Token (JWT ngắn hạn - 15 phút)
-     * 
-     * @param userId   ID của user
-     * @param username Username của user
-     * @param role     Role của user (ADMIN, USER, etc.)
-     * @return Access Token string
-     */
     public String generateAccessToken(String userId, String email, String role, String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
@@ -96,7 +83,7 @@ public class JwtService {
             claims.put("username", username);
         }
         claims.put("role", role);
-        claims.put("tokenType", "ACCESS"); // Đánh dấu đây là access token
+        claims.put("tokenType", "ACCESS");
 
         String subject = email != null ? email : username;
 
@@ -113,13 +100,6 @@ public class JwtService {
         return generateAccessToken(userId, username, role, username);
     }
 
-    /**
-     * Tạo Refresh Token (JWT dài hạn - 7 ngày)
-     * 
-     * @param userId   ID của user
-     * @param username Username của user
-     * @return Refresh Token string
-     */
     public String generateRefreshToken(String userId, String email, String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
@@ -127,7 +107,7 @@ public class JwtService {
         if (username != null) {
             claims.put("username", username);
         }
-        claims.put("tokenType", "REFRESH"); // Đánh dấu đây là refresh token
+        claims.put("tokenType", "REFRESH");
 
         String subject = email != null ? email : username;
 
@@ -144,18 +124,11 @@ public class JwtService {
         return generateRefreshToken(userId, username, username);
     }
 
-    /**
-     * Tạo Token (deprecated - sử dụng generateAccessToken thay thế)
-     * Giữ lại để backward compatibility
-     */
     @Deprecated
     public String generateToken(String userId, String username, String role) {
         return generateAccessToken(userId, username, role, username);
     }
 
-    /**
-     * Extract username từ token
-     */
     public String extractUsername(String token) {
         return extractClaims(token, claims -> {
             String usernameClaim = claims.get("username", String.class);
@@ -166,23 +139,14 @@ public class JwtService {
         });
     }
 
-    /**
-     * Extract userId từ token
-     */
     public String extractUserId(String token) {
         return extractClaims(token, claims -> claims.get("userId", String.class));
     }
 
-    /**
-     * Extract role từ token (chỉ có trong access token)
-     */
     public String extractRole(String token) {
         return extractClaims(token, claims -> claims.get("role", String.class));
     }
 
-    /**
-     * Extract email từ token
-     */
     public String extractEmail(String token) {
         return extractClaims(token, claims -> {
             String emailClaim = claims.get("email", String.class);
@@ -193,73 +157,47 @@ public class JwtService {
         });
     }
 
-    /**
-     * Extract token type (ACCESS hoặc REFRESH)
-     */
     public String extractTokenType(String token) {
         return extractClaims(token, claims -> claims.get("tokenType", String.class));
     }
 
-    /**
-     * Extract expiration date từ token
-     */
     public Date extractExpiration(String token) {
         return extractClaims(token, Claims::getExpiration);
     }
 
-    /**
-     * Extract claims từ token
-     */
     private <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
         return claimsResolver.apply(Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token).getPayload());
     }
 
-    /**
-     * Kiểm tra token đã hết hạn chưa
-     */
     private Boolean isTokenExpired(String token) {
         return extractClaims(token, Claims::getExpiration).before(new Date());
     }
 
-    /**
-     * Validate token (kiểm tra username và expiration)
-     * 
-     * @param token    JWT token cần validate
-     * @param username Username để so sánh
-     * @return true nếu token hợp lệ
-     */
     public Boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
 
-    /**
-     * Validate Refresh Token
-     * Kiểm tra token type phải là REFRESH và chưa hết hạn
-     * 
-     * @param refreshToken Refresh token cần validate
-     * @return true nếu refresh token hợp lệ
-     */
     public Boolean validateRefreshToken(String refreshToken) {
         try {
             if (refreshToken == null || refreshToken.isEmpty()) {
                 return false;
             }
 
-            // Parse token để validate signature
+            // Parse token to validate signature
             Claims claims = Jwts.parser()
                     .verifyWith(publicKey)
                     .build()
                     .parseSignedClaims(refreshToken)
                     .getPayload();
 
-            // Kiểm tra token type phải là REFRESH
+            // Check token type must be REFRESH
             String tokenType = claims.get("tokenType", String.class);
             if (!"REFRESH".equals(tokenType)) {
                 return false;
             }
 
-            // Kiểm tra token chưa hết hạn
+            // Check token has not expired
             Date expiration = claims.getExpiration();
             if (expiration == null) {
                 return false;
@@ -268,37 +206,29 @@ public class JwtService {
             boolean isExpired = expiration.before(new Date());
             return !isExpired;
 
-        } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            // Token đã hết hạn
+        } catch (ExpiredJwtException e) {
+            // Token is expired
             return false;
-        } catch (io.jsonwebtoken.security.SignatureException e) {
-            // Signature không hợp lệ
+        } catch (SignatureException e) {
+            // Signature is invalid
             return false;
-        } catch (io.jsonwebtoken.MalformedJwtException e) {
-            // Token không đúng format
+        } catch (MalformedJwtException e) {
+            // Token is malformed
             return false;
         } catch (Exception e) {
-            // Lỗi khác
+            // Other errors
             return false;
         }
     }
 
-    /**
-     * Validate Access Token
-     * Kiểm tra token type phải là ACCESS và chưa hết hạn
-     * 
-     * @param accessToken Access token cần validate
-     * @param username    Username để so sánh
-     * @return true nếu access token hợp lệ
-     */
     public Boolean validateAccessToken(String accessToken, String username) {
         try {
             String tokenType = extractTokenType(accessToken);
-            // Kiểm tra token type phải là ACCESS
+            // Check token type must be ACCESS
             if (!"ACCESS".equals(tokenType)) {
                 return false;
             }
-            // Kiểm tra username và expiration
+            // Check username and expiration
             return validateToken(accessToken, username);
         } catch (Exception e) {
             return false;

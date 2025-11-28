@@ -1,23 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { FileText, Calendar, Edit, Trash2, Download, Copy } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { formatDateAgo } from "@/lib/utils";
+import { Trash2, Download, Copy, Edit } from "lucide-react";
+import { CVPreviewCard } from "../cv-builder/CVPreviewCard";
+import CVDetailedDialog from "./CVDetailedDialog";
 
 interface CVCardProps {
   cv: ICV;
   onUpdate?: (cv: ICV) => void;
   onDuplicate: (cvId: string) => void;
   onDelete?: (cvId: string) => void;
-  onDownload?: () => void;
+  onDownload: (cv: ICV) => void;
 }
 
 export default function CVCard({
@@ -27,97 +21,121 @@ export default function CVCard({
   onDelete,
   onDownload,
 }: CVCardProps) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   return (
-    <Card className="group relative overflow-hidden flex flex-col h-full border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm transition-all duration-200 hover:shadow-xl hover:shadow-primary/20 hover:scale-[1.02]">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">
-              {cv.title}
-            </CardTitle>
-            <CardDescription className="mt-2 flex items-center gap-2">
-              <Calendar className="h-3 w-3" />
-              Cập nhật {formatDateAgo(cv.updatedAt || "")}
-            </CardDescription>
-          </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20">
-            <FileText className="h-5 w-5 group-hover:text-primary transition-colors" />
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="flex flex-col h-full">
-        {/* Vùng nội dung chiếm toàn bộ khoảng trống */}
-        <div className="flex flex-col gap-4 flex-1">
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">
-              {cv.personalInfo?.fullname || "Chưa đặt tên"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {cv.personalInfo?.summary
-                ? cv.personalInfo.summary.length > 100
-                  ? cv.personalInfo.summary.substring(0, 100) + "..."
-                  : cv.personalInfo.summary
-                : "Chưa có đoạn giới thiệu"}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {cv.experiences?.length > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {cv.experiences.length} Kinh nghiệm
-              </Badge>
-            )}
-            {cv.educations?.length > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {cv.educations.length} Học vấn
-              </Badge>
-            )}
-            {cv.skills?.length > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {cv.skills.length} Kỹ năng
-              </Badge>
-            )}
-          </div>
+    <div key={cv.id} className="group flex flex-col gap-3">
+      {/* CV Preview Container */}
+      <div
+        className="relative aspect-[210/297] w-full rounded-lg border border-border bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden cursor-pointer"
+        onClick={() => setDialogOpen(true)}
+      >
+        {/* Badge template */}
+        <div className="absolute top-2 right-2 z-20 bg-primary/90 text-primary-foreground px-2 py-0.5 rounded text-xs font-medium backdrop-blur-sm">
+          {cv.template || "Template 1"}
         </div>
 
-        {/* Footer cố định */}
-        <div className="flex gap-2 pt-2 border-t border-border/50">
-          {onUpdate && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onUpdate(cv)}
-              className="flex-1 hover:bg-primary/10 hover:text-primary"
-            >
-              <Edit className="mr-2 h-3 w-3" />
-              Chỉnh sửa
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDuplicate(cv.id)}
+        {/* CV Preview Wrapper */}
+        <div className="absolute inset-0">
+          <div
+            className="relative w-full h-full"
+            style={{
+              transform: "scale(0.32)",
+              transformOrigin: "top left",
+              width: "312.5%",
+              height: "312.5%",
+            }}
           >
-            <Copy className="h-3 w-3" />
-          </Button>
-          {onDownload && (
-            <Button variant="outline" size="sm" onClick={onDownload}>
+            <CVPreviewCard
+              currentCV={cv}
+              className="shadow-none border-none w-full h-full"
+            />
+          </div>
+        </div>
+
+        {/* Overlay khi hover với buttons */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+          <div className="absolute bottom-0 left-0 right-0 p-3 flex gap-2">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDuplicate(cv?.id);
+              }}
+              size="sm"
+              variant="secondary"
+              className="flex-1 gap-1.5 text-xs h-8"
+            >
+              <Copy className="h-3 w-3" />
+              Sao chép
+            </Button>
+
+            {onUpdate && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdate(cv);
+                }}
+                className="flex-1 hover:bg-primary/10 hover:text-primary"
+              >
+                <Edit className="mr-2 h-3 w-3" />
+                Sửa
+              </Button>
+            )}
+
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDownload(cv);
+              }}
+              size="sm"
+              variant="outline"
+              className="w-8 h-8 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200"
+            >
               <Download className="h-3 w-3" />
             </Button>
-          )}
-          {onDelete && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(cv.id)}
-              className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          )}
+
+            {onDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(cv.id);
+                }}
+                className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {cv.title && (
+          <div className="px-1">
+            <h3 className="font-semibold text-sm line-clamp-1">{cv.title}</h3>
+          </div>
+        )}
+      </div>
+
+      <div className="px-1 mt-2">
+        <h3 className="font-semibold text-sm">
+          {(cv.title || "Untitled CV").length > 35
+            ? (cv.title || "Untitled CV").substring(0, 35) + "..."
+            : cv.title || "Untitled CV"}
+        </h3>
+      </div>
+
+      <CVDetailedDialog
+        cv={cv}
+        onUpdate={onUpdate}
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+        onDownload={onDownload}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
+    </div>
   );
 }

@@ -16,6 +16,8 @@ import ConfirmationDialog from "@/components/commons/layout/ConfirmationDialog";
 import ImportFileDialog from "@/components/commons/my-cvs/ImportFileDialog";
 import { useAIStore } from "@/stores/aiStore";
 import { EUserRole } from "@/types/enum";
+import { toast } from "react-toastify";
+import DraggingOnPage from "@/components/commons/layout/DraggingOnPage";
 
 export type CvFilterType = "visibility";
 
@@ -51,6 +53,10 @@ export default function CVDashboardPage() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<ICV | null>(null);
+
+  const [isDraggingOnPage, setIsDraggingOnPage] = useState(false);
+  const [droppedFile, setDroppedFile] = useState<File | null>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   // Initialize empty filters
   const initialFilters = { visibility: [] as string[] };
@@ -98,6 +104,7 @@ export default function CVDashboardPage() {
   }, [CVsTable, searchQuery, activeFilters, filterData]);
 
   const onDelete = (cv: ICV) => {
+    toast.success("Xóa CV thành công!");
     setCvToDelete(cv);
     setDeleteDialogOpen(true);
   };
@@ -184,13 +191,64 @@ export default function CVDashboardPage() {
     }
   };
 
+  // Page-level drag and drop handlers
+  const handlePageDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDraggingOnPage(true);
+    }
+  };
+
+  const handlePageDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only hide overlay if leaving the container entirely
+    if (e.currentTarget === e.target) {
+      setIsDraggingOnPage(false);
+    }
+  };
+
+  const handlePageDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handlePageDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOnPage(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type === "application/pdf") {
+      setDroppedFile(file);
+      setImportDialogOpen(true);
+    } else if (file) {
+      toast.error("Chỉ chấp nhận file PDF!");
+    }
+  };
+
   // Show skeleton loading when fetching (even if cache empty)
   if (isLoading && CVsTable.length === 0) {
     return <TableDashboardSkeleton />;
   }
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6"
+      onDragEnter={handlePageDragEnter}
+      onDragLeave={handlePageDragLeave}
+      onDragOver={handlePageDragOver}
+      onDrop={handlePageDrop}
+    >
+      {/* Drag Overlay */}
+      {isDraggingOnPage && (
+        <DraggingOnPage
+          title="Thả file PDF vào đây"
+          subtitle="để import CV của bạn"
+        />
+      )}
+
       <DashboardHeader
         title="CV Dashboard"
         onCreateClick={() => {
@@ -199,7 +257,12 @@ export default function CVDashboardPage() {
         }}
         createButtonText="Create CV"
       >
-        <ImportFileDialog onImport={handleImport} />
+        <ImportFileDialog
+          onImport={handleImport}
+          externalFile={droppedFile}
+          isExternalOpen={importDialogOpen}
+          onExternalOpenChange={setImportDialogOpen}
+        />
       </DashboardHeader>
 
       <div className="space-y-6">

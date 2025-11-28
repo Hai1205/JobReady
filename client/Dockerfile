@@ -1,3 +1,4 @@
+# Production Dockerfile for Next.js application with Puppeteer support
 # Use the official Node.js image as the base image
 FROM node:18-alpine AS base
 
@@ -31,11 +32,9 @@ COPY . .
 # These must be set at build time for Next.js to embed them
 # Values will be passed from Render environment variables
 ARG NEXT_PUBLIC_SERVER_URL
-ARG NEXT_PUBLIC_NODE_ENV
 
 # Set them as environment variables for the build
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
-ENV NEXT_PUBLIC_NODE_ENV=$NEXT_PUBLIC_NODE_ENV
 
 # Build the Next.js application with environment variables embedded
 RUN npm run build
