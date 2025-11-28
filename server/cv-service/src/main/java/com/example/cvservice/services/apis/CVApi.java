@@ -563,6 +563,10 @@ public class CVApi extends BaseApi {
         logger.info("Duplicating CV id={}", cvId);
         CVDto existingCV = handleGetCVById(cvId);
 
+        if (existingCV == null) {
+            return new CVDto();
+        }
+
         CVDto newCV = handleCreateCV(
                 existingCV.getUserId(),
                 existingCV.getTitle() + " (Copy)",

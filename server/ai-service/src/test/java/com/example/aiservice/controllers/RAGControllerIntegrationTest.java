@@ -3,6 +3,7 @@ package com.example.aiservice.controllers;
 import com.example.aiservice.services.RAGService;
 import com.example.aiservice.services.DocumentService;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -41,130 +42,131 @@ import org.springframework.test.context.TestPropertySource;
 @WebMvcTest(RAGController.class)
 @AutoConfigureMockMvc
 @EnableAutoConfiguration(exclude = {
-        org.springframework.ai.autoconfigure.vectorstore.pgvector.PgVectorStoreAutoConfiguration.class
+                org.springframework.ai.autoconfigure.vectorstore.pgvector.PgVectorStoreAutoConfiguration.class
 })
 @Import(TestSecurityConfig.class)
 @TestPropertySource(properties = {
-        "OPENROUTER_API_URL=https://openrouter.ai/api/v1/chat/completions",
-        "OPENROUTER_API_KEY=test-key",
-        "OPENROUTER_API_MODEL=gpt-3.5-turbo"
+                "OPENROUTER_API_URL=https://openrouter.ai/api/v1/chat/completions",
+                "OPENROUTER_API_KEY=test-key",
+                "OPENROUTER_API_MODEL=gpt-3.5-turbo"
 })
 public class RAGControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private EmbeddingModel embeddingModel;
+        @MockBean
+        private EmbeddingModel embeddingModel;
 
-    @MockBean
-    private ChatModel chatModel;
+        @MockBean
+        private ChatModel chatModel;
 
-    @MockBean
-    private VectorStore vectorStore;
+        @MockBean
+        private VectorStore vectorStore;
 
-    @MockBean
-    private com.example.aiservice.configs.OpenRouterConfig openRouterConfig;
+        @MockBean
+        private com.example.aiservice.configs.OpenRouterConfig openRouterConfig;
 
-    @MockBean
-    private DocumentService documentService;
+        @MockBean
+        private DocumentService documentService;
 
-    @MockBean
-    private RAGService ragService;
+        @MockBean
+        private RAGService ragService;
 
-    @Test
-    public void testUploadDocument() throws Exception {
-        // Mock embedding response
-        doReturn(new float[] { 0.1f, 0.2f, 0.3f }).when(embeddingModel).embed(anyString());
+        @Test
+        public void testUploadDocument() throws Exception {
+                // Mock embedding response
+                doReturn(new float[] { 0.1f, 0.2f, 0.3f }).when(embeddingModel).embed(anyString());
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "test.txt",
-                "text/plain",
-                "This is a test document content".getBytes());
+                MockMultipartFile file = new MockMultipartFile(
+                                "file",
+                                "test.txt",
+                                "text/plain",
+                                "This is a test document content".getBytes());
 
-        mockMvc.perform(multipart("/api/rag/documents/upload")
-                .file(file)
-                .param("userId", "testUser")
-                .param("title", "Test Document"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value(200))
-                .andExpect(jsonPath("$.message").exists());
-    }
+                mockMvc.perform(multipart("/api/rag/documents/upload")
+                                .file(file)
+                                .param("userId", "testUser")
+                                .param("title", "Test Document"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.statusCode").value(200))
+                                .andExpect(jsonPath("$.message").exists());
+        }
 
-    @Test
-    public void testUploadText() throws Exception {
-        // Mock embedding response
-        doReturn(new float[] { 0.1f, 0.2f, 0.3f }).when(embeddingModel).embed(anyString());
+        @Test
+        public void testUploadText() throws Exception {
+                // Mock embedding response
+                doReturn(new float[] { 0.1f, 0.2f, 0.3f }).when(embeddingModel).embed(anyString());
 
-        String jsonRequest = """
-                {
-                    "text": "Java is a programming language. Spring Boot is a framework.",
-                    "userId": "testUser",
-                    "metadata": {
-                        "category": "tech"
-                    }
-                }
-                """;
+                String jsonRequest = """
+                                {
+                                    "text": "Java is a programming language. Spring Boot is a framework.",
+                                    "userId": "testUser",
+                                    "metadata": {
+                                        "category": "tech"
+                                    }
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/rag/documents/text")
-                .contentType("application/json")
-                .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value(200));
-    }
+                mockMvc.perform(post("/api/rag/documents/text")
+                                .contentType("application/json")
+                                .content(jsonRequest))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.statusCode").value(200));
+        }
 
-    @Test
-    public void testQuery() throws Exception {
-        // Mock vector store search
-        List<Document> mockDocuments = List.of(new Document("Mock content"));
-        doReturn(mockDocuments).when(vectorStore).similaritySearch(any(SearchRequest.class));
+        @Test
+        public void testQuery() throws Exception {
+                // Mock vector store search
+                List<Document> mockDocuments = List.of(new Document("Mock content"));
+                doReturn(mockDocuments).when(vectorStore).similaritySearch(any(SearchRequest.class));
 
-        // Mock chat response
-        @SuppressWarnings("deprecation")
-        ChatResponse mockChatResponse = new ChatResponse(List.of(new Generation("Mocked answer")));
-        when(chatModel.call(any(Prompt.class))).thenReturn(mockChatResponse);
+                // Mock chat response
+                @SuppressWarnings("deprecation")
+                ChatResponse mockChatResponse = new ChatResponse(
+                                List.of(new Generation(new AssistantMessage("Mocked answer"))));
+                when(chatModel.call(any(Prompt.class))).thenReturn(mockChatResponse);
 
-        // Mock RAG service
-        when(ragService.query(anyString(), anyString())).thenReturn("Mocked answer");
+                // Mock RAG service
+                when(ragService.query(anyString(), anyString())).thenReturn("Mocked answer");
 
-        String jsonRequest = """
-                {
-                    "question": "What is Java?",
-                    "userId": "testUser"
-                }
-                """;
+                String jsonRequest = """
+                                {
+                                    "question": "What is Java?",
+                                    "userId": "testUser"
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/rag/query")
-                .contentType("application/json")
-                .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value(200))
-                .andExpect(jsonPath("$.additionalData.answer").exists());
-    }
+                mockMvc.perform(post("/api/rag/query")
+                                .contentType("application/json")
+                                .content(jsonRequest))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.statusCode").value(200))
+                                .andExpect(jsonPath("$.additionalData.answer").exists());
+        }
 
-    @Test
-    public void testSearchDocuments() throws Exception {
-        // Mock vector store search
-        List<Document> mockDocuments = List.of(new Document("Mock content"));
-        doReturn(mockDocuments).when(vectorStore).similaritySearch(any(SearchRequest.class));
+        @Test
+        public void testSearchDocuments() throws Exception {
+                // Mock vector store search
+                List<Document> mockDocuments = List.of(new Document("Mock content"));
+                doReturn(mockDocuments).when(vectorStore).similaritySearch(any(SearchRequest.class));
 
-        // Mock RAG service
-        when(ragService.getRelevantDocuments(anyString(), anyString()))
-                .thenReturn(List.of(Map.of("content", "Mock content")));
+                // Mock RAG service
+                when(ragService.getRelevantDocuments(anyString(), anyString()))
+                                .thenReturn(List.of(Map.of("content", "Mock content")));
 
-        String jsonRequest = """
-                {
-                    "query": "programming",
-                    "userId": "testUser"
-                }
-                """;
+                String jsonRequest = """
+                                {
+                                    "query": "programming",
+                                    "userId": "testUser"
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/rag/search")
-                .contentType("application/json")
-                .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value(200))
-                .andExpect(jsonPath("$.additionalData.documents").exists());
-    }
+                mockMvc.perform(post("/api/rag/search")
+                                .contentType("application/json")
+                                .content(jsonRequest))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.statusCode").value(200))
+                                .andExpect(jsonPath("$.additionalData.documents").exists());
+        }
 }

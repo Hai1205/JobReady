@@ -5,7 +5,7 @@
 
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
-    display: none;
+  display: none;
 }
 
 :root {
@@ -164,4 +164,16 @@ input[type="password"]::-ms-clear {
 /* Ensure body doesn't shift when toast appears */
 body {
   overflow-x: hidden;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari and Opera */
 }

@@ -133,7 +133,7 @@ export function middleware(request: NextRequest) {
         userRole,
         hasToken: !!authToken,
         hasUserAuth: !!userAuth,
-        tokenPreview: authToken ? authToken.substring(0, 30) + '...' : 'NO TOKEN',
+        tokenPreview: authToken ? `${authToken.substring(0, 30)}...` : 'NO TOKEN',
         allCookies: request.cookies.getAll().map(c => c.name),
         userInfo: userAuth ? { id: userAuth.id, role: userAuth.role, username: userAuth.username } : null,
     })
@@ -146,30 +146,22 @@ export function middleware(request: NextRequest) {
     }
 
     // 2. Protect routes that require authentication
-    // NOTE: Chỉ redirect nếu KHÔNG có token hoặc auth storage
-    // Nếu có token/storage nhưng chưa parse được, cho phép tiếp tục để client-side xử lý
     if (
         pathname.startsWith('/cv-builder') ||
         pathname.startsWith('/my-cvs') ||
         pathname.startsWith('/settings')
     ) {
-        // Chỉ redirect nếu hoàn toàn không có token và không có auth storage
         if (!authToken && !authStorage) {
             return NextResponse.redirect(new URL('/auth/login', request.url))
         }
-        
-        // Nếu có token hoặc storage, cho phép request tiếp tục
-        // Client-side sẽ xử lý authentication state
     }
 
     // 3. Protect admin routes
     if (pathname.startsWith('/admin')) {
-        // Chỉ redirect nếu hoàn toàn không có token
         if (!authToken && !authStorage) {
             return NextResponse.redirect(new URL('/auth/login', request.url))
         }
 
-        // Nếu đã xác thực được và không phải admin, redirect về home
         if (isAuthenticated && !isAdmin) {
             return NextResponse.redirect(new URL('/', request.url))
         }

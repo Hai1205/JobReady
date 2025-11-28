@@ -245,15 +245,15 @@ function UserDashboardPage() {
 
   const handleDialogConfirm = async () => {
     if (isDeleteDialog && userToDelete) {
-      await deleteUser(userToDelete.id);
       toast.success("Xóa người dùng thành công!");
       setDeleteDialogOpen(false);
       setUserToDelete(null);
+      await deleteUser(userToDelete.id);
     } else if (!isDeleteDialog && userToResetPassword) {
       toast.success("Đã gửi mật khẩu mới về email của người dùng!");  
-      await resetPassword(userToResetPassword.email);
       setResetPasswordDialogOpen(false);
       setUserToResetPassword(null);
+      await resetPassword(userToResetPassword.email);
     }
   };
 

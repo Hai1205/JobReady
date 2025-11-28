@@ -108,10 +108,10 @@ public class UserApi extends BaseApi {
 
             user.setPassword(passwordEncoder.encode(password));
 
-            if (!role.isEmpty()) {
+            if (role != null && !role.isEmpty()) {
                 user.setRole(UserRole.valueOf(role));
             }
-            if (!status.isEmpty()) {
+            if (status != null && !status.isEmpty()) {
                 user.setStatus(UserStatus.valueOf(status));
             }
 

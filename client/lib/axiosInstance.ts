@@ -66,10 +66,9 @@ const refreshAccessToken = async (): Promise<string | null> => {
       refreshTokenLength: refreshToken?.length
     });
 
-    // Gửi request với refresh token trong cả body và cookie để server có nhiều lựa chọn
     const response = await axios.post(
-      `${SERVER_URL}/auth/refresh-token`,
-      {}, // Không gửi trong body nữa, để server lấy từ cookie
+      `${SERVER_URL}/api/v1/auth/refresh-token`,
+      {},
       {
         withCredentials: true,
         headers: {
@@ -99,7 +98,6 @@ const refreshAccessToken = async (): Promise<string | null> => {
         window.location.href = '/auth/login';
       }
     } else {
-      // Lỗi khác (500, lỗi mạng) - không xóa cookie
       console.log('⚠️ Server or network error, keeping tokens');
     }
     return null;

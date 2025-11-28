@@ -81,7 +81,6 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity<Response> refreshToken(
             @RequestBody(required = false) RefreshTokenRequest refreshTokenRequest,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader,

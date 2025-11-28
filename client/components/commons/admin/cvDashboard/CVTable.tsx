@@ -1,5 +1,6 @@
 import { formatDateAgo } from "@/lib/utils";
 import { DataTable } from "../adminTable/DataTable";
+import { Pencil, Download, Trash2 } from "lucide-react";
 
 interface ICVTableProps {
   CVs: ICV[];
@@ -60,6 +61,7 @@ export const CVTable = ({
     actions.push({
       label: "Sửa",
       onClick: onUpdate,
+      icon: Pencil,
     });
   }
 
@@ -67,6 +69,7 @@ export const CVTable = ({
     actions.push({
       label: "Tải xuống",
       onClick: onDownload,
+      icon: Download,
     });
   }
 
@@ -74,6 +77,8 @@ export const CVTable = ({
     actions.push({
       label: "Xoá",
       onClick: onDelete,
+      icon: Trash2,
+      className: "hover:bg-destructive/10 hover:text-destructive",
     });
   }
 

@@ -27,7 +27,6 @@ public class CVController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('admin')")
     public ResponseEntity<Response> getAllCVs() {
         Response response = cvService.getAllCVs();
 

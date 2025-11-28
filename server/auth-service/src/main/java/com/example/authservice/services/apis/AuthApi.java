@@ -28,7 +28,7 @@ public class AuthApi extends BaseApi {
     private AuthProducer authProducer;
     private OtpService otpService;
     private final ObjectMapper objectMapper;
-    private static final int ACCESS_TOKEN_EXPIRATION_SECONDS = 15 * 60; // 15 minutes
+    private static final int ACCESS_TOKEN_EXPIRATION_SECONDS = 5 * 60 * 60; // 5 hours
     private static final int REFRESH_TOKEN_EXPIRATION_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
     @Value("${DEV_MODE}")
@@ -157,7 +157,7 @@ public class AuthApi extends BaseApi {
         try {
             // UserDto user = userFeignClient.createUser(dataJson).getUser();
             // UserCreateRequest userCreateRequest = new UserCreateRequest(dataJson);
-            UserDto user = userFeignClient.createUser(dataJson).getUser();
+            UserDto user = userFeignClient.registerUser(dataJson).getUser();
 
             response.setMessage("Registration successful");
             response.setUser(user);

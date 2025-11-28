@@ -1,8 +1,0 @@
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Microservice\projects\JobReady\server\security-common\src\main\java\com\example\securitycommon\configs\SecurityConfig.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Microservice\projects\JobReady\server\security-common\src\main\java\com\example\securitycommon\exceptions\JwtValidationException.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Microservice\projects\JobReady\server\security-common\src\main\java\com\example\securitycommon\filters\JwtAuthenticationFilter.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Microservice\projects\JobReady\server\security-common\src\main\java\com\example\securitycommon\handlers\JsonAccessDeniedHandler.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Microservice\projects\JobReady\server\security-common\src\main\java\com\example\securitycommon\handlers\JsonAuthenticationEntryPoint.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Microservice\projects\JobReady\server\security-common\src\main\java\com\example\securitycommon\jwts\JwtTokenProvider.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Microservice\projects\JobReady\server\security-common\src\main\java\com\example\securitycommon\models\AuthenticatedUser.java
-C:\Users\ASUS\OneDrive\Desktop\Learn\Backend\Microservice\projects\JobReady\server\security-common\src\main\java\com\example\securitycommon\utils\SecurityUtils.java

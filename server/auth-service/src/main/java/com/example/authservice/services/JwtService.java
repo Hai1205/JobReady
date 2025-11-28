@@ -29,7 +29,7 @@ public class JwtService {
     private String publicKeyStr;
     private PublicKey publicKey;
 
-    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15; // 15 minutes
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 5; // 5 hours
 
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7 days
 

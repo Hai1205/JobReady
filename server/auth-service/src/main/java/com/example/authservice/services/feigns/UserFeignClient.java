@@ -17,8 +17,8 @@ import com.example.authservice.dtos.responses.Response;
 @FeignClient(name = "${USER_SERVICE_NAME}", url = "${USER_SERVICE_URL}")
 public interface UserFeignClient {
 
-    @PostMapping("/api/v1/users")
-    Response createUser(@RequestBody String dataJson);
+    @PostMapping("/api/v1/users/register")
+    Response registerUser(@RequestBody String dataJson);
 
     @GetMapping("/api/v1/users/{userId}")
     Response getUserById(@PathVariable("userId") String userId);
