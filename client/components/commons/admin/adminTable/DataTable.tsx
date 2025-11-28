@@ -32,6 +32,8 @@ interface DataTableProps<T> {
   actions?: {
     label: string;
     onClick: (item: T) => void;
+    icon?: React.ComponentType<{ className?: string }>;
+    className?: string;
   }[];
   onRowClick?: (item: T) => void;
   emptyMessage?: string;
@@ -126,8 +128,13 @@ export function DataTable<T>({
                                 e.stopPropagation();
                                 action.onClick(item);
                               }}
-                              className="text-foreground cursor-pointer hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:text-primary focus:bg-gradient-to-r focus:from-primary/10 focus:to-secondary/10 active:bg-primary/20 transition-all duration-200 rounded-lg font-medium"
+                              className={`text-foreground cursor-pointer hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:text-primary focus:bg-gradient-to-r focus:from-primary/10 focus:to-secondary/10 active:bg-primary/20 transition-all duration-200 rounded-lg font-medium ${
+                                action.className || ""
+                              }`}
                             >
+                              {action.icon && (
+                                <action.icon className="mr-2 h-4 w-4" />
+                              )}
                               {action.label}
                             </DropdownMenuItem>
                           ))}

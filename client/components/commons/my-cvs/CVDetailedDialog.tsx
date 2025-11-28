@@ -32,19 +32,25 @@ export default function CVDetailedDialog({
 }: CVDetailedDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-[90vw] max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>{cv.title || "Untitled CV"}</DialogTitle>
         </DialogHeader>
-        <div className="flex justify-center">
-          <div className="relative w-full max-w-4xl aspect-[210/297] bg-white border rounded-lg shadow-lg">
-            <CVPreviewCard
-              currentCV={cv}
-              className="shadow-none border-none w-full h-full"
-            />
+        
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-auto scrollbar-hide px-6">
+          <div className="flex justify-center pb-4">
+            <div className="relative w-full max-w-4xl aspect-[210/297] bg-white border rounded-lg shadow-lg">
+              <CVPreviewCard
+                currentCV={cv}
+                className="shadow-none border-none w-full h-full"
+              />
+            </div>
           </div>
         </div>
-        <DialogFooter className="flex gap-2 justify-center">
+
+        {/* Fixed footer */}
+        <DialogFooter className="flex gap-2 justify-center px-6 py-4 border-t bg-background">
           <Button
             onClick={() => {
               onDuplicate(cv?.id);

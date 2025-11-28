@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DataTable } from "../adminTable/DataTable";
 import { useEffect, useState } from "react";
+import { Pencil, Key, Trash2 } from "lucide-react";
 
 interface UserTableProps {
   users: IUser[];
@@ -105,6 +106,7 @@ export const UserTable = ({
     actions.push({
       label: "Sửa",
       onClick: onUpdate,
+      icon: Pencil,
     });
   }
 
@@ -112,13 +114,16 @@ export const UserTable = ({
     actions.push({
       label: "Đặt lại mật khẩu",
       onClick: onResetPassword,
+      icon: Key,
     });
   }
-  
+
   if (onDelete) {
     actions.push({
       label: "Xoá",
       onClick: onDelete,
+      icon: Trash2,
+      className: "hover:bg-destructive/10 hover:text-destructive",
     });
   }
 

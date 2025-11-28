@@ -27,6 +27,13 @@ public class UserController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<Response> registerUser(@RequestBody String dataJson) {
+        Response response = userApi.createUser(dataJson);
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     @GetMapping
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<Response> getAllUsers() {

@@ -104,16 +104,16 @@ export default function CVDashboardPage() {
   }, [CVsTable, searchQuery, activeFilters, filterData]);
 
   const onDelete = (cv: ICV) => {
-    toast.success("Xóa CV thành công!");
     setCvToDelete(cv);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
     if (cvToDelete) {
-      await deleteCV(cvToDelete.id);
+      toast.success("Xóa CV thành công!");
       setDeleteDialogOpen(false);
       setCvToDelete(null);
+      await deleteCV(cvToDelete.id);
     }
   };
 

@@ -7,9 +7,11 @@ import { CVBuilderWizard } from "@/components/commons/cv-builder/CVBuilderWizard
 import { AIPanel } from "@/components/commons/cv-builder/AI-powered/AIPanel";
 import { toast } from "react-toastify";
 import DraggingOnPage from "@/components/commons/layout/DraggingOnPage";
+import { useAIStore } from "@/stores/aiStore";
 
 export default function CVBuilderPage() {
   const { handleSetCurrentStep } = useCVStore();
+  const { reset: resetAIStore } = useAIStore();
   const [isDraggingOnPage, setIsDraggingOnPage] = useState(false);
   const [droppedFile, setDroppedFile] = useState<File | null>(null);
   const [accordionValue, setAccordionValue] = useState<string>("");
@@ -17,6 +19,13 @@ export default function CVBuilderPage() {
   useEffect(() => {
     handleSetCurrentStep(0);
   }, [handleSetCurrentStep]);
+
+  // Reset AI suggestions when leaving the page
+  useEffect(() => {
+    return () => {
+      resetAIStore();
+    };
+  }, [resetAIStore]);
 
   // Page-level drag and drop handlers
   const handlePageDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
