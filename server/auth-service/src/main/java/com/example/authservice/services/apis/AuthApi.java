@@ -14,6 +14,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -22,15 +23,20 @@ import java.util.Map;
 @Service
 public class AuthApi extends BaseApi {
 
-    private JwtService jwtUtil;
+    private JwtService jwtService;
     private UserFeignClient userFeignClient;
     private AuthProducer authProducer;
     private OtpService otpService;
     private final ObjectMapper objectMapper;
+    private static final int ACCESS_TOKEN_EXPIRATION_SECONDS = 15 * 60; // 15 minutes
+    private static final int REFRESH_TOKEN_EXPIRATION_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
-    public AuthApi(JwtService jwtUtil, UserFeignClient userFeignClient, AuthProducer authProducer,
+    @Value("${DEV_MODE}")
+    private String devMode;
+
+    public AuthApi(JwtService jwtService, UserFeignClient userFeignClient, AuthProducer authProducer,
             OtpService otpService) {
-        this.jwtUtil = jwtUtil;
+        this.jwtService = jwtService;
         this.userFeignClient = userFeignClient;
         this.authProducer = authProducer;
         this.otpService = otpService;
@@ -71,12 +77,11 @@ public class AuthApi extends BaseApi {
             String username = user.getUsername();
             String role = user.getRole();
 
-            String accessToken = jwtUtil.generateAccessToken(userId, email, role, username);
-            String refreshToken = jwtUtil.generateRefreshToken(userId, email, username);
+            String accessToken = jwtService.generateAccessToken(userId, email, role, username);
+            String refreshToken = jwtService.generateRefreshToken(userId, email, username);
 
-            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("access_token", accessToken, 5 * 60 * 60); // 5 hours
-            Cookie refreshTokenCookie = handleCreateHttpOnlyCookie("refresh_token", refreshToken, 7 * 24 * 60 * 60); // 7
-                                                                                                                     // days
+            Cookie accessTokenCookie = handleCreateCookie("access_token", accessToken, ACCESS_TOKEN_EXPIRATION_SECONDS);
+            Cookie refreshTokenCookie = handleCreateCookie("refresh_token", refreshToken, REFRESH_TOKEN_EXPIRATION_SECONDS);
             httpServletResponse.addCookie(accessTokenCookie);
             httpServletResponse.addCookie(refreshTokenCookie);
             httpServletResponse.setHeader("X-Access-Token", accessToken);
@@ -98,31 +103,30 @@ public class AuthApi extends BaseApi {
         }
     }
 
-    private Cookie handleCreateHttpOnlyCookie(String name, String value, int maxAgeInSeconds) {
+    private Cookie handleCreateCookie(String name, String value, int maxAgeInSeconds) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeInSeconds);
-        cookie.setAttribute("SameSite", "None");
+
+        if (devMode.equals("development")) {
+            cookie.setHttpOnly(false);
+            cookie.setSecure(false);
+            cookie.setAttribute("SameSite", "Lax");
+        }else{
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setAttribute("SameSite", "None");
+        }
+
         return cookie;
     }
-    // private Cookie handleCreateHttpOnlyCookie(String name, String value, int maxAgeInSeconds) {
-    //     Cookie cookie = new Cookie(name, value);
-    //     cookie.setHttpOnly(false);
-    //     cookie.setSecure(false);
-    //     cookie.setPath("/");
-    //     cookie.setMaxAge(maxAgeInSeconds);
-    //     cookie.setAttribute("SameSite", "Lax");
-    //     return cookie;
-    // }
 
     public Response validateToken(String token, String username) {
         logger.debug("Token validation attempt for username: {}", username);
         Response response = new Response();
 
         try {
-            boolean isValid = jwtUtil.validateToken(token, username);
+            boolean isValid = jwtService.validateToken(token, username);
 
             Map<String, Object> additionalData = new HashMap<>();
             additionalData.put("valid", isValid);
@@ -151,24 +155,19 @@ public class AuthApi extends BaseApi {
         Response response = new Response();
 
         try {
-            RegisterRequest request = objectMapper.readValue(dataJson, RegisterRequest.class);
-            String username = request.getUsername();
-            String email = request.getEmail();
-            String password = request.getPassword();
-            String fullname = request.getFullname();
-
-            UserCreateRequest userCreateRequest = new UserCreateRequest(username, email, password, fullname);
-            UserDto user = userFeignClient.createUser(userCreateRequest).getUser();
+            // UserDto user = userFeignClient.createUser(dataJson).getUser();
+            // UserCreateRequest userCreateRequest = new UserCreateRequest(dataJson);
+            UserDto user = userFeignClient.createUser(dataJson).getUser();
 
             response.setMessage("Registration successful");
             response.setUser(user);
-            logger.info("Registration successful for email: {}", email);
+            logger.info("Registration successful for email: {}", user.getEmail());
             return response;
         } catch (OurException e) {
-            logger.error("Registration failed with OurException for email");
+            logger.error("Registration failed with OurException: {}", e.getMessage());
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("Registration failed with unexpected error for email");
+            logger.error("Registration failed with unexpected error: {}", e.getMessage());
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }
@@ -427,14 +426,14 @@ public class AuthApi extends BaseApi {
             }
 
             // Validate refresh token
-            if (!jwtUtil.validateRefreshToken(refreshToken)) {
+            if (!jwtService.validateRefreshToken(refreshToken)) {
                 logger.warn("Token refresh failed: Invalid or expired refresh token from {}", source);
                 throw new OurException("Invalid or expired refresh token", 401);
             }
 
             // Extract user info from refresh token
-            String email = jwtUtil.extractEmail(refreshToken);
-            String userId = jwtUtil.extractUserId(refreshToken);
+            String email = jwtService.extractEmail(refreshToken);
+            String userId = jwtService.extractUserId(refreshToken);
 
             if (email == null || userId == null) {
                 logger.warn("Token refresh failed: Cannot extract user info from refresh token");
@@ -450,12 +449,11 @@ public class AuthApi extends BaseApi {
             }
 
             // Generate new access token
-            String newAccessToken = jwtUtil.generateAccessToken(userId, email, user.getRole(),
+            String newAccessToken = jwtService.generateAccessToken(userId, email, user.getRole(),
                     user.getUsername());
 
             // Set new access token in cookie and header
-            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("access_token", newAccessToken, 15 * 60); // 15
-                                                                                                            // minutes
+            Cookie accessTokenCookie = handleCreateCookie("access_token", newAccessToken, ACCESS_TOKEN_EXPIRATION_SECONDS); 
             httpServletResponse.addCookie(accessTokenCookie);
             httpServletResponse.setHeader("X-Access-Token", newAccessToken);
 
@@ -479,8 +477,8 @@ public class AuthApi extends BaseApi {
         Response response = new Response();
 
         try {
-            Cookie accessTokenCookie = handleCreateHttpOnlyCookie("access_token", "", 15 * 60);
-            Cookie refreshTokenCookie = handleCreateHttpOnlyCookie("refresh_token", "", 7 * 24 * 60 * 60);
+            Cookie accessTokenCookie = handleCreateCookie("access_token", "", 0);
+            Cookie refreshTokenCookie = handleCreateCookie("refresh_token", "", 0);
             httpServletResponse.addCookie(accessTokenCookie);
             httpServletResponse.addCookie(refreshTokenCookie);
             httpServletResponse.setHeader("X-Access-Token", "");

@@ -59,7 +59,9 @@ export const useAuthStore = createStore<IAuthStore>(
 				console.log("Registration res:", res);
 				return res;
 			});
-		}, login: async (identifier: string, password: string): Promise<IApiResponse<IAuthDataResponse>> => {
+		}, 
+		
+		login: async (identifier: string, password: string): Promise<IApiResponse<IAuthDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				identifier,
@@ -78,7 +80,9 @@ export const useAuthStore = createStore<IAuthStore>(
 
 					if (user?.role === EUserRole.ADMIN) {
 						useStatsStore.getState().fetchDashboardStatsInBackground();
+						useStatsStore.getState().fetchReportInBackground();
 						useCVStore.getState().fetchAllCVsInBackground();
+						useCVStore.getState().fetchUserCVsInBackground(user.id);
 						useUserStore.getState().fetchAllUsersInBackground();
 					}
 					useCVStore.getState().fetchUserCVsInBackground(user.id);
@@ -86,7 +90,9 @@ export const useAuthStore = createStore<IAuthStore>(
 
 				return res;
 			});
-		}, logout: async (): Promise<IApiResponse> => {
+		}, 
+		
+		logout: async (): Promise<IApiResponse> => {
 			return await get().handleRequest(async () => {
 				const res = await handleRequest(EHttpType.POST, `/auth/logout`);
 

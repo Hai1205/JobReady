@@ -142,28 +142,35 @@ export function middleware(request: NextRequest) {
 
     // 1. Redirect authenticated users away from auth pages FIRST (prevent infinite loop)
     if (isAuthenticated && pathname.startsWith('/auth')) {
-        const redirectUrl = isAdmin ? '/admin' : '/'
-        return NextResponse.redirect(new URL(redirectUrl, request.url))
+        return NextResponse.redirect(new URL('/', request.url))
     }
 
     // 2. Protect routes that require authentication
+    // NOTE: Chỉ redirect nếu KHÔNG có token hoặc auth storage
+    // Nếu có token/storage nhưng chưa parse được, cho phép tiếp tục để client-side xử lý
     if (
         pathname.startsWith('/cv-builder') ||
         pathname.startsWith('/my-cvs') ||
         pathname.startsWith('/settings')
     ) {
-        if (!isAuthenticated) {
+        // Chỉ redirect nếu hoàn toàn không có token và không có auth storage
+        if (!authToken && !authStorage) {
             return NextResponse.redirect(new URL('/auth/login', request.url))
         }
+        
+        // Nếu có token hoặc storage, cho phép request tiếp tục
+        // Client-side sẽ xử lý authentication state
     }
 
     // 3. Protect admin routes
     if (pathname.startsWith('/admin')) {
-        if (!isAuthenticated) {
+        // Chỉ redirect nếu hoàn toàn không có token
+        if (!authToken && !authStorage) {
             return NextResponse.redirect(new URL('/auth/login', request.url))
         }
 
-        if (!isAdmin) {
+        // Nếu đã xác thực được và không phải admin, redirect về home
+        if (isAuthenticated && !isAdmin) {
             return NextResponse.redirect(new URL('/', request.url))
         }
     }

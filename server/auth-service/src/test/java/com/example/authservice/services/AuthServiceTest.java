@@ -186,7 +186,7 @@ class AuthServiceTest {
         UserCreateRequest createRequest = new UserCreateRequest("newuser", "newuser@example.com", "password123", "New User");
         Response createResponse = new Response();
         createResponse.setUser(mockUser);
-        when(userFeignClient.createUser(createRequest)).thenReturn(createResponse);
+        when(userFeignClient.createUser(dataJson)).thenReturn(createResponse);
 
         // Act
         Response response = authService.register(dataJson);
@@ -197,7 +197,7 @@ class AuthServiceTest {
         assertEquals("Registration successful", response.getMessage());
         assertNotNull(response.getUser());
 
-        verify(userFeignClient).createUser(createRequest);
+        verify(userFeignClient).createUser(dataJson);
     }
 
     @Test
@@ -538,7 +538,7 @@ class AuthServiceTest {
         registerRequest.setFullname("New User");
         String dataJson = objectMapper.writeValueAsString(registerRequest);
 
-        when(userFeignClient.createUser(any(UserCreateRequest.class)))
+        when(userFeignClient.createUser(any(String.class)))
                 .thenThrow(new OurException("Email already exists", 409));
 
         // Act

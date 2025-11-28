@@ -9,7 +9,7 @@ WORKDIR /workspace
 COPY . .
 
 # build jar for this module and its reactor dependencies (skip tests)
-RUN mvn -f server/pom.xml -pl stats-service -am -B -DskipTests package
+RUN mvn -f server/pom.xml -B -DskipTests package
 
 # find the built jar (module target)
 RUN ls -lah server/stats-service/target || true
