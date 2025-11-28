@@ -28,7 +28,6 @@ export default function CVDashboardPage() {
     handleGeneratePDF,
     handleSetCurrentCV,
     getAllCVs,
-    isLoading,
   } = useCVStore();
   const { userAuth } = useAuthStore();
   const { importCV } = useAIStore();
@@ -48,6 +47,7 @@ export default function CVDashboardPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCVs, setFilteredCVs] = useState<ICV[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<ICV | null>(null);
@@ -59,8 +59,8 @@ export default function CVDashboardPage() {
   }>(initialFilters);
 
   useEffect(() => {
-    // Fetch CVs in background
-    fetchAllCVsInBackground();
+    setIsLoading(true);
+    fetchAllCVsInBackground().finally(() => setIsLoading(false));
   }, []);
 
   // Function to filter data based on query and activeFilters
