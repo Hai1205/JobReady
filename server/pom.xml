@@ -43,7 +43,8 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mapstruct-processor.version>1.5.5.Final</mapstruct-processor.version>
         <spring-dotenv.version>4.0.0</spring-dotenv.version>
-        <spring-ai.version>1.0.0-M4</spring-ai.version>
+        <spring-ai.version>1.0.0-M5</spring-ai.version>
+        <!-- <spring-ai.version>1.0.0-RC1</spring-ai.version> -->
         <postgresql.version>42.7.3</postgresql.version>
         <pgvector.version>0.1.4</pgvector.version>
         <jasperreports.version>6.21.3</jasperreports.version>

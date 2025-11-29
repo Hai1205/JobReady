@@ -1,6 +1,7 @@
 package com.example.aiservice.controllers;
 
 import com.example.aiservice.dtos.responses.Response;
+import com.example.aiservice.services.CVKnowledgeBaseService;
 import com.example.aiservice.services.DocumentService;
 import com.example.aiservice.services.RAGService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class RAGController {
 
     private final DocumentService documentService;
     private final RAGService ragService;
+    private final CVKnowledgeBaseService knowledgeBaseService;
 
     /**
      * Upload và xử lý tài liệu
@@ -177,6 +179,128 @@ public class RAGController {
                     .build());
         } catch (Exception e) {
             log.error("Error deleting user documents", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .message("Error: " + e.getMessage())
+                            .build());
+        }
+    }
+
+    /**
+     * Admin: Get all templates
+     */
+    @GetMapping("/admin/templates")
+    public ResponseEntity<Response> getAllTemplates() {
+        try {
+            List<com.example.aiservice.entities.CVTemplateEntity> templates = 
+                knowledgeBaseService.getAllTemplates();
+            
+            return ResponseEntity.ok(Response.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Templates retrieved successfully")
+                    .additionalData(Map.of(
+                        "templates", templates,
+                        "count", templates.size()
+                    ))
+                    .build());
+        } catch (Exception e) {
+            log.error("Error getting templates", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .message("Error: " + e.getMessage())
+                            .build());
+        }
+    }
+
+    /**
+     * Admin: Add new template
+     */
+    @PostMapping("/admin/templates")
+    public ResponseEntity<Response> addTemplate(
+            @RequestBody com.example.aiservice.entities.CVTemplateEntity template) {
+        try {
+            com.example.aiservice.entities.CVTemplateEntity saved = 
+                knowledgeBaseService.addTemplate(template);
+            
+            return ResponseEntity.ok(Response.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Template added successfully")
+                    .additionalData(Map.of("template", saved))
+                    .build());
+        } catch (Exception e) {
+            log.error("Error adding template", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .message("Error: " + e.getMessage())
+                            .build());
+        }
+    }
+
+    /**
+     * Admin: Update template
+     */
+    @PutMapping("/admin/templates/{id}")
+    public ResponseEntity<Response> updateTemplate(
+            @PathVariable String id,
+            @RequestBody com.example.aiservice.entities.CVTemplateEntity template) {
+        try {
+            com.example.aiservice.entities.CVTemplateEntity updated = 
+                knowledgeBaseService.updateTemplate(id, template);
+            
+            return ResponseEntity.ok(Response.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Template updated successfully")
+                    .additionalData(Map.of("template", updated))
+                    .build());
+        } catch (Exception e) {
+            log.error("Error updating template", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .message("Error: " + e.getMessage())
+                            .build());
+        }
+    }
+
+    /**
+     * Admin: Delete template
+     */
+    @DeleteMapping("/admin/templates/{id}")
+    public ResponseEntity<Response> deleteTemplate(@PathVariable String id) {
+        try {
+            knowledgeBaseService.deleteTemplate(id);
+            
+            return ResponseEntity.ok(Response.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Template deleted successfully")
+                    .build());
+        } catch (Exception e) {
+            log.error("Error deleting template", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .message("Error: " + e.getMessage())
+                            .build());
+        }
+    }
+
+    /**
+     * Admin: Reinitialize knowledge base
+     */
+    @PostMapping("/admin/reinitialize")
+    public ResponseEntity<Response> reinitializeKnowledgeBase() {
+        try {
+            knowledgeBaseService.reinitializeKnowledgeBase();
+            
+            return ResponseEntity.ok(Response.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Knowledge base reinitialized successfully")
+                    .build());
+        } catch (Exception e) {
+            log.error("Error reinitializing knowledge base", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response.builder()
                             .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())

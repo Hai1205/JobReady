@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: ankane/pgvector
+    container_name: postgres-pgvector
+    environment:
+      POSTGRES_DB: jobready
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   gateway-service:
     build:
       context: .
@@ -74,6 +93,8 @@ services:
     ports:
       - "8085:8085"
     depends_on:
+      postgres:
+        condition: service_healthy
       cv-service:
         condition: service_started
     networks:
@@ -111,6 +132,7 @@ services:
       - app-network
 
 volumes:
+  postgres_data:
   rabbitmq_data:
 
 networks:

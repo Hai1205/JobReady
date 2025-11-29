@@ -29,10 +29,7 @@ export function CompactJobMatch({
   externalFile,
   onExternalFileProcessed,
 }: CompactJobMatchProps) {
-  const [jobDescription, setJobDescription] = useState("");
-  const [jdFile, setJdFile] = useState<File | null>(null);
   const [inputMethod, setInputMethod] = useState<"text" | "file">("file");
-  const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -40,7 +37,13 @@ export function CompactJobMatch({
     analyzeCVWithJD,
     handleSetAISuggestions,
     handleSetIsAnalyzing,
+    handleSetMatchScore,
+    handleSetJdFile,
+    handleSetJobDescription,
     isAnalyzing: globalIsAnalyzing,
+    matchScore,
+    jdFile,
+    jobDescription,
   } = useAIStore();
   const { isLoading } = useCVStore();
 
@@ -68,13 +71,13 @@ export function CompactJobMatch({
       return false;
     }
 
-    setJdFile(selectedFile);
+    handleSetJdFile(selectedFile);
 
     if (selectedFile.type === "text/plain") {
       const reader = new FileReader();
       reader.onload = (event) => {
         const text = event.target?.result as string;
-        setJobDescription(text);
+        handleSetJobDescription(text);
       };
       reader.readAsText(selectedFile);
     }
@@ -156,12 +159,7 @@ export function CompactJobMatch({
       handleSetAISuggestions(suggestions);
 
       // Store match score
-      setMatchScore(score);
-
-      // Show success message
-      // toast.success(`✅ Phân tích hoàn tất! Xem kết quả bên dưới`, {
-      //   autoClose: 2000,
-      // });
+      handleSetMatchScore(score);
 
       if (onAnalysisComplete) {
         onAnalysisComplete(suggestions, score);
@@ -283,7 +281,7 @@ export function CompactJobMatch({
                 e.target.value.length > 2000
                   ? e.target.value.slice(0, 2000)
                   : e.target.value;
-              setJobDescription(truncatedValue);
+              handleSetJobDescription(truncatedValue);
             }}
             className="mt-1 min-h-[120px] max-h-[400px] text-xs"
           />
