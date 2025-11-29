@@ -18,6 +18,8 @@ export interface IAIStore extends IBaseStore {
 	aiSuggestions: IAISuggestion[]
 	jobDescription: string
 	isAnalyzing: boolean
+	matchScore: number | undefined
+	jdFile: File | null
 
 	analyzeCV: (
 		title: string,
@@ -49,6 +51,8 @@ export interface IAIStore extends IBaseStore {
 	handleSetJobDescription: (jd: string) => void;
 	handleApplySuggestion: (id: string) => void;
 	handleSetIsAnalyzing: (isAnalyzing: boolean) => void;
+	handleSetMatchScore: (score: number | undefined) => void;
+	handleSetJdFile: (file: File | null) => void;
 }
 
 const storeName = "ai";
@@ -56,6 +60,8 @@ const initialState = {
 	aiSuggestions: [],
 	jobDescription: "",
 	isAnalyzing: false,
+	matchScore: undefined,
+	jdFile: null,
 };
 
 export const useAIStore = createStore<IAIStore>(
@@ -181,6 +187,14 @@ export const useAIStore = createStore<IAIStore>(
 
 		handleSetIsAnalyzing: (isAnalyzing: boolean): void => {
 			set({ isAnalyzing });
+		},
+
+		handleSetMatchScore: (score: number | undefined): void => {
+			set({ matchScore: score });
+		},
+
+		handleSetJdFile: (file: File | null): void => {
+			set({ jdFile: file });
 		},
 
 		reset: () => {

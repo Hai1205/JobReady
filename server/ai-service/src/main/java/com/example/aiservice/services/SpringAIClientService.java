@@ -29,12 +29,12 @@ public class SpringAIClientService {
 
     public String callAIWithSystem(String systemPrompt, String userPrompt) {
         log.debug("Calling AI with system prompt");
-        
+
         Message systemMessage = new SystemMessage(systemPrompt);
         Message userMessage = new UserMessage(userPrompt);
-        
+
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
-        
+
         return chatModel.call(prompt).getResult().getOutput().getContent();
     }
 }

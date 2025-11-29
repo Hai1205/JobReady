@@ -31,13 +31,13 @@ export function AIToolsSidebar({
   accordionValue,
   onAccordionChange,
 }: AIToolsSidebarProps) {
-  const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const {
     analyzeCV,
     handleSetAISuggestions,
     handleSetIsAnalyzing,
+    handleSetMatchScore,
     isAnalyzing: globalIsAnalyzing,
   } = useAIStore();
   const { isLoading } = useCVStore();
@@ -75,7 +75,7 @@ export function AIToolsSidebar({
       if (suggestions.length > 0) {
         handleSetAISuggestions(suggestions);
         const score = responseData?.matchScore;
-        setMatchScore(score);
+        handleSetMatchScore(score);
         toast.success(
           `Phân tích hoàn tất! Tìm thấy ${suggestions.length} gợi ý`
         );
@@ -93,38 +93,6 @@ export function AIToolsSidebar({
 
   return (
     <div className="space-y-4">
-      {/* Match Score Display for Quick Analyze */}
-      {matchScore !== undefined && (
-        <div className="p-4 rounded-lg bg-muted border">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Điểm Tương Đồng:</span>
-            <span
-              className={`text-2xl font-bold ${
-                matchScore >= 80
-                  ? "text-green-600"
-                  : matchScore >= 60
-                  ? "text-yellow-600"
-                  : "text-red-600"
-              }`}
-            >
-              {Math.round(matchScore)}%
-            </span>
-          </div>
-          <div className="h-2 bg-background rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all ${
-                matchScore >= 80
-                  ? "bg-green-600"
-                  : matchScore >= 60
-                  ? "bg-yellow-600"
-                  : "bg-red-600"
-              }`}
-              style={{ width: `${matchScore}%` }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Quick Analyze Button */}
       <Button
         onClick={handleQuickAnalyze}
