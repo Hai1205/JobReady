@@ -1,8 +1,6 @@
 package com.example.aiservice.controllers;
 
-import com.example.aiservice.dtos.responses.Response;
 import com.example.aiservice.services.apis.AIApi;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

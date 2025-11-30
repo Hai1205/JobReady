@@ -1,9 +1,8 @@
-package com.example.userservice.services;
+package com.example.cloudinarycommon;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
-import com.example.userservice.configs.ImageValidator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

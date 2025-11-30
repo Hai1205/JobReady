@@ -76,9 +76,9 @@ kubectl get pods -n jobready -w
 - **Frontend**: http://localhost:3000
 - **API Gateway**: http://localhost:8080
 
-## 🎯 Tính năng chính
+## Tính năng chính
 
-### 🤖 AI-Powered Features
+### AI-Powered Features
 
 - **Smart CV Import**: Upload và tự động phân tích CV từ PDF, DOCX, TXT
 - **AI Analyze**: Phân tích CV và đưa ra suggestions cải thiện chi tiết
@@ -160,7 +160,7 @@ JobReady/
 - **[📘 Backend Documentation](./server/README.md)** - Hướng dẫn chi tiết về microservices, Kubernetes deployment, API endpoints
 - **[🎨 Frontend Documentation](./client/README.md)** - Hướng dẫn setup frontend, components, state management, UI/UX
 
-## 🔧 Development
+## Development
 
 ### Prerequisites
 
@@ -224,7 +224,7 @@ Chúng tôi hoan nghênh mọi đóng góp! Vui lòng đọc documentation chi t
 4. Test thoroughly (backend: `mvn test`, frontend: `npm run test`)
 5. Submit Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 

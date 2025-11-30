@@ -1,0 +1,167 @@
+[
+  {
+    "category": "legal",
+    "level": "senior",
+    "section": "summary",
+    "content": "Senior Corporate Counsel with 15+ years of experience in corporate law and regulatory compliance. Led legal strategy for multinational corporation, managing $100M+ in legal matters and ensuring 100% compliance. Expert in mergers & acquisitions, contract negotiation, and risk management.",
+    "rating": 5,
+    "keywords": [
+      "Senior",
+      "15+ years",
+      "Corporate Law",
+      "Regulatory Compliance",
+      "Mergers & Acquisitions",
+      "100% compliance"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "mid",
+    "section": "summary",
+    "content": "Associate Attorney with 7 years of experience in litigation and corporate law. Successfully managed 50+ cases with 85% success rate in court. Proficient in legal research, contract drafting, and client counseling, specializing in employment law and commercial disputes.",
+    "rating": 5,
+    "keywords": [
+      "7 years",
+      "Associate Attorney",
+      "Litigation",
+      "Legal Research",
+      "85% success rate",
+      "Employment Law"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "junior",
+    "section": "summary",
+    "content": "Legal Assistant with 3 years of experience supporting attorneys in corporate and litigation matters. Skilled in legal research, document preparation, and case management. Assisted in preparing 200+ legal documents and maintained 98% accuracy in filing deadlines.",
+    "rating": 5,
+    "keywords": [
+      "3 years",
+      "Legal Assistant",
+      "Legal Research",
+      "Document Preparation",
+      "98% accuracy",
+      "Case Management"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "senior",
+    "section": "experience",
+    "content": "• Directed legal affairs for Fortune 500 company, overseeing 30+ attorneys and managing $50M legal budget\n• Led complex M&A transactions valued at $2B+, ensuring regulatory compliance and minimizing legal risks\n• Developed corporate governance policies and compliance programs, reducing legal exposure by 60% and improving regulatory standing",
+    "rating": 5,
+    "keywords": [
+      "Directed",
+      "Legal Affairs",
+      "M&A Transactions",
+      "Corporate Governance",
+      "60% risk reduction",
+      "Regulatory Compliance"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "mid",
+    "section": "experience",
+    "content": "• Managed litigation portfolio of 40+ cases, achieving favorable outcomes in 80% of matters through strategic case preparation\n• Drafted and negotiated commercial contracts and agreements, protecting client interests and reducing dispute potential by 40%\n• Conducted legal research and prepared briefs for appellate court, contributing to successful precedent-setting decisions",
+    "rating": 5,
+    "keywords": [
+      "Managed",
+      "Litigation Portfolio",
+      "Contract Negotiation",
+      "Legal Research",
+      "80% success rate",
+      "Appellate Court"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "senior",
+    "section": "skills",
+    "content": "Legal Expertise: Corporate Law, M&A, Regulatory Compliance, Risk Management | Litigation: Trial Preparation, Negotiation, Settlement Strategies | Research & Writing: Legal Research, Brief Writing, Contract Drafting | Technology: Legal Databases (Westlaw, LexisNexis), Case Management Software | Leadership: Team Management, Client Relations, Strategic Planning | Ethics: Professional Responsibility, Confidentiality, Conflict Resolution",
+    "rating": 5,
+    "keywords": [
+      "Corporate Law",
+      "Litigation",
+      "Legal Research",
+      "Westlaw",
+      "Team Management",
+      "Professional Ethics"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "mid",
+    "section": "skills",
+    "content": "Legal Skills: Contract Drafting, Legal Research, Case Analysis, Client Counseling | Technology: MS Office Suite, Legal Software, Document Management Systems | Communication: Oral Advocacy, Written Communication, Client Presentations | Research: Primary/Secondary Sources, Case Law, Statutory Interpretation | Soft Skills: Analytical Thinking, Attention to Detail, Time Management | Certifications: Bar Admission, Continuing Legal Education",
+    "rating": 5,
+    "keywords": [
+      "Contract Drafting",
+      "Legal Research",
+      "MS Office",
+      "Oral Advocacy",
+      "Analytical Thinking",
+      "Bar Admission"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "mid",
+    "section": "education",
+    "content": "Juris Doctor (JD) | Law School University | 2013 - 2016 | GPA: 3.8/4.0\nBachelor of Arts in Political Science | State University | 2009 - 2013 | GPA: 3.6/4.0\nRelevant Coursework: Constitutional Law, Contracts, Torts, Legal Writing, Professional Responsibility\nBar Admission: State Bar Association (2016)\nAchievements: Law Review Editor, Moot Court Champion, Public Interest Law Fellowship",
+    "rating": 5,
+    "keywords": [
+      "Juris Doctor",
+      "Bar Admission",
+      "Constitutional Law",
+      "GPA 3.8",
+      "Law Review",
+      "Moot Court"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "senior",
+    "section": "job_description",
+    "content": "Senior Corporate Counsel\n\nWe are seeking an experienced Senior Corporate Counsel to provide strategic legal guidance and manage complex legal matters. You will lead legal initiatives, ensure compliance, and protect company interests.\n\nRequired Skills:\n- 12+ years of legal experience with corporate law focus\n- JD degree and active bar admission\n- Proven experience in M&A and regulatory matters\n- Strong leadership and strategic thinking skills\n- Excellent communication and negotiation abilities\n\nResponsibilities:\n- Provide legal counsel on corporate transactions\n- Ensure regulatory compliance across operations\n- Manage litigation and dispute resolution\n- Develop legal policies and procedures\n- Lead and mentor legal team members",
+    "rating": 5,
+    "keywords": [
+      "Senior",
+      "Corporate Counsel",
+      "12+ years",
+      "JD Degree",
+      "M&A",
+      "Regulatory Compliance"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "mid",
+    "section": "job_description",
+    "content": "Associate Attorney\n\nWe're looking for a talented Associate Attorney to join our legal team. You'll handle legal matters, conduct research, and provide support in litigation and corporate law practice.\n\nRequired Skills:\n- 5+ years of legal experience\n- JD degree and active bar admission\n- Strong research and writing skills\n- Experience in litigation or corporate law\n- Excellent analytical and communication skills\n\nResponsibilities:\n- Conduct legal research and analysis\n- Draft legal documents and pleadings\n- Assist in case preparation and strategy\n- Communicate with clients and stakeholders\n- Participate in negotiations and settlements",
+    "rating": 5,
+    "keywords": [
+      "Mid",
+      "Associate Attorney",
+      "5+ years",
+      "Legal Research",
+      "Litigation",
+      "Client Communication"
+    ]
+  },
+  {
+    "category": "legal",
+    "level": "junior",
+    "section": "job_description",
+    "content": "Legal Assistant\n\nJoin our legal team as a Legal Assistant! This role provides an opportunity to gain experience in legal support and develop your career in the legal field.\n\nRequired Skills:\n- Bachelor's degree in related field\n- Strong organizational and research skills\n- Proficiency in Microsoft Office\n- Excellent attention to detail\n- Ability to handle confidential information\n\nResponsibilities:\n- Assist with legal research and document preparation\n- Maintain case files and databases\n- Schedule appointments and manage calendars\n- Prepare correspondence and legal documents\n- Support attorneys with administrative tasks",
+    "rating": 5,
+    "keywords": [
+      "Junior",
+      "Legal Assistant",
+      "Bachelor's degree",
+      "Legal Research",
+      "Document Preparation",
+      "Organizational Skills"
+    ]
+  }
+]

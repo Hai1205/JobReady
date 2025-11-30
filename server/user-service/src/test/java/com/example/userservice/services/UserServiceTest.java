@@ -7,6 +7,7 @@ import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
 import com.example.userservice.repositories.UserRepository;
 import com.example.userservice.services.apis.UserApi;
+import com.example.cloudinarycommon.CloudinaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

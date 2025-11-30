@@ -1,0 +1,167 @@
+[
+  {
+    "category": "healthcare",
+    "level": "senior",
+    "section": "summary",
+    "content": "Senior Healthcare Administrator with 10+ years of experience in hospital management and patient care coordination. Led implementation of electronic health records system serving 1000+ patients daily, improving efficiency by 35%. Expert in healthcare policy, quality assurance, and interdisciplinary team leadership.",
+    "rating": 5,
+    "keywords": [
+      "Senior",
+      "10+ years",
+      "Hospital Management",
+      "Electronic Health Records",
+      "Quality Assurance",
+      "35% improvement"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "mid",
+    "section": "summary",
+    "content": "Registered Nurse with 6 years of experience in acute care and patient advocacy. Proficient in patient assessment, medication administration, and care coordination. Successfully reduced patient readmission rates by 20% through comprehensive discharge planning and follow-up care.",
+    "rating": 5,
+    "keywords": [
+      "6 years",
+      "Registered Nurse",
+      "Patient Assessment",
+      "Medication Administration",
+      "20% reduction",
+      "Discharge Planning"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "junior",
+    "section": "summary",
+    "content": "Compassionate Nursing Assistant with 2 years of experience providing direct patient care in long-term care facility. Skilled in vital signs monitoring, personal care assistance, and infection control. Committed to delivering high-quality care and supporting patient dignity and comfort.",
+    "rating": 5,
+    "keywords": [
+      "2 years",
+      "Nursing Assistant",
+      "Vital Signs",
+      "Personal Care",
+      "Infection Control",
+      "Patient Dignity"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "senior",
+    "section": "experience",
+    "content": "• Directed hospital operations for 500-bed facility, managing $50M budget and ensuring compliance with healthcare regulations\n• Implemented patient safety protocols and quality improvement initiatives, reducing medical errors by 40% and improving patient satisfaction scores by 25%\n• Led interdisciplinary teams in developing care pathways, resulting in 30% reduction in length of stay and improved clinical outcomes",
+    "rating": 5,
+    "keywords": [
+      "Directed",
+      "Hospital Operations",
+      "Patient Safety",
+      "Quality Improvement",
+      "40% reduction",
+      "Interdisciplinary Teams"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "mid",
+    "section": "experience",
+    "content": "• Provided comprehensive nursing care for 20+ patients daily in medical-surgical unit, maintaining 98% patient satisfaction rating\n• Administered medications and treatments according to physician orders, ensuring accuracy and patient safety\n• Educated patients and families on disease management and self-care, reducing hospital readmissions by 25%",
+    "rating": 5,
+    "keywords": [
+      "Provided",
+      "Nursing Care",
+      "Medication Administration",
+      "Patient Education",
+      "98% satisfaction",
+      "Disease Management"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "senior",
+    "section": "skills",
+    "content": "Healthcare Administration: Hospital Management, Regulatory Compliance, Quality Assurance | Clinical Skills: Patient Assessment, Care Planning, Emergency Response | Technology: Electronic Health Records (EHR), Medical Software, Telemedicine | Leadership: Team Management, Conflict Resolution, Staff Development | Communication: Patient Advocacy, Interdisciplinary Collaboration, Documentation",
+    "rating": 5,
+    "keywords": [
+      "Hospital Management",
+      "Patient Assessment",
+      "Electronic Health Records",
+      "Quality Assurance",
+      "Team Management",
+      "Patient Advocacy"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "mid",
+    "section": "skills",
+    "content": "Clinical Skills: Vital Signs, Medication Administration, Wound Care, IV Therapy | Patient Care: Assessment, Documentation, Care Planning | Technology: EHR Systems, Medical Equipment, Patient Monitoring | Communication: Patient Education, Family Communication, Team Collaboration | Soft Skills: Empathy, Critical Thinking, Time Management | Certifications: BLS, ACLS, RN License",
+    "rating": 5,
+    "keywords": [
+      "Vital Signs",
+      "Medication Administration",
+      "Patient Assessment",
+      "EHR Systems",
+      "Patient Education",
+      "BLS"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "mid",
+    "section": "education",
+    "content": "Bachelor of Science in Nursing | University of Health Sciences | 2014 - 2018 | GPA: 3.8/4.0\nAssociate Degree in Nursing | Community College | 2012 - 2014 | GPA: 3.9/4.0\nRelevant Coursework: Medical-Surgical Nursing, Pharmacology, Health Assessment, Community Health\nCertifications: Registered Nurse License, Basic Life Support (BLS), Advanced Cardiac Life Support (ACLS)\nClinical Experience: Medical-Surgical Unit, Emergency Department, Intensive Care Unit",
+    "rating": 5,
+    "keywords": [
+      "Bachelor of Science in Nursing",
+      "RN License",
+      "Medical-Surgical Nursing",
+      "GPA 3.8",
+      "BLS",
+      "ACLS"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "senior",
+    "section": "job_description",
+    "content": "Senior Healthcare Administrator\n\nWe are seeking an experienced Senior Healthcare Administrator to lead our healthcare facility operations and ensure exceptional patient care. You will oversee administrative functions, regulatory compliance, and quality improvement initiatives.\n\nRequired Skills:\n- 8+ years in healthcare administration\n- Strong knowledge of healthcare regulations and accreditation\n- Proven leadership in quality improvement and patient safety\n- Experience with healthcare information systems\n- Excellent communication and organizational skills\n\nResponsibilities:\n- Manage daily operations of healthcare facility\n- Ensure compliance with healthcare regulations\n- Develop and implement quality improvement programs\n- Oversee budgeting and resource allocation\n- Lead and develop administrative staff",
+    "rating": 5,
+    "keywords": [
+      "Senior",
+      "Healthcare Administrator",
+      "8+ years",
+      "Regulatory Compliance",
+      "Quality Improvement",
+      "Healthcare Information Systems"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "mid",
+    "section": "job_description",
+    "content": "Registered Nurse\n\nWe're looking for a skilled Registered Nurse to join our healthcare team. You'll provide high-quality patient care and contribute to positive health outcomes in our facility.\n\nRequired Skills:\n- Current RN license and 3+ years of nursing experience\n- Strong clinical assessment and critical thinking skills\n- Proficiency in electronic health records\n- Excellent communication and interpersonal skills\n- Commitment to patient-centered care\n\nResponsibilities:\n- Assess and monitor patient conditions\n- Administer medications and treatments\n- Develop and implement care plans\n- Educate patients and families\n- Collaborate with healthcare team members",
+    "rating": 5,
+    "keywords": [
+      "Mid",
+      "Registered Nurse",
+      "3+ years",
+      "Clinical Assessment",
+      "Electronic Health Records",
+      "Patient-centered Care"
+    ]
+  },
+  {
+    "category": "healthcare",
+    "level": "junior",
+    "section": "job_description",
+    "content": "Nursing Assistant\n\nJoin our healthcare team as a Nursing Assistant! This entry-level position offers the opportunity to gain valuable experience in patient care and develop your healthcare career.\n\nRequired Skills:\n- High school diploma or equivalent\n- Certification as Nursing Assistant preferred\n- Basic knowledge of patient care procedures\n- Strong communication and compassion skills\n- Ability to work in a fast-paced environment\n\nResponsibilities:\n- Assist with daily living activities\n- Monitor and record vital signs\n- Help with patient mobility and transfers\n- Maintain clean and safe patient environment\n- Support nursing staff with patient care tasks",
+    "rating": 5,
+    "keywords": [
+      "Junior",
+      "Nursing Assistant",
+      "Certification",
+      "Patient Care",
+      "Vital Signs",
+      "Communication"
+    ]
+  }
+]

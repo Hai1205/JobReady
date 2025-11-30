@@ -4,7 +4,7 @@
 
 ## ✨ Tính năng chính
 
-### 🎯 AI-Powered CV Features
+### AI-Powered CV Features
 
 - **Smart CV Import**: Upload và tự động phân tích CV từ PDF, DOCX, TXT
 - **AI Analyze**: Phân tích CV và đưa ra suggestions cải thiện chi tiết
@@ -201,7 +201,7 @@ client/
     └── globals.css              # Additional global styles
 ```
 
-## 🎯 Key Components
+## Key Components
 
 ### CV Builder Components
 
@@ -392,7 +392,7 @@ export function middleware(request: NextRequest) {
 - **Secure Storage**: HTTP-only cookies cho production
 - **Expiration Handling**: Automatic logout khi token hết hạn
 
-## 🧪 Testing
+## Testing
 
 ### Development Scripts
 
@@ -464,7 +464,7 @@ npm run build
 npm run start
 ```
 
-## 🔧 Development Features
+## Development Features
 
 ### Turbopack
 
@@ -565,7 +565,7 @@ npm run start
 - **Conventional Commits**: Standardized commit messages
 - **Component Structure**: Consistent component organization
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 

@@ -37,13 +37,13 @@ export function TokenRefresher() {
       return;
     }
 
-    console.log("🔄 Token refresher started - will refresh every 10 minutes");
+    console.log("Token refresher started - will refresh every 10 minutes");
 
     // Refresh token immediately on mount if user is logged in
     const performRefresh = async () => {
       // Double check refresh token still exists before calling
       if (!hasRefreshToken()) {
-        console.log("⚠️ No refresh token found, skipping refresh");
+        console.log("No refresh token found, skipping refresh");
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
@@ -53,9 +53,9 @@ export function TokenRefresher() {
 
       try {
         await RefreshToken();
-        console.log("✅ Token refreshed successfully");
+        console.log("Token refreshed successfully");
       } catch (error) {
-        console.error("❌ Failed to refresh token:", error);
+        console.error("Failed to refresh token:", error);
         // Stop the interval if refresh fails
         if (intervalRef.current) {
           clearInterval(intervalRef.current);

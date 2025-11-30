@@ -90,10 +90,10 @@
         </dependency>
 
         <!-- External Integrations -->
-        <!-- Cloudinary SDK for image and file management -->
+        <!-- Cloudinary Common Module for image and file management -->
         <dependency>
-            <groupId>com.cloudinary</groupId>
-            <artifactId>cloudinary-http44</artifactId>
+            <groupId>com.example</groupId>
+            <artifactId>cloudinary-common</artifactId>
         </dependency>
     </dependencies>
 

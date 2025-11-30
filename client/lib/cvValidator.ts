@@ -254,7 +254,7 @@ export function suggestImprovements(cv: ICV): string[] {
     }
 
     if (validation.warnings.length > 0) {
-        suggestions.push(...validation.warnings.map(w => `⚠️ ${w}`));
+        suggestions.push(...validation.warnings.map(w => `${w}`));
     }
 
     return suggestions;

@@ -3,6 +3,7 @@ package com.example.cvservice.services.apis;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Async;
 
 import com.example.cvservice.dtos.*;
 import com.example.cvservice.dtos.requests.*;
@@ -11,7 +12,7 @@ import com.example.cvservice.entities.*;
 import com.example.cvservice.exceptions.OurException;
 import com.example.cvservice.mappers.*;
 import com.example.cvservice.repositoryies.*;
-import com.example.cvservice.services.CloudinaryService;
+import com.example.cloudinarycommon.CloudinaryService;
 import com.example.cvservice.services.feigns.UserFeignClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -400,7 +402,8 @@ public class CVApi extends BaseApi {
     }
 
     @Transactional
-    public CVDto handleUpdateCV(UUID cvId,
+    @Async
+    public void handleUpdateCV(UUID cvId,
             String title,
             PersonalInfoDto personalInfoDto,
             MultipartFile avatar,
@@ -410,94 +413,98 @@ public class CVApi extends BaseApi {
             Boolean isVisibility,
             String color,
             String template) {
-        CV existing = cvRepository.findById(cvId)
-                .orElseThrow(() -> new OurException("CV not found", 404));
+        try {
+            CV existing = cvRepository.findById(cvId)
+                    .orElseThrow(() -> new OurException("CV not found", 404));
 
-        // Only update if not null
-        if (title != null && !title.trim().isEmpty()) {
-            existing.setTitle(title);
-        }
-        if (color != null && !color.trim().isEmpty()) {
-            existing.setColor(color);
-        }
-        if (template != null && !template.trim().isEmpty()) {
-            existing.setTemplate(template);
-        }
-
-        if (personalInfoDto != null) {
-            PersonalInfo pi = existing.getPersonalInfo();
-
-            if (pi == null)
-                pi = new PersonalInfo();
-
-            // Only update non-null fields
-            if (personalInfoDto.getFullname() != null && !personalInfoDto.getFullname().trim().isEmpty()) {
-                pi.setFullname(personalInfoDto.getFullname());
+            // Only update if not null
+            if (title != null && !title.trim().isEmpty()) {
+                existing.setTitle(title);
             }
-            if (personalInfoDto.getEmail() != null && !personalInfoDto.getEmail().trim().isEmpty()) {
-                pi.setEmail(personalInfoDto.getEmail());
+            if (color != null && !color.trim().isEmpty()) {
+                existing.setColor(color);
             }
-            if (personalInfoDto.getPhone() != null) {
-                pi.setPhone(personalInfoDto.getPhone());
-            }
-            if (personalInfoDto.getLocation() != null) {
-                pi.setLocation(personalInfoDto.getLocation());
-            }
-            if (personalInfoDto.getSummary() != null) {
-                pi.setSummary(personalInfoDto.getSummary());
+            if (template != null && !template.trim().isEmpty()) {
+                existing.setTemplate(template);
             }
 
-            if (avatar != null && !avatar.isEmpty()) {
-                String oldAvatarPublicId = pi.getAvatarPublicId();
-                if (oldAvatarPublicId != null && !oldAvatarPublicId.isEmpty()) {
-                    cloudinaryService.deleteImage(oldAvatarPublicId);
+            if (personalInfoDto != null) {
+                PersonalInfo pi = existing.getPersonalInfo();
+
+                if (pi == null)
+                    pi = new PersonalInfo();
+
+                // Only update non-null fields
+                if (personalInfoDto.getFullname() != null && !personalInfoDto.getFullname().trim().isEmpty()) {
+                    pi.setFullname(personalInfoDto.getFullname());
+                }
+                if (personalInfoDto.getEmail() != null && !personalInfoDto.getEmail().trim().isEmpty()) {
+                    pi.setEmail(personalInfoDto.getEmail());
+                }
+                if (personalInfoDto.getPhone() != null) {
+                    pi.setPhone(personalInfoDto.getPhone());
+                }
+                if (personalInfoDto.getLocation() != null) {
+                    pi.setLocation(personalInfoDto.getLocation());
+                }
+                if (personalInfoDto.getSummary() != null) {
+                    pi.setSummary(personalInfoDto.getSummary());
                 }
 
-                var uploadResult = cloudinaryService.uploadImage(avatar);
-                if (uploadResult.containsKey("error")) {
-                    throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
+                if (avatar != null && !avatar.isEmpty()) {
+                    String oldAvatarPublicId = pi.getAvatarPublicId();
+                    if (oldAvatarPublicId != null && !oldAvatarPublicId.isEmpty()) {
+                        cloudinaryService.deleteImage(oldAvatarPublicId);
+                    }
+
+                    var uploadResult = cloudinaryService.uploadImage(avatar);
+                    if (uploadResult.containsKey("error")) {
+                        throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
+                    }
+
+                    pi.setAvatarUrl((String) uploadResult.get("url"));
+                    pi.setAvatarPublicId((String) uploadResult.get("publicId"));
                 }
 
-                pi.setAvatarUrl((String) uploadResult.get("url"));
-                pi.setAvatarPublicId((String) uploadResult.get("publicId"));
+                existing.setPersonalInfo(pi);
             }
 
-            existing.setPersonalInfo(pi);
-        }
-
-        // Only update experiences if provided
-        if (experiencesDto != null) {
-            existing.getExperiences().clear();
-            for (ExperienceDto e : experiencesDto) {
-                Experience ex = new Experience(e);
-                existing.getExperiences().add(ex);
+            // Only update experiences if provided
+            if (experiencesDto != null) {
+                existing.getExperiences().clear();
+                for (ExperienceDto e : experiencesDto) {
+                    Experience ex = new Experience(e);
+                    existing.getExperiences().add(ex);
+                }
             }
-        }
 
-        // Only update educations if provided
-        if (educationsDto != null) {
-            existing.getEducations().clear();
-            for (EducationDto ed : educationsDto) {
-                Education e = new Education(ed);
-                existing.getEducations().add(e);
+            // Only update educations if provided
+            if (educationsDto != null) {
+                existing.getEducations().clear();
+                for (EducationDto ed : educationsDto) {
+                    Education e = new Education(ed);
+                    existing.getEducations().add(e);
+                }
             }
+
+            // Only update skills if provided
+            if (skills != null) {
+                existing.getSkills().clear();
+                existing.getSkills().addAll(skills);
+            }
+
+            // Only update isVisibility if provided
+            if (isVisibility != null) {
+                existing.setIsVisibility(isVisibility);
+            }
+
+            existing.setUpdatedAt(Instant.now());
+
+            CV saved = cvRepository.save(existing);
+            logger.info("Async update completed for CV id={} (userId={})", cvId, saved.getUserId());
+        } catch (Exception e) {
+            logger.error("Async update failed for CV id={}: {}", cvId, e.getMessage(), e);
         }
-
-        // Only update skills if provided
-        if (skills != null) {
-            existing.getSkills().clear();
-            existing.getSkills().addAll(skills);
-        }
-
-        // Only update isVisibility if provided
-        if (isVisibility != null) {
-            existing.setIsVisibility(isVisibility);
-        }
-
-        existing.setUpdatedAt(Instant.now());
-
-        CV saved = cvRepository.save(existing);
-        return cvMapper.toDto(saved);
     }
 
     public Response updateCV(UUID cvId, String dataJson, MultipartFile avatar) {
@@ -514,21 +521,12 @@ public class CVApi extends BaseApi {
             String color = request.getColor();
             String template = request.getTemplate();
 
-            CVDto cvDto = handleUpdateCV(
-                    cvId,
-                    title,
-                    personalInfo,
-                    avatar,
-                    experiences,
-                    educations,
-                    skills,
-                    isVisibility,
-                    color,
-                    template);
-
-            response.setMessage("CV updated successfully");
-            response.setCv(cvDto);
-            logger.info("Updated CV id={} (userId={})", cvId, cvDto.getUserId());
+            handleUpdateCV(cvId, title, personalInfo, avatar, experiences, educations, skills, isVisibility, color, template);
+            
+            logger.info("CV update initiated for cvId={} - processing asynchronously", cvId);
+           
+            response.setStatusCode(200);
+            response.setMessage("CV update initiated successfully - processing in background");
             return response;
         } catch (OurException e) {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
@@ -567,10 +565,15 @@ public class CVApi extends BaseApi {
             return new CVDto();
         }
 
+        PersonalInfoDto personalInfo = existingCV.getPersonalInfo();
+        if (personalInfo != null) {
+            personalInfo.setAvatarUrl(null);
+        }
+
         CVDto newCV = handleCreateCV(
                 existingCV.getUserId(),
                 existingCV.getTitle() + " (Copy)",
-                existingCV.getPersonalInfo(),
+                personalInfo,
                 null,
                 existingCV.getExperiences(),
                 existingCV.getEducations(),

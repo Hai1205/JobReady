@@ -95,7 +95,7 @@ export const applySuggestionToCV = (
     const afterContent = parseAfterContent(suggestion.suggestion);
 
     // Debug logging
-    console.log('🔍 Applying suggestion:', {
+    console.log('Applying suggestion:', {
         section: suggestion.section,
         message: suggestion.message,
         originalSuggestion: suggestion.suggestion,
@@ -162,7 +162,7 @@ export const applySuggestionToCV = (
                         ...updatedCV.experiences[matchingIndex],
                         description: afterContent,
                     };
-                    console.log('✅ Applied to experience:', updatedCV.experiences[matchingIndex].company);
+                    console.log('Applied to experience:', updatedCV.experiences[matchingIndex].company);
                 } else if (updatedCV.experiences.length > 0) {
                     // Apply to first experience if no match found
                     updatedCV.experiences = [...updatedCV.experiences];
@@ -170,7 +170,7 @@ export const applySuggestionToCV = (
                         ...updatedCV.experiences[0],
                         description: afterContent,
                     };
-                    console.log('⚠️ No match found, applied to first experience');
+                    console.log('No match found, applied to first experience');
                 }
             }
             break;
@@ -198,7 +198,7 @@ export const applySuggestionToCV = (
             // Parse and add skills from suggestion
             if (suggestion.suggestion) {
                 const newSkills = parseSkillsSuggestion(suggestion.suggestion);
-                console.log('🎯 Parsed new skills:', newSkills);
+                console.log('Parsed new skills:', newSkills);
                 console.log('📋 Current skills:', updatedCV.skills);
 
                 const uniqueNewSkills = newSkills.filter(
@@ -209,10 +209,10 @@ export const applySuggestionToCV = (
 
                 if (uniqueNewSkills.length > 0) {
                     updatedCV.skills = [...updatedCV.skills, ...uniqueNewSkills];
-                    console.log('✅ Added new skills:', uniqueNewSkills);
+                    console.log('Added new skills:', uniqueNewSkills);
                     console.log('📊 Updated skills list:', updatedCV.skills);
                 } else {
-                    console.log('⚠️ No new skills to add (all already exist)');
+                    console.log('No new skills to add (all already exist)');
                 }
             }
             break;

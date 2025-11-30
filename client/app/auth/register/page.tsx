@@ -42,7 +42,7 @@ const RegisterPage: React.FC = () => {
     if (!formData.fullname) {
       newErrors.fullname = "Họ và tên là bắt buộc";
     }
-    
+
     if (!formData.username) {
       newErrors.username = "Username là bắt buộc";
     }
@@ -83,7 +83,7 @@ const RegisterPage: React.FC = () => {
       formData.password
     );
 
-    console.log("📥 Register response:", response);
+    console.log("Register response:", response);
 
     if (response?.status === 200) {
       toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.");

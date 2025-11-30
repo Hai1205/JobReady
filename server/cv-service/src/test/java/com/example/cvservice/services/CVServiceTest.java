@@ -10,6 +10,7 @@ import com.example.cvservice.repositoryies.*;
 import com.example.cvservice.services.apis.CVApi;
 import com.example.cvservice.services.feigns.UserFeignClient;
 import com.example.cvservice.dtos.responses.Response;
+import com.example.cloudinarycommon.CloudinaryService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

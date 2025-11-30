@@ -10,7 +10,7 @@ import com.example.userservice.entities.User.UserStatus;
 import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
 import com.example.userservice.repositories.UserRepository;
-import com.example.userservice.services.CloudinaryService;
+import com.example.cloudinarycommon.CloudinaryService;
 import com.example.securitycommon.utils.SecurityUtils;
 import com.example.securitycommon.models.AuthenticatedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
