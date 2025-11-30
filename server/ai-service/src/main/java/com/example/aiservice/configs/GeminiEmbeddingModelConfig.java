@@ -5,19 +5,19 @@ import org.springframework.ai.embedding.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GeminiEmbeddingModel implements EmbeddingModel {
+public class GeminiEmbeddingModelConfig implements EmbeddingModel {
 
     private final String apiKey;
     private final String apiUrl;
 
-    public GeminiEmbeddingModel(String apiKey, String apiUrl) {
+    public GeminiEmbeddingModelConfig(String apiKey, String apiUrl) {
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
     }
 
     @Override
     public float[] embed(Document document) {
-        return embed(document.getContent());
+        return embed(document.getText());
     }
 
     @Override

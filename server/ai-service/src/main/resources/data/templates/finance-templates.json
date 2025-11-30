@@ -1,0 +1,175 @@
+[
+  {
+    "category": "finance",
+    "level": "senior",
+    "section": "summary",
+    "content": "Senior Financial Analyst with 8+ years of experience in corporate finance and investment analysis. Led financial modeling for $500M+ transactions and improved forecasting accuracy by 25%. Expert in risk management, budgeting, and strategic planning, delivering insights that drove 15% cost savings and enhanced profitability.",
+    "rating": 5,
+    "keywords": [
+      "Senior",
+      "8+ years",
+      "Financial Modeling",
+      "Risk Management",
+      "Budgeting",
+      "25% improvement",
+      "Led analysis"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "mid",
+    "section": "summary",
+    "content": "Financial Analyst with 4 years of experience in financial reporting and analysis. Proficient in Excel, financial modeling, and variance analysis. Successfully prepared quarterly reports for executive team and identified cost-saving opportunities worth $200K annually. Strong analytical skills with attention to detail.",
+    "rating": 5,
+    "keywords": [
+      "4 years",
+      "Financial Reporting",
+      "Excel",
+      "Financial Modeling",
+      "Variance Analysis",
+      "Cost-saving"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "junior",
+    "section": "summary",
+    "content": "Motivated Junior Accountant with 1 year of experience in bookkeeping and financial data entry. Assisted in preparing financial statements, reconciling accounts, and processing invoices. Quick learner with strong numerical skills and commitment to accuracy in financial operations.",
+    "rating": 5,
+    "keywords": [
+      "1 year",
+      "Junior",
+      "Bookkeeping",
+      "Financial Statements",
+      "Reconciling",
+      "Numerical skills"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "senior",
+    "section": "experience",
+    "content": "• Led financial planning and analysis for $1B revenue company, developing 5-year strategic financial models and improving budget accuracy by 30%\n• Managed M&A due diligence for $300M acquisition, identifying synergies worth $50M and ensuring smooth integration post-transaction\n• Directed risk assessment and internal controls implementation, reducing financial discrepancies by 40% and strengthening compliance framework",
+    "rating": 5,
+    "keywords": [
+      "Led",
+      "Financial Planning",
+      "M&A",
+      "Due Diligence",
+      "Risk Assessment",
+      "30% improvement",
+      "Compliance"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "mid",
+    "section": "experience",
+    "content": "• Prepared monthly financial statements and variance analysis reports, providing insights that led to 20% improvement in operational efficiency\n• Developed cash flow forecasts and working capital management strategies, optimizing liquidity and reducing borrowing costs by 15%\n• Conducted cost-benefit analysis for capital projects, evaluating ROI and recommending investments that generated $1M+ in additional revenue",
+    "rating": 5,
+    "keywords": [
+      "Prepared",
+      "Financial Statements",
+      "Variance Analysis",
+      "Cash Flow",
+      "Cost-benefit",
+      "ROI",
+      "Optimized"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "senior",
+    "section": "skills",
+    "content": "Financial Analysis: Financial Modeling, Valuation, DCF, NPV, IRR | Accounting: GAAP, IFRS, Financial Reporting, Audit | Tools: Excel (Advanced), Bloomberg, SAP, Oracle Financials | Risk Management: Risk Assessment, Internal Controls, Compliance | Soft Skills: Leadership, Communication, Problem-Solving | Certifications: CFA Level 2, CPA",
+    "rating": 5,
+    "keywords": [
+      "Financial Modeling",
+      "GAAP",
+      "Excel",
+      "Bloomberg",
+      "Risk Management",
+      "CFA",
+      "CPA"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "mid",
+    "section": "skills",
+    "content": "Technical Skills: Excel (VBA, Pivot Tables), SQL, Financial Modeling | Accounting Software: QuickBooks, SAP, Oracle | Analysis: Budgeting, Forecasting, Variance Analysis | Tools: Bloomberg Terminal, FactSet, Thomson Reuters | Soft Skills: Analytical Thinking, Attention to Detail, Communication | Languages: English (Fluent), Mandarin (Conversational)",
+    "rating": 5,
+    "keywords": [
+      "Excel",
+      "SQL",
+      "Financial Modeling",
+      "QuickBooks",
+      "Budgeting",
+      "Variance Analysis",
+      "Analytical"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "mid",
+    "section": "education",
+    "content": "Bachelor of Science in Finance | University of Finance | 2016 - 2020 | GPA: 3.6/4.0\nRelevant Coursework: Corporate Finance, Financial Accounting, Investment Analysis, Economics, Statistics\nAchievements: Finance Club Treasurer, Dean's Honor Roll, Internship at Investment Bank",
+    "rating": 5,
+    "keywords": [
+      "Finance",
+      "Bachelor",
+      "GPA 3.6",
+      "Corporate Finance",
+      "Investment Analysis",
+      "Finance Club"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "senior",
+    "section": "job_description",
+    "content": "Senior Financial Analyst\n\nWe are seeking an experienced Senior Financial Analyst to provide strategic financial insights and support decision-making processes. You will lead financial modeling, analysis, and reporting for key business initiatives.\n\nRequired Skills:\n- 5+ years in financial analysis or related field\n- Advanced Excel and financial modeling expertise\n- Strong analytical and problem-solving skills\n- Experience with budgeting and forecasting\n- Knowledge of accounting principles and financial regulations\n\nResponsibilities:\n- Develop complex financial models and scenarios\n- Prepare financial reports and presentations for executives\n- Analyze financial performance and identify trends\n- Support strategic planning and investment decisions\n- Ensure compliance with financial regulations",
+    "rating": 5,
+    "keywords": [
+      "Senior",
+      "Financial Analyst",
+      "5+ years",
+      "Financial Modeling",
+      "Excel",
+      "Budgeting",
+      "Compliance"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "mid",
+    "section": "job_description",
+    "content": "Financial Analyst\n\nWe're looking for a detail-oriented Financial Analyst to join our finance team. You'll be responsible for financial reporting, analysis, and supporting budgeting processes.\n\nRequired Skills:\n- 2-4 years of financial analysis experience\n- Proficiency in Excel and financial software\n- Strong analytical and quantitative skills\n- Experience with financial reporting and budgeting\n- Good communication and presentation skills\n\nResponsibilities:\n- Prepare monthly and quarterly financial reports\n- Conduct variance analysis and trend analysis\n- Assist in budgeting and forecasting processes\n- Support financial planning and decision-making\n- Collaborate with cross-functional teams",
+    "rating": 5,
+    "keywords": [
+      "Mid",
+      "Financial Analyst",
+      "2-4 years",
+      "Excel",
+      "Financial Reporting",
+      "Budgeting",
+      "Variance Analysis"
+    ]
+  },
+  {
+    "category": "finance",
+    "level": "junior",
+    "section": "job_description",
+    "content": "Junior Accountant\n\nJoin our accounting team as a Junior Accountant! This role offers an opportunity to learn and grow in a supportive environment while contributing to essential financial operations.\n\nRequired Skills:\n- 0-2 years of accounting or finance experience\n- Basic knowledge of accounting principles\n- Proficiency in Microsoft Excel\n- Strong attention to detail and accuracy\n- Willingness to learn and take on new challenges\n\nResponsibilities:\n- Assist in bookkeeping and data entry\n- Help prepare financial statements and reports\n- Support accounts payable and receivable processes\n- Reconcile accounts and resolve discrepancies\n- Learn from senior accountants through hands-on tasks",
+    "rating": 5,
+    "keywords": [
+      "Junior",
+      "Accountant",
+      "0-2 years",
+      "Bookkeeping",
+      "Financial Statements",
+      "Excel",
+      "Attention to Detail"
+    ]
+  }
+]

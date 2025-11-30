@@ -7,13 +7,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 import com.example.securitycommon.configs.SecurityConfig;
-// import com.example.statsservice.configs.FeignConfig;
-
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.example.statsservice", "com.example.rediscommon" })
-@Import({ SecurityConfig.class
-    // , FeignConfig.class 
-})
+@Import({ SecurityConfig.class })
 @EnableFeignClients
 public class StatsServiceApplication {
     public static void main(String[] args) {

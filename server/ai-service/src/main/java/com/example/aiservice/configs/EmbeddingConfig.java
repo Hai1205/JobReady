@@ -18,6 +18,6 @@ public class EmbeddingConfig {
     @Bean
     @Primary
     public EmbeddingModel embeddingModel() {
-        return new GeminiEmbeddingModel(geminiApiKey, embeddingApiUrl);
+        return new GeminiEmbeddingModelConfig(geminiApiKey, embeddingApiUrl);
     }
 }

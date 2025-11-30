@@ -189,7 +189,7 @@ mvn spring-boot:run -pl stats-service
 - `PUT /users/{id}` - Cập nhật user
 - `DELETE /users/{id}` - Xóa user
 
-## 🔧 Cấu hình Environment
+## Cấu hình Environment
 
 ### Development
 
@@ -226,7 +226,7 @@ mvn spring-boot:run -pl stats-service
 - **Database connection**: Check MySQL service và credentials
 - **OAuth2 redirect error**: Verify callback URLs trong provider console
 
-## 🧪 Testing
+## Testing
 
 ### Chạy Tests
 
@@ -268,9 +268,9 @@ mvn test
 - **JWT (JJWT 0.12.3)** - Token management
 - **Docker & Docker Compose** - Containerization
 
-## 🔍 Key Features
+## Key Features
 
-### ✅ Implemented
+### Implemented
 
 - [x] **Kubernetes Service Discovery** (thay thế Eureka)
 - [x] API Gateway với JWT authentication
@@ -301,7 +301,7 @@ Dự án đã được chuyển đổi từ Eureka Service Discovery sang Kubern
 
 **Benefits:**
 
-- 🎯 Simplified architecture (no Eureka server)
+- Simplified architecture (no Eureka server)
 - 🚀 Better scalability with Kubernetes
 - 💪 Production-ready features (health checks, auto-scaling)
 - ☁️ Cloud-native deployment
@@ -379,8 +379,8 @@ curl http://localhost:8080/actuator/health
 
 ### Key Changes from Docker Compose
 
-- ❌ Removed: Eureka Server
-- ✅ Added: Kubernetes DNS-based discovery (`http://service-name:port`)
+- Removed: Eureka Server
+- Added: Kubernetes DNS-based discovery (`http://service-name:port`)
 - ConfigMaps replace application.properties
 - Secrets for sensitive data
 
@@ -410,6 +410,6 @@ kubectl logs deployment/service-name -n jobready
 kubectl run -it --rm debug --image=curlimages/curl --restart=Never -n jobready -- curl http://user-service:8083/actuator/health
 ```
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.

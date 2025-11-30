@@ -9,14 +9,11 @@ import org.springframework.context.annotation.Import;
 
 import com.example.rediscommon.configs.RedisConfig;
 import com.example.securitycommon.configs.SecurityConfig;
-// import com.example.authservice.configs.FeignConfig;
 
 @SpringBootApplication
 @EnableRabbit
 @ComponentScan(basePackages = { "com.example.authservice", "com.example.rabbitmq", "com.example.rediscommon" })
-@Import({ SecurityConfig.class, RedisConfig.class
-    // , FeignConfig.class 
-})
+@Import({ SecurityConfig.class, RedisConfig.class })
 @EnableFeignClients
 public class AuthServiceApplication {
 

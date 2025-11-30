@@ -1,4 +1,4 @@
-package com.example.cvservice.configs;
+package com.example.cloudinarycommon;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,4 +59,3 @@ public class ImageValidator {
         return true;
     }
 }
-

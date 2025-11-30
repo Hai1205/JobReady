@@ -56,12 +56,12 @@ const refreshAccessToken = async (): Promise<string | null> => {
   // Check if refresh token exists before attempting refresh
   const refreshToken = getRefreshToken();
   if (!refreshToken) {
-    console.log('⚠️ No refresh token available, cannot refresh access token');
+    console.log('No refresh token available, cannot refresh access token');
     return null;
   }
 
   try {
-    console.log('🔄 Attempting to refresh token...', {
+    console.log('Attempting to refresh token...', {
       hasRefreshToken: !!refreshToken,
       refreshTokenLength: refreshToken?.length
     });
@@ -77,14 +77,14 @@ const refreshAccessToken = async (): Promise<string | null> => {
       }
     );
 
-    console.log('✅ Token refreshed successfully', response.data);
+    console.log('Token refreshed successfully', response.data);
 
     // Wait a bit to ensure cookie is set
     await new Promise(resolve => setTimeout(resolve, 100));
 
     return getCookie('access_token');
   } catch (error) {
-    console.error('❌ Token refresh failed:', error);
+    console.error('Token refresh failed:', error);
 
     // Chỉ xóa cookie khi server trả về lỗi 401 (invalid/expired token)
     if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -98,7 +98,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
         window.location.href = '/auth/login';
       }
     } else {
-      console.log('⚠️ Server or network error, keeping tokens');
+      console.log('Server or network error, keeping tokens');
     }
     return null;
   }
@@ -165,23 +165,23 @@ axiosInstance.interceptors.response.use(
             return axiosInstance(config);
           })
           .catch((err) => {
-            console.error('❌ Queued request failed:', config.url, err);
+            console.error('Queued request failed:', config.url, err);
             return Promise.reject(err);
           });
       }
 
       config._retry = true;
       isRefreshing = true;
-      console.log('🔄 Starting token refresh due to 401 from:', config.url);
+      console.log('Starting token refresh due to 401 from:', config.url);
 
       try {
         const newToken = await refreshAccessToken();
 
         if (newToken && config.headers) {
           config.headers.Authorization = `Bearer ${newToken}`;
-          console.log('✅ Retrying original request with new token:', config.url);
+          console.log('Retrying original request with new token:', config.url);
         } else {
-          console.error('❌ No new token received, cannot retry request');
+          console.error('No new token received, cannot retry request');
           processQueue(new Error('Token refresh failed'), null);
           isRefreshing = false;
           return Promise.reject(error);
@@ -195,7 +195,7 @@ axiosInstance.interceptors.response.use(
 
         return axiosInstance(config);
       } catch (refreshError) {
-        console.error('❌ Token refresh error:', refreshError);
+        console.error('Token refresh error:', refreshError);
         processQueue(refreshError, null);
         isRefreshing = false;
         return Promise.reject(refreshError);

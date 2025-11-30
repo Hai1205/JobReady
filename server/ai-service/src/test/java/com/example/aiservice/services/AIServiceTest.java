@@ -1,14 +1,13 @@
 package com.example.aiservice.services;
 
-import com.example.aiservice.configs.OpenRouterConfig;
 import com.example.aiservice.dtos.responses.Response;
 import com.example.aiservice.services.apis.AIApi;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.ai.chat.client.ChatClient;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class AIServiceTest {
 
     @Mock
-    private OpenRouterConfig openRouterConfig;
+    private ChatClient chatClient;
 
     @Mock
-    private EnhancedEmbeddingService embeddingService;
+    private EmbeddingService embeddingService;
 
     @Mock
     private PromptBuilderService promptBuilderService;
@@ -31,18 +30,15 @@ class AIServiceTest {
     private com.example.aiservice.services.feigns.CVFeignClient cvFeignClient;
 
     private AIApi aiService;
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
         aiService = new AIApi(
-            openRouterConfig,
-            embeddingService,
-            promptBuilderService,
-            fileParserService,
-            cvFeignClient
-        );
+                chatClient,
+                embeddingService,
+                promptBuilderService,
+                fileParserService,
+                cvFeignClient);
     }
 
     @Test
@@ -62,9 +58,9 @@ class AIServiceTest {
 
         // Assert
         assertEquals(500, response.getStatusCode());
-        assertTrue(response.getMessage().contains("Unrecognized token") || 
-                   response.getMessage().contains("JSON") ||
-                   response.getMessage().contains("Cannot deserialize"));
+        assertTrue(response.getMessage().contains("Unrecognized token") ||
+                response.getMessage().contains("JSON") ||
+                response.getMessage().contains("Cannot deserialize"));
     }
 
     @Test

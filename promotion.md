@@ -32,7 +32,7 @@
 
 ## Tính năng Nổi bật (7 phút)
 
-### 🤖 AI-Powered Features (3 phút)
+### AI-Powered Features (3 phút)
 
 - **Smart CV Import:**
 

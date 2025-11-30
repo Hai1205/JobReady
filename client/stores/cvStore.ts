@@ -382,7 +382,7 @@ export const useCVStore = createStore<ICVStore>(
 			} catch (error) {
 				console.error("PDF generation error:", error);
 				toast.error(
-					`❌ Lỗi tạo PDF: ${error instanceof Error ? error.message : "Unknown error"
+					`Lỗi tạo PDF: ${error instanceof Error ? error.message : "Unknown error"
 					}`
 				);
 			};

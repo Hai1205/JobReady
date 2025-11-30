@@ -182,7 +182,7 @@ export const useAIStore = createStore<IAIStore>(
 			} as Partial<IAIStore>);
 
 			// const sectionName = getSectionDisplayName(suggestion.section);
-			// toast.success(`✅ Đã áp dụng gợi ý cho "${sectionName}"`);
+			// toast.success(`Đã áp dụng gợi ý cho "${sectionName}"`);
 		},
 
 		handleSetIsAnalyzing: (isAnalyzing: boolean): void => {

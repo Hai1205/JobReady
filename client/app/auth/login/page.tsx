@@ -54,7 +54,7 @@ const LoginPage: React.FC = () => {
 
     const response = await login(formData.identifier, formData.password);
 
-    console.log("📥 Kết quả đăng nhập:", response);
+    console.log("Kết quả đăng nhập:", response);
 
     if (response?.status === 403) {
       router.push(

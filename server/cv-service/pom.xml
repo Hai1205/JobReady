@@ -93,10 +93,10 @@
         </dependency>
 
         <!-- Cloud Integration -->
-        <!-- Cloudinary SDK for media storage and file uploads -->
+        <!-- Cloudinary Common Module for media storage and file uploads -->
         <dependency>
-            <groupId>com.cloudinary</groupId>
-            <artifactId>cloudinary-http44</artifactId>
+            <groupId>com.example</groupId>
+            <artifactId>cloudinary-common</artifactId>
         </dependency>
 
         <!-- Testing Tools -->
