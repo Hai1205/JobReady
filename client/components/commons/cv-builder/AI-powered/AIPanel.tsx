@@ -16,10 +16,6 @@ interface AIPanelProps {
   onAccordionChange?: (value: string) => void;
 }
 
-/**
- * AIPanel - Panel hiển thị tất cả tính năng AI ở sidebar
- * Bao gồm Quick Analyze, Job Match Analysis, và AI Suggestions
- */
 export function AIPanel({
   externalFile,
   onExternalFileProcessed,

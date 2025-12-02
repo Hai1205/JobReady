@@ -477,7 +477,9 @@ class AuthServiceTest {
         forgotRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(forgotRequest);
 
-        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(null);
+        Response nullResponse = new Response();
+        nullResponse.setUser(null);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(nullResponse);
 
         // Act
         Response response = authService.forgotPassword(identifier, dataJson);
@@ -560,6 +562,10 @@ class AuthServiceTest {
         registerRequest.setFullname("New User");
         String dataJson = objectMapper.writeValueAsString(registerRequest);
 
+        Response createResponse = new Response();
+        createResponse.setUser(mockUser);
+        when(userFeignClient.registerUser(dataJson)).thenReturn(createResponse);
+
         // Act
         Response response = authService.register(dataJson);
 
@@ -636,7 +642,9 @@ class AuthServiceTest {
         verifyRequest.setOtp("123456");
         String dataJson = objectMapper.writeValueAsString(verifyRequest);
 
-        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(null);
+        Response nullResponse = new Response();
+        nullResponse.setUser(null);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(nullResponse);
 
         // Act
         Response response = authService.verifyOTP(identifier, dataJson);
@@ -673,7 +681,9 @@ class AuthServiceTest {
         changePasswordRequest.setConfirmPassword("newPassword");
         String dataJson = objectMapper.writeValueAsString(changePasswordRequest);
 
-        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(null);
+        Response nullResponse = new Response();
+        nullResponse.setUser(null);
+        when(userFeignClient.findUserByIdentifier(identifier)).thenReturn(nullResponse);
 
         // Act
         Response response = authService.changePassword(identifier, dataJson);
@@ -757,7 +767,10 @@ class AuthServiceTest {
         when(jwtUtil.validateRefreshToken(anyString())).thenReturn(true);
         when(jwtUtil.extractEmail(anyString())).thenReturn("nonexistent@example.com");
         when(jwtUtil.extractUserId(anyString())).thenReturn("some-user-id");
-        when(userFeignClient.findUserByEmail(anyString())).thenReturn(null);
+        
+        Response nullResponse = new Response();
+        nullResponse.setUser(null);
+        when(userFeignClient.findUserByEmail(anyString())).thenReturn(nullResponse);
 
         // Act
         Response response = authService.refreshToken(

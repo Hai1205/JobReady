@@ -7,9 +7,10 @@
  * Generate Modern Template HTML
  * @param cv - CV data
  * @param primaryColor - Primary theme color (hex)
+ * @param fontFamily - Font family to use (default: 'Inter, sans-serif')
  * @returns Complete HTML string with inline CSS
  */
-export function generateModernTemplate(cv: ICV, primaryColor: string): string {
+export function generateModernTemplate(cv: ICV, primaryColor: string, fontFamily: string = 'Inter, sans-serif'): string {
   // Helper function to escape HTML
   const escapeHtml = (text: string): string => {
     const div = document.createElement('div');
@@ -128,7 +129,7 @@ export function generateModernTemplate(cv: ICV, primaryColor: string): string {
   // Complete HTML document
   return `
     <div style="max-width: 210mm; margin: 0 auto; background-color: white; padding: 40px; min-height: 297mm; 
-                font-family: 'Times New Roman', Times, serif; font-size: 13px; line-height: 1.5; color: #000;">
+                font-family: ${fontFamily}; font-size: 13px; line-height: 1.5; color: #000;">
       <!-- Header Section -->
       <div style="display: flex; gap: 30px; align-items: flex-start; margin-bottom: 30px; 
                   padding-bottom: 20px; border-bottom: 2px solid ${primaryColor};">
@@ -143,7 +144,7 @@ export function generateModernTemplate(cv: ICV, primaryColor: string): string {
             ${escapeHtml(cv.personalInfo?.fullname || 'Họ và tên')}
           </h1>
           <p style="font-size: 15px; color: #666; font-style: italic; margin-bottom: 15px; margin-top: 0;">
-            ${escapeHtml(cv.title || 'Vị trí ứng tuyển')}
+            ${escapeHtml(cv.title || 'Untitled CV')}
           </p>
           <div style="font-size: 13px; color: #333; line-height: 1.8;">
             ${contactInfo}

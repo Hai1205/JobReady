@@ -27,7 +27,7 @@ export default function CVCard({
     <div key={cv.id} className="group flex flex-col gap-3">
       {/* CV Preview Container */}
       <div
-        className="relative aspect-[210/297] w-full rounded-lg border border-border bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden cursor-pointer"
+        className="relative aspect-210/297 w-full rounded-lg border border-border bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden cursor-pointer"
         onClick={() => setDialogOpen(true)}
       >
         {/* Badge template */}
@@ -54,7 +54,7 @@ export default function CVCard({
         </div>
 
         {/* Overlay khi hover với buttons */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
           <div className="absolute bottom-0 left-0 right-0 p-3 flex gap-2">
             <Button
               onClick={(e) => {

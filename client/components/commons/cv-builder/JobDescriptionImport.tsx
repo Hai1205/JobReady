@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { useAIStore } from "@/stores/aiStore";
 import { useCVStore } from "@/stores/cvStore";
 import { JobDescriptionMatchResult } from "./JobDescriptionMatchResult";
+import { detectCVLanguage } from "@/lib/languageDetector";
 
 interface JobDescriptionImportProps {
   currentCV: ICV | null;
@@ -31,7 +32,6 @@ export function JobDescriptionImport({
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [jdFile, setJdFile] = useState<File | null>(null);
-  const [language, setLanguage] = useState<string>("vi");
 
   // State for analysis results
   const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
@@ -104,16 +104,20 @@ export function JobDescriptionImport({
       }
 
       const response = await analyzeCVWithJD(
+      // Auto-detect language from CV content
+      const detectedLanguage = detectCVLanguage(currentCV);
+      console.log('🌐 Detected CV language:', detectedLanguage);
+
+      const response = await analyzeCVWithJD(
         jobDescription,
         jdFile,
-        language,
+        detectedLanguage,
         currentCV.title,
         currentCV.personalInfo,
         currentCV.experiences,
         currentCV.educations,
         currentCV.skills
       );
-
       const maybeResponse = (response as any).data;
       const responseData = maybeResponse?.data
         ? maybeResponse.data

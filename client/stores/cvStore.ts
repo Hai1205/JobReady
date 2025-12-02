@@ -1,5 +1,5 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
-import { createStore, IBaseStore } from "@/lib/initialStore";
+import { createStore, EStorageType, IBaseStore } from "@/lib/initialStore";
 import { renderCVToHTMLAsync } from "@/components/commons/cv-builder/CVRenderer";
 import { toast } from "react-toastify";
 import { testFormData } from "@/lib/utils";
@@ -42,13 +42,15 @@ export interface ICVStore extends IBaseStore {
 		skills: string[],
 		isVisibility: boolean,
 		color: string,
-		template: string
+		template: string,
+		font: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	deleteCV: (
 		cvId: string
 	) => Promise<IApiResponse<void>>;
 	duplicateCV: (
-		cvId: string
+		cvId: string,
+		userId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	importCV: (
 		userId: string,
@@ -116,6 +118,7 @@ const initialState = {
 		isVisibility: true,
 		color: '#000000',
 		template: 'default',
+		font: 'Inter, sans-serif',
 		createdAt: '',
 		updatedAt: '',
 	}
@@ -254,7 +257,8 @@ export const useCVStore = createStore<ICVStore>(
 			skills: string[],
 			isVisibility: boolean,
 			color: string,
-			template: string
+			template: string,
+			font: string
 		): Promise<IApiResponse<ICVDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
@@ -265,7 +269,8 @@ export const useCVStore = createStore<ICVStore>(
 				skills,
 				isVisibility,
 				color,
-				template
+				template,
+				font
 			}));
 			if (avatar) formData.append("avatar", avatar);
 			testFormData(formData);
@@ -293,9 +298,9 @@ export const useCVStore = createStore<ICVStore>(
 			return { data: { success: true } } as IApiResponse;
 		},
 
-		duplicateCV: async (cvId: string): Promise<IApiResponse<ICVDataResponse>> => {
+		duplicateCV: async (cvId: string, userId: string): Promise<IApiResponse<ICVDataResponse>> => {
 			return await get().handleRequest(async () => {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/${cvId}/duplicate`);
+				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/${cvId}/duplicate/users/${userId}`);
 
 				if (res.data && res.data.success && res.data.cv) {
 					set({ currentCV: res.data.cv });
@@ -408,4 +413,5 @@ export const useCVStore = createStore<ICVStore>(
 			set({ ...initialState });
 		},
 	}),
+	{ storageType: EStorageType.LOCAL }
 );

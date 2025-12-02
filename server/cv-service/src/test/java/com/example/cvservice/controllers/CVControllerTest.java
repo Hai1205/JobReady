@@ -229,16 +229,16 @@ class CVControllerTest {
     @WithMockUser(authorities = { "admin", "user" })
     void testDuplicateCV_Success() throws Exception {
         // Arrange
-        when(cvService.duplicateCV(cvId)).thenReturn(mockResponse);
+        when(cvService.duplicateCV(cvId, userId)).thenReturn(mockResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/api/v1/cvs/{cvId}/duplicate", cvId)
+        mockMvc.perform(post("/api/v1/cvs/{cvId}/duplicate/users/{userId}", cvId, userId)
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.message").value("Success"));
 
-        verify(cvService).duplicateCV(cvId);
+        verify(cvService).duplicateCV(cvId, userId);
     }
 
     @Test
@@ -290,15 +290,13 @@ class CVControllerTest {
     @Test
     @WithMockUser(authorities = { "guest" })
     void testCreateCV_WithInsufficientRole_Unauthorized() throws Exception {
-        // Arrange - Mock the service to return a response (authorization is not
-        // enforced on this endpoint)
+        // Arrange - Mock the service to return a response (authorization is enforced)
         when(cvService.createCV(userId)).thenReturn(mockResponse);
 
-        // Act & Assert - Since no @PreAuthorize annotation exists, any authenticated
-        // user can access
+        // Act & Assert - User with 'guest' authority should be unauthorized
         mockMvc.perform(post("/api/v1/cvs/users/{userId}", userId)
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isForbidden());
     }
 }
 

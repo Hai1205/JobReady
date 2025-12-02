@@ -11,6 +11,7 @@ import { useCVStore } from "@/stores/cvStore";
 import { useAIStore } from "@/stores/aiStore";
 import { useRef } from "react";
 import { toast } from "react-toastify";
+import { templates } from "../templates/templateProvider";
 
 export function PersonalInfoStep() {
   const { currentCV, handleUpdateCV } = useCVStore();
@@ -20,6 +21,8 @@ export function PersonalInfoStep() {
   if (!currentCV) {
     return <div>Loading...</div>;
   }
+
+  const templateInfo = templates.find((t) => t.id === currentCV.template);
 
   const handleChange = (field: string, value: string) => {
     handleUpdateCV({
@@ -87,72 +90,74 @@ export function PersonalInfoStep() {
       </div>
 
       {/* Avatar Upload Section */}
-      <Card className="p-6">
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col items-center gap-4">
-            <Avatar className="h-24 w-24">
-              {(currentCV?.personalInfo?.avatarUrl ||
-                currentCV?.personalInfo?.avatarPublicId) && (
-                <AvatarImage
-                  src={
-                    currentCV.personalInfo.avatarUrl ||
-                    currentCV.personalInfo.avatarPublicId ||
-                    ""
-                  }
-                />
-              )}
-              <AvatarFallback className="text-lg">
-                {currentCV?.personalInfo?.fullname
-                  ? currentCV?.personalInfo?.fullname
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()
-                  : "CV"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Tải ảnh lên
-              </Button>
-              {currentCV?.avatar && (
+      {templateInfo?.hasAvatar && (
+        <Card className="p-6">
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col items-center gap-4">
+              <Avatar className="h-24 w-24">
+                {(currentCV?.personalInfo?.avatarUrl ||
+                  currentCV?.personalInfo?.avatarPublicId) && (
+                  <AvatarImage
+                    src={
+                      currentCV.personalInfo.avatarUrl ||
+                      currentCV.personalInfo.avatarPublicId ||
+                      ""
+                    }
+                  />
+                )}
+                <AvatarFallback className="text-lg">
+                  {currentCV?.personalInfo?.fullname
+                    ? currentCV?.personalInfo?.fullname
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                    : "CV"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={removeAvatar}
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  <X className="h-4 w-4 mr-2" />
-                  Xóa ảnh
+                  <Upload className="h-4 w-4 mr-2" />
+                  Tải ảnh lên
                 </Button>
-              )}
+                {currentCV?.avatar && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={removeAvatar}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Xóa ảnh
+                  </Button>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
             </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarUpload}
-              className="hidden"
-            />
+            <div className="flex-1">
+              <h3 className="font-semibold mb-2">Ảnh đại diện</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Tải lên ảnh đại diện để CV của bạn trông chuyên nghiệp hơn.
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                <li>• Định dạng: JPG, PNG, GIF</li>
+                <li>• Kích thước tối đa: 5MB</li>
+              </ul>
+            </div>
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold mb-2">Ảnh đại diện</h3>
-            <p className="text-sm text-muted-foreground mb-2">
-              Tải lên ảnh đại diện để CV của bạn trông chuyên nghiệp hơn.
-            </p>
-            <ul className="text-xs text-muted-foreground space-y-1">
-              <li>• Định dạng: JPG, PNG, GIF</li>
-              <li>• Kích thước tối đa: 5MB</li>
-            </ul>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-2">

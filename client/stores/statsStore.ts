@@ -1,5 +1,5 @@
 import { EHttpType, handleRequest, IApiResponse } from "@/lib/axiosInstance";
-import { createStore, IBaseStore } from "@/lib/initialStore";
+import { createStore, EStorageType, IBaseStore } from "@/lib/initialStore";
 
 export interface IStatsResponse {
 	dashboardStats?: IDashboardStats;
@@ -145,4 +145,5 @@ export const useStatsStore = createStore<IStatsStore>(
 			return null;
 		},
 	}),
+	{ storageType: EStorageType.LOCAL }
 );

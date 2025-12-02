@@ -85,6 +85,7 @@ public class CVMapper {
 
         dto.setColor(cv.getColor() != null ? cv.getColor() : "#3498db");
         dto.setTemplate(cv.getTemplate() != null ? cv.getTemplate() : "modern");
+        dto.setFont(cv.getFont() != null ? cv.getFont() : "Inter, sans-serif");
 
         dto.setCreatedAt(cv.getCreatedAt() != null ? cv.getCreatedAt().toString() : null);
         dto.setUpdatedAt(cv.getUpdatedAt() != null ? cv.getUpdatedAt().toString() : null);
@@ -130,6 +131,7 @@ public class CVMapper {
 
         cv.setColor(dto.getColor() != null ? dto.getColor() : "#3498db");
         cv.setTemplate(dto.getTemplate() != null ? dto.getTemplate() : "modern");
+        cv.setFont(dto.getFont() != null ? dto.getFont() : "Inter, sans-serif");
         cv.setIsVisibility(dto.getIsVisibility() != null ? dto.getIsVisibility() : false);
 
         if (dto.getUpdatedAt() != null) {

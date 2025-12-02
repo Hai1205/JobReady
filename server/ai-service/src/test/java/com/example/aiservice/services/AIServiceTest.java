@@ -2,6 +2,7 @@ package com.example.aiservice.services;
 
 import com.example.aiservice.dtos.responses.Response;
 import com.example.aiservice.services.apis.AIApi;
+import com.example.aiservice.services.CompactPromptBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +22,7 @@ class AIServiceTest {
     private EmbeddingService embeddingService;
 
     @Mock
-    private PromptBuilderService promptBuilderService;
+    private CompactPromptBuilder promptBuilderService;
 
     @Mock
     private FileParserService fileParserService;

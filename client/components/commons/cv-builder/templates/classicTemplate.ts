@@ -7,9 +7,10 @@
  * Generate Classic Template HTML
  * @param cv - CV data
  * @param primaryColor - Primary theme color (hex)
+ * @param fontFamily - Font family to use (default: 'Inter, sans-serif')
  * @returns Complete HTML string with inline CSS
  */
-export function generateClassicTemplate(cv: ICV, primaryColor: string): string {
+export function generateClassicTemplate(cv: ICV, primaryColor: string, fontFamily: string = 'Inter, sans-serif'): string {
   // Helper function to escape HTML
   const escapeHtml = (text: string): string => {
     const div = document.createElement('div');
@@ -143,7 +144,7 @@ export function generateClassicTemplate(cv: ICV, primaryColor: string): string {
   // Complete HTML document
   return `
     <div style="max-width: 210mm; margin: 0 auto; background-color: white; padding: 40px 50px; min-height: 297mm; 
-                font-family: 'Georgia', 'Times New Roman', Times, serif; font-size: 13px; line-height: 1.6; color: #000;">
+                font-family: ${fontFamily}; font-size: 13px; line-height: 1.6; color: #000;">
       <!-- Header Section - Centered -->
       <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px;">
         ${avatarHtml}
@@ -154,7 +155,7 @@ export function generateClassicTemplate(cv: ICV, primaryColor: string): string {
         </h1>
         
         <p style="font-size: 16px; color: #666; margin: 5px 0; font-style: italic; font-weight: 500;">
-          ${escapeHtml(cv.title || 'Vị trí ứng tuyển')}
+          ${escapeHtml(cv.title || 'Untitled CV')}
         </p>
         
         ${contactInfo}

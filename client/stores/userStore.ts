@@ -196,4 +196,5 @@ export const useUserStore = createStore<IUserStore>(
 			set({ ...initialState });
 		},
 	}),
+	{ storageType: EStorageType.LOCAL }
 );

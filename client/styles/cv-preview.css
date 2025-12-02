@@ -1,9 +1,11 @@
 /* CV Preview Styling with Custom Properties */
 
-/* Container uses CSS custom property for dynamic color theming */
+/* Container uses CSS custom property for dynamic color theming and font */
 #cv-preview-content {
   --cv-primary-color: #3498db;
+  --cv-font-family: 'Inter', sans-serif;
   /* Default - will be overridden by inline style */
+  font-family: var(--cv-font-family);
 }
 
 /* Section Headers */

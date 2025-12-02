@@ -45,48 +45,51 @@ export default function AISuggestionCard({
     }
   };
 
-  // Parse suggestion text to extract Before and After content (or raw)
-  const parseSuggestionParts = (suggestionText: string) => {
-    if (!suggestionText) return { before: null, after: null, raw: null };
+  // Format data for display based on section type
+  const formatDataForDisplay = (data: any, section: string) => {
+    if (!data) return null;
 
-    const lines = suggestionText.split("\n");
-    let beforeContent: string | null = null;
-    let afterContent: string | null = null;
+    switch (section.toLowerCase()) {
+      case "skills":
+      case "skill":
+      case "kỹ năng":
+        return data.skills && Array.isArray(data.skills) ? data.skills : null;
 
-    // Find Before line
-    const beforeLineIndex = lines.findIndex((line) =>
-      line.trim().startsWith("Before:")
-    );
-    if (beforeLineIndex !== -1) {
-      const beforeLine = lines[beforeLineIndex];
-      beforeContent = beforeLine
-        .replace(/^Before:\s*/i, "")
-        .trim()
-        .replace(/^['"]|['"]$/g, ""); // Remove quotes
+      case "summary":
+      case "personal info":
+      case "personalinfo":
+      case "thông tin cá nhân":
+      case "title":
+      case "tiêu đề":
+      case "fullname":
+      case "name":
+      case "họ tên":
+      case "email":
+      case "phone":
+      case "điện thoại":
+      case "số điện thoại":
+      case "location":
+      case "địa chỉ":
+      case "vị trí":
+        return data.text || null;
+
+      case "experience":
+      case "experiences":
+      case "kinh nghiệm":
+      case "kinh nghiệm làm việc":
+        return data.description || null;
+
+      case "education":
+      case "educations":
+      case "học vấn":
+        return data.field || data.degree || null;
+
+      default:
+        return null;
     }
-
-    // Find After line
-    const afterLineIndex = lines.findIndex((line) =>
-      line.trim().startsWith("After:")
-    );
-    if (afterLineIndex !== -1) {
-      const afterLine = lines[afterLineIndex];
-      afterContent = afterLine
-        .replace(/^After:\s*/i, "")
-        .trim()
-        .replace(/^['"]|['"]$/g, ""); // Remove quotes
-    }
-
-    // If there is no explicit Before line, treat this as a special/raw suggestion
-    // In that case we do NOT want to show a 'Sau' label — show raw text only.
-    if (!beforeContent && !afterContent) {
-      return { before: null, after: null, raw: suggestionText };
-    }
-
-    return { before: beforeContent, after: afterContent, raw: null };
   };
 
-  const { before, after, raw } = parseSuggestionParts(suggestion.suggestion);
+  const displayData = formatDataForDisplay(suggestion.data, suggestion.section);
 
   return (
     <Card className={suggestion.applied ? "opacity-50" : ""}>
@@ -116,31 +119,40 @@ export default function AISuggestionCard({
               )}
             </div>
 
-            {suggestion.suggestion && (
+            {displayData && (
               <div className="bg-muted p-3 rounded-md space-y-2">
-                {before && (
-                  <div>
-                    <p className="text-xs font-medium text-red-600 mb-1">
-                      Trước:
-                    </p>
-                    <p className="text-sm font-mono text-black bg-red-200 p-2 rounded border-l-2 border-red-200">
-                      {before}
-                    </p>
+                <p className="text-xs font-medium text-green-600 mb-1">
+                  Dữ liệu đề xuất:
+                </p>
+                {Array.isArray(displayData) ? (
+                  // Display skills as chips
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.map((skill, index) => (
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="bg-green-100 text-green-800 border-green-300"
+                      >
+                        {skill}
+                      </Badge>
+                    ))}
                   </div>
+                ) : (
+                  // Display text content
+                  <p className="text-sm text-black bg-green-100 p-2 rounded border-l-4 border-green-500 whitespace-pre-wrap">
+                    {displayData}
+                  </p>
                 )}
-                {after && (
-                  <div>
-                    <p className="text-xs font-medium text-green-600 mb-1">
-                      Sau:
-                    </p>
-                    <p className="text-sm font-mono text-black bg-green-200 p-2 rounded border-l-2 border-green-200">
-                      {after}
-                    </p>
-                  </div>
-                )}
-                {!before && !after && (
-                  <p className="text-sm font-mono text-black bg-green-200 p-2 rounded border-l-2 border-green-200">{suggestion.suggestion}</p>
-                )}
+              </div>
+            )}
+
+            {!displayData && suggestion.suggestion && (
+              // Fallback to old format if no data provided
+              <div className="bg-muted p-3 rounded-md">
+                <p className="text-xs font-medium text-blue-600 mb-1">Gợi ý:</p>
+                <p className="text-sm text-black bg-blue-50 p-2 rounded border-l-2 border-blue-300">
+                  {suggestion.suggestion}
+                </p>
               </div>
             )}
 

@@ -1,86 +1,7 @@
 /**
  * Helper functions to apply AI suggestions to CV data
+ * Updated to use suggestion.data directly instead of parsing text
  */
-
-/**
- * Parse suggestion text to extract "After" content
- * Example: "Before: 'old text'\nAfter: 'new text'" => "new text"
- */
-const parseAfterContent = (suggestionText: string): string => {
-    if (!suggestionText) return "";
-
-    // Split by newline and find the "After:" line
-    const lines = suggestionText.split('\n');
-    const afterLineIndex = lines.findIndex(line => line.trim().startsWith('After:'));
-
-    if (afterLineIndex !== -1) {
-        const afterLine = lines[afterLineIndex];
-        // Remove "After:" and trim quotes if present
-        const afterText = afterLine
-            .replace(/^After:\s*/i, '')
-            .trim()
-            .replace(/^['"]|['"]$/g, ''); // Remove leading and trailing quotes
-
-        return afterText;
-    }
-
-    // Fallback: try regex match for single line format
-    const afterMatch = suggestionText.match(/After:\s*['"](.*?)['"]/);
-    if (afterMatch && afterMatch[1]) {
-        return afterMatch[1].trim();
-    }
-
-    // If still no match, try without quotes
-    const afterMatchNoQuotes = suggestionText.match(/After:\s*(.+)/);
-    if (afterMatchNoQuotes && afterMatchNoQuotes[1]) {
-        return afterMatchNoQuotes[1].trim();
-    }
-
-    // If no "After:" pattern found, return the original suggestion
-    return suggestionText.trim();
-};
-
-/**
- * Extract skills from suggestion text
- * Handles multiple formats:
- * 1. "Technical Skills: A, B. Soft Skills: C, D."
- * 2. "Thêm kỹ năng như 'Spring Boot', 'Docker', 'RESTful API'"
- * 3. "After: 'skill1, skill2, skill3'"
- */
-const parseSkillsSuggestion = (suggestionText: string): string[] => {
-    // Try to get content after "After:" first
-    const afterContent = parseAfterContent(suggestionText);
-
-    // If no "After:" pattern, work with the full suggestion text
-    const textToParse = afterContent || suggestionText;
-
-    // Extract skills from quotes (e.g., 'Spring Boot', 'Docker')
-    const quotedSkillsMatch = textToParse.match(/['"]([^'"]+)['"]/g);
-    if (quotedSkillsMatch && quotedSkillsMatch.length > 0) {
-        const skills = quotedSkillsMatch
-            .map((match) => match.replace(/['"]/g, "").trim())
-            .filter((skill) => skill.length > 0 && skill.length < 100); // Reasonable skill name length
-
-        if (skills.length > 0) {
-            console.log('📝 Extracted skills from quotes:', skills);
-            return skills;
-        }
-    }
-
-    // Fallback: Remove category labels and split by common delimiters
-    const cleanedText = textToParse
-        .replace(/(Technical Skills|Soft Skills|Kỹ năng|Skills|Thêm|như|để phù hợp|với mô tả công việc)[:：]?\s*/gi, "")
-        .replace(/\.\s*/g, ","); // Replace periods with commas
-
-    // Split by comma and clean up
-    const skills = cleanedText
-        .split(",")
-        .map((skill) => skill.trim())
-        .filter((skill) => skill.length > 0 && skill.length < 100);
-
-    console.log('📝 Extracted skills from text:', skills);
-    return skills;
-};
 
 export const applySuggestionToCV = (
     cv: ICV | null,
@@ -91,86 +12,80 @@ export const applySuggestionToCV = (
     const updatedCV = { ...cv };
     const section = suggestion.section.toLowerCase().trim();
 
-    // Extract the "After" content from suggestion
-    const afterContent = parseAfterContent(suggestion.suggestion);
+    // Use suggestion.data directly - AI provides actual data to apply
+    const data = suggestion.data;
 
     // Debug logging
-    console.log('Applying suggestion:', {
+    console.log('🔧 Applying suggestion:', {
         section: suggestion.section,
         message: suggestion.message,
-        originalSuggestion: suggestion.suggestion,
-        parsedAfterContent: afterContent
+        data: data
     });
+
+    if (!data) {
+        console.warn('⚠️ No data provided in suggestion, cannot apply');
+        return null;
+    }
 
     switch (section) {
         case "summary":
         case "personal info":
         case "personalinfo":
         case "thông tin cá nhân":
-            updatedCV.personalInfo = {
-                ...updatedCV.personalInfo,
-                summary: afterContent || updatedCV.personalInfo.summary,
-            };
+            if (data.text) {
+                updatedCV.personalInfo = {
+                    ...updatedCV.personalInfo,
+                    summary: data.text,
+                };
+                console.log('✅ Applied summary:', data.text.substring(0, 50) + '...');
+            }
             break;
 
         case "experience":
         case "experiences":
         case "kinh nghiệm":
         case "kinh nghiệm làm việc":
-            // If lineNumber is provided, update specific experience
-            if (
-                suggestion.lineNumber !== undefined &&
-                suggestion.lineNumber !== null &&
-                updatedCV.experiences[suggestion.lineNumber]
-            ) {
-                updatedCV.experiences = [...updatedCV.experiences];
-                const targetExp = updatedCV.experiences[suggestion.lineNumber];
-                updatedCV.experiences[suggestion.lineNumber] = {
-                    ...targetExp,
-                    description: afterContent || targetExp.description,
-                };
-            } else if (afterContent) {
-                // Try to find matching experience by company name in message
-                // Example: "Experience at TechCorp Inc. thiếu metrics..."
-                const companyMatch = suggestion.message.match(/(?:at|tại)\s+([^.]+)/i);
-                const companyName = companyMatch ? companyMatch[1].trim() : null;
+            if (data.description) {
+                // Clean description: remove bullet points (•, -, *, etc.) from the beginning of each line
+                const cleanedDescription = data.description
+                    .split('\n')
+                    .map(line => line.trim().replace(/^[•\-*]\s*/, ''))
+                    .join('\n');
 
-                let matchingIndex = -1;
-
-                if (companyName) {
-                    // Try exact or partial company name match
-                    matchingIndex = updatedCV.experiences.findIndex(
-                        (exp) =>
-                            exp.company.toLowerCase().includes(companyName.toLowerCase()) ||
-                            companyName.toLowerCase().includes(exp.company.toLowerCase())
-                    );
-                }
-
-                // If no company match, try matching by description content
-                if (matchingIndex === -1) {
-                    const beforeContent = suggestion.suggestion.match(/Before:\s*['"](.*?)['"]/)?.[1];
-                    if (beforeContent) {
-                        matchingIndex = updatedCV.experiences.findIndex(
-                            (exp) => exp.description.includes(beforeContent.substring(0, 30))
-                        );
-                    }
-                }
-
-                if (matchingIndex !== -1) {
+                // If lineNumber is provided, update specific experience
+                if (
+                    suggestion.lineNumber !== undefined &&
+                    suggestion.lineNumber !== null &&
+                    updatedCV.experiences[suggestion.lineNumber]
+                ) {
                     updatedCV.experiences = [...updatedCV.experiences];
-                    updatedCV.experiences[matchingIndex] = {
-                        ...updatedCV.experiences[matchingIndex],
-                        description: afterContent,
+                    updatedCV.experiences[suggestion.lineNumber] = {
+                        ...updatedCV.experiences[suggestion.lineNumber],
+                        description: cleanedDescription,
                     };
-                    console.log('Applied to experience:', updatedCV.experiences[matchingIndex].company);
+                    console.log('✅ Applied experience at index:', suggestion.lineNumber);
                 } else if (updatedCV.experiences.length > 0) {
-                    // Apply to first experience if no match found
+                    // Apply to first/most recent experience
                     updatedCV.experiences = [...updatedCV.experiences];
                     updatedCV.experiences[0] = {
                         ...updatedCV.experiences[0],
-                        description: afterContent,
+                        description: cleanedDescription,
                     };
-                    console.log('No match found, applied to first experience');
+                    console.log('✅ Applied experience to most recent position');
+                }
+            }
+
+            // Handle date updates
+            if (data.startDate || data.endDate) {
+                const targetIndex = suggestion.lineNumber ?? 0;
+                if (updatedCV.experiences[targetIndex]) {
+                    updatedCV.experiences = [...updatedCV.experiences];
+                    updatedCV.experiences[targetIndex] = {
+                        ...updatedCV.experiences[targetIndex],
+                        ...(data.startDate && { startDate: data.startDate }),
+                        ...(data.endDate && { endDate: data.endDate }),
+                    };
+                    console.log('✅ Applied dates:', data.startDate, '->', data.endDate);
                 }
             }
             break;
@@ -178,30 +93,29 @@ export const applySuggestionToCV = (
         case "education":
         case "educations":
         case "học vấn":
-            // If lineNumber is provided, update specific education
-            if (
-                suggestion.lineNumber !== undefined &&
-                updatedCV.educations[suggestion.lineNumber]
-            ) {
+            const eduIndex = suggestion.lineNumber ?? 0;
+            if (updatedCV.educations[eduIndex]) {
                 updatedCV.educations = [...updatedCV.educations];
-                const targetEdu = updatedCV.educations[suggestion.lineNumber];
-                updatedCV.educations[suggestion.lineNumber] = {
-                    ...targetEdu,
-                    field: afterContent || targetEdu.field,
+                updatedCV.educations[eduIndex] = {
+                    ...updatedCV.educations[eduIndex],
+                    ...(data.field && { field: data.field }),
+                    ...(data.degree && { degree: data.degree }),
+                    ...(data.startDate && { startDate: data.startDate }),
+                    ...(data.endDate && { endDate: data.endDate }),
                 };
+                console.log('✅ Applied education updates');
             }
             break;
 
         case "skills":
         case "skill":
         case "kỹ năng":
-            // Parse and add skills from suggestion
-            if (suggestion.suggestion) {
-                const newSkills = parseSkillsSuggestion(suggestion.suggestion);
-                console.log('Parsed new skills:', newSkills);
+            if (data.skills && Array.isArray(data.skills)) {
                 console.log('📋 Current skills:', updatedCV.skills);
+                console.log('➕ Adding skills:', data.skills);
 
-                const uniqueNewSkills = newSkills.filter(
+                // Filter out skills that already exist (case insensitive)
+                const uniqueNewSkills = data.skills.filter(
                     (skill) => !updatedCV.skills.some(
                         (existingSkill) => existingSkill.toLowerCase() === skill.toLowerCase()
                     )
@@ -209,66 +123,71 @@ export const applySuggestionToCV = (
 
                 if (uniqueNewSkills.length > 0) {
                     updatedCV.skills = [...updatedCV.skills, ...uniqueNewSkills];
-                    console.log('Added new skills:', uniqueNewSkills);
+                    console.log('✅ Added new skills:', uniqueNewSkills);
                     console.log('📊 Updated skills list:', updatedCV.skills);
                 } else {
-                    console.log('No new skills to add (all already exist)');
+                    console.log('ℹ️ All skills already exist, no new skills added');
                 }
             }
             break;
 
         case "title":
         case "tiêu đề":
-            if (afterContent) {
-                updatedCV.title = afterContent;
+            if (data.text) {
+                updatedCV.title = data.text;
+                console.log('✅ Applied title:', data.text);
             }
             break;
 
         case "fullname":
         case "name":
         case "họ tên":
-            if (afterContent) {
+            if (data.text) {
                 updatedCV.personalInfo = {
                     ...updatedCV.personalInfo,
-                    fullname: afterContent,
+                    fullname: data.text,
                 };
+                console.log('✅ Applied fullname:', data.text);
             }
             break;
 
         case "email":
-            if (afterContent) {
+            if (data.text) {
                 updatedCV.personalInfo = {
                     ...updatedCV.personalInfo,
-                    email: afterContent,
+                    email: data.text,
                 };
+                console.log('✅ Applied email:', data.text);
             }
             break;
 
         case "phone":
         case "điện thoại":
         case "số điện thoại":
-            if (afterContent) {
+            if (data.text) {
                 updatedCV.personalInfo = {
                     ...updatedCV.personalInfo,
-                    phone: afterContent,
+                    phone: data.text,
                 };
+                console.log('✅ Applied phone:', data.text);
             }
             break;
 
         case "location":
         case "địa chỉ":
         case "vị trí":
-            if (afterContent) {
+            if (data.text) {
                 updatedCV.personalInfo = {
                     ...updatedCV.personalInfo,
-                    location: afterContent,
+                    location: data.text,
                 };
+                console.log('✅ Applied location:', data.text);
             }
             break;
 
         default:
-            console.warn(`Unknown section: ${suggestion.section}`);
-            return null; // Return null if section is not recognized
+            console.warn(`⚠️ Unknown section: ${suggestion.section}`);
+            return null;
     }
 
     updatedCV.updatedAt = new Date().toISOString();

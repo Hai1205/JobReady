@@ -19,6 +19,7 @@ public class CVDto {
     private Boolean isVisibility;
     private String color;
     private String template;
+    private String font;
     private String createdAt;
     private String updatedAt;
 

@@ -22,4 +22,5 @@ public class CVCreateRequest {
     private Boolean isVisibility;
     private String color;
     private String template;
+    private String font;
 }

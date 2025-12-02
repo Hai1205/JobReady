@@ -162,7 +162,7 @@ class CVServiceTest {
         lenient().when(cvMapper.toDto(any(CV.class))).thenReturn(cvDto);
 
         // Act
-        CVDto result = cvService.handleDuplicateCV(cvId);
+        CVDto result = cvService.handleDuplicateCV(cvId, userId);
 
         // Assert
         assertNotNull(result);
@@ -186,7 +186,7 @@ class CVServiceTest {
 
         // Act & Assert
         OurException exception = assertThrows(OurException.class,
-                () -> cvService.handleDuplicateCV(cvId));
+                () -> cvService.handleDuplicateCV(cvId, userId));
         assertEquals("User not found", exception.getMessage());
         assertEquals(404, exception.getStatusCode());
     }
@@ -208,7 +208,7 @@ class CVServiceTest {
         lenient().when(cvMapper.toDto(any(CV.class))).thenReturn(cvDto);
 
         // Act - Service handles null personalInfo by creating empty PersonalInfoDto
-        CVDto result = cvService.handleDuplicateCV(cvId);
+        CVDto result = cvService.handleDuplicateCV(cvId, userId);
 
         // Assert - Should succeed with default empty personal info
         assertNotNull(result);
@@ -233,7 +233,7 @@ class CVServiceTest {
         lenient().when(cvMapper.toDto(any(CV.class))).thenReturn(cvDto);
 
         // Act - Service uses experiences from existing CV
-        CVDto result = cvService.handleDuplicateCV(cvId);
+        CVDto result = cvService.handleDuplicateCV(cvId, userId);
 
         // Assert - Should succeed with experiences from existing CV
         assertNotNull(result);
@@ -258,7 +258,7 @@ class CVServiceTest {
         lenient().when(cvMapper.toDto(any(CV.class))).thenReturn(cvDto);
 
         // Act - Service uses educations from existing CV
-        CVDto result = cvService.handleDuplicateCV(cvId);
+        CVDto result = cvService.handleDuplicateCV(cvId, userId);
 
         // Assert - Should succeed with educations from existing CV
         assertNotNull(result);
@@ -426,7 +426,7 @@ class CVServiceTest {
 
         // Act - method is now async and returns void
         cvService.handleUpdateCV(cvId, "Updated Title", personalInfoDto, null,
-                experiencesDto, educationsDto, Arrays.asList("Java", "Spring"), true, "red", "classic");
+            experiencesDto, educationsDto, Arrays.asList("Java", "Spring"), true, "red", "classic", null);
 
         // Assert - verify that the method was called and repository interactions happened
         verify(cvRepository).findById(cvId);
@@ -441,7 +441,7 @@ class CVServiceTest {
 
         // Act & Assert
         OurException exception = assertThrows(OurException.class,
-                () -> cvService.handleUpdateCV(cvId, "Updated Title", null, null, null, null, null, null, null, null));
+                () -> cvService.handleUpdateCV(cvId, "Updated Title", null, null, null, null, null, null, null, null, null));
         assertEquals("CV not found", exception.getMessage());
         assertEquals(404, exception.getStatusCode());
     }
@@ -495,8 +495,7 @@ class CVServiceTest {
 
         // Assert
         assertEquals(200, response.getStatusCode());
-        assertEquals("CV updated successfully", response.getMessage());
-        assertNotNull(response.getCv());
+        assertEquals("CV update initiated successfully - processing in background", response.getMessage());
     }
 
     @Test
@@ -563,7 +562,7 @@ class CVServiceTest {
         when(cvMapper.toDto(newCv)).thenReturn(newCvDto);
 
         // Act
-        CVDto result = cvService.handleDuplicateCV(cvId);
+        CVDto result = cvService.handleDuplicateCV(cvId, userId);
 
         // Assert
         assertNotNull(result);
@@ -597,7 +596,7 @@ class CVServiceTest {
         when(cvMapper.toDto(newCv)).thenReturn(newCvDto);
 
         // Act
-        Response response = cvService.duplicateCV(cvId);
+        Response response = cvService.duplicateCV(cvId, userId);
 
         // Assert
         assertEquals(200, response.getStatusCode());

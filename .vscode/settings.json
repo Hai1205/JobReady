@@ -4,6 +4,7 @@
         "aiservice",
         "amqp",
         "cloudinarycommon",
+        "CVHTML",
         "cvservice",
         "Dskip",
         "dtos",

@@ -1,4 +1,4 @@
-# multi-stage Dockerfile for Spring Boot (Maven + OpenJDK 17)
+# multi-stage Dockerfile for Spring Boot (Maven + OpenJDK 21)
 # Place this Dockerfile in each service folder (discovery, gateway, auth, cv)
 
 # -------- build stage --------
@@ -19,16 +19,24 @@ RUN JAR_FILE=$(ls server/ai-service/target/*.jar | head -n 1) && echo "Jar: $JAR
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
-# Add a non-root ai for safety (optional)
-RUN useradd -m appuser
-USER appuser
+# Create credentials directory
+RUN mkdir -p /app/credentials
 
+# Add a non-root user for safety (optional)
+RUN useradd -m appuser
+
+# Copy jar file first
 COPY --from=build /workspace/app.jar ./app.jar
 
-# Expose default port (the actual binding comes from Spring config)
-EXPOSE 8080
+# Change ownership to appuser
+RUN chown -R appuser:appuser /app
 
-# JVM options can be adjusted via env JAVA_OPTS
-ENV JAVA_OPTS="-Xss512k -Xms256m -Xmx512m"
+USER appuser
+
+# Expose default port (the actual binding comes from Spring config)
+EXPOSE 8085
+
+# JVM options - Increased memory for AI service
+ENV JAVA_OPTS="-Xss512k -Xms512m -Xmx1024m"
 
 ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar /app/app.jar" ]

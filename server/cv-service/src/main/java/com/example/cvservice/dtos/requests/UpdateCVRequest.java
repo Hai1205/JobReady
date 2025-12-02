@@ -20,4 +20,5 @@ public class UpdateCVRequest {
     private Boolean isVisibility;
     private String color;
     private String template;
+    private String font;
 }

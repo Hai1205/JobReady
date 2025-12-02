@@ -95,7 +95,7 @@ export default function MyCVsPageClient() {
   };
 
   const handleDuplicate = (cvId: string) => {
-    duplicateCV(cvId);
+    duplicateCV(cvId, userAuth?.id || "");
     router.push("/cv-builder");
   };
 

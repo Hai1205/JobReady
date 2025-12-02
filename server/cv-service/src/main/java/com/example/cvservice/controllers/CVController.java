@@ -76,11 +76,12 @@ public class CVController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/{cvId}/duplicate")
+    @PostMapping("/{cvId}/duplicate/users/{userId}")
     @PreAuthorize("hasAnyAuthority('admin','user')")
-    public ResponseEntity<Response> duplicateCV(@PathVariable("cvId") UUID cvId) {
-        Response response = cvService.duplicateCV(cvId);
-
+    public ResponseEntity<Response> duplicateCV(
+        @PathVariable("cvId") UUID cvId, 
+        @PathVariable("userId") UUID userId) {
+        Response response = cvService.duplicateCV(cvId, userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

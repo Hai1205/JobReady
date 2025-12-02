@@ -73,7 +73,9 @@ public class CVApi extends BaseApi {
             List<String> skills,
             Boolean isVisibility,
             String color,
-            String template) {
+            String template,
+            String font
+        ) {
 
         logger.info("Creating CV for userId={} title='{}' experiencesCount={} educationsCount={}",
                 userId, title,
@@ -88,8 +90,9 @@ public class CVApi extends BaseApi {
         boolean visibility = ensureVisibility(isVisibility);
         String safeColor = (color != null && !color.trim().isEmpty()) ? color : "#3498db";
         String safeTemplate = (template != null && !template.trim().isEmpty()) ? template : "modern";
+        String safeFont = (font != null && !font.trim().isEmpty()) ? font : "Inter";
 
-        CV cv = new CV(userId, title, skills, visibility, safeColor, safeTemplate);
+        CV cv = new CV(userId, title, skills, visibility, safeColor, safeTemplate, safeFont);
 
         PersonalInfo personalInfo = buildPersonalInfo(personalInfoDto, avatar);
         cv.setPersonalInfo(personalInfo);
@@ -192,14 +195,7 @@ public class CVApi extends BaseApi {
         Response response = new Response();
 
         try {
-            UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
-
-            if (user == null) {
-                logger.warn("User not found when creating CV: userId={}", userId);
-                throw new OurException("User not found", 404);
-            }
-
-                CVDto savedCV = handleCreateCV(userId, "Untitled CV", null, null, null, null, null, null, null, null);
+            CVDto savedCV = handleCreateNew(userId);
 
                 response.setStatusCode(201);
                 response.setMessage("CV created successfully");
@@ -212,6 +208,17 @@ public class CVApi extends BaseApi {
             e.printStackTrace();
             return buildErrorResponse(500, "Error creating CV: " + e.getMessage());
         }
+    }
+
+    public CVDto handleCreateNew(UUID userId) {
+        UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+
+        if (user == null) {
+            logger.warn("User not found when creating CV: userId={}", userId);
+            throw new OurException("User not found", 404);
+        }
+
+        return handleCreateCV(userId, "Untitled CV", null, null, null, null, null, null, null, null, null);
     }
 
     public Response importCV(UUID userId, String dataJson) {
@@ -227,8 +234,8 @@ public class CVApi extends BaseApi {
 
                 CVCreateRequest request = objectMapper.readValue(dataJson, CVCreateRequest.class);
                 CVDto savedCV = handleCreateCV(userId, request.getTitle(), request.getPersonalInfo(),
-                        null, request.getExperiences(), request.getEducations(), request.getSkills(),
-                        request.getIsVisibility(), request.getColor(), request.getTemplate());
+                    null, request.getExperiences(), request.getEducations(), request.getSkills(),
+                    request.getIsVisibility(), request.getColor(), request.getTemplate(), request.getFont());
 
                 response.setStatusCode(201);
                 response.setMessage("CV imported successfully");
@@ -412,7 +419,8 @@ public class CVApi extends BaseApi {
             List<String> skills,
             Boolean isVisibility,
             String color,
-            String template) {
+            String template,
+            String font) {
         try {
             CV existing = cvRepository.findById(cvId)
                     .orElseThrow(() -> new OurException("CV not found", 404));
@@ -426,6 +434,9 @@ public class CVApi extends BaseApi {
             }
             if (template != null && !template.trim().isEmpty()) {
                 existing.setTemplate(template);
+            }
+            if (font != null && !font.trim().isEmpty()) {
+                existing.setFont(font);
             }
 
             if (personalInfoDto != null) {
@@ -502,6 +513,8 @@ public class CVApi extends BaseApi {
 
             CV saved = cvRepository.save(existing);
             logger.info("Async update completed for CV id={} (userId={})", cvId, saved.getUserId());
+        } catch (OurException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Async update failed for CV id={}: {}", cvId, e.getMessage(), e);
         }
@@ -520,8 +533,9 @@ public class CVApi extends BaseApi {
             Boolean isVisibility = request.getIsVisibility();
             String color = request.getColor();
             String template = request.getTemplate();
+            String font = request.getFont();
 
-            handleUpdateCV(cvId, title, personalInfo, avatar, experiences, educations, skills, isVisibility, color, template);
+            handleUpdateCV(cvId, title, personalInfo, avatar, experiences, educations, skills, isVisibility, color, template, font);
             
             logger.info("CV update initiated for cvId={} - processing asynchronously", cvId);
            
@@ -557,12 +571,12 @@ public class CVApi extends BaseApi {
         return true;
     }
 
-    public CVDto handleDuplicateCV(UUID cvId) {
-        logger.info("Duplicating CV id={}", cvId);
+    public CVDto handleDuplicateCV(UUID cvId, UUID userId) {
+        logger.info("Duplicating CV id={} for userId={}", cvId, userId);
         CVDto existingCV = handleGetCVById(cvId);
 
         if (existingCV == null) {
-            return new CVDto();
+            return handleCreateNew(userId);
         }
 
         PersonalInfoDto personalInfo = existingCV.getPersonalInfo();
@@ -571,7 +585,7 @@ public class CVApi extends BaseApi {
         }
 
         CVDto newCV = handleCreateCV(
-                existingCV.getUserId(),
+                userId,
                 existingCV.getTitle() + " (Copy)",
                 personalInfo,
                 null,
@@ -580,7 +594,9 @@ public class CVApi extends BaseApi {
                 new ArrayList<>(existingCV.getSkills()),
                 existingCV.getIsVisibility(),
                 existingCV.getColor(),
-                existingCV.getTemplate());
+                existingCV.getTemplate(),
+                existingCV.getFont()
+            );
 
         logger.info("Duplicated CV id={} created new CV id={}", cvId, newCV.getId());
         return newCV;
@@ -603,11 +619,11 @@ public class CVApi extends BaseApi {
         }
     }
 
-    public Response duplicateCV(UUID cvId) {
+    public Response duplicateCV(UUID cvId, UUID userId) {
         Response response = new Response();
 
         try {
-            CVDto duplicatedCV = handleDuplicateCV(cvId);
+            CVDto duplicatedCV = handleDuplicateCV(cvId, userId);
 
             response.setMessage("CV duplicated successfully");
             response.setCv(duplicatedCV);

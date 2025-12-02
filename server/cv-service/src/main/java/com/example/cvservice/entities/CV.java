@@ -29,15 +29,17 @@ public class CV {
         this.isVisibility = false;
         this.color = "#3498db";
         this.template = "modern";
+        this.font = "Inter, sans-serif";
     }
 
-    public CV(UUID userId, String title, List<String> skills, Boolean isVisibility, String color, String template) {
+    public CV(UUID userId, String title, List<String> skills, Boolean isVisibility, String color, String template, String font) {
         this.isVisibility = isVisibility;
         this.title = title;
         this.userId = userId;
         this.skills = skills;
         this.color = color;
         this.template = template;
+        this.font = font;
     }
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -60,6 +62,9 @@ public class CV {
 
     @Column(nullable = false)
     private String template = "modern"; // Default modern template
+
+    @Column(nullable = false)
+    private String font = "Inter, sans-serif"; // Default font family
 
     private Instant createdAt;
     private Instant updatedAt;

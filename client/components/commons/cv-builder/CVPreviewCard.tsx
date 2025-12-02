@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
-import { generateCVHTML } from "./templates/templates";
+import { generateCVHTML } from "./templates/templateProvider";
 
 interface CVPreviewCardProps {
   currentCV: ICV | null;
@@ -26,8 +26,8 @@ export function CVPreviewCard({ currentCV, className }: CVPreviewCardProps) {
   }, [currentCV]);
 
   return (
-    <Card 
-    className={`overflow-hidden bg-white shadow-2xl border-border/50 ${className}`}
+    <Card
+      className={`overflow-hidden bg-white shadow-2xl border-border/50 ${className}`}
     >
       <div
         id="cv-preview-content"

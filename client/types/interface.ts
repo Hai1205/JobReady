@@ -23,6 +23,7 @@ declare global {
         isVisibility: boolean
         color: string
         template: string
+        font: string
         createdAt?: string
         updatedAt?: string
     }
@@ -63,6 +64,16 @@ declare global {
         lineNumber?: number
         message: string
         suggestion: string
+        data?: {
+            skills?: string[]
+            text?: string
+            description?: string
+            startDate?: string
+            endDate?: string
+            field?: string
+            degree?: string
+            [key: string]: any
+        }
         applied: boolean
     }
 

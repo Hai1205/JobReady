@@ -9,6 +9,7 @@ import { Upload, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAIStore } from "@/stores/aiStore";
 import { useCVStore } from "@/stores/cvStore";
+import { detectCVLanguage } from "@/lib/languageDetector";
 
 interface CompactJobMatchProps {
   currentCV: ICV | null;
@@ -133,10 +134,14 @@ export function CompactJobMatch({
     handleSetIsAnalyzing(true);
 
     try {
+      // Auto-detect language from CV content
+      const detectedLanguage = detectCVLanguage(currentCV);
+      console.log("🌐 Detected CV language:", detectedLanguage);
+
       const response = await analyzeCVWithJD(
         jobDescription,
         jdFile,
-        "vi",
+        detectedLanguage,
         currentCV.title,
         currentCV.personalInfo,
         currentCV.experiences,

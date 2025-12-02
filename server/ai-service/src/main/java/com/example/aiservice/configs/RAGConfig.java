@@ -1,5 +1,7 @@
 package com.example.aiservice.configs;
 
+import com.example.aiservice.services.GeminiChatModel;
+import com.example.aiservice.services.GeminiService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -24,28 +26,81 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @Slf4j
 public class RAGConfig {
 
-    private int chunkSize = 1000;
-    private int chunkOverlap = 200;
-    private int topK = 5;
+    private int chunkSize = 500;
+    private int chunkOverlap = 100;
+    private int topK = 2;
+
+    /**
+     * GeminiChatModel Bean - Custom ChatModel implementation for Gemini API
+     */
+    @Bean
+    public ChatModel geminiChatModel(GeminiService geminiService) {
+        log.info("Creating GeminiChatModel bean");
+        return new GeminiChatModel(geminiService);
+    }
 
     /**
      * ChatClient Bean - Sử dụng cho RAG Generation
      */
+    // @Bean
+    // public ChatClient chatClient(ChatModel chatModel) {
+    //     log.info("Creating ChatClient bean with Gemini ChatModel");
+    //     return ChatClient.builder(chatModel)
+    //             .defaultSystem("""
+    //                     You are an expert CV reviewer and career coach.
+    //                     Provide detailed, actionable feedback based on best practices.
+    //                     Always use specific examples and metrics when possible.
+    //                     """)
+    //             .build();
+    // }
     @Bean
     public ChatClient chatClient(ChatModel chatModel) {
         log.info("Creating ChatClient bean with Gemini ChatModel");
         return ChatClient.builder(chatModel)
-                .defaultSystem("""
-                        You are an expert CV reviewer and career coach.
-                        Provide detailed, actionable feedback based on best practices.
-                        Always use specific examples and metrics when possible.
-                        """)
+                .defaultSystem("You are a CV expert. Provide concise, actionable feedback.")
                 .build();
     }
 
     /**
      * VectorStore Bean - PGVector với Gemini Embeddings (Cập nhật 1.0+)
      */
+    // @Bean
+    // public VectorStore vectorStore(
+    //         JdbcTemplate jdbcTemplate,
+    //         EmbeddingModel embeddingModel,
+    //         @Value("${PGVECTOR_DIMENSION}") int dimensions,
+    //         @Value("${PGVECTOR_DISTANCE_TYPE}") String distanceTypeStr,
+    //         @Value("${PGVECTOR_INDEX_TYPE}") String indexTypeStr,
+    //         @Value("${PGVECTOR_REMOVE_EXISTING}") boolean removeExisting,
+    //         @Value("${PGVECTOR_INITIALIZE_SCHEMA}") boolean initializeSchema) {
+
+    //     log.info("Creating PgVectorStore (Spring AI 1.0.3+) - Dimensions: {}", dimensions);
+
+    //     PgDistanceType distanceType = switch (distanceTypeStr.toUpperCase()) {
+    //         case "COSINE_DISTANCE", "COSINE" -> PgDistanceType.COSINE_DISTANCE;
+    //         case "EUCLIDEAN_DISTANCE", "L2", "L2_DISTANCE" -> PgDistanceType.EUCLIDEAN_DISTANCE;
+    //         case "NEGATIVE_INNER_PRODUCT", "NIP", "INNER_PRODUCT", "IP" -> PgDistanceType.NEGATIVE_INNER_PRODUCT; // SỬA:
+    //                                                                                                               // Map
+    //                                                                                                               // alias
+    //                                                                                                               // sang
+    //                                                                                                               // NEGATIVE_INNER_PRODUCT
+    //         default -> PgDistanceType.COSINE_DISTANCE;
+    //     };
+
+    //     PgIndexType indexType = switch (indexTypeStr.toUpperCase()) {
+    //         case "HNSW" -> PgIndexType.HNSW;
+    //         case "IVFFLAT", "IVF" -> PgIndexType.IVFFLAT;
+    //         default -> PgIndexType.HNSW;
+    //     };
+
+    //     return PgVectorStore.builder(jdbcTemplate, embeddingModel)
+    //             .dimensions(dimensions)
+    //             .distanceType(distanceType)
+    //             .indexType(indexType)
+    //             .initializeSchema(initializeSchema)
+    //             .removeExistingVectorStoreTable(removeExisting)
+    //             .build();
+    // }
     @Bean
     public VectorStore vectorStore(
             JdbcTemplate jdbcTemplate,
@@ -56,24 +111,17 @@ public class RAGConfig {
             @Value("${PGVECTOR_REMOVE_EXISTING}") boolean removeExisting,
             @Value("${PGVECTOR_INITIALIZE_SCHEMA}") boolean initializeSchema) {
 
-        log.info("Creating PgVectorStore (Spring AI 1.0.3+) - Dimensions: {}", dimensions);
+        log.info("Creating PgVectorStore - Dimensions: {}", dimensions);
 
         PgDistanceType distanceType = switch (distanceTypeStr.toUpperCase()) {
             case "COSINE_DISTANCE", "COSINE" -> PgDistanceType.COSINE_DISTANCE;
             case "EUCLIDEAN_DISTANCE", "L2", "L2_DISTANCE" -> PgDistanceType.EUCLIDEAN_DISTANCE;
-            case "NEGATIVE_INNER_PRODUCT", "NIP", "INNER_PRODUCT", "IP" -> PgDistanceType.NEGATIVE_INNER_PRODUCT; // SỬA:
-                                                                                                                  // Map
-                                                                                                                  // alias
-                                                                                                                  // sang
-                                                                                                                  // NEGATIVE_INNER_PRODUCT
+            case "NEGATIVE_INNER_PRODUCT", "NIP", "INNER_PRODUCT", "IP" -> PgDistanceType.NEGATIVE_INNER_PRODUCT;
             default -> PgDistanceType.COSINE_DISTANCE;
         };
 
-        PgIndexType indexType = switch (indexTypeStr.toUpperCase()) {
-            case "HNSW" -> PgIndexType.HNSW;
-            case "IVFFLAT", "IVF" -> PgIndexType.IVFFLAT;
-            default -> PgIndexType.HNSW;
-        };
+        // OPTIMIZED: Use HNSW for faster searches
+        PgIndexType indexType = PgIndexType.HNSW; // Force HNSW regardless of config
 
         return PgVectorStore.builder(jdbcTemplate, embeddingModel)
                 .dimensions(dimensions)

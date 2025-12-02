@@ -24,6 +24,7 @@ import { EducationStep } from "./steps/EducationStep";
 import { useState } from "react";
 import { ColorThemeSelector } from "./ColorThemeSelector";
 import { TemplateSelector } from "./TemplateSelector";
+import { FontSelector } from "./FontSelector";
 import { useRouter } from "next/navigation";
 
 const steps = [
@@ -84,7 +85,8 @@ export function CVBuilderWizard() {
       currentCV.skills,
       currentCV.isVisibility,
       currentCV.color,
-      currentCV.template
+      currentCV.template,
+      currentCV.font
     );
   };
 
@@ -144,10 +146,10 @@ export function CVBuilderWizard() {
               </Label>
               <p className="text-sm text-muted-foreground mt-1">
                 {isCustomizationExpanded
-                  ? "Thu gọn để ẩn các tùy chọn màu sắc và template"
+                  ? "Thu gọn để ẩn các tùy chọn màu sắc, template và font chữ"
                   : `Màu: ${currentCV?.color || "#3498db"} | Template: ${
                       currentCV?.template || "modern"
-                    }`}
+                    } | Font: ${currentCV?.font || "Inter, sans-serif"}`}
               </p>
             </div>
             <Button type="button" variant="ghost" size="sm" className="gap-2">
@@ -180,17 +182,19 @@ export function CVBuilderWizard() {
                 selectedTemplate={currentCV?.template || "modern"}
                 onTemplateChange={(template) => handleCVUpdate({ template })}
               />
+
+              {/* Divider */}
+              <div className="border-t border-border" />
+
+              {/* Font Selector */}
+              <FontSelector
+                selectedFont={currentCV?.font || "Inter, sans-serif"}
+                onFontChange={(font) => handleCVUpdate({ font })}
+              />
             </div>
           )}
         </div>
       </div>
-
-      {/* File Import */}
-      {/* {currentStep === 0 && (
-        <div className="mb-4">
-          <FileImport />
-        </div>
-      )} */}
 
       {/* Progress Bar */}
       <div className="flex flex-col gap-2">

@@ -5,9 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
-import { templates } from "./templates/templates";
+import { templates } from "./templates/templateProvider";
 
 interface TemplateSelectorProps {
   selectedTemplate: string;
@@ -67,7 +68,7 @@ export function TemplateSelector({
       {/* Preview template hiện tại - always visible */}
       {!isExpanded && selectedTemp && (
         <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-primary bg-primary/5">
-          <div className="w-12 h-16 rounded bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30 flex items-center justify-center font-bold text-primary text-xl">
+          <div className="w-12 h-16 rounded bg-linear-to-br from-primary/20 to-primary/10 border border-primary/30 flex items-center justify-center font-bold text-primary text-xl">
             {selectedTemp.preview}
           </div>
           <div className="flex-1">
@@ -103,7 +104,7 @@ export function TemplateSelector({
           </div>
 
           {/* Scrollable grid container */}
-          <div className="max-h-[420px] overflow-y-auto pr-1">
+          <ScrollArea className="h-[420px] pr-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredTemplates.map((template) => (
                 <button
@@ -142,8 +143,8 @@ export function TemplateSelector({
                   {/* Template preview mockup */}
                   <div
                     className={cn(
-                      "w-full aspect-[3/4] rounded-md mb-3 flex items-center justify-center text-4xl font-bold",
-                      "bg-gradient-to-br from-muted to-muted/50 border border-border"
+                      "w-full aspect-3/4 rounded-md mb-3 flex items-center justify-center text-4xl font-bold",
+                      "bg-linear-to-br from-muted to-muted/50 border border-border"
                     )}
                   >
                     {template.preview}
@@ -166,7 +167,7 @@ export function TemplateSelector({
                 Không tìm thấy template phù hợp
               </div>
             )}
-          </div>
+          </ScrollArea>
         </div>
       )}
     </div>

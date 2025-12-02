@@ -1,99 +1,238 @@
 package com.example.aiservice.services;
 
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 @Component
-public class PromptBuilderService {
+public class CompactPromptBuilder {
 
-  /**
-   * Build prompt for CV analysis
-   * Analyzes CV and provides strengths, weaknesses, and actionable suggestions
-   * 
-   * @return Optimized system prompt for CV analysis
-   */
-  public String buildCVAnalysisPrompt() {
+  public String buildCompactAnalysisPrompt() {
     return """
-        [VAI TRÒ]
-        Bạn là chuyên gia tuyển dụng cấp cao với 10+ năm kinh nghiệm đánh giá CV tại các công ty Fortune 500.
-        Chuyên môn: Đánh giá CV cho các vị trí công nghệ, phân tích kỹ năng, định lượng thành tích.
+        You are a CV expert. Analyze the CV and return JSON with ACTIONABLE data that can be directly applied.
 
-        [NHIỆM VỤ]
-        Phân tích CV theo 3 bước sau:
-        1. Đánh giá từng section (Personal Info, Experience, Education, Skills) theo checklist 7 gạch đầu dòng
-        2. Xác định 3 điểm mạnh nổi bật nhất và sắp xếp theo mức độ ấn tượng
-        3. Xác định 3 điểm yếu cần cải thiện gấp và ưu tiên theo tầm quan trọng
+        CRITICAL: The 'data' field must contain ACTUAL content that can be used immediately, NOT instructions.
 
-        [NGỮ CẢNH]
-        - Doanh nghiệp hiện đại ưu tiên: Kết quả đo lường được > Mô tả chung chung
-        - ATS systems yêu cầu: Keywords chính xác + Format chuẩn
-        - Recruiter đọc mỗi CV trung bình 6 giây → Cần highlight ngay từ đầu
-
-        [CHECKLIST ĐÁNH GIÁ]
-        Personal Info:
-        - ✓ Có đầy đủ: Họ tên, Email, SĐT, Địa chỉ
-        - ✓ Summary dài 2-3 câu, nêu rõ: Vị trí mục tiêu + Số năm kinh nghiệm + Top 2 kỹ năng
-        - ✗ Tránh: Email không chuyên nghiệp (VD: cuteboy123@gmail.com)
-
-        Experience:
-        - ✓ Mỗi experience có: Công ty + Vị trí + Thời gian (tháng/năm) + Mô tả
-        - ✓ Mô tả bắt đầu bằng Action Verb (VD: Developed, Led, Increased)
-        - ✓ Có số liệu định lượng (VD: "Tăng 30% performance", "Quản lý team 5 người")
-        - ✗ Tránh: Câu dài > 2 dòng, mô tả mơ hồ không có metrics
-
-        Education:
-        - ✓ Có đầy đủ: Trường + Bằng cấp + Chuyên ngành + Thời gian
-        - ✓ Thứ tự: Học vấn cao nhất lên đầu
-        - ✗ Tránh: Thiếu thời gian tốt nghiệp, bằng không liên quan
-
-        Skills:
-        - ✓ Phân loại rõ ràng: Technical skills riêng, Soft skills riêng
-        - ✓ Có ít nhất 5-7 skills liên quan đến job description
-        - ✗ Tránh: Skill quá cơ bản (VD: "Sử dụng Microsoft Word"), skill quá mơ hồ (VD: "Good communication")
-
-        [ĐỊNH DẠNG ĐẦU RA]
-        Trả về CHÍNH XÁC JSON format sau (không thêm markdown, không thêm text ngoài JSON):
         {
-          "overallScore": <number 0-100, tính theo: Personal 10% + Experience 50% + Education 20% + Skills 20%>,
-          "strengths": [
-            "<Điểm mạnh 1: Nêu cụ thể section + lý do>",
-            "<Điểm mạnh 2>",
-            "<Điểm mạnh 3>"
-          ],
-          "weaknesses": [
-            "<Điểm yếu 1: Nêu cụ thể section + vấn đề>",
-            "<Điểm yếu 2>",
-            "<Điểm yếu 3>"
-          ],
+          "overallScore": <0-100>,
+          "strengths": ["strength1", "strength2", "strength3"],
+          "weaknesses": ["weakness1", "weakness2", "weakness3"],
           "suggestions": [
             {
               "id": "<uuid>",
               "type": "improvement|warning|error",
               "section": "summary|experience|education|skills",
-              "lineNumber": null,
-              "message": "<Mô tả vấn đề cụ thể>",
-              "suggestion": "<Gợi ý cải thiện cụ thể với ví dụ>",
+              "message": "<issue description>",
+              "suggestion": "<brief instruction>",
+              "data": <actual data to apply - see examples below>,
               "applied": false
             }
           ]
         }
 
-        [ĐIỀU KIỆN]
-        - Nếu Experience thiếu metrics → Bắt buộc có suggestion type="warning" cho section đó
-        - Nếu Summary > 4 câu hoặc < 1 câu → Bắt buộc có suggestion type="error"
-        - Mỗi suggestion PHẢI có ví dụ cụ thể (Before/After)
-        - Ưu tiên suggestion theo thứ tự: error > warning > improvement
-        - Tối ưu cho SEO keyword: Nếu thiếu keyword từ job description → thêm vào suggestions
+        DATA FIELD FORMATS BY SECTION:
+        • skills: {"skills": ["React", "Node.js", "Docker"]} - Array of skill names
+        • summary: {"text": "Full paragraph of professional summary ready to use"}
+        • experience: {"description": "Complete bullet points with STAR format and metrics"}
+        • education: {"field": "Computer Science", "degree": "Bachelor"}
+        • dates: {"startDate": "2021-01", "endDate": "2024-12"}
+        • title: {"text": "Senior Backend Developer"}
 
-        [VÍ DỤ SUGGESTION TỐT]
+        EXAMPLES:
+        1. Missing skills:
         {
-          "type": "warning",
-          "section": "experience",
-          "message": "Experience at ABC Company thiếu metrics định lượng",
-          "suggestion": "Before: 'Phát triển tính năng mới'\\nAfter: 'Phát triển 3 tính năng mới giúp tăng 25% user engagement và giảm 40% load time'"
+          "section": "skills",
+          "message": "The target company works in e-commerce. Your current experience lacks specific database keywords like PostgreSQL, MongoDB",
+          "suggestion": "Add relevant database skills",
+          "data": {"skills": ["PostgreSQL", "MongoDB", "Redis"]}
         }
-                        """;
+
+        2. Missing summary:
+        {
+          "section": "summary",
+          "message": "Missing professional summary",
+          "suggestion": "Add a professional summary",
+          "data": {"text": "Backend Developer with 3+ years of experience in building scalable microservices using Java Spring Boot. Specialized in e-commerce platforms with expertise in PostgreSQL, Redis, and AWS. Track record of improving system performance by 40% through optimization."}
+        }
+
+        3. Weak experience description:
+        {
+          "section": "experience",
+          "message": "Experience at TechCorp lacks metrics and strong action verbs",
+          "suggestion": "Rewrite with STAR format",
+          "data": {"description": "• Led 5-engineer team to rebuild e-commerce platform using microservices, increasing order processing speed by 60% and reducing system downtime from 2h/week to 15min/month\\n• Implemented Redis caching strategy and database optimization, achieving 90% faster query response time and handling 50K concurrent users"}
+        }
+
+        4. Invalid dates:
+        {
+          "section": "experience",
+          "message": "Date format invalid: '2021' should be 'YYYY-MM'",
+          "suggestion": "Fix date format",
+          "data": {"startDate": "2021-01", "endDate": "2024-12"}
+        }
+
+        Scoring:
+        - Personal Info (10%): Complete contact + 2-3 sentence summary
+        - Experience (50%): Action verbs + metrics + clear dates
+        - Education (20%): Relevant degree + school + dates
+        - Skills (20%): 5-7 relevant technical skills
+
+        Return ONLY JSON, no markdown.
+        """;
+  }
+
+  public String buildCompactImprovementPrompt(String section) {
+    return """
+        Rewrite this CV section using STAR framework:
+        • Start with strong action verb (Led, Built, Increased, etc.)
+        • Add specific metrics (%, $, time saved, users impacted)
+        • Keep to 1-2 lines per bullet
+        • Use active voice, avoid "responsible for"
+
+        Example:
+        Before: "Worked on website development"
+        After: "Led 5-engineer team to rebuild website, increasing page speed by 60% and reducing bounce rate from 45% to 18%"
+
+        Return improved text only, no explanation.
+        """;
+  }
+
+  public String buildCompactJobMatchPrompt(String language) {
+    boolean isVi = "vi".equalsIgnoreCase(language);
+
+    if (isVi) {
+      return """
+          So khớp CV với Job Description và trả về JSON với dữ liệu CÓ THỂ ÁP DỤNG TRỰC TIẾP:
+
+          QUAN TRỌNG: Field 'data' phải chứa nội dung THỰC TẾ có thể dùng ngay, KHÔNG PHẢI hướng dẫn.
+
+          {
+            "overallMatchScore": <0-100>,
+            "detailedScores": {
+              "skillsMatch": <0-40>,
+              "experienceMatch": <0-30>,
+              "educationMatch": <0-15>,
+              "culturalFit": <0-10>,
+              "keywordsOptimization": <0-5>
+            },
+            "missingKeywords": ["keyword1", "keyword2"],
+            "suggestions": [
+              {
+                "id": "<uuid>",
+                "type": "improvement|warning|error",
+                "section": "summary|experience|education|skills|general",
+                "message": "<vấn đề cụ thể>",
+                "suggestion": "<hướng dẫn ngắn gọn>",
+                "data": <dữ liệu thực tế để áp dụng - xem ví dụ bên dưới>,
+                "applied": false
+              }
+            ]
+          }
+
+          ĐỊNH DẠNG FIELD DATA THEO SECTION:
+          • skills: {"skills": ["React", "Node.js", "Docker"]} - Mảng các kỹ năng
+          • summary: {"text": "Đoạn summary đầy đủ sẵn sàng sử dụng"}
+          • experience: {"description": "Các bullet points đầy đủ với STAR format và metrics"}
+          • education: {"field": "Computer Science", "degree": "Bachelor"}
+          • dates: {"startDate": "2021-01", "endDate": "2024-12"}
+
+          VÍ DỤ:
+          1. Thiếu kỹ năng:
+          {
+            "section": "skills",
+            "message": "Công ty mục tiêu làm về e-commerce. Kinh nghiệm hiện tại thiếu các kỹ năng database như PostgreSQL, MongoDB",
+            "suggestion": "Thêm các kỹ năng database phù hợp",
+            "data": {"skills": ["PostgreSQL", "MongoDB", "Redis"]}
+          }
+
+          2. Thiếu mô tả bản thân:
+          {
+            "section": "summary",
+            "message": "Thiếu phần mô tả bản thân chuyên nghiệp",
+            "suggestion": "Thêm mô tả bản thân",
+            "data": {"text": "Backend Developer với 3+ năm kinh nghiệm xây dựng microservices bằng Java Spring Boot. Chuyên về nền tảng e-commerce với chuyên môn PostgreSQL, Redis và AWS. Đã cải thiện hiệu suất hệ thống 40% thông qua tối ưu hóa."}
+          }
+
+          3. Mô tả kinh nghiệm yếu:
+          {
+            "section": "experience",
+            "message": "Kinh nghiệm tại TechCorp thiếu metrics và động từ mạnh",
+            "suggestion": "Viết lại theo STAR format",
+            "data": {"description": "• Dẫn dắt team 5 kỹ sư xây dựng lại nền tảng e-commerce bằng microservices, tăng tốc độ xử lý đơn hàng 60% và giảm downtime từ 2h/tuần xuống 15 phút/tháng\\n• Triển khai Redis caching và tối ưu database, đạt thời gian response nhanh hơn 90% và xử lý 50K người dùng đồng thời"}
+          }
+
+          Tiêu chí:
+          • Skills (40đ): % skills từ JD có trong CV
+          • Experience (30đ): Số năm kinh nghiệm + industry match
+          • Education (15đ): Degree level + field phù hợp
+          • Cultural Fit (10đ): Work style + values match
+          • Keywords (5đ): ATS keywords coverage
+
+          Chỉ trả về JSON, không markdown.
+          """;
+    } else {
+      return """
+          Match CV against Job Description and return JSON with DIRECTLY APPLICABLE data:
+
+          CRITICAL: The 'data' field must contain ACTUAL content ready to use, NOT instructions.
+
+          {
+            "overallMatchScore": <0-100>,
+            "detailedScores": {
+              "skillsMatch": <0-40>,
+              "experienceMatch": <0-30>,
+              "educationMatch": <0-15>,
+              "culturalFit": <0-10>,
+              "keywordsOptimization": <0-5>
+            },
+            "missingKeywords": ["keyword1", "keyword2"],
+            "suggestions": [
+              {
+                "id": "<uuid>",
+                "type": "improvement|warning|error",
+                "section": "summary|experience|education|skills|general",
+                "message": "<specific issue>",
+                "suggestion": "<brief instruction>",
+                "data": <actual data to apply - see examples below>,
+                "applied": false
+              }
+            ]
+          }
+
+          DATA FIELD FORMATS BY SECTION:
+          • skills: {"skills": ["React", "Node.js", "Docker"]} - Array of skill names
+          • summary: {"text": "Full paragraph of professional summary ready to use"}
+          • experience: {"description": "Complete bullet points with STAR format and metrics"}
+          • education: {"field": "Computer Science", "degree": "Bachelor"}
+          • dates: {"startDate": "2021-01", "endDate": "2024-12"}
+
+          EXAMPLES:
+          1. Missing skills:
+          {
+            "section": "skills",
+            "message": "Target company works in e-commerce. Missing database skills like PostgreSQL, MongoDB",
+            "suggestion": "Add relevant database skills",
+            "data": {"skills": ["PostgreSQL", "MongoDB", "Redis"]}
+          }
+
+          2. Missing summary:
+          {
+            "section": "summary",
+            "message": "Missing professional summary",
+            "suggestion": "Add a professional summary",
+            "data": {"text": "Backend Developer with 3+ years of experience in building scalable microservices using Java Spring Boot. Specialized in e-commerce platforms with expertise in PostgreSQL, Redis, and AWS. Track record of improving system performance by 40% through optimization."}
+          }
+
+          Criteria:
+          • Skills (40pts): % of JD skills in CV
+          • Experience (30pts): Years + industry match
+          • Education (15pts): Degree level + field match
+          • Cultural Fit (10pts): Work style + values match
+          • Keywords (5pts): ATS keyword coverage
+
+          Return JSON only, no markdown.
+          """;
+    }
   }
 
   /**

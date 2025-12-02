@@ -4,6 +4,7 @@ import { Check, ChevronDown, ChevronUp, Search } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
 
@@ -112,7 +113,7 @@ export function ColorThemeSelector({
           </div>
 
           {/* Color grid with fixed 2 rows + scroll */}
-          <div className="max-h-[280px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+          <ScrollArea className="h-[280px] pr-2">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 animate-in fade-in-50 slide-in-from-top-2 duration-200">
               {filteredColors.map((theme) => (
                 <button
@@ -151,7 +152,7 @@ export function ColorThemeSelector({
                 Không tìm thấy màu phù hợp
               </div>
             )}
-          </div>
+          </ScrollArea>
         </div>
       )}
     </div>

@@ -268,7 +268,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(authorities = "user")
     void testLogout_Success() throws Exception {
         // Arrange
         when(authService.logout(any(HttpServletResponse.class))).thenReturn(successResponse);

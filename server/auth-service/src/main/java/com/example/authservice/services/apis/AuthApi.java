@@ -53,6 +53,16 @@ public class AuthApi extends BaseApi {
             String identifier = request.getIdentifier();
             String password = request.getPassword();
 
+            if (identifier == null || identifier.trim().isEmpty()) {
+                logger.warn("Login failed: Identifier is required");
+                throw new OurException("Identifier is required", 404);
+            }
+
+            if (password == null || password.trim().isEmpty()) {
+                logger.warn("Login failed: Password is required");
+                throw new OurException("Password is required", 400);
+            }
+
             UserDto user = userFeignClient.authenticateUser(identifier, password).getUser();
 
             if (user == null) {
@@ -108,7 +118,7 @@ public class AuthApi extends BaseApi {
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeInSeconds);
 
-        if (devMode.equals("development")) {
+        if (devMode != null && devMode.equals("development")) {
             cookie.setHttpOnly(false);
             cookie.setSecure(false);
             cookie.setAttribute("SameSite", "Lax");
