@@ -3,7 +3,7 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen py-12 bg-gradient-to-b from-background to-muted/20">
       <div className="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-card border border-border rounded-lg shadow-lg p-8 md:p-12">
-          <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-8 bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
             Chính sách bảo mật
           </h1>
           <div className="prose dark:prose-invert max-w-none space-y-6">

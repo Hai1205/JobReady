@@ -4,6 +4,7 @@ import { X, Save, LucideIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AdminDialogProps<T> {
   isOpen: boolean;
@@ -49,7 +50,7 @@ function AdminDialog<T>({
           {isOpen && (
             <DialogPrimitive.Content
               className={cn(
-                "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 shadow-2xl rounded-2xl p-3 duration-200 overflow-hidden",
+                "fixed left-[50%] top-[50%] z-50 flex w-full max-w-lg max-h-[90vh] translate-x-[-50%] translate-y-[-50%] bg-linear-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 shadow-2xl rounded-2xl p-3 duration-200",
                 className
               )}
             >
@@ -58,7 +59,7 @@ function AdminDialog<T>({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="flex flex-col h-full rounded-2xl"
+                className="flex flex-col w-full rounded-2xl overflow-hidden"
               >
                 {showCloseButton && (
                   <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 bg-card/30 border border-border/30 text-muted-foreground hover:bg-card/40 hover:shadow-md transition">
@@ -68,7 +69,7 @@ function AdminDialog<T>({
                 )}
 
                 {/* Header */}
-                <header className="flex-shrink-0 flex flex-col space-y-1 text-center sm:text-left pb-2 border-b border-border/30">
+                <header className="shrink-0 flex flex-col space-y-1 text-center sm:text-left pb-2 border-b border-border/30">
                   <div className="flex items-center gap-3">
                     {Icon && (
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -76,7 +77,7 @@ function AdminDialog<T>({
                       </div>
                     )}
                     <div>
-                      <DialogPrimitive.Title className="text-lg font-semibold leading-none tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      <DialogPrimitive.Title className="text-lg font-semibold leading-none tracking-tight bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
                         {title}
                       </DialogPrimitive.Title>
                       {description && (
@@ -89,12 +90,12 @@ function AdminDialog<T>({
                 </header>
 
                 {/* Content */}
-                <div className="flex-1 overflow-auto py-2 h-full">
-                  {children}
-                </div>
+                <ScrollArea className="flex-1 min-h-0">
+                  <div className="py-2">{children}</div>
+                </ScrollArea>
 
                 {/* Footer */}
-                <footer className="flex-shrink-0 py-2 flex items-center justify-end gap-3 border-t border-border/30 bg-card/30 backdrop-blur-sm">
+                <footer className="shrink-0 py-2 flex items-center justify-end gap-3 border-t border-border/30 bg-card/30 backdrop-blur-sm">
                   <Button
                     variant="outline"
                     onClick={() => onOpenChange(false)}
@@ -105,7 +106,7 @@ function AdminDialog<T>({
                   <Button
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg hover:shadow-xl hover:shadow-primary/30 transition-all duration-200"
+                    className="bg-linear-to-br from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg hover:shadow-xl hover:shadow-primary/30 transition-all duration-200"
                   >
                     {isLoading ? (
                       <span className="flex items-center gap-2">

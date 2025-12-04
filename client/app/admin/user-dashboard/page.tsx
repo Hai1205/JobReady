@@ -187,6 +187,10 @@ function UserDashboardPage() {
     const res = await updateUser(
       data.id,
       data.fullname,
+      data.phone || "",
+      data.location || "",
+      data.birth || "",
+      data.summary || "",
       avatarFile || null,
       data.role,
       data.status
@@ -210,6 +214,11 @@ function UserDashboardPage() {
       data.email,
       data.password || "",
       data.fullname,
+      data.username,
+      data.phone || "",
+      data.location || "",
+      data.birth || "",
+      data.summary || "",
       avatarFile || null,
       data.role,
       data.status
@@ -250,7 +259,7 @@ function UserDashboardPage() {
       setUserToDelete(null);
       await deleteUser(userToDelete.id);
     } else if (!isDeleteDialog && userToResetPassword) {
-      toast.success("Đã gửi mật khẩu mới về email của người dùng!");  
+      toast.success("Đã gửi mật khẩu mới về email của người dùng!");
       setResetPasswordDialogOpen(false);
       setUserToResetPassword(null);
       await resetPassword(userToResetPassword.email);
@@ -314,7 +323,7 @@ function UserDashboardPage() {
       />
 
       <div className="space-y-4">
-        <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+        <Card className="border-border/50 shadow-lg bg-linear-to-br from-card to-card/80 backdrop-blur-sm">
           <CardHeader className="pb-4 border-b border-border/30">
             <div className="flex items-center justify-between">
               <CardTitle />
@@ -330,7 +339,7 @@ function UserDashboardPage() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="h-9 gap-2 px-4 bg-gradient-to-r from-secondary/80 to-secondary hover:from-secondary hover:to-secondary/90 shadow-md hover:shadow-lg hover:shadow-secondary/20 transition-all duration-200 hover:scale-105"
+                  className="h-9 gap-2 px-4 bg-linear-to-br from-secondary/80 to-secondary hover:from-secondary hover:to-secondary/90 shadow-md hover:shadow-lg hover:shadow-secondary/20 transition-all duration-200 hover:scale-105"
                   onClick={async () => {
                     handleRefresh();
                   }}

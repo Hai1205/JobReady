@@ -23,6 +23,10 @@ public class UserMapper {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setFullname(user.getFullname());
+        dto.setPhone(user.getPhone());
+        dto.setLocation(user.getLocation());
+        dto.setBirth(user.getBirth());
+        dto.setSummary(user.getSummary());
         dto.setRole(user.getRole() != null ? user.getRole().name() : null);
         dto.setStatus(user.getStatus() != null ? user.getStatus().name() : null);
         dto.setOauthProvider(user.getOauthProvider());
@@ -47,6 +51,10 @@ public class UserMapper {
         user.setPassword(dto.getPassword());
         user.setEmail(dto.getEmail());
         user.setFullname(dto.getFullname());
+        user.setPhone(dto.getPhone());
+        user.setLocation(dto.getLocation());
+        user.setBirth(dto.getBirth());
+        user.setSummary(dto.getSummary());
 
         if (dto.getRole() != null) {
             try {

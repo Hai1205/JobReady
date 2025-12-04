@@ -66,7 +66,7 @@ export default function CVCard({
               className="flex-1 gap-1.5 text-xs h-8"
             >
               <Copy className="h-3 w-3" />
-              Sao chép
+              Nhân bản
             </Button>
 
             {onUpdate && (

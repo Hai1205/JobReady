@@ -270,6 +270,9 @@ public class FileParserService {
                     piNode.has("summary") && !piNode.get("summary").isNull()
                             ? piNode.get("summary").asText()
                             : "",
+                    piNode.has("birth") && !piNode.get("birth").isNull()
+                            ? piNode.get("birth").asText()
+                            : null,
                     null,
                     null);
         }

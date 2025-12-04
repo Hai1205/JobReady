@@ -10,7 +10,11 @@ import {
 import { Filter } from "lucide-react";
 
 export type FilterType = "status" | "visibility" | "role";
-export const initialFilters = { status: [] as string[], role: [] as string[], visibility: [] as string[] };
+export const initialFilters = {
+  status: [] as string[],
+  role: [] as string[],
+  visibility: [] as string[],
+};
 
 interface SharedFilterProps {
   openMenuFilters: boolean;
@@ -43,7 +47,7 @@ export const SharedFilter = ({
         <Button
           variant="secondary"
           size="sm"
-          className="h-9 gap-2 px-4 bg-gradient-to-r from-secondary/80 to-secondary hover:from-secondary hover:to-secondary/90 shadow-md hover:shadow-lg hover:shadow-secondary/20 transition-all duration-200 hover:scale-105"
+          className="h-9 gap-2 px-4 bg-linear-to-br from-secondary/80 to-secondary hover:from-secondary hover:to-secondary/90 shadow-md hover:shadow-lg hover:shadow-secondary/20 transition-all duration-200 hover:scale-105"
           onClick={() => setOpenMenuFilters(!openMenuFilters)}
         >
           <Filter className="h-4 w-4" />
@@ -55,7 +59,7 @@ export const SharedFilter = ({
         align="end"
         className="w-[250px] bg-card/95 backdrop-blur-sm border border-border/50 shadow-xl"
       >
-        <DropdownMenuLabel className="text-foreground font-semibold bg-gradient-to-r from-primary/10 to-secondary/10">
+        <DropdownMenuLabel className="text-foreground font-semibold bg-linear-to-br from-primary/10 to-secondary/10">
           Bộ lọc theo
         </DropdownMenuLabel>
 
@@ -109,7 +113,8 @@ export const SharedFilter = ({
                   <Checkbox
                     id={`visibility-${visibility.value}`}
                     checked={
-                      activeFilters.visibility?.includes(visibility.value) || false
+                      activeFilters.visibility?.includes(visibility.value) ||
+                      false
                     }
                     onCheckedChange={() =>
                       toggleFilter(visibility.value, "visibility")
@@ -131,7 +136,9 @@ export const SharedFilter = ({
 
         {filterOptions?.role && (
           <div className="p-3">
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Vai trò</h4>
+            <h4 className="mb-3 text-sm font-semibold text-foreground">
+              Vai trò
+            </h4>
 
             <div className="space-y-3">
               {filterOptions.role.map((role) => (
@@ -179,7 +186,7 @@ export const SharedFilter = ({
           <Button
             size="sm"
             onClick={applyFilters}
-            className="flex-1 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-md hover:shadow-lg transition-all"
+            className="flex-1 bg-linear-to-br from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-md hover:shadow-lg transition-all"
           >
             Lọc
           </Button>

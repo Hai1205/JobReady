@@ -36,20 +36,20 @@ export const NavbarMobileMenu = ({
       </Button>
     </SheetTrigger>
 
-    <SheetContent className="w-[300px] sm:w-[400px] bg-gradient-to-br from-card to-card/80 backdrop-blur-xl border-border/50">
+    <SheetContent className="w-[300px] sm:w-[400px] bg-linear-to-br from-card to-card/80 backdrop-blur-xl border-border/50">
       <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
 
       <div className="flex items-center gap-2 mb-8 pb-6 border-b border-border/50">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-lg">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary to-secondary shadow-lg">
           <FileText className="h-5 w-5 text-primary-foreground" />
         </div>
-        <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <span className="text-xl font-bold bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
           JobReady
         </span>
       </div>
 
       {userAuth && (
-        <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border border-border/50">
+        <div className="mb-6 p-4 rounded-xl bg-linear-to-br from-primary/10 to-secondary/10 border border-border/50">
           <Link href="/settings" onClick={() => onOpenChange(false)}>
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-lg">
@@ -60,7 +60,7 @@ export const NavbarMobileMenu = ({
                     className="object-cover"
                   />
                 )}
-                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold text-lg">
+                <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-primary-foreground font-bold text-lg">
                   {userAuth.fullname?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
@@ -97,7 +97,7 @@ export const NavbarMobileMenu = ({
             className={cn(
               "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200",
               pathname === link.href
-                ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/30"
+                ? "bg-linear-to-br from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/30"
                 : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             )}
           >
@@ -114,7 +114,7 @@ export const NavbarMobileMenu = ({
           <Button
             variant="outline"
             onClick={onLogout}
-            className="w-full bg-gradient-to-r from-destructive/10 to-destructive/5 hover:from-destructive/20 hover:to-destructive/10 text-destructive hover:text-destructive border-destructive/30 hover:border-destructive/50 transition-all duration-200"
+            className="w-full bg-linear-to-br from-destructive/10 to-destructive/5 hover:from-destructive/20 hover:to-destructive/10 text-destructive hover:text-destructive border-destructive/30 hover:border-destructive/50 transition-all duration-200"
           >
             Đăng xuất
           </Button>
@@ -130,7 +130,7 @@ export const NavbarMobileMenu = ({
             </Button>
           </Link>
           <Link href="/auth/register" onClick={() => onOpenChange(false)}>
-            <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-200">
+            <Button className="w-full bg-linear-to-br from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-200">
               Đăng ký
             </Button>
           </Link>

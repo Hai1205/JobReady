@@ -91,7 +91,7 @@ class CVServiceTest {
                 .build();
 
         personalInfoDto = new PersonalInfoDto(null, "John Doe", "john@example.com", "1234567890", "New York",
-                "Software Developer", null, null);
+                "1990-01-01", "Software Developer", null, null);
 
         experiencesDto = Arrays.asList(
                 new ExperienceDto(null, "Tech Corp", "Developer", "2020-01", "2023-12", "Developing software"));

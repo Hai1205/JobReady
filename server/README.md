@@ -129,6 +129,9 @@ mvn clean install -pl mail-service
 mvn clean install -pl cv-service
 mvn clean install -pl ai-service
 mvn clean install -pl stats-service
+
+# Hoặc build with jacoco
+mvn clean verify -DskipITs=true -pl coverage-report -am
 ```
 
 ### 4. Chạy Services

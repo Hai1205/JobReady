@@ -11,7 +11,7 @@ export default function TableDashboardSkeleton() {
       </div>
 
       {/* Table Card Skeleton */}
-      <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+      <Card className="border-border/50 shadow-lg bg-linear-to-br from-card to-card/80 backdrop-blur-sm">
         <CardHeader className="pb-4 border-b border-border/30">
           <div className="flex items-center justify-between">
             <Skeleton className="h-6 w-32" />

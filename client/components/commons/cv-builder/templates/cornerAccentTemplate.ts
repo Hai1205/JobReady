@@ -127,7 +127,8 @@ export function generateCornerAccentTemplate(cv: ICV, primaryColor: string, font
         <div style="font-size: 12px; color: #333; line-height: 1.8;">
           ${cv.personalInfo?.phone ? `<span style="margin-right: 15px;">📞 ${escapeHtml(cv.personalInfo.phone)}</span>` : ''}
           ${cv.personalInfo?.email ? `<span style="margin-right: 15px;">✉ ${escapeHtml(cv.personalInfo.email)}</span>` : ''}
-          ${cv.personalInfo?.location ? `<span>📍 ${escapeHtml(cv.personalInfo.location)}</span>` : ''}
+          ${cv.personalInfo?.location ? `<span style="margin-right: 15px;">📍 ${escapeHtml(cv.personalInfo.location)}</span>` : ''}
+          ${cv.personalInfo?.birth ? `<span>🎂 ${escapeHtml(cv.personalInfo.birth)}</span>` : ''}
         </div>
         ${cv.personalInfo?.summary ? `
           <p style="font-size: 13px; line-height: 1.6; color: #333; text-align: justify; margin: 15px 0 0 0;">

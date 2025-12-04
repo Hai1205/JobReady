@@ -16,6 +16,7 @@ public class Response {
     private int statusCode;
     private String message;
 
+    private UserDto user;
     private CVDto cv;
     private List<CVDto> cvs;
     private AnalyzeResultDto analyze;

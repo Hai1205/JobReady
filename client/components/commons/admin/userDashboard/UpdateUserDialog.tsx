@@ -31,7 +31,7 @@ const UpdateUserDialog = ({
       icon={UserCog}
       onSubmit={onUserUpdated}
       isCreateDialog={false}
-      className="max-w-lg min-h-[650px]"
+      className="max-w-lg"
     >
       <UserForm
         data={data as ExtendedUserData | null}

@@ -14,6 +14,7 @@ import com.example.aiservice.dtos.responses.Response;
 import com.example.aiservice.exceptions.OurException;
 import com.example.aiservice.services.*;
 import com.example.aiservice.services.feigns.CVFeignClient;
+import com.example.aiservice.services.feigns.UserFeignClient;
 import com.fasterxml.jackson.databind.*;
 
 import java.util.*;
@@ -34,13 +35,13 @@ public class AIApi extends BaseApi {
     // Core RAG Components
     private final ChatClient chatClient; // Gemini Chat Model
     private final EmbeddingService embeddingService; // Vector Search
-    // private final PromptBuilderService promptBuilderService; // Prompt
     // Engineering
     private final CompactPromptBuilder promptBuilder;
 
     // Supporting Services
     private final FileParserService fileParserService;
     private final CVFeignClient cvFeignClient;
+    private final UserFeignClient userFeignClient;
     private final ObjectMapper objectMapper;
 
     /**
@@ -49,17 +50,17 @@ public class AIApi extends BaseApi {
     public AIApi(
             ChatClient chatClient, // Inject từ RAGConfig
             EmbeddingService embeddingService,
-            // PromptBuilderService promptBuilderService,
             CompactPromptBuilder promptBuilder,
             FileParserService fileParserService,
-            CVFeignClient cvFeignClient) {
+            CVFeignClient cvFeignClient,
+            UserFeignClient userFeignClient) {
 
         this.chatClient = chatClient;
         this.embeddingService = embeddingService;
-        // this.promptBuilderService = promptBuilderService;
         this.promptBuilder = promptBuilder;
         this.fileParserService = fileParserService;
         this.cvFeignClient = cvFeignClient;
+        this.userFeignClient = userFeignClient;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -138,8 +139,10 @@ public class AIApi extends BaseApi {
             // OPTIMIZED: Parallel RAG + shorter prompt
             long geminiStart = System.currentTimeMillis();
             logger.info("Starting Gemini call for analyzeCV");
+
             AIResponseDto aiResponse = handleAnalyzeCVFast(cvDto, category, level);
             long geminiEnd = System.currentTimeMillis();
+
             logger.info("Completed Gemini call for analyzeCV in {} ms", geminiEnd - geminiStart);
             AnalyzeResultDto analyzeResult = aiResponse.getAnalyzeResult();
             logger.info("analyzeResult: {}", analyzeResult);
@@ -226,36 +229,11 @@ public class AIApi extends BaseApi {
         Response response = new Response();
 
         try {
-            long startTime = System.currentTimeMillis();
-            logger.info("Starting importCV request at {}", startTime);
-
-            fileParserService.validatePDFFile(file);
-
-            String cvText = fileParserService.extractTextFromFile(file);
-            long geminiStart = System.currentTimeMillis();
-            logger.info("Starting Gemini call for importCV");
-            CVDto cvDto = fileParserService.parseCVWithAI(cvText);
-            long geminiEnd = System.currentTimeMillis();
-            logger.info("Completed Gemini call for importCV in {} ms", geminiEnd - geminiStart);
-
-            CVCreateRequest cvCreateRequest = CVCreateRequest.builder()
-                    .title(cvDto.getTitle())
-                    .personalInfo(cvDto.getPersonalInfo())
-                    .experiences(cvDto.getExperiences())
-                    .educations(cvDto.getEducations())
-                    .skills(cvDto.getSkills())
-                    .build();
-
-            String dataJson = objectMapper.writeValueAsString(cvCreateRequest);
-            Response createCVResponse = cvFeignClient.importCV(userId.toString(), dataJson);
-            CVDto savedCV = createCVResponse.getCv();
+            CVDto savedCV = handleImportCV(userId, file);
 
             response.setStatusCode(201);
             response.setMessage("CV created successfully");
             response.setCv(savedCV);
-
-            long endTime = System.currentTimeMillis();
-            logger.info("Completed importCV request in {} ms", endTime - startTime);
 
             return response;
 
@@ -270,6 +248,64 @@ public class AIApi extends BaseApi {
     // ========================================
     // CORE RAG METHODS - Implement RAG Flow
     // ========================================
+
+    private CVDto handleImportCV(UUID userId, MultipartFile file) {
+        try {
+            long startTime = System.currentTimeMillis();
+            logger.info("Starting importCV request at {}", startTime);
+
+            UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+
+            if (user == null) {
+                logger.warn("User not found when creating CV: userId={}", userId);
+                throw new OurException("User not found", 404);
+            }
+
+            fileParserService.validatePDFFile(file);
+
+            String cvText = fileParserService.extractTextFromFile(file);
+            long geminiStart = System.currentTimeMillis();
+            logger.info("Starting Gemini call for importCV");
+            CVDto cvDto = fileParserService.parseCVWithAI(cvText);
+            long geminiEnd = System.currentTimeMillis();
+            logger.info("Completed Gemini call for importCV in {} ms", geminiEnd - geminiStart);
+
+            // Merge AI parsed personal info with user's real info
+            PersonalInfoDto mergedPersonalInfo = cvDto.getPersonalInfo();
+            if (mergedPersonalInfo == null) {
+                mergedPersonalInfo = new PersonalInfoDto();
+            }
+            mergedPersonalInfo
+                    .setFullname(user.getFullname() != null ? user.getFullname() : mergedPersonalInfo.getFullname());
+            mergedPersonalInfo.setEmail(user.getEmail() != null ? user.getEmail() : mergedPersonalInfo.getEmail());
+            mergedPersonalInfo.setPhone(user.getPhone() != null ? user.getPhone() : mergedPersonalInfo.getPhone());
+            mergedPersonalInfo
+                    .setLocation(user.getLocation() != null ? user.getLocation() : mergedPersonalInfo.getLocation());
+            mergedPersonalInfo.setBirth(user.getBirth() != null ? user.getBirth() : mergedPersonalInfo.getBirth());
+            mergedPersonalInfo.setAvatarUrl(
+                    user.getAvatarUrl() != null ? user.getAvatarUrl() : mergedPersonalInfo.getAvatarUrl());
+
+            CVCreateRequest cvCreateRequest = CVCreateRequest.builder()
+                    .title(cvDto.getTitle())
+                    .personalInfo(mergedPersonalInfo)
+                    .experiences(cvDto.getExperiences())
+                    .educations(cvDto.getEducations())
+                    .skills(cvDto.getSkills())
+                    .build();
+
+            String dataJson = objectMapper.writeValueAsString(cvCreateRequest);
+            Response createCVResponse = cvFeignClient.importCV(userId.toString(), dataJson);
+            CVDto savedCV = createCVResponse.getCv();
+            long endTime = System.currentTimeMillis();
+            logger.info("Completed importCV request in {} ms", endTime - startTime);
+            return savedCV;
+        } catch (OurException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error in handleImportCV: {}", e.getMessage(), e);
+            throw new OurException("Failed to import CV: " + e.getMessage(), 500);
+        }
+    }
 
     /**
      * RAG Flow 1: Analyze CV

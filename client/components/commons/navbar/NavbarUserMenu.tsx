@@ -15,7 +15,7 @@ export const NavbarUserMenu = ({
 }: NavbarUserMenuProps) => (
   <div className="hidden md:flex items-center gap-3">
     <Link href="/settings">
-      <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 border border-border/50">
+      <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-linear-to-br from-primary/5 to-secondary/5 border border-border/50">
         <Avatar className="h-8 w-8 border-2 border-primary/20 shadow-md">
           {userAuth.avatarUrl && (
             <AvatarImage
@@ -24,7 +24,7 @@ export const NavbarUserMenu = ({
               className="object-cover"
             />
           )}
-          <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold text-sm">
+          <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-primary-foreground font-bold text-sm">
             {userAuth.fullname?.charAt(0).toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>

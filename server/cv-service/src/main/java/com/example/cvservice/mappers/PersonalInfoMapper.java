@@ -17,6 +17,7 @@ public class PersonalInfoMapper {
         dto.setEmail(personalInfo.getEmail());
         dto.setPhone(personalInfo.getPhone());
         dto.setLocation(personalInfo.getLocation());
+        dto.setBirth(personalInfo.getBirth());
         dto.setSummary(personalInfo.getSummary());
         dto.setAvatarUrl(personalInfo.getAvatarUrl());
         dto.setAvatarPublicId(personalInfo.getAvatarPublicId());
@@ -32,6 +33,7 @@ public class PersonalInfoMapper {
         entity.setEmail(personalInfoDto.getEmail());
         entity.setPhone(personalInfoDto.getPhone());
         entity.setLocation(personalInfoDto.getLocation());
+        entity.setBirth(personalInfoDto.getBirth());
         entity.setSummary(personalInfoDto.getSummary());
         entity.setAvatarUrl(personalInfoDto.getAvatarUrl());
         entity.setAvatarPublicId(personalInfoDto.getAvatarPublicId());

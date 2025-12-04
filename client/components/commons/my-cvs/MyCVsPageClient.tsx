@@ -52,7 +52,7 @@ export default function MyCVsPageClient() {
 
   const handleCreate = async () => {
     router.push("/cv-builder");
-    await createCV(userAuth?.id || "");
+    await createCV(userAuth);
   };
 
   const handleImport = async (file: File | null) => {

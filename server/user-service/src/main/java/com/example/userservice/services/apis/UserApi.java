@@ -56,6 +56,10 @@ public class UserApi extends BaseApi {
             String email,
             String password,
             String fullname,
+            String phone,
+            String location,
+            String birth,
+            String summary,
             String role,
             String status,
             MultipartFile avatar) {
@@ -83,6 +87,12 @@ public class UserApi extends BaseApi {
                 }
             }
 
+            // Check if username already exists
+            if (userRepository.existsByUsername(username)) {
+                logger.warn("Attempted to create user with existing username: {}", username);
+                throw new OurException("Username already exists", 400);
+            }
+
             // If no password provided, generate a secure random one
             if (password == null || password.isEmpty()) {
                 password = handleGenerateRandomPassword();
@@ -93,6 +103,20 @@ public class UserApi extends BaseApi {
                     username,
                     email,
                     fullname);
+
+            // Set optional fields
+            if (phone != null && !phone.isEmpty()) {
+                user.setPhone(phone);
+            }
+            if (location != null && !location.isEmpty()) {
+                user.setLocation(location);
+            }
+            if (birth != null && !birth.isEmpty()) {
+                user.setBirth(birth);
+            }
+            if (summary != null && !summary.isEmpty()) {
+                user.setSummary(summary);
+            }
 
             if (avatar != null && !avatar.isEmpty()) {
                 logger.debug("Uploading avatar for user: {}", email);
@@ -121,6 +145,15 @@ public class UserApi extends BaseApi {
         } catch (OurException e) {
             logger.error("Error in handleCreateUser: {}", e.getMessage(), e);
             throw e;
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            logger.error("Database constraint violation in handleCreateUser: {}", e.getMessage());
+            String message = "Failed to create user";
+            if (e.getMessage().contains("UK_r43af9ap4edm43mmtq01oddj6") || e.getMessage().contains("username")) {
+                message = "Username already exists";
+            } else if (e.getMessage().contains("email")) {
+                message = "Email already exists";
+            }
+            throw new OurException(message, 400);
         } catch (Exception e) {
             logger.error("Unexpected error in handleCreateUser: {}", e.getMessage(), e);
             throw new OurException("Failed to create user", 500);
@@ -261,11 +294,16 @@ public class UserApi extends BaseApi {
             String email = request.getEmail();
             String password = request.getPassword();
             String fullname = request.getFullname();
+            String phone = request.getPhone();
+            String location = request.getLocation();
+            String birth = request.getBirth();
+            String summary = request.getSummary();
             String role = request.getRole();
             String status = request.getStatus();
             MultipartFile avatar = request.getAvatar();
 
-            UserDto savedUserDto = handleCreateUser(username, email, password, fullname, role, status, avatar);
+            UserDto savedUserDto = handleCreateUser(username, email, password, fullname, phone, location, birth,
+                    summary, role, status, avatar);
 
             response.setStatusCode(201);
             response.setMessage("User created successfully");
@@ -341,7 +379,8 @@ public class UserApi extends BaseApi {
         }
     }
 
-    public UserDto handleUpdateUser(UUID userId, String fullname, String role, String status, MultipartFile avatar) {
+    public UserDto handleUpdateUser(UUID userId, String fullname, String phone, String location, String birth,
+            String summary, String role, String status, MultipartFile avatar) {
         try {
             logger.info("Updating user with ID: {}", userId);
 
@@ -374,6 +413,22 @@ public class UserApi extends BaseApi {
             // Update other fields
             if (fullname != null && !fullname.isEmpty() && !fullname.equals(existingUser.getFullname())) {
                 existingUser.setFullname(fullname);
+            }
+
+            if (phone != null && !phone.equals(existingUser.getPhone())) {
+                existingUser.setPhone(phone);
+            }
+
+            if (location != null && !location.equals(existingUser.getLocation())) {
+                existingUser.setLocation(location);
+            }
+
+            if (birth != null && !birth.equals(existingUser.getBirth())) {
+                existingUser.setBirth(birth);
+            }
+
+            if (summary != null && !summary.equals(existingUser.getSummary())) {
+                existingUser.setSummary(summary);
             }
 
             if (role != null && !role.isEmpty()) {
@@ -413,10 +468,15 @@ public class UserApi extends BaseApi {
         try {
             UpdateUserRequest request = objectMapper.readValue(dataJson, UpdateUserRequest.class);
             String fullname = request.getFullname();
+            String phone = request.getPhone();
+            String location = request.getLocation();
+            String birth = request.getBirth();
+            String summary = request.getSummary();
             String role = request.getRole();
             String status = request.getStatus();
 
-            UserDto updatedUserDto = handleUpdateUser(userId, fullname, role, status, avatar);
+            UserDto updatedUserDto = handleUpdateUser(userId, fullname, phone, location, birth, summary, role, status,
+                    avatar);
 
             response.setMessage("User updated successfully");
             response.setUser(updatedUserDto);

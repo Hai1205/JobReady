@@ -38,6 +38,7 @@ export function generateClassicTemplate(cv: ICV, primaryColor: string, fontFamil
     cv.personalInfo?.email && escapeHtml(cv.personalInfo.email),
     cv.personalInfo?.phone && escapeHtml(cv.personalInfo.phone),
     cv.personalInfo?.location && escapeHtml(cv.personalInfo.location),
+    cv.personalInfo?.birth && `Born: ${escapeHtml(cv.personalInfo.birth)}`,
   ].filter(Boolean);
 
   const contactInfo = contactItems.length > 0
@@ -51,7 +52,7 @@ export function generateClassicTemplate(cv: ICV, primaryColor: string, fontFamil
     ? `<div style="margin-bottom: 30px; padding-top: 20px; border-top: 2px solid ${primaryColor};">
          <h2 style="font-size: 18px; font-weight: bold; color: ${primaryColor}; margin-bottom: 12px; 
                     margin-top: 0; text-transform: uppercase; text-align: center; letter-spacing: 1px;">
-           Mục tiêu nghề nghiệp
+           Giới thiệu
          </h2>
          <p style="font-size: 13px; line-height: 1.8; color: #333; text-align: justify; margin: 0; 
                    padding: 0 20px;">

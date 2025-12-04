@@ -59,14 +59,14 @@ export default function AdminSidebar({
       style={{ width: collapsed ? 80 : width, height: "100%" }}
     >
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10">
+      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-linear-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10">
         {!collapsed && (
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-br from-primary to-secondary w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+            <div className="bg-linear-to-br from-primary to-secondary w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
               <Home className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
                 Admin
               </span>
               <p className="text-[10px] text-muted-foreground font-medium">
@@ -101,12 +101,12 @@ export default function AdminSidebar({
                   className={cn(
                     "flex items-center rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group relative overflow-hidden",
                     isActive
-                      ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/30"
+                      ? "bg-linear-to-br from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/30"
                       : "text-foreground/70 hover:text-foreground hover:bg-accent/50 dark:hover:bg-accent/30"
                   )}
                 >
                   {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 animate-pulse" />
+                    <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-secondary/10 animate-pulse" />
                   )}
                   <Icon
                     className={cn(

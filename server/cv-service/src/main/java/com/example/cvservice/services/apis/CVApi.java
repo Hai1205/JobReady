@@ -137,6 +137,7 @@ public class CVApi extends BaseApi {
         personalInfo.setEmail(dto.getEmail());
         personalInfo.setPhone(dto.getPhone());
         personalInfo.setLocation(dto.getLocation());
+        personalInfo.setBirth(dto.getBirth());
         personalInfo.setSummary(dto.getSummary());
 
         if (avatar != null && !avatar.isEmpty()) {
@@ -218,7 +219,22 @@ public class CVApi extends BaseApi {
             throw new OurException("User not found", 404);
         }
 
-        return handleCreateCV(userId, "Untitled CV", null, null, null, null, null, null, null, null, null);
+        PersonalInfoDto personalInfoDto = handleSetUserPersonalInfo(user);
+
+        return handleCreateCV(userId, "Untitled CV", personalInfoDto, null, null, null, null, null, null, null, null);
+    }
+
+    private PersonalInfoDto handleSetUserPersonalInfo(UserDto user){
+        // Create PersonalInfoDto with user's real information
+        PersonalInfoDto personalInfoDto = new PersonalInfoDto();
+        personalInfoDto.setFullname(user.getFullname() != null ? user.getFullname() : "");
+        personalInfoDto.setEmail(user.getEmail() != null ? user.getEmail() : "");
+        personalInfoDto.setPhone(user.getPhone() != null ? user.getPhone() : "");
+        personalInfoDto.setLocation(user.getLocation() != null ? user.getLocation() : "");
+        personalInfoDto.setBirth(user.getBirth() != null ? user.getBirth() : "");
+        personalInfoDto.setSummary(user.getSummary() != null ? user.getSummary() : "");
+        personalInfoDto.setAvatarUrl(user.getAvatarUrl() != null ? user.getAvatarUrl() : "");
+        return personalInfoDto;
     }
 
     public Response importCV(UUID userId, String dataJson) {
@@ -233,7 +249,10 @@ public class CVApi extends BaseApi {
             }
 
                 CVCreateRequest request = objectMapper.readValue(dataJson, CVCreateRequest.class);
-                CVDto savedCV = handleCreateCV(userId, request.getTitle(), request.getPersonalInfo(),
+
+                PersonalInfoDto personalInfoDto = handleSetUserPersonalInfo(user);
+                
+                CVDto savedCV = handleCreateCV(userId, request.getTitle(), personalInfoDto,
                     null, request.getExperiences(), request.getEducations(), request.getSkills(),
                     request.getIsVisibility(), request.getColor(), request.getTemplate(), request.getFont());
 
@@ -574,20 +593,24 @@ public class CVApi extends BaseApi {
     public CVDto handleDuplicateCV(UUID cvId, UUID userId) {
         logger.info("Duplicating CV id={} for userId={}", cvId, userId);
         CVDto existingCV = handleGetCVById(cvId);
+        
+                UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+        
+                if (user == null) {
+                    logger.warn("User not found when duplicating CV: userId={}", userId);
+                    throw new OurException("User not found", 404);
+                }
 
         if (existingCV == null) {
             return handleCreateNew(userId);
         }
 
-        PersonalInfoDto personalInfo = existingCV.getPersonalInfo();
-        if (personalInfo != null) {
-            personalInfo.setAvatarUrl(null);
-        }
+        PersonalInfoDto personalInfoDto = handleSetUserPersonalInfo(user);
 
         CVDto newCV = handleCreateCV(
                 userId,
                 existingCV.getTitle() + " (Copy)",
-                personalInfo,
+                personalInfoDto,
                 null,
                 existingCV.getExperiences(),
                 existingCV.getEducations(),

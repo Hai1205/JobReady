@@ -8,6 +8,7 @@ import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Navbar } from "@/components/commons/navbar/Navbar";
 import Footer from "@/components/commons/layout/Footer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -35,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="overflow-hidden">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -49,7 +50,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden h-screen`}
       >
         <ThemeProvider
           attribute="class"
@@ -61,8 +62,10 @@ export default function RootLayout({
           <TokenRefresher />
 
           <Navbar />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+          <ScrollArea className="h-[calc(100vh-64px)]">
+            <main className="min-h-[calc(100vh-64px)]">{children}</main>
+            <Footer />
+          </ScrollArea>
 
           <ToastContainer
             position="bottom-right"

@@ -125,9 +125,13 @@ export function generateBurgundySidebarTemplate(cv: ICV, primaryColor: string, f
             <span style="color: rgba(255,255,255,0.8);">✉</span>
             <span style="word-break: break-all;">${escapeHtml(cv.personalInfo.email)}</span>
           </div>` : ''}
-          ${cv.personalInfo?.location ? `<div style="display: flex; align-items: center; gap: 8px;">
+          ${cv.personalInfo?.location ? `<div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
             <span style="color: rgba(255,255,255,0.8);">📍</span>
             <span>${escapeHtml(cv.personalInfo.location)}</span>
+          </div>` : ''}
+          ${cv.personalInfo?.birth ? `<div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: rgba(255,255,255,0.8);">🎂</span>
+            <span>${escapeHtml(cv.personalInfo.birth)}</span>
           </div>` : ''}
         </div>
 

@@ -7,7 +7,7 @@ import { Home, Search, ShoppingBag, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+    <div className="min-h-screen bg-linear-to-br from-background to-muted">
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <Card className="w-full max-w-2xl">
@@ -18,7 +18,7 @@ export default function NotFound() {
                   404
                 </h1>
 
-                <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-linear-to-br from-primary to-secondary mx-auto rounded-full"></div>
               </div>
 
               {/* Error Message */}

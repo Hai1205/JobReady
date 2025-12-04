@@ -65,6 +65,7 @@
         <module>cv-service</module>
         <module>ai-service</module>
         <module>stats-service</module>
+        <module>coverage-report</module>
     </modules>
 
     <dependencyManagement>
@@ -320,6 +321,12 @@
                         <goals>
                             <goal>report-aggregate</goal>
                         </goals>
+                        <configuration>
+                            <dataFileIncludes>
+                                <dataFileInclude>**/target/jacoco.exec</dataFileInclude>
+                            </dataFileIncludes>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate</outputDirectory>
+                        </configuration>
                     </execution>
                     <!-- Check coverage rules -->
                     <execution>
@@ -335,13 +342,13 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.50</minimum>
+                                            <minimum>0.70</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
                             </rules>
                         </configuration>
-                        <phase>none</phase>
+                        <phase>verify</phase>
                     </execution>
                 </executions>
             </plugin>

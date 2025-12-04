@@ -48,11 +48,11 @@ export function DataTable<T>({
   emptyMessage = "No data found",
 }: DataTableProps<T>) {
   return (
-    <ScrollArea className="h-[calc(100vh-220px)] w-full rounded-xl bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 shadow-lg">
+    <ScrollArea className="h-[calc(100vh-220px)] w-full rounded-xl bg-linear-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 shadow-lg">
       <CardContent>
         <Table className="border-collapse [&_tr]:border-b [&_tr]:border-border/30">
           <TableHeader>
-            <TableRow className="border-b-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-colors">
+            <TableRow className="border-b-2 border-primary/20 bg-linear-to-br from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-colors">
               {columns.map((column, index) => (
                 <TableHead
                   key={index}
@@ -83,7 +83,7 @@ export function DataTable<T>({
                 <TableRow
                   key={index}
                   className={cn(
-                    "transition-all duration-200 hover:bg-gradient-to-r hover:from-primary/5 hover:to-secondary/5",
+                    "transition-all duration-200 hover:bg-linear-to-br hover:from-primary/5 hover:to-secondary/5",
                     onRowClick &&
                       "cursor-pointer hover:shadow-md hover:shadow-primary/10"
                   )}
@@ -115,7 +115,7 @@ export function DataTable<T>({
                           align="end"
                           className="bg-card/95 backdrop-blur-sm border border-border/50 shadow-xl"
                         >
-                          <DropdownMenuLabel className="text-foreground font-semibold bg-gradient-to-r from-primary/10 to-secondary/10">
+                          <DropdownMenuLabel className="text-foreground font-semibold bg-linear-to-br from-primary/10 to-secondary/10">
                             Hành động
                           </DropdownMenuLabel>
 
@@ -128,7 +128,7 @@ export function DataTable<T>({
                                 e.stopPropagation();
                                 action.onClick(item);
                               }}
-                              className={`text-foreground cursor-pointer hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:text-primary focus:bg-gradient-to-r focus:from-primary/10 focus:to-secondary/10 active:bg-primary/20 transition-all duration-200 rounded-lg font-medium ${
+                              className={`text-foreground cursor-pointer hover:bg-linear-to-br hover:from-primary/10 hover:to-secondary/10 hover:text-primary focus:bg-linear-to-br focus:from-primary/10 focus:to-secondary/10 active:bg-primary/20 transition-all duration-200 rounded-lg font-medium ${
                                 action.className || ""
                               }`}
                             >

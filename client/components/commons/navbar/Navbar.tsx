@@ -29,7 +29,7 @@ export function Navbar() {
   const logout = authStore?.logout || (() => {});
 
   const handleCreate = async () => {
-    await createCV(userAuth?.id || "");
+    await createCV(userAuth);
     router.push("/cv-builder");
   };
 
@@ -50,7 +50,7 @@ export function Navbar() {
 
   if (!isHydrated)
     return (
-      <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <NavbarLogo />
           <Button
@@ -66,7 +66,7 @@ export function Navbar() {
     );
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
           <NavbarLogo />

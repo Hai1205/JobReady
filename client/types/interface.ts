@@ -6,6 +6,10 @@ declare global {
         username: string
         email: string
         fullname: string
+        phone?: string
+        location?: string
+        birth?: string
+        summary?: string
         avatarUrl?: string
         role: EUserRole
         status: EUserStatus
@@ -34,6 +38,7 @@ declare global {
         email: string
         phone: string
         location: string
+        birth: string
         summary: string
         avatarUrl?: string
         avatarPublicId?: string

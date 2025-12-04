@@ -30,6 +30,9 @@ class AIServiceTest {
     @Mock
     private com.example.aiservice.services.feigns.CVFeignClient cvFeignClient;
 
+    @Mock
+    private com.example.aiservice.services.feigns.UserFeignClient userFeignClient;
+
     private AIApi aiService;
 
     @BeforeEach
@@ -39,7 +42,8 @@ class AIServiceTest {
                 embeddingService,
                 promptBuilderService,
                 fileParserService,
-                cvFeignClient);
+                cvFeignClient,
+                userFeignClient);
     }
 
     @Test

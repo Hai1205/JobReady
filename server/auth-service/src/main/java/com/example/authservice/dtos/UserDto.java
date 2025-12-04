@@ -15,6 +15,10 @@ public class UserDto {
     private String password;
     private String email;
     private String fullname;
+    private String phone;
+    private String location;
+    private String birth;
+    private String summary;
     private String status;
     private String role;
 
@@ -28,7 +32,7 @@ public class UserDto {
     // Constructor with all fields for MapStruct
     @Builder
     public UserDto(UUID id, String username, String password, String email,
-            String fullname,
+            String fullname, String phone, String location, String birth, String summary,
             String status, String role, String oauthProvider,
             String oauthProviderId, String avatarUrl, String avatarPublicId, boolean isOAuthUser) {
         this.id = id;
@@ -36,6 +40,10 @@ public class UserDto {
         this.password = password;
         this.email = email;
         this.fullname = fullname;
+        this.phone = phone;
+        this.location = location;
+        this.birth = birth;
+        this.summary = summary;
         this.status = status;
         this.role = role;
         this.oauthProvider = oauthProvider;

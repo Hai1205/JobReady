@@ -12,6 +12,7 @@ import { useAIStore } from "@/stores/aiStore";
 import { useRef } from "react";
 import { toast } from "react-toastify";
 import { templates } from "../templates/templateProvider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function PersonalInfoStep() {
   const { currentCV, handleUpdateCV } = useCVStore();
@@ -164,7 +165,7 @@ export function PersonalInfoStep() {
           <Label htmlFor="fullname">Họ và Tên *</Label>
           <Input
             id="fullname"
-            value={currentCV?.personalInfo?.fullname}
+            value={currentCV?.personalInfo?.fullname || ""}
             onChange={(e) => handleChange("fullname", e.target.value)}
             placeholder="Nguyễn Hoàng Hải"
           />
@@ -175,7 +176,7 @@ export function PersonalInfoStep() {
           <Input
             id="email"
             type="email"
-            value={currentCV?.personalInfo?.email}
+            value={currentCV?.personalInfo?.email || ""}
             onChange={(e) => handleChange("email", e.target.value)}
             placeholder="hainguyenhoang1205@gmail.com"
           />
@@ -186,7 +187,7 @@ export function PersonalInfoStep() {
           <Input
             id="phone"
             type="tel"
-            value={currentCV?.personalInfo?.phone}
+            value={currentCV?.personalInfo?.phone || ""}
             onChange={(e) => handleChange("phone", e.target.value)}
             placeholder="0782748863"
           />
@@ -196,33 +197,46 @@ export function PersonalInfoStep() {
           <Label htmlFor="location">Địa Chỉ</Label>
           <Input
             id="location"
-            value={currentCV?.personalInfo?.location}
+            value={currentCV?.personalInfo?.location || ""}
             onChange={(e) => handleChange("location", e.target.value)}
             placeholder="Hà Nội, Việt Nam"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="birth">Ngày Sinh</Label>
+          <Input
+            id="birth"
+            type="date"
+            value={currentCV?.personalInfo?.birth || ""}
+            onChange={(e) => handleChange("birth", e.target.value)}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="summary">Mục Tiêu Nghề Nghiệp</Label>
+          <Label htmlFor="summary">Giởi thiệu bản thân</Label>
           <span className="text-xs text-muted-foreground">
             {currentCV?.personalInfo?.summary?.length || 0}/2000
           </span>
         </div>
-        <HighlightableTextarea
-          id="summary"
-          value={currentCV?.personalInfo?.summary}
-          onChange={(value) => {
-            // Truncate to 2000 characters if exceeded
-            const truncatedValue =
-              value.length > 2000 ? value.slice(0, 2000) : value;
-            handleChange("summary", truncatedValue);
-          }}
-          placeholder="Mô tả ngắn gọn về kinh nghiệm chuyên môn và mục tiêu nghề nghiệp của bạn..."
-          rows={6}
-          highlighted={summaryHasSuggestion}
-        />
+        <ScrollArea className="h-40 w-full rounded-md border-0">
+          <HighlightableTextarea
+            id="summary"
+            value={currentCV?.personalInfo?.summary || ""}
+            onChange={(value) => {
+              // Truncate to 2000 characters if exceeded
+              const truncatedValue =
+                value.length > 2000 ? value.slice(0, 2000) : value;
+              handleChange("summary", truncatedValue);
+            }}
+            placeholder="Mô tả ngắn gọn về kinh nghiệm chuyên môn và mục tiêu nghề nghiệp của bạn..."
+            rows={6}
+            highlighted={summaryHasSuggestion}
+            className="min-h-[152px] border border-border/50 rounded-md"
+          />
+        </ScrollArea>
         <p className="text-xs text-muted-foreground">
           Viết 2-3 câu nổi bật về kỹ năng và kinh nghiệm chính của bạn
         </p>

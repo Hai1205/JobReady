@@ -18,29 +18,30 @@
         @GeneratedValue(strategy = GenerationType.UUID)
         private UUID id;
 
-        private String fullname;
-        private String email;
-        private String phone;
-        private String location;
-        private String avatarUrl;
-        private String avatarPublicId;
-
-        @Column(columnDefinition = "TEXT")
+    private String fullname;
+    private String email;
+    private String phone;
+    private String location;
+    private String birth;
+    private String avatarUrl;
+    private String avatarPublicId;        @Column(columnDefinition = "TEXT")
         private String summary;
         
-        public PersonalInfo(String fullname, String email, String phone, String location, String summary) {
-            this.fullname = fullname;
-            this.email = email;
-            this.phone = phone;
-            this.location = location;
-            this.summary = summary;
-        }
-        
-        public PersonalInfo(PersonalInfoDto personalInfoDto) {
+    public PersonalInfo(String fullname, String email, String phone, String location, String birth, String summary) {
+        this.fullname = fullname;
+        this.email = email;
+        this.phone = phone;
+        this.location = location;
+        this.birth = birth;
+        this.summary = summary;
+    }        public PersonalInfo(PersonalInfoDto personalInfoDto) {
             this.fullname = personalInfoDto.getFullname();
             this.email = personalInfoDto.getEmail();
             this.phone = personalInfoDto.getPhone();
             this.location = personalInfoDto.getLocation();
+            this.birth = personalInfoDto.getBirth();
             this.summary = personalInfoDto.getSummary();
+            this.avatarUrl = personalInfoDto.getAvatarUrl();
+            this.avatarPublicId = personalInfoDto.getAvatarPublicId();
         }
     }

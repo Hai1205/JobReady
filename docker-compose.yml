@@ -97,6 +97,8 @@ services:
         condition: service_healthy
       cv-service:
         condition: service_started
+      user-service:
+        condition: service_started
     networks:
       - app-network
 

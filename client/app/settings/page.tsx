@@ -66,6 +66,10 @@ export default function SettingsPage() {
       await updateUser(
         data.id,
         data.fullname,
+        data.phone || "",
+        data.location || "",
+        data.birth || "",
+        data.summary || "",
         avatarFile || null,
         data.role,
         data.status
@@ -185,10 +189,10 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 bg-gradient-to-br from-background to-muted/20">
+    <div className="min-h-screen flex items-center justify-center py-12 bg-linear-to-br from-background to-muted/20">
       <div className="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
             Cài Đặt
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -202,7 +206,7 @@ export default function SettingsPage() {
               <TabsTrigger
                 key={value}
                 value={value}
-                className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground"
+                className="gap-2 data-[state=active]:bg-linear-to-br data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground"
               >
                 <Icon className="h-4 w-4" />
                 <span className="hidden sm:inline">{title}</span>
@@ -212,9 +216,9 @@ export default function SettingsPage() {
 
           {tabContents.map(({ value, title, description, component }) => (
             <TabsContent key={value} value={value}>
-              <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+              <Card className="border-border/50 shadow-lg bg-linear-to-br from-card to-card/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  <CardTitle className="text-xl bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
                     {title}
                   </CardTitle>
                   <CardDescription>{description}</CardDescription>

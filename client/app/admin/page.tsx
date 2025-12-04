@@ -89,7 +89,7 @@ function AdminDashboardPage() {
       <DashboardHeader title="Dashboard">
         <Button
           onClick={() => setShowReportDialog(true)}
-          className="gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg shadow-blue-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105"
+          className="gap-2 bg-linear-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg shadow-blue-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105"
           size="sm"
         >
           <Eye className="h-4 w-4" />
@@ -100,7 +100,7 @@ function AdminDashboardPage() {
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Users */}
-        <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 hover:scale-105">
+        <Card className="bg-linear-to-br from-primary to-primary/80 text-primary-foreground border-0 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold">Total Users</CardTitle>
             <div className="bg-primary-foreground/20 p-2 rounded-lg backdrop-blur-sm">
@@ -119,7 +119,7 @@ function AdminDashboardPage() {
         </Card>
 
         {/* Active Users */}
-        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-primary-foreground border-0 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 hover:scale-105">
+        <Card className="bg-linear-to-br from-green-500 to-green-600 text-primary-foreground border-0 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold">
               Active Users
@@ -140,7 +140,7 @@ function AdminDashboardPage() {
         </Card>
 
         {/* Total CVs */}
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-primary-foreground border-0 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105">
+        <Card className="bg-linear-to-br from-blue-500 to-blue-600 text-primary-foreground border-0 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold">Total CVs</CardTitle>
             <div className="bg-primary-foreground/20 p-2 rounded-lg backdrop-blur-sm">
@@ -159,7 +159,7 @@ function AdminDashboardPage() {
         </Card>
 
         {/* Public CVs */}
-        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-primary-foreground border-0 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 hover:scale-105">
+        <Card className="bg-linear-to-br from-purple-500 to-purple-600 text-primary-foreground border-0 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold">Public CVs</CardTitle>
             <div className="bg-primary-foreground/20 p-2 rounded-lg backdrop-blur-sm">
@@ -179,9 +179,9 @@ function AdminDashboardPage() {
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 gap-6">
-        <Card className="border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+        <Card className="border-border/50 shadow-lg bg-linear-to-br from-card to-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <CardTitle className="text-xl font-bold bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
               Recent Activity
             </CardTitle>
             <CardDescription>Latest actions on your platform</CardDescription>
@@ -196,9 +196,9 @@ function AdminDashboardPage() {
                   return (
                     <div
                       key={activity.id}
-                      className="flex items-start group hover:bg-gradient-to-r hover:from-primary/5 hover:to-secondary/5 p-3 rounded-lg transition-all duration-200"
+                      className="flex items-start group hover:bg-linear-to-br hover:from-primary/5 hover:to-secondary/5 p-3 rounded-lg transition-all duration-200"
                     >
-                      <div className="bg-gradient-to-br from-primary/20 to-secondary/20 p-3 rounded-xl mr-3 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-200">
+                      <div className="bg-linear-to-br from-primary/20 to-secondary/20 p-3 rounded-xl mr-3 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-200">
                         {isUserActivity && (
                           <UserPlus className="h-4 w-4 text-primary" />
                         )}

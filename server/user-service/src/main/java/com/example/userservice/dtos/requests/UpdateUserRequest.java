@@ -9,6 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 public class UpdateUserRequest {
     private String fullname;
+    private String phone;
+    private String location;
+    private String birth;
+    private String summary;
     private MultipartFile avatar;
     private String role;
     private String status;

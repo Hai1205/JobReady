@@ -40,7 +40,7 @@ export default function CVDetailedDialog({
         {/* Scrollable content */}
         <div className="flex-1 overflow-auto scrollbar-hide px-6">
           <div className="flex justify-center pb-4">
-            <div className="relative w-full max-w-4xl aspect-[210/297] bg-white border rounded-lg shadow-lg">
+            <div className="relative w-full max-w-4xl aspect-210/297 bg-white border rounded-lg shadow-lg">
               <CVPreviewCard
                 currentCV={cv}
                 className="shadow-none border-none w-full h-full"
@@ -61,7 +61,7 @@ export default function CVDetailedDialog({
             className="gap-1.5"
           >
             <Copy className="h-4 w-4" />
-            Sao chép
+            Nhân bản
           </Button>
 
           {onUpdate && (

@@ -25,6 +25,12 @@ public class User {
     private String email;
 
     private String fullname;
+    private String phone;
+    private String location;
+    private String birth;
+
+    @Column(columnDefinition = "TEXT")
+    private String summary;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -44,6 +50,7 @@ public class User {
     // Full constructor for MapStruct
     @Builder
     public User(UUID id, String username, String password, String email, String fullname,
+            String phone, String location, String birth, String summary,
             UserRole role, UserStatus status, String oauthProvider, String oauthProviderId,
             String avatarUrl, String avatarPublicId, boolean isOAuthUser) {
         this.id = id;
@@ -51,6 +58,10 @@ public class User {
         this.password = password;
         this.email = email;
         this.fullname = fullname;
+        this.phone = phone;
+        this.location = location;
+        this.birth = birth;
+        this.summary = summary;
         this.role = role;
         this.status = status;
         this.oauthProvider = oauthProvider;

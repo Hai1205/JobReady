@@ -15,7 +15,7 @@ export const NavbarAuthButtons = () => (
     <Link href="/auth/register">
       <Button
         size="sm"
-        className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200"
+        className="bg-linear-to-br from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200"
       >
         Đăng ký
       </Button>

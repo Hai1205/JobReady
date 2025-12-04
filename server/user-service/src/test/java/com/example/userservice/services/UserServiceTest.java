@@ -96,7 +96,8 @@ class UserServiceTest {
         when(userMapper.toDto(any(User.class))).thenReturn(mockUserDto);
 
         // Act
-        UserDto result = userService.handleCreateUser(username, email, password, fullname, role, status, null);
+        UserDto result = userService.handleCreateUser(username, email, password, fullname, null, null, null, null, role,
+                status, null);
 
         // Assert
         assertNotNull(result);
@@ -116,7 +117,7 @@ class UserServiceTest {
 
         // Act & Assert
         OurException exception = assertThrows(OurException.class, () -> {
-            userService.handleCreateUser(username, email, password, fullname, "", "", null);
+            userService.handleCreateUser(username, email, password, fullname, null, null, null, null, "", "", null);
         });
 
         assertEquals("Email is required", exception.getMessage());
@@ -131,7 +132,7 @@ class UserServiceTest {
 
         // Act & Assert
         OurException exception = assertThrows(OurException.class, () -> {
-            userService.handleCreateUser("user", email, "pass", "Name", "", "", null);
+            userService.handleCreateUser("user", email, "pass", "Name", null, null, null, null, "", "", null);
         });
 
         assertEquals("Email is required", exception.getMessage());
@@ -146,7 +147,7 @@ class UserServiceTest {
 
         // Act & Assert
         OurException exception = assertThrows(OurException.class, () -> {
-            userService.handleCreateUser("user", email, "pass", "Name", "", "", null);
+            userService.handleCreateUser("user", email, "pass", "Name", null, null, null, null, "", "", null);
         });
 
         assertEquals("Email already exists", exception.getMessage());
@@ -164,7 +165,8 @@ class UserServiceTest {
         when(userMapper.toDto(any(User.class))).thenReturn(mockUserDto);
 
         // Act
-        UserDto result = userService.handleCreateUser(null, email, "pass", "Name", "", "", null);
+        UserDto result = userService.handleCreateUser(null, email, "pass", "Name", null, null, null, null, "", "",
+                null);
 
         // Assert
         assertNotNull(result);
@@ -182,7 +184,7 @@ class UserServiceTest {
         when(userMapper.toDto(any(User.class))).thenReturn(mockUserDto);
 
         // Act
-        UserDto result = userService.handleCreateUser("", email, "pass", "Name", "", "", null);
+        UserDto result = userService.handleCreateUser("", email, "pass", "Name", null, null, null, null, "", "", null);
 
         // Assert
         assertNotNull(result);
@@ -199,7 +201,8 @@ class UserServiceTest {
         when(userMapper.toDto(any(User.class))).thenReturn(mockUserDto);
 
         // Act
-        UserDto result = userService.handleCreateUser("user", email, null, "Name", "", "", null);
+        UserDto result = userService.handleCreateUser("user", email, null, "Name", null, null, null, null, "", "",
+                null);
 
         // Assert
         assertNotNull(result);
@@ -217,7 +220,7 @@ class UserServiceTest {
         when(userMapper.toDto(any(User.class))).thenReturn(mockUserDto);
 
         // Act
-        UserDto result = userService.handleCreateUser("user", email, "", "Name", "", "", null);
+        UserDto result = userService.handleCreateUser("user", email, "", "Name", null, null, null, null, "", "", null);
 
         // Assert
         assertNotNull(result);
@@ -239,7 +242,8 @@ class UserServiceTest {
         when(avatarFile.isEmpty()).thenReturn(false);
 
         // Act
-        UserDto result = userService.handleCreateUser("user", "test@example.com", "pass", "Name", "", "", avatarFile);
+        UserDto result = userService.handleCreateUser("user", "test@example.com", "pass", "Name", null, null, null,
+                null, "", "", avatarFile);
 
         // Assert
         assertNotNull(result);
@@ -259,7 +263,8 @@ class UserServiceTest {
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> {
-            userService.handleCreateUser("user", "test@example.com", "pass", "Name", "", "", avatarFile);
+            userService.handleCreateUser("user", "test@example.com", "pass", "Name", null, null, null, null, "", "",
+                    avatarFile);
         });
 
         verify(userRepository, never()).save(any(User.class));
@@ -615,7 +620,7 @@ class UserServiceTest {
         when(userMapper.toDto(any(User.class))).thenReturn(mockUserDto);
 
         // Act
-        UserDto result = userService.handleUpdateUser(testUserId, newFullname, "", "", null);
+        UserDto result = userService.handleUpdateUser(testUserId, newFullname, "", "", "", "", "", "", null);
 
         // Assert
         assertNotNull(result);
@@ -638,7 +643,7 @@ class UserServiceTest {
         when(userMapper.toDto(any(User.class))).thenReturn(mockUserDto);
 
         // Act
-        UserDto result = userService.handleUpdateUser(testUserId, "", "", "", avatarFile);
+        UserDto result = userService.handleUpdateUser(testUserId, "", "", "", "", "", "", "", avatarFile);
 
         // Assert
         assertNotNull(result);
@@ -654,7 +659,7 @@ class UserServiceTest {
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> {
-            userService.handleUpdateUser(notFoundId, "Name", "", "", null);
+            userService.handleUpdateUser(notFoundId, "Name", "", "", "", "", "", "", null);
         });
     }
 

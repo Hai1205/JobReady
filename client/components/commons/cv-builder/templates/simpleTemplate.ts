@@ -112,6 +112,7 @@ export function generateSimpleTemplate(cv: ICV, primaryColor: string, fontFamily
         ${cv.personalInfo?.phone ? `<span style="margin: 0 12px;">📞 ${escapeHtml(cv.personalInfo.phone)}</span>` : ''}
         ${cv.personalInfo?.email ? `<span style="margin: 0 12px;">✉ ${escapeHtml(cv.personalInfo.email)}</span>` : ''}
         ${cv.personalInfo?.location ? `<span style="margin: 0 12px;">📍 ${escapeHtml(cv.personalInfo.location)}</span>` : ''}
+        ${cv.personalInfo?.birth ? `<span style="margin: 0 12px;">🎂 ${escapeHtml(cv.personalInfo.birth)}</span>` : ''}
       </div>
 
       <!-- Summary Section -->

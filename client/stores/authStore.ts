@@ -73,6 +73,7 @@ export const useAuthStore = createStore<IAuthStore>(
 				const { success, user } = res.data || {};
 
 				if (success && user) {
+					console.log("Logged in user:", user);
 					set({
 						userAuth: user,
 						isAdmin: user?.role === EUserRole.ADMIN,

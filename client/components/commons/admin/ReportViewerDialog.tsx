@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Download, FileText, Loader2 } from "lucide-react";
 import { useStatsStore } from "@/stores/statsStore";
 import { toast } from "react-toastify";
@@ -22,36 +23,90 @@ export function ReportViewerDialog({
   open,
   onOpenChange,
 }: ReportViewerDialogProps) {
-  const { getStatsReport, fetchReportInBackground, isLoading, statsReport } =
+  const { getStatsReport, fetchReportInBackground, statsReport } =
     useStatsStore();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [isLocalLoading, setIsLocalLoading] = useState(false);
 
+  // Cleanup effect for pdfUrl
   useEffect(() => {
-    if (open) {
-      setLoadError(false);
-      loadReport();
-      // Refresh report in background for next time
-      fetchReportInBackground();
-    } else {
-      // Cleanup URL when dialog closes (but keep blob in store)
-      if (pdfUrl) {
-        URL.revokeObjectURL(pdfUrl);
-        setPdfUrl(null);
-      }
-    }
-
     return () => {
       if (pdfUrl) {
         URL.revokeObjectURL(pdfUrl);
       }
     };
-  }, [open]);
+  }, [pdfUrl]);
+
+  // Load report effect
+  useEffect(() => {
+    if (!open) {
+      setPdfUrl(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadReport = async () => {
+      try {
+        setIsLocalLoading(true);
+        setLoadError(false);
+        setPdfUrl(null); // Clear old URL first
+
+        // This will use cached report if available
+        const blob = await getStatsReport();
+
+        if (cancelled) return;
+
+        console.log("ReportViewerDialog: getStatsReport returned:", blob);
+        console.log("ReportViewerDialog: blob type:", typeof blob);
+        console.log(
+          "ReportViewerDialog: blob instanceof Blob:",
+          blob instanceof Blob
+        );
+
+        if (blob && blob instanceof Blob) {
+          const url = URL.createObjectURL(blob);
+          setPdfUrl(url);
+          setLoadError(false);
+        } else {
+          setLoadError(true);
+          toast.error("Failed to load report");
+        }
+      } catch (error) {
+        if (cancelled) return;
+        console.error("Error loading report:", error);
+        setLoadError(true);
+        toast.error("Failed to load report");
+      } finally {
+        if (!cancelled) {
+          setIsLocalLoading(false);
+        }
+      }
+    };
+
+    loadReport();
+    // Refresh report in background for next time
+    fetchReportInBackground();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, getStatsReport, fetchReportInBackground]);
 
   const loadReport = async () => {
     try {
+      setLoadError(false);
+
       // This will use cached report if available
       const blob = await getStatsReport();
+
+      console.log("ReportViewerDialog: getStatsReport returned:", blob);
+      console.log("ReportViewerDialog: blob type:", typeof blob);
+      console.log(
+        "ReportViewerDialog: blob instanceof Blob:",
+        blob instanceof Blob
+      );
 
       if (blob) {
         // Clean up old URL if exists
@@ -104,7 +159,7 @@ export function ReportViewerDialog({
         </DialogHeader>
 
         <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-          {isLoading || (!pdfUrl && !loadError) ? (
+          {isLocalLoading || (!pdfUrl && !loadError) ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -115,13 +170,15 @@ export function ReportViewerDialog({
             </div>
           ) : pdfUrl ? (
             <>
-              <div className="flex-1 border rounded-lg overflow-hidden bg-muted">
-                <iframe
-                  src={pdfUrl}
-                  className="w-full h-full"
-                  title="Dashboard Report"
-                />
-              </div>
+              <ScrollArea className="flex-1 border rounded-lg bg-muted">
+                <div className="w-full min-h-[70vh]">
+                  <iframe
+                    src={pdfUrl}
+                    className="w-full h-[80vh]"
+                    title="Dashboard Report"
+                  />
+                </div>
+              </ScrollArea>
 
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => onOpenChange(false)}>

@@ -66,6 +66,15 @@ export const formatNumberStyle = (value: number): string => {
   }
 }
 
+export const validatePhoneNumber = (phone: string): boolean => {
+  // Vietnamese phone number regex
+  // Format: 0[35789]xxxxxxxx (10 digits total)
+  // Starts with 0, followed by 3,5,7,8,9, then 8 more digits
+  const phoneRegex = /^0[35789][0-9]{8}$/;
+  const cleanedPhone = phone.replace(/\s+/g, "");
+  return phoneRegex.test(cleanedPhone);
+}
+
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',

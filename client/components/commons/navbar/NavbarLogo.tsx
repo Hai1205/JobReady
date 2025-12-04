@@ -9,7 +9,7 @@ export const NavbarLogo = () => (
       alt="JobReady Logo"
       className="h-6 w-6 object-contain"
     /> */}
-    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+    <span className="bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
       JobReady
     </span>
   </Link>

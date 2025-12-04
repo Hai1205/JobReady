@@ -18,7 +18,9 @@ export default function TemplateCVsSection({
   return (
     <div className="mt-12 pt-8 border-t border-border">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">CV mẫu</h1>
+        <h1 className="text-3xl font-bold bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
+          CV mẫu
+        </h1>
         <p className="text-muted-foreground mt-2">
           Khám phá và sử dụng các mẫu CV chuyên nghiệp
         </p>

@@ -132,6 +132,7 @@ export function generateProfessionalTemplate(cv: ICV, primaryColor: string, font
             ${cv.personalInfo?.phone ? `<div>📞 ${escapeHtml(cv.personalInfo.phone)}</div>` : ''}
             ${cv.personalInfo?.email ? `<div>✉ ${escapeHtml(cv.personalInfo.email)}</div>` : ''}
             ${cv.personalInfo?.location ? `<div>📍 ${escapeHtml(cv.personalInfo.location)}</div>` : ''}
+            ${cv.personalInfo?.birth ? `<div>🎂 ${escapeHtml(cv.personalInfo.birth)}</div>` : ''}
           </div>
         </div>
       </div>

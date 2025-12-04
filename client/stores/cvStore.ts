@@ -30,7 +30,7 @@ export interface ICVStore extends IBaseStore {
 		cvId: string
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	createCV: (
-		userId: string,
+		user: IUser | null
 	) => Promise<IApiResponse<ICVDataResponse>>;
 	updateCV: (
 		cvId: string,
@@ -90,6 +90,7 @@ const initialState = {
 			email: '',
 			phone: '',
 			location: '',
+			birth: '',
 			summary: '',
 			avatarUrl: '',
 			avatarPublicId: '',
@@ -231,12 +232,27 @@ export const useCVStore = createStore<ICVStore>(
 		},
 
 		createCV: async (
-			userId: string
+			user: IUser | null
 		): Promise<IApiResponse<ICVDataResponse>> => {
-			get().handleSetCurrentCV(get().initialCV);
+			const initialCVWithUserInfo = {
+				...get().initialCV,
+				personalInfo: {
+					...get().initialCV.personalInfo,
+					fullname: user?.fullname || '',
+					email: user?.email || '',
+					phone: user?.phone || '',
+					location: user?.location || '',
+					birth: user?.birth || '',
+					summary: user?.summary || '',
+					avatarUrl: user?.avatarUrl || '',
+				}
+			};
+
+			get().handleSetCurrentCV(initialCVWithUserInfo);
 
 			return await get().handleRequest(async () => {
-				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${userId}`, new FormData());
+				const res = await handleRequest<ICVDataResponse>(EHttpType.POST, `/cvs/users/${user?.id}`, new FormData());
+				console.log("Create CV response:", res);
 
 				if (res.data && res.data.success && res.data.cv) {
 					get().handleAddCVToUserCVs(res.data.cv);
@@ -245,9 +261,7 @@ export const useCVStore = createStore<ICVStore>(
 
 				return res;
 			});
-		},
-
-		updateCV: async (
+		}, updateCV: async (
 			cvId: string,
 			title: string,
 			avatar: File,

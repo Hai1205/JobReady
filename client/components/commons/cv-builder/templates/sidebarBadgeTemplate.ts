@@ -121,6 +121,7 @@ export function generateSidebarBadgeTemplate(cv: ICV, primaryColor: string, font
             ${cv.personalInfo?.phone ? `<div style="margin-bottom: 8px;">📞 ${escapeHtml(cv.personalInfo.phone)}</div>` : ''}
             ${cv.personalInfo?.email ? `<div style="margin-bottom: 8px;">✉ ${escapeHtml(cv.personalInfo.email)}</div>` : ''}
             ${cv.personalInfo?.location ? `<div style="margin-bottom: 8px;">📍 ${escapeHtml(cv.personalInfo.location)}</div>` : ''}
+            ${cv.personalInfo?.birth ? `<div style="margin-bottom: 8px;">🎂 ${escapeHtml(cv.personalInfo.birth)}</div>` : ''}
           </div>
         </div>
 
