@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +5,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { CVTable } from "@/components/commons/admin/cvDashboard/CVTable";
 import { DashboardHeader } from "@/components/commons/admin/DashboardHeader";
 import { useCVStore } from "@/stores/cvStore";
+import { usePagination } from "@/hooks/use-pagination";
 import { TableSearch } from "@/components/commons/admin/adminTable/TableSearch";
 import { CVFilter } from "@/components/commons/admin/cvDashboard/CVFilter";
 import { useRouter } from "next/navigation";
@@ -64,6 +63,12 @@ export default function CVDashboardPage() {
     visibility?: string[];
   }>(initialFilters);
 
+  // Pagination
+  const { paginationState, paginationData, setPage } = usePagination({
+    initialPage: 1,
+    initialPageSize: 10,
+  });
+
   useEffect(() => {
     setIsLoading(true);
     fetchAllCVsInBackground().finally(() => setIsLoading(false));
@@ -102,6 +107,20 @@ export default function CVDashboardPage() {
   useEffect(() => {
     filterData(searchQuery, activeFilters);
   }, [CVsTable, searchQuery, activeFilters, filterData]);
+
+  // Update pagination when filtered CVs change
+  useEffect(() => {
+    paginationData.totalElements = filteredCVs.length;
+    paginationData.totalPages = Math.ceil(
+      filteredCVs.length / paginationState.pageSize
+    );
+  }, [filteredCVs.length, paginationState.pageSize]);
+
+  // Paginate filtered CVs
+  const paginatedCVs = filteredCVs.slice(
+    (paginationState.page - 1) * paginationState.pageSize,
+    paginationState.page * paginationState.pageSize
+  );
 
   const onDelete = (cv: ICV) => {
     setCvToDelete(cv);
@@ -305,11 +324,14 @@ export default function CVDashboardPage() {
           </CardHeader>
 
           <CVTable
-            CVs={filteredCVs}
+            CVs={paginatedCVs}
             isLoading={isLoading}
             onUpdate={onUpdate}
             onDownload={onDownload}
             onDelete={onDelete}
+            showPagination={filteredCVs.length > 10}
+            paginationData={paginationData}
+            onPageChange={setPage}
           />
         </Card>
       </div>

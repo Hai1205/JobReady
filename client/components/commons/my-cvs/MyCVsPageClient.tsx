@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
+import { usePagination } from "@/hooks/use-pagination";
 import PageHeader from "@/components/commons/my-cvs/PageHeader";
 import UserCVsSkeleton from "@/components/commons/layout/UserCVsSkeleton";
 import UserCVsSection from "@/components/commons/my-cvs/UserCVsSection";
@@ -36,6 +37,30 @@ export default function MyCVsPageClient() {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [droppedFile, setDroppedFile] = useState<File | null>(null);
 
+  // Pagination for user CVs
+  const userCVsPagination = usePagination({
+    initialPage: 1,
+    initialPageSize: 12,
+  });
+
+  // Pagination for template CVs
+  const templateCVsPagination = usePagination({
+    initialPage: 1,
+    initialPageSize: 12,
+  });
+
+  // Paginate user CVs in memory
+  const paginatedUserCVs = userCVs.slice(
+    (userCVsPagination.paginationState.page - 1) * userCVsPagination.paginationState.pageSize,
+    userCVsPagination.paginationState.page * userCVsPagination.paginationState.pageSize
+  );
+
+  // Paginate template CVs in memory
+  const paginatedTemplateCVs = templateCVs.slice(
+    (templateCVsPagination.paginationState.page - 1) * templateCVsPagination.paginationState.pageSize,
+    templateCVsPagination.paginationState.page * templateCVsPagination.paginationState.pageSize
+  );
+
   useEffect(() => {
     if (userAuth) {
       fetchUserCVsInBackground(userAuth.id);
@@ -49,6 +74,15 @@ export default function MyCVsPageClient() {
     const publicCvs = CVsTable.filter((cv) => cv.isVisibility === true);
     setTemplateCVs(publicCvs);
   }, [CVsTable]);
+
+  // Update pagination when data changes
+  useEffect(() => {
+    userCVsPagination.updateTotalElements(userCVs.length);
+  }, [userCVs.length]);
+
+  useEffect(() => {
+    templateCVsPagination.updateTotalElements(templateCVs.length);
+  }, [templateCVs.length]);
 
   const handleCreate = async () => {
     router.push("/cv-builder");
@@ -174,18 +208,33 @@ export default function MyCVsPageClient() {
           />
 
           <UserCVsSection
-            userCVs={userCVs}
+            userCVs={paginatedUserCVs}
             onCreateNew={handleCreate}
             onUpdate={handleEdit}
             onDuplicate={handleDuplicate}
             onDownload={handleGeneratePDF}
             onDelete={handleDeleteClick}
+            isLoading={isLoadingUserCVs}
+            showPagination={userCVs.length > 12}
+            paginationData={userCVsPagination.paginationData}
+            onPageChange={(page) => {
+              userCVsPagination.setPage(page);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            onPageSizeChange={userCVsPagination.setPageSize}
           />
 
           <TemplateCVsSection
-            templateCVs={templateCVs}
+            templateCVs={paginatedTemplateCVs}
             handleDuplicate={handleDuplicate}
             onDownload={handleGeneratePDF}
+            showPagination={templateCVs.length > 12}
+            paginationData={templateCVsPagination.paginationData}
+            onPageChange={(page) => {
+              templateCVsPagination.setPage(page);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            onPageSizeChange={templateCVsPagination.setPageSize}
           />
         </div>
       </div>

@@ -42,16 +42,7 @@ public class CV {
         this.font = font;
     }
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private PersonalInfo personalInfo;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Experience> experiences = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Education> educations = new ArrayList<>();
-
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     private List<String> skills = new ArrayList<>();
 
     @Column(nullable = false)

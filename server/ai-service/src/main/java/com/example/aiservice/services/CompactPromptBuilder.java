@@ -7,78 +7,154 @@ import org.springframework.stereotype.Component;
 @Component
 public class CompactPromptBuilder {
 
-  public String buildCompactAnalysisPrompt() {
-    return """
-        You are a CV expert. Analyze the CV and return JSON with ACTIONABLE data that can be directly applied.
+  public String buildCompactAnalysisPrompt(String language) {
+    boolean isVi = "vi".equalsIgnoreCase(language);
 
-        CRITICAL: The 'data' field must contain ACTUAL content that can be used immediately, NOT instructions.
+    if (isVi) {
+      return """
+          Bạn là chuyên gia CV chuyên nghiệp. Phân tích CV và trả về JSON với dữ liệu CÓ THỂ ÁP DỤNG TRỰC TIẾP.
 
-        {
-          "overallScore": <0-100>,
-          "strengths": ["strength1", "strength2", "strength3"],
-          "weaknesses": ["weakness1", "weakness2", "weakness3"],
-          "suggestions": [
-            {
-              "id": "<uuid>",
-              "type": "improvement|warning|error",
-              "section": "summary|experience|education|skills",
-              "message": "<issue description>",
-              "suggestion": "<brief instruction>",
-              "data": <actual data to apply - see examples below>,
-              "applied": false
-            }
-          ]
-        }
+          QUAN TRỌNG: Trường 'data' phải chứa nội dung THỰC TẾ có thể sử dụng ngay, KHÔNG PHẢI hướng dẫn.
 
-        DATA FIELD FORMATS BY SECTION:
-        • skills: {"skills": ["React", "Node.js", "Docker"]} - Array of skill names
-        • summary: {"text": "Full paragraph of professional summary ready to use"}
-        • experience: {"description": "Complete bullet points with STAR format and metrics"}
-        • education: {"field": "Computer Science", "degree": "Bachelor"}
-        • dates: {"startDate": "2021-01", "endDate": "2024-12"}
-        • title: {"text": "Senior Backend Developer"}
+          {
+            "overallScore": <0-100>,
+            "strengths": ["điểm mạnh 1", "điểm mạnh 2", "điểm mạnh 3"],
+            "weaknesses": ["điểm yếu 1", "điểm yếu 2", "điểm yếu 3"],
+            "suggestions": [
+              {
+                "id": "<uuid>",
+                "type": "improvement|warning|error",
+                "section": "summary|experience|education|skills",
+                "message": "<mô tả vấn đề>",
+                "suggestion": "<hướng dẫn ngắn gọn>",
+                "data": <dữ liệu thực tế để áp dụng - xem ví dụ bên dưới>,
+                "applied": false
+              }
+            ]
+          }
 
-        EXAMPLES:
-        1. Missing skills:
-        {
-          "section": "skills",
-          "message": "The target company works in e-commerce. Your current experience lacks specific database keywords like PostgreSQL, MongoDB",
-          "suggestion": "Add relevant database skills",
-          "data": {"skills": ["PostgreSQL", "MongoDB", "Redis"]}
-        }
+          ĐỊNH DẠNG TRƯỜNG DATA THEO TỪNG SECTION:
+          • skills: {"skills": ["React", "Node.js", "Docker"]} - Mảng tên kỹ năng
+          • summary: {"text": "Đoạn văn đầy đủ về tóm tắt chuyên môn sẵn sàng sử dụng"}
+          • experience: {"description": "Mô tả chi tiết theo format STAR với số liệu"}
+          • education: {"field": "Khoa học máy tính", "degree": "Cử nhân"}
+          • dates: {"startDate": "2021-01", "endDate": "2024-12"}
+          • title: {"text": "Senior Backend Developer"}
 
-        2. Missing summary:
-        {
-          "section": "summary",
-          "message": "Missing professional summary",
-          "suggestion": "Add a professional summary",
-          "data": {"text": "Backend Developer with 3+ years of experience in building scalable microservices using Java Spring Boot. Specialized in e-commerce platforms with expertise in PostgreSQL, Redis, and AWS. Track record of improving system performance by 40% through optimization."}
-        }
+          VÍ DỤ:
+          1. Thiếu kỹ năng:
+          {
+            "section": "skills",
+            "message": "Công ty mục tiêu hoạt động trong lĩnh vực thương mại điện tử. Kinh nghiệm hiện tại của bạn thiếu các từ khóa cơ sở dữ liệu cụ thể như PostgreSQL, MongoDB",
+            "suggestion": "Thêm các kỹ năng cơ sở dữ liệu liên quan",
+            "data": {"skills": ["PostgreSQL", "MongoDB", "Redis"]}
+          }
 
-        3. Weak experience description:
-        {
-          "section": "experience",
-          "message": "Experience at TechCorp lacks metrics and strong action verbs",
-          "suggestion": "Rewrite with STAR format",
-          "data": {"description": "• Led 5-engineer team to rebuild e-commerce platform using microservices, increasing order processing speed by 60% and reducing system downtime from 2h/week to 15min/month\\n• Implemented Redis caching strategy and database optimization, achieving 90% faster query response time and handling 50K concurrent users"}
-        }
+          2. Thiếu tóm tắt:
+          {
+            "section": "summary",
+            "message": "Thiếu phần tóm tắt chuyên môn",
+            "suggestion": "Thêm phần tóm tắt chuyên môn",
+            "data": {"text": "Backend Developer với hơn 3 năm kinh nghiệm xây dựng microservices có khả năng mở rộng sử dụng Java Spring Boot. Chuyên về nền tảng thương mại điện tử với kiến thức chuyên sâu về PostgreSQL, Redis và AWS. Thành tích cải thiện hiệu suất hệ thống 40% thông qua tối ưu hóa."}
+          }
 
-        4. Invalid dates:
-        {
-          "section": "experience",
-          "message": "Date format invalid: '2021' should be 'YYYY-MM'",
-          "suggestion": "Fix date format",
-          "data": {"startDate": "2021-01", "endDate": "2024-12"}
-        }
+          3. Mô tả kinh nghiệm yếu:
+          {
+            "section": "experience",
+            "message": "Kinh nghiệm tại TechCorp thiếu số liệu và động từ hành động mạnh",
+            "suggestion": "Viết lại theo format STAR",
+            "data": {"description": "• Lãnh đạo đội 5 kỹ sư xây dựng lại nền tảng thương mại điện tử sử dụng microservices, tăng tốc độ xử lý đơn hàng 60% và giảm thời gian chết hệ thống từ 2h/tuần xuống 15 phút/tháng\\n• Triển khai chiến lược Redis caching và tối ưu hóa cơ sở dữ liệu, đạt thời gian phản hồi query nhanh hơn 90% và xử lý 50K người dùng đồng thời"}
+          }
 
-        Scoring:
-        - Personal Info (10%): Complete contact + 2-3 sentence summary
-        - Experience (50%): Action verbs + metrics + clear dates
-        - Education (20%): Relevant degree + school + dates
-        - Skills (20%): 5-7 relevant technical skills
+          4. Định dạng ngày không hợp lệ:
+          {
+            "section": "experience",
+            "message": "Định dạng ngày không hợp lệ: '2021' nên là 'YYYY-MM'",
+            "suggestion": "Sửa định dạng ngày",
+            "data": {"startDate": "2021-01", "endDate": "2024-12"}
+          }
 
-        Return ONLY JSON, no markdown.
-        """;
+          Chấm điểm:
+          - Thông tin cá nhân (10%): Liên hệ đầy đủ + tóm tắt 2-3 câu
+          - Kinh nghiệm (50%): Động từ hành động + số liệu + ngày tháng rõ ràng
+          - Học vấn (20%): Bằng cấp liên quan + trường + ngày tháng
+          - Kỹ năng (20%): 5-7 kỹ năng kỹ thuật liên quan
+
+          Chỉ trả về JSON, không có markdown.
+          """;
+    } else {
+      return """
+          You are a CV expert. Analyze the CV and return JSON with ACTIONABLE data that can be directly applied.
+
+          CRITICAL: The 'data' field must contain ACTUAL content that can be used immediately, NOT instructions.
+
+          {
+            "overallScore": <0-100>,
+            "strengths": ["strength1", "strength2", "strength3"],
+            "weaknesses": ["weakness1", "weakness2", "weakness3"],
+            "suggestions": [
+              {
+                "id": "<uuid>",
+                "type": "improvement|warning|error",
+                "section": "summary|experience|education|skills",
+                "message": "<issue description>",
+                "suggestion": "<brief instruction>",
+                "data": <actual data to apply - see examples below>,
+                "applied": false
+              }
+            ]
+          }
+
+          DATA FIELD FORMATS BY SECTION:
+          • skills: {"skills": ["React", "Node.js", "Docker"]} - Array of skill names
+          • summary: {"text": "Full paragraph of professional summary ready to use"}
+          • experience: {"description": "Complete bullet points with STAR format and metrics"}
+          • education: {"field": "Computer Science", "degree": "Bachelor"}
+          • dates: {"startDate": "2021-01", "endDate": "2024-12"}
+          • title: {"text": "Senior Backend Developer"}
+
+          EXAMPLES:
+          1. Missing skills:
+          {
+            "section": "skills",
+            "message": "The target company works in e-commerce. Your current experience lacks specific database keywords like PostgreSQL, MongoDB",
+            "suggestion": "Add relevant database skills",
+            "data": {"skills": ["PostgreSQL", "MongoDB", "Redis"]}
+          }
+
+          2. Missing summary:
+          {
+            "section": "summary",
+            "message": "Missing professional summary",
+            "suggestion": "Add a professional summary",
+            "data": {"text": "Backend Developer with 3+ years of experience in building scalable microservices using Java Spring Boot. Specialized in e-commerce platforms with expertise in PostgreSQL, Redis, and AWS. Track record of improving system performance by 40% through optimization."}
+          }
+
+          3. Weak experience description:
+          {
+            "section": "experience",
+            "message": "Experience at TechCorp lacks metrics and strong action verbs",
+            "suggestion": "Rewrite with STAR format",
+            "data": {"description": "• Led 5-engineer team to rebuild e-commerce platform using microservices, increasing order processing speed by 60% and reducing system downtime from 2h/week to 15min/month\\n• Implemented Redis caching strategy and database optimization, achieving 90% faster query response time and handling 50K concurrent users"}
+          }
+
+          4. Invalid dates:
+          {
+            "section": "experience",
+            "message": "Date format invalid: '2021' should be 'YYYY-MM'",
+            "suggestion": "Fix date format",
+            "data": {"startDate": "2021-01", "endDate": "2024-12"}
+          }
+
+          Scoring:
+          - Personal Info (10%): Complete contact + 2-3 sentence summary
+          - Experience (50%): Action verbs + metrics + clear dates
+          - Education (20%): Relevant degree + school + dates
+          - Skills (20%): 5-7 relevant technical skills
+
+          Return ONLY JSON, no markdown.
+          """;
+    }
   }
 
   public String buildCompactImprovementPrompt(String section) {

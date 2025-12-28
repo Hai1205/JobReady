@@ -19,6 +19,7 @@ public class AnalyzeCVRequest {
     private List<ExperienceDto> experiences;
     private List<EducationDto> educations;
     private List<String> skills;
+    private String language;
     private String privacy;
     private String color;
     private String template;

@@ -18,6 +18,27 @@ services:
     networks:
       - app-network
 
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-jobready
+    environment:
+      MYSQL_DATABASE: jobready
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: jobready_user
+      MYSQL_PASSWORD: jobready_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   gateway-service:
     build:
       context: .
@@ -39,6 +60,9 @@ services:
       - server/user-service/.env
     ports:
       - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -78,6 +102,8 @@ services:
     ports:
       - "8084:8084"
     depends_on:
+      mysql:
+        condition: service_healthy
       user-service:
         condition: service_started
     networks:
@@ -135,6 +161,7 @@ services:
 
 volumes:
   postgres_data:
+  mysql_data:
   rabbitmq_data:
 
 networks:

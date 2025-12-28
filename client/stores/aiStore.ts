@@ -27,6 +27,7 @@ export interface IAIStore extends IBaseStore {
 		experiences: IExperience[],
 		educations: IEducation[],
 		skills: string[],
+		language?: string,
 	) => Promise<IApiResponse<IAIDataResponse>>;
 	analyzeCVWithJD: (
 		jobDescription: string,
@@ -50,6 +51,7 @@ export interface IAIStore extends IBaseStore {
 	handleSetAISuggestions: (suggestions: IAISuggestion[]) => void;
 	handleSetJobDescription: (jd: string) => void;
 	handleApplySuggestion: (id: string) => void;
+	handleRejectSuggestion: (id: string) => void;
 	handleSetIsAnalyzing: (isAnalyzing: boolean) => void;
 	handleSetMatchScore: (score: number | undefined) => void;
 	handleSetJdFile: (file: File | null) => void;
@@ -73,7 +75,8 @@ export const useAIStore = createStore<IAIStore>(
 			personalInfo: IPersonalInfo,
 			experiences: IExperience[],
 			educations: IEducation[],
-			skills: string[],): Promise<IApiResponse<IAIDataResponse>> => {
+			skills: string[],
+			language: string = "vi"): Promise<IApiResponse<IAIDataResponse>> => {
 			const formData = new FormData();
 			formData.append("data", JSON.stringify({
 				title,
@@ -81,6 +84,7 @@ export const useAIStore = createStore<IAIStore>(
 				experiences,
 				educations,
 				skills,
+				language,
 			}));
 
 			return await get().handleRequest(async () => {
@@ -88,9 +92,7 @@ export const useAIStore = createStore<IAIStore>(
 				console.log("Analyze CV Response:", res);
 				return res;
 			});
-		},
-
-		analyzeCVWithJD: async (
+		}, analyzeCVWithJD: async (
 			jobDescription: string,
 			jdFile: File | null,
 			language: string = "vi",
@@ -180,9 +182,26 @@ export const useAIStore = createStore<IAIStore>(
 			set({
 				aiSuggestions: updatedSuggestions,
 			} as Partial<IAIStore>);
+		},
 
-			// const sectionName = getSectionDisplayName(suggestion.section);
-			// toast.success(`Đã áp dụng gợi ý cho "${sectionName}"`);
+		handleRejectSuggestion: (id: string): void => {
+			const currentState = get();
+			const suggestion = currentState.aiSuggestions.find(s => s.id === id);
+
+			if (!suggestion) {
+				toast.error("Không tìm thấy gợi ý");
+				return;
+			}
+
+			// Mark suggestion as rejected
+			const updatedSuggestions = currentState.aiSuggestions.map(s =>
+				s.id === id ? { ...s, rejected: true } : s
+			);
+
+			// Update state
+			set({
+				aiSuggestions: updatedSuggestions,
+			} as Partial<IAIStore>);
 		},
 
 		handleSetIsAnalyzing: (isAnalyzing: boolean): void => {

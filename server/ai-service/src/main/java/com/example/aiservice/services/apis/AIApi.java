@@ -133,14 +133,16 @@ public class AIApi extends BaseApi {
 
             String category = detectCategory(cvDto);
             String level = detectLevel(cvDto);
+            String language = request.getLanguage() != null ? request.getLanguage() : "vi";
 
-            logger.info("Analyzing CV: title={}, cat={}, lvl={}", request.getTitle(), category, level);
+            logger.info("Analyzing CV: title={}, cat={}, lvl={}, lang={}", request.getTitle(), category, level,
+                    language);
 
             // OPTIMIZED: Parallel RAG + shorter prompt
             long geminiStart = System.currentTimeMillis();
             logger.info("Starting Gemini call for analyzeCV");
 
-            AIResponseDto aiResponse = handleAnalyzeCVFast(cvDto, category, level);
+            AIResponseDto aiResponse = handleAnalyzeCVFast(cvDto, category, level, language);
             long geminiEnd = System.currentTimeMillis();
 
             logger.info("Completed Gemini call for analyzeCV in {} ms", geminiEnd - geminiStart);
@@ -315,9 +317,9 @@ public class AIApi extends BaseApi {
      * 2. AUGMENT: Build prompt với examples
      * 3. GENERATE: Gemini tạo analysis dựa trên augmented prompt
      */
-    private AIResponseDto handleAnalyzeCVFast(CVDto cv, String category, String level) {
+    private AIResponseDto handleAnalyzeCVFast(CVDto cv, String category, String level, String language) {
         try {
-            logger.info("Starting FAST RAG analysis...");
+            logger.info("Starting FAST RAG analysis with language: {}...", language);
             long startTime = System.currentTimeMillis();
 
             String cvContent = formatCVCompact(cv);
@@ -340,7 +342,7 @@ public class AIApi extends BaseApi {
             logger.info("RAG retrieve phase: {}ms", System.currentTimeMillis() - startTime);
 
             // OPTIMIZATION 2: Compact prompt with minimal examples
-            String systemPrompt = promptBuilder.buildCompactAnalysisPrompt();
+            String systemPrompt = promptBuilder.buildCompactAnalysisPrompt(language);
             String userPrompt = buildCompactAnalysisPrompt(cvContent, allExamples);
 
             logger.info("Prompt built: {} chars", userPrompt.length());

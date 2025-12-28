@@ -18,6 +18,8 @@ public class Experience {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    private UUID cvId;
+
     private String company;
     private String position;
     private String startDate;

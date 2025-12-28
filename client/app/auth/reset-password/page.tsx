@@ -1,33 +1,12 @@
-"use client";
+import ResetPasswordClient from "@/components/commons/auth/ResetPasswordClient";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type React from "react";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import { useAuthStore } from "@/stores/authStore";
-import Link from "next/link";
-import { Loader2, Lock, Eye, EyeOff, ArrowLeft, KeyRound } from "lucide-react";
+interface PageProps {
+  searchParams: { identifier?: string };
+}
 
-const ResetPasswordPage: React.FC = () => {
-  const { forgotPassword, isLoading } = useAuthStore();
-
-  const router = useRouter();
-  const [identifier, setIdentifier] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const identifierParam = urlParams.get("identifier");
-
-    if (identifierParam) {
-      setIdentifier(identifierParam);
-    }
-  }, []);
+export default function ResetPasswordPage({ searchParams }: PageProps) {
+  return <ResetPasswordClient identifier={searchParams.identifier || null} />;
+}
 
   const [formData, setFormData] = useState({
     newPassword: "",

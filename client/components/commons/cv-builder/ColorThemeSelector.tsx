@@ -30,15 +30,29 @@ const colorThemes: ColorTheme[] = [
 interface ColorThemeSelectorProps {
   selectedColor: string;
   onColorChange: (color: string) => void;
+  isExpanded?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 export function ColorThemeSelector({
   selectedColor,
   onColorChange,
+  isExpanded: controlledIsExpanded,
+  onExpandChange,
 }: ColorThemeSelectorProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [internalIsExpanded, setInternalIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const selectedTheme = colorThemes.find((t) => t.value === selectedColor);
+
+  // Sử dụng controlled state nếu có, ngược lại dùng internal state
+  const isExpanded = controlledIsExpanded ?? internalIsExpanded;
+  const setIsExpanded = (value: boolean) => {
+    if (onExpandChange) {
+      onExpandChange(value);
+    } else {
+      setInternalIsExpanded(value);
+    }
+  };
 
   // Filter colors based on search
   const filteredColors = useMemo(() => {

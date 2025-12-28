@@ -18,6 +18,8 @@ public class Education {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    private UUID cvId;
+
     private String school;
     private String degree;
     private String field;

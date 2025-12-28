@@ -1,23 +1,8 @@
-"use client";
+import ForgotPasswordClient from "@/components/commons/auth/ForgotPasswordClient";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type React from "react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import { useAuthStore } from "@/stores/authStore";
-import Link from "next/link";
-import { Loader2, Mail, ArrowLeft, Send } from "lucide-react";
-
-const ForgotPasswordPage: React.FC = () => {
-  const router = useRouter();
-
-  const { isLoading, sendOTP } = useAuthStore();
-  const [identifier, setIdentifier] = useState("");
-  const [error, setError] = useState("");
+export default function ForgotPasswordPage() {
+  return <ForgotPasswordClient />;
+}
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIdentifier(e.target.value);

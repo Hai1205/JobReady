@@ -23,7 +23,8 @@ export function AISuggestionsList({
   onApplySuggestion,
   isApplying = false,
 }: AISuggestionsListProps) {
-  const { aiSuggestions, handleApplySuggestion } = useAIStore();
+  const { aiSuggestions, handleApplySuggestion, handleRejectSuggestion } =
+    useAIStore();
   const { currentCV, handleUpdateCV } = useCVStore();
 
   const handleApply = (suggestion: IAISuggestion) => {
@@ -39,6 +40,11 @@ export function AISuggestionsList({
     if (onApplySuggestion) {
       onApplySuggestion(suggestion);
     }
+  };
+
+  const handleDismiss = (id: string) => {
+    // Mark as rejected in AI store
+    handleRejectSuggestion(id);
   };
 
   return (
@@ -69,7 +75,7 @@ export function AISuggestionsList({
                   suggestion={suggestion}
                   isApplying={isApplying}
                   onApply={handleApply}
-                  onDismiss={handleApplySuggestion}
+                  onDismiss={handleDismiss}
                 />
               ))}
             </div>

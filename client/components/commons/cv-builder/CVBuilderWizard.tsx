@@ -49,6 +49,7 @@ export function CVBuilderWizard() {
   const { isAnalyzing } = useAIStore();
 
   const [isCustomizationExpanded, setIsCustomizationExpanded] = useState(false);
+  const [expandedSelector, setExpandedSelector] = useState<string | null>(null);
 
   // Security check: redirect to login if not authenticated
   if (!userAuth) {
@@ -172,6 +173,10 @@ export function CVBuilderWizard() {
               <ColorThemeSelector
                 selectedColor={currentCV?.color || "#3498db"}
                 onColorChange={(color) => handleCVUpdate({ color })}
+                isExpanded={expandedSelector === "color"}
+                onExpandChange={(expanded) =>
+                  setExpandedSelector(expanded ? "color" : null)
+                }
               />
 
               {/* Divider */}
@@ -181,6 +186,10 @@ export function CVBuilderWizard() {
               <TemplateSelector
                 selectedTemplate={currentCV?.template || "modern"}
                 onTemplateChange={(template) => handleCVUpdate({ template })}
+                isExpanded={expandedSelector === "template"}
+                onExpandChange={(expanded) =>
+                  setExpandedSelector(expanded ? "template" : null)
+                }
               />
 
               {/* Divider */}
@@ -190,6 +199,10 @@ export function CVBuilderWizard() {
               <FontSelector
                 selectedFont={currentCV?.font || "Inter, sans-serif"}
                 onFontChange={(font) => handleCVUpdate({ font })}
+                isExpanded={expandedSelector === "font"}
+                onExpandChange={(expanded) =>
+                  setExpandedSelector(expanded ? "font" : null)
+                }
               />
             </div>
           )}

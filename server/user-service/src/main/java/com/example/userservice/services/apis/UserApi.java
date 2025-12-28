@@ -9,7 +9,9 @@ import com.example.userservice.entities.User.UserRole;
 import com.example.userservice.entities.User.UserStatus;
 import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
-import com.example.userservice.repositories.UserRepository;
+import com.example.userservice.repositories.SimpleUserRepository;
+import com.example.userservice.repositories.UserQueryRepository;
+import com.example.userservice.repositories.UserCommandRepository;
 import com.example.cloudinarycommon.CloudinaryService;
 import com.example.securitycommon.utils.SecurityUtils;
 import com.example.securitycommon.models.AuthenticatedUser;
@@ -20,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.security.SecureRandom;
 import java.util.List;
@@ -30,7 +33,9 @@ import java.util.stream.Collectors;
 @Service
 public class UserApi extends BaseApi {
 
-    private final UserRepository userRepository;
+    private final SimpleUserRepository simpleUserRepository;
+    private final UserQueryRepository userQueryRepository;
+    private final UserCommandRepository userCommandRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final CloudinaryService cloudinaryService;
@@ -43,9 +48,16 @@ public class UserApi extends BaseApi {
     @Value("${PASSWORD_LENGTH}")
     private int passwordLength;
 
-    public UserApi(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
+    public UserApi(
+            SimpleUserRepository simpleUserRepository,
+            UserQueryRepository userQueryRepository,
+            UserCommandRepository userCommandRepository,
+            PasswordEncoder passwordEncoder,
+            UserMapper userMapper,
             CloudinaryService cloudinaryService) {
-        this.userRepository = userRepository;
+        this.simpleUserRepository = simpleUserRepository;
+        this.userQueryRepository = userQueryRepository;
+        this.userCommandRepository = userCommandRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.cloudinaryService = cloudinaryService;
@@ -73,7 +85,7 @@ public class UserApi extends BaseApi {
                 throw new OurException("Email is required", 400);
             }
 
-            if (userRepository.existsByEmail(email)) {
+            if (userQueryRepository.existsByEmail(email)) {
                 logger.warn("Attempted to create user with existing email: {}", email);
                 throw new OurException("Email already exists", 400);
             }
@@ -88,7 +100,7 @@ public class UserApi extends BaseApi {
             }
 
             // Check if username already exists
-            if (userRepository.existsByUsername(username)) {
+            if (userQueryRepository.existsByUsername(username)) {
                 logger.warn("Attempted to create user with existing username: {}", username);
                 throw new OurException("Username already exists", 400);
             }
@@ -139,7 +151,29 @@ public class UserApi extends BaseApi {
                 user.setStatus(UserStatus.valueOf(status));
             }
 
-            User savedUser = userRepository.save(user);
+            // Insert user using command repository
+            UUID userId = UUID.randomUUID();
+            LocalDateTime now = LocalDateTime.now();
+            userCommandRepository.insertUser(
+                    userId,
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getPassword(),
+                    user.getFullname(),
+                    user.getPhone(),
+                    user.getLocation(),
+                    user.getBirth(),
+                    user.getSummary(),
+                    user.getAvatarUrl(),
+                    user.getAvatarPublicId(),
+                    user.getRole().name(),
+                    user.getStatus().name(),
+                    now,
+                    now);
+
+            // Fetch created user to return
+            User savedUser = simpleUserRepository.findById(userId)
+                    .orElseThrow(() -> new OurException("Failed to create user", 500));
             logger.info("User created successfully with ID: {}", savedUser.getId());
             return userMapper.toDto(savedUser);
         } catch (OurException e) {
@@ -163,11 +197,15 @@ public class UserApi extends BaseApi {
     public UserDto handleActivateUser(String email) {
         try {
             logger.info("Activating user with email: {}", email);
-            User user = userRepository.findByEmail(email)
+            User user = userQueryRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            user.setStatus(UserStatus.active);
-            userRepository.save(user);
+            // Update status using command repository
+            userCommandRepository.updateUserStatusByEmail(email, UserStatus.active, LocalDateTime.now());
+
+            // Fetch updated user
+            user = userQueryRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
             logger.info("User activated successfully: {}", email);
             return userMapper.toDto(user);
         } catch (OurException e) {
@@ -191,10 +229,10 @@ public class UserApi extends BaseApi {
             User user = null;
             boolean isEmailValid = handleIsValidEmail(identifier);
             if (isEmailValid) {
-                user = userRepository.findByEmail(identifier)
+                user = userQueryRepository.findByEmail(identifier)
                         .orElseThrow(() -> new OurException("User not found", 404));
             } else {
-                user = userRepository.findByUsername(identifier)
+                user = userQueryRepository.findByUsername(identifier)
                         .orElseThrow(() -> new OurException("User not found", 404));
             }
 
@@ -230,12 +268,12 @@ public class UserApi extends BaseApi {
 
     public String handleResetPasswordUser(String email) {
         try {
-            User user = userRepository.findByEmail(email)
+            userQueryRepository.findByEmail(email)
                     .orElseThrow(() -> new OurException("User not found", 404));
 
             String newPassword = handleGenerateRandomPassword();
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            userCommandRepository.updateUserPasswordByEmail(email, encodedPassword, LocalDateTime.now());
 
             return newPassword;
         } catch (OurException e) {
@@ -249,12 +287,15 @@ public class UserApi extends BaseApi {
 
     public UserDto handleForgotPasswordUser(String email, String newPassword) {
         try {
-            User user = userRepository.findByEmail(email)
+            User user = userQueryRepository.findByEmail(email)
                     .orElseThrow(() -> new OurException("User not found", 404));
 
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            userCommandRepository.updateUserPasswordByEmail(email, encodedPassword, LocalDateTime.now());
 
+            // Fetch updated user
+            user = userQueryRepository.findByEmail(email)
+                    .orElseThrow(() -> new OurException("User not found", 404));
             return userMapper.toDto(user);
         } catch (OurException e) {
             logger.error("Error in handleForgotPasswordUser: {}", e.getMessage(), e);
@@ -270,9 +311,8 @@ public class UserApi extends BaseApi {
             UserDto userDto = handleAuthenticateUser(email, currentPassword);
             System.out.println("Authenticated user for password change: " + userDto.getEmail());
 
-            User user = userMapper.toEntity(userDto);
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            userCommandRepository.updateUserPasswordByEmail(email, encodedPassword, LocalDateTime.now());
 
             return userDto;
         } catch (OurException e) {
@@ -322,7 +362,7 @@ public class UserApi extends BaseApi {
 
     public List<UserDto> handleGetAllUsers() {
         try {
-            return userRepository.findAll().stream()
+            return userQueryRepository.findAllUsers(org.springframework.data.domain.Pageable.unpaged()).stream()
                     .map(userMapper::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
@@ -350,7 +390,7 @@ public class UserApi extends BaseApi {
 
     public UserDto handleGetUserById(UUID userId) {
         try {
-            User user = userRepository.findById(userId)
+            User user = simpleUserRepository.findById(userId)
                     .orElseThrow(() -> new OurException("User not found", 404));
             return userMapper.toDto(user);
         } catch (OurException e) {
@@ -384,7 +424,7 @@ public class UserApi extends BaseApi {
         try {
             logger.info("Updating user with ID: {}", userId);
 
-            User existingUser = userRepository.findById(userId)
+            User existingUser = simpleUserRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             AuthenticatedUser currentUser = SecurityUtils.getCurrentUser();
@@ -449,7 +489,23 @@ public class UserApi extends BaseApi {
                 existingUser.setStatus(UserStatus.valueOf(status));
             }
 
-            User updatedUser = userRepository.save(existingUser);
+            // Update user using command repository
+            userCommandRepository.updateUserAllFields(
+                    userId,
+                    existingUser.getFullname(),
+                    existingUser.getPhone(),
+                    existingUser.getLocation(),
+                    existingUser.getBirth(),
+                    existingUser.getSummary(),
+                    existingUser.getAvatarUrl(),
+                    existingUser.getAvatarPublicId(),
+                    existingUser.getRole(),
+                    existingUser.getStatus(),
+                    LocalDateTime.now());
+
+            // Fetch updated user
+            User updatedUser = simpleUserRepository.findById(userId)
+                    .orElseThrow(() -> new OurException("User not found", 404));
             logger.info("User updated successfully: {}", userId);
             return userMapper.toDto(updatedUser);
         } catch (OurException e) {
@@ -503,7 +559,7 @@ public class UserApi extends BaseApi {
                 cloudinaryService.deleteImage(avatarPublicId);
             }
 
-            userRepository.deleteById(userId);
+            userCommandRepository.deleteUserById(userId);
             logger.info("User deleted successfully: {}", userId);
             return true;
         } catch (OurException e) {
@@ -537,7 +593,7 @@ public class UserApi extends BaseApi {
 
     public UserDto handleFindByEmail(String email) {
         try {
-            return userRepository.findByEmail(email)
+            return userQueryRepository.findByEmail(email)
                     .map(userMapper::toDto)
                     .orElse(null);
         } catch (Exception e) {
@@ -548,7 +604,7 @@ public class UserApi extends BaseApi {
 
     public UserDto handleFindByUsername(String username) {
         try {
-            return userRepository.findByUsername(username)
+            return userQueryRepository.findByUsername(username)
                     .map(userMapper::toDto)
                     .orElse(null);
         } catch (Exception e) {
@@ -559,7 +615,7 @@ public class UserApi extends BaseApi {
 
     public UserDto handleFindById(UUID userId) {
         try {
-            return userRepository.findById(userId)
+            return simpleUserRepository.findById(userId)
                     .map(userMapper::toDto)
                     .orElse(null);
         } catch (Exception e) {
@@ -590,14 +646,14 @@ public class UserApi extends BaseApi {
             logger.debug("Finding OAuth2 user: email={}, provider={}, providerId={}", email, provider, providerId);
 
             // Tìm theo email và provider trước
-            Optional<User> userByEmailAndProvider = userRepository.findByEmailAndOauthProvider(email, provider);
+            Optional<User> userByEmailAndProvider = userQueryRepository.findByEmailAndOauthProvider(email, provider);
             if (userByEmailAndProvider.isPresent()) {
                 return userMapper.toDto(userByEmailAndProvider.get());
             }
 
             // Nếu không tìm thấy, thử tìm theo email thôi (trường hợp user có thể đã tồn
             // tại nhưng chưa link provider)
-            Optional<User> userByEmail = userRepository.findByEmail(email);
+            Optional<User> userByEmail = userQueryRepository.findByEmail(email);
             if (userByEmail.isPresent()) {
                 User user = userByEmail.get();
                 // Kiểm tra nếu user chưa có OAuth provider, có thể link
@@ -621,7 +677,7 @@ public class UserApi extends BaseApi {
         try {
             logger.debug("Finding user by email and provider: email={}, provider={}", email, provider);
 
-            Optional<User> user = userRepository.findByEmailAndOauthProvider(email, provider);
+            Optional<User> user = userQueryRepository.findByEmailAndOauthProvider(email, provider);
             return user.map(userMapper::toDto).orElse(null);
         } catch (Exception e) {
             logger.error("Error in handleFindByEmailAndProvider: {}", e.getMessage(), e);
@@ -638,9 +694,9 @@ public class UserApi extends BaseApi {
                     oauth2UserDto.getProvider());
 
             // Kiểm tra user đã tồn tại chưa
-            if (userRepository.existsByEmail(oauth2UserDto.getEmail())) {
+            if (userQueryRepository.existsByEmail(oauth2UserDto.getEmail())) {
                 // User đã tồn tại, cần link với OAuth provider
-                Optional<User> existingUser = userRepository.findByEmail(oauth2UserDto.getEmail());
+                Optional<User> existingUser = userQueryRepository.findByEmail(oauth2UserDto.getEmail());
                 if (existingUser.isPresent()) {
                     User user = existingUser.get();
                     return handleLinkOAuth2Provider(user, oauth2UserDto);
@@ -651,7 +707,7 @@ public class UserApi extends BaseApi {
             String username = handleGenerateUniqueUsername(oauth2UserDto);
 
             // Tạo user mới
-            User newUser = new User(
+            new User(
                     username,
                     oauth2UserDto.getEmail(),
                     oauth2UserDto.getFirstName() != null ? oauth2UserDto.getFirstName()
@@ -662,7 +718,31 @@ public class UserApi extends BaseApi {
                     oauth2UserDto.getProviderId(),
                     oauth2UserDto.getAvatarUrl());
 
-            User savedUser = userRepository.save(newUser);
+            // Insert OAuth2 user using command repository
+            UUID userId = UUID.randomUUID();
+            LocalDateTime now = LocalDateTime.now();
+            String fullname = (oauth2UserDto.getFirstName() != null ? oauth2UserDto.getFirstName()
+                    : handleExtractFirstName(oauth2UserDto.getName()))
+                    + " " + (oauth2UserDto.getLastName() != null ? oauth2UserDto.getLastName()
+                            : handleExtractLastName(oauth2UserDto.getName()));
+
+            userCommandRepository.insertOAuth2User(
+                    userId,
+                    username,
+                    oauth2UserDto.getEmail(),
+                    fullname,
+                    oauth2UserDto.getProvider(),
+                    oauth2UserDto.getProviderId(),
+                    oauth2UserDto.getAvatarUrl(),
+                    UserRole.user.name(),
+                    UserStatus.active.name(),
+                    true,
+                    now,
+                    now);
+
+            // Fetch created user
+            User savedUser = simpleUserRepository.findById(userId)
+                    .orElseThrow(() -> new OurException("Failed to create OAuth2 user", 500));
             logger.info("OAuth2 user created successfully with ID: {}", savedUser.getId());
 
             return userMapper.toDto(savedUser);
@@ -682,7 +762,7 @@ public class UserApi extends BaseApi {
         try {
             logger.info("Updating OAuth2 user: userId={}", userId);
 
-            User existingUser = userRepository.findById(userId)
+            User existingUser = simpleUserRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
             // Cập nhật thông tin
@@ -699,7 +779,26 @@ public class UserApi extends BaseApi {
                 existingUser.setOAuthUser(true);
             }
 
-            User updatedUser = userRepository.save(existingUser);
+            // Update OAuth2 user using command repository
+            String fullname = existingUser.getFullname();
+            if (oauth2UserDto.getLastName() != null && oauth2UserDto.getFirstName() != null) {
+                fullname = oauth2UserDto.getLastName() + " " + oauth2UserDto.getFirstName();
+            }
+
+            userCommandRepository.updateOAuth2User(
+                    userId,
+                    fullname,
+                    oauth2UserDto.getAvatarUrl() != null ? oauth2UserDto.getAvatarUrl() : existingUser.getAvatarUrl(),
+                    existingUser.getOauthProvider() != null ? existingUser.getOauthProvider()
+                            : oauth2UserDto.getProvider(),
+                    existingUser.getOauthProviderId() != null ? existingUser.getOauthProviderId()
+                            : oauth2UserDto.getProviderId(),
+                    true,
+                    LocalDateTime.now());
+
+            // Fetch updated user
+            User updatedUser = simpleUserRepository.findById(userId)
+                    .orElseThrow(() -> new OurException("User not found", 404));
             logger.info("OAuth2 user updated successfully: userId={}", userId);
 
             return userMapper.toDto(updatedUser);
@@ -731,7 +830,18 @@ public class UserApi extends BaseApi {
                 existingUser.setFullname(oauth2UserDto.getFirstName() + "" + oauth2UserDto.getLastName());
             }
 
-            User savedUser = userRepository.save(existingUser);
+            // Link OAuth2 provider using command repository
+            userCommandRepository.linkOAuth2Provider(
+                    existingUser.getId(),
+                    oauth2UserDto.getProvider(),
+                    oauth2UserDto.getProviderId(),
+                    oauth2UserDto.getAvatarUrl(),
+                    true,
+                    LocalDateTime.now());
+
+            // Fetch updated user
+            User savedUser = simpleUserRepository.findById(existingUser.getId())
+                    .orElseThrow(() -> new OurException("User not found", 500));
             return userMapper.toDto(savedUser);
         } catch (Exception e) {
             logger.error("Error in handleLinkOAuth2Provider: {}", e.getMessage(), e);
@@ -757,7 +867,7 @@ public class UserApi extends BaseApi {
             String username = baseUsername;
             int counter = 1;
 
-            while (userRepository.existsByUsername(username)) {
+            while (userQueryRepository.existsByUsername(username)) {
                 username = baseUsername + counter;
                 counter++;
             }
@@ -811,7 +921,7 @@ public class UserApi extends BaseApi {
      */
     public long handleGetTotalUsers() {
         try {
-            return userRepository.count();
+            return userQueryRepository.countTotalUsers();
         } catch (Exception e) {
             logger.error("Error in handleGetTotalUsers: {}", e.getMessage(), e);
             throw new OurException("Failed to get total users", 500);
@@ -823,7 +933,7 @@ public class UserApi extends BaseApi {
      */
     public long handleGetUsersByStatus(String status) {
         try {
-            return userRepository.findAll().stream()
+            return userQueryRepository.findAllUsers(org.springframework.data.domain.Pageable.unpaged()).stream()
                     .filter(user -> user.getStatus().toString().equalsIgnoreCase(status))
                     .count();
         } catch (Exception e) {
@@ -855,7 +965,7 @@ public class UserApi extends BaseApi {
         try {
             // Note: User entity doesn't have createdAt field in current implementation
             // This returns first N users instead
-            return userRepository.findAll().stream()
+            return userQueryRepository.findAllUsers(org.springframework.data.domain.Pageable.unpaged()).stream()
                     .limit(limit)
                     .map(userMapper::toDto)
                     .collect(Collectors.toList());

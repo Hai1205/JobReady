@@ -13,15 +13,29 @@ import { templates } from "./templates/templateProvider";
 interface TemplateSelectorProps {
   selectedTemplate: string;
   onTemplateChange: (template: string) => void;
+  isExpanded?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 export function TemplateSelector({
   selectedTemplate,
   onTemplateChange,
+  isExpanded: controlledIsExpanded,
+  onExpandChange,
 }: TemplateSelectorProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [internalIsExpanded, setInternalIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const selectedTemp = templates.find((t) => t.id === selectedTemplate);
+
+  // Sử dụng controlled state nếu có, ngược lại dùng internal state
+  const isExpanded = controlledIsExpanded ?? internalIsExpanded;
+  const setIsExpanded = (value: boolean) => {
+    if (onExpandChange) {
+      onExpandChange(value);
+    } else {
+      setInternalIsExpanded(value);
+    }
+  };
 
   const filteredTemplates = useMemo(() => {
     if (!searchQuery) return templates;

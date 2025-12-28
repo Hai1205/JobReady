@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DataTable } from "../adminTable/DataTable";
 import { useEffect, useState } from "react";
 import { Pencil, Key, Trash2 } from "lucide-react";
+import { PaginationData } from "@/components/commons/pagination/PaginationControls";
 
 interface UserTableProps {
   users: IUser[];
@@ -9,6 +10,9 @@ interface UserTableProps {
   onUpdate?: (user: IUser) => void;
   onResetPassword?: (user: IUser) => void;
   onDelete?: (user: IUser) => void;
+  paginationData?: PaginationData;
+  onPageChange?: (page: number) => void;
+  showPagination?: boolean;
 }
 
 const getStatusColor = (status: string) => {
@@ -41,11 +45,20 @@ export const UserTable = ({
   onUpdate,
   onDelete,
   onResetPassword,
+  paginationData,
+  onPageChange,
+  showPagination = false,
 }: UserTableProps) => {
   const columns = [
     {
       header: "STT",
-      accessor: (_: IUser, index: number) => index + 1,
+      accessor: (_: IUser, index: number) => {
+        // Calculate correct index based on current page
+        const baseIndex = paginationData
+          ? (paginationData.currentPage - 1) * paginationData.pageSize
+          : 0;
+        return baseIndex + index + 1;
+      },
     },
     {
       header: "Người dùng",
@@ -134,6 +147,9 @@ export const UserTable = ({
       columns={columns}
       actions={actions}
       emptyMessage="Không tìm thấy người dùng nào"
+      showPagination={showPagination}
+      paginationData={paginationData}
+      onPageChange={onPageChange}
     />
   );
 };

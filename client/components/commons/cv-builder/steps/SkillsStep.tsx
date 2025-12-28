@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
 import { useCVStore } from "@/stores/cvStore";
+import { toast } from "react-toastify";
 
 export function SkillsStep() {
   const { currentCV, handleUpdateCV } = useCVStore();
@@ -19,6 +20,16 @@ export function SkillsStep() {
 
   const addSkill = () => {
     if (!skillInput.trim()) return;
+
+    // Kiểm tra kỹ năng đã tồn tại (không phân biệt chữ hoa/thường)
+    const skillExists = currentCV.skills.some(
+      (skill) => skill.toLowerCase() === skillInput.trim().toLowerCase()
+    );
+
+    if (skillExists) {
+      toast.error(`Kỹ năng "${skillInput.trim()}" đã tồn tại trong danh sách.`);
+      return;
+    }
 
     handleUpdateCV({
       skills: [...currentCV?.skills, skillInput.trim()],
@@ -69,7 +80,7 @@ export function SkillsStep() {
         <Button
           onClick={addSkill}
           size="sm"
-          className="bg-primary text-primary-foreground shadow-md hover:shadow-lg transform hover:-translate-y-[1px] transition-all"
+          className="bg-primary text-primary-foreground shadow-md hover:shadow-lg transform hover:-translate-y-px transition-all"
         >
           <Plus className="mr-2 h-4 w-4" />
           Thêm
@@ -111,11 +122,21 @@ export function SkillsStep() {
               size="sm"
               className="bg-primary/95 text-primary-foreground shadow-sm hover:shadow-md focus:ring-2 focus:ring-primary/40 transition"
               onClick={() => {
-                if (!currentCV.skills.includes(suggestion)) {
-                  handleUpdateCV({
-                    skills: [...currentCV.skills, suggestion],
-                  });
+                // Kiểm tra kỹ năng đã tồn tại (không phân biệt chữ hoa/thường)
+                const skillExists = currentCV.skills.some(
+                  (skill) => skill.toLowerCase() === suggestion.toLowerCase()
+                );
+
+                if (skillExists) {
+                  toast.error(
+                    `Kỹ năng "${suggestion}" đã tồn tại trong danh sách.`
+                  );
+                  return;
                 }
+
+                handleUpdateCV({
+                  skills: [...currentCV.skills, suggestion],
+                });
               }}
             >
               <Plus className="mr-1 h-3 w-3" />

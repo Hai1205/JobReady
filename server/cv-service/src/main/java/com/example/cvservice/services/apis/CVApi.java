@@ -11,9 +11,21 @@ import com.example.cvservice.dtos.responses.*;
 import com.example.cvservice.entities.*;
 import com.example.cvservice.exceptions.OurException;
 import com.example.cvservice.mappers.*;
-import com.example.cvservice.repositoryies.*;
+import com.example.cvservice.repositories.cvRepositories.SimpleCVRepository;
+import com.example.cvservice.repositories.cvRepositories.CVQueryRepository;
+import com.example.cvservice.repositories.cvRepositories.CVCommandRepository;
+import com.example.cvservice.repositories.experienceRepositories.SimpleExperienceRepository;
+import com.example.cvservice.repositories.experienceRepositories.ExperienceQueryRepository;
+import com.example.cvservice.repositories.experienceRepositories.ExperienceCommandRepository;
+import com.example.cvservice.repositories.educationRepositories.SimpleEducationRepository;
+import com.example.cvservice.repositories.educationRepositories.EducationQueryRepository;
+import com.example.cvservice.repositories.educationRepositories.EducationCommandRepository;
+import com.example.cvservice.repositories.personalInfoRepositories.SimplePersonalInfoRepository;
+import com.example.cvservice.repositories.personalInfoRepositories.PersonalInfoQueryRepository;
+import com.example.cvservice.repositories.personalInfoRepositories.PersonalInfoCommandRepository;
 import com.example.cloudinarycommon.CloudinaryService;
 import com.example.cvservice.services.feigns.UserFeignClient;
+import com.example.cvservice.services.CVQueryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
@@ -27,39 +39,65 @@ import java.util.stream.Collectors;
 
 @Service
 public class CVApi extends BaseApi {
-    private final CVRepository cvRepository;
+    private final SimpleCVRepository simpleCVRepository;
+    private final CVQueryRepository cvQueryRepository;
+    private final CVCommandRepository cvCommandRepository;
+    
+    private final ExperienceQueryRepository experienceQueryRepository;
+    private final ExperienceCommandRepository experienceCommandRepository;
+    
+    private final EducationQueryRepository educationQueryRepository;
+    private final EducationCommandRepository educationCommandRepository;
+    
+    private final PersonalInfoQueryRepository personalInfoQueryRepository;
+    private final PersonalInfoCommandRepository personalInfoCommandRepository;
+    
     private final CVMapper cvMapper;
+    private final CVQueryService cvQueryService;
     private final ObjectMapper objectMapper;
     private final CloudinaryService cloudinaryService;
     private final UserFeignClient userFeignClient;
-    private final ExperienceRepository experienceRepository;
-    private final EducationRepository educationRepository;
-    private final PersonalInfoRepository personalInfoRepository;
 
     public CVApi(
-            CVRepository cvRepository,
+            SimpleCVRepository simpleCVRepository,
+            CVQueryRepository cvQueryRepository,
+            CVCommandRepository cvCommandRepository,
+            ExperienceQueryRepository experienceQueryRepository,
+            ExperienceCommandRepository experienceCommandRepository,
+            EducationQueryRepository educationQueryRepository,
+            EducationCommandRepository educationCommandRepository,
+            PersonalInfoQueryRepository personalInfoQueryRepository,
+            PersonalInfoCommandRepository personalInfoCommandRepository,
             CloudinaryService cloudinaryService,
             CVMapper cvMapper,
-            UserFeignClient userFeignClient,
-            ExperienceRepository experienceRepository,
-            EducationRepository educationRepository,
-            PersonalInfoRepository personalInfoRepository) {
-        this.cvRepository = cvRepository;
+            CVQueryService cvQueryService,
+            UserFeignClient userFeignClient) {
+        this.simpleCVRepository = simpleCVRepository;
+        this.cvQueryRepository = cvQueryRepository;
+        this.cvCommandRepository = cvCommandRepository;
+        this.experienceQueryRepository = experienceQueryRepository;
+        this.experienceCommandRepository = experienceCommandRepository;
+        this.educationQueryRepository = educationQueryRepository;
+        this.educationCommandRepository = educationCommandRepository;
+        this.personalInfoQueryRepository = personalInfoQueryRepository;
+        this.personalInfoCommandRepository = personalInfoCommandRepository;
         this.cvMapper = cvMapper;
+        this.cvQueryService = cvQueryService;
         this.cloudinaryService = cloudinaryService;
         this.userFeignClient = userFeignClient;
         this.objectMapper = new ObjectMapper();
-        this.experienceRepository = experienceRepository;
-        this.educationRepository = educationRepository;
-        this.personalInfoRepository = personalInfoRepository;
     }
 
     @Transactional(readOnly = true)
     public CVDto handleGetCVById(UUID cvId) {
         logger.debug("Fetching CV by id={}", cvId);
-        CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
-        logger.debug("Found CV id={} userId={}", cv.getId(), cv.getUserId());
-        return cvMapper.toDto(cv);
+        
+        // Sử dụng CVQueryService để fetch CV với đầy đủ children
+        CVDto cvDto = cvQueryService.findByIdWithChildren(cvId)
+                .orElseThrow(() -> new OurException("CV not found", 404));
+        
+        logger.debug("Found CV id={} userId={}", cvDto.getId(), cvDto.getUserId());
+        return cvDto;
     }
 
     @Transactional
@@ -92,17 +130,78 @@ public class CVApi extends BaseApi {
         String safeTemplate = (template != null && !template.trim().isEmpty()) ? template : "modern";
         String safeFont = (font != null && !font.trim().isEmpty()) ? font : "Inter";
 
+        // Save CV first to get ID
         CV cv = new CV(userId, title, skills, visibility, safeColor, safeTemplate, safeFont);
+        UUID cvId = UUID.randomUUID();
+        Instant now = Instant.now();
+        
+        // Convert skills list to comma-separated string for native query
+        String skillsStr = skills != null && !skills.isEmpty() ? String.join(",", skills) : "";
+        
+        cvCommandRepository.insertCV(
+            cvId,
+            userId,
+            title,
+            skillsStr,
+            visibility,
+            safeColor,
+            safeTemplate,
+            safeFont,
+            now,
+            now
+        );
+        
+        logger.info("Created CV id={} for userId={}", cvId, userId);
 
+        // Save PersonalInfo separately with CV ID
         PersonalInfo personalInfo = buildPersonalInfo(personalInfoDto, avatar);
-        cv.setPersonalInfo(personalInfo);
+        UUID personalInfoId = UUID.randomUUID();
+        personalInfoCommandRepository.insertPersonalInfo(
+            personalInfoId,
+            cvId,
+            personalInfo.getFullname(),
+            personalInfo.getEmail(),
+            personalInfo.getPhone(),
+            personalInfo.getLocation(),
+            personalInfo.getBirth(),
+            personalInfo.getSummary(),
+            personalInfo.getAvatarUrl(),
+            personalInfo.getAvatarPublicId()
+        );
 
-        cv.setExperiences(buildExperiences(safeExperiences));
-        cv.setEducations(buildEducations(safeEducations));
+        // Save Experiences separately with CV ID
+        List<Experience> experiences = buildExperiences(safeExperiences);
+        for (Experience exp : experiences) {
+            UUID expId = UUID.randomUUID();
+            experienceCommandRepository.insertExperience(
+                expId,
+                cvId,
+                exp.getCompany(),
+                exp.getPosition(),
+                exp.getStartDate(),
+                exp.getEndDate(),
+                exp.getDescription()
+            );
+        }
 
-        CV saved = cvRepository.save(cv);
-        logger.info("Created CV id={} for userId={}", saved.getId(), saved.getUserId());
+        // Save Educations separately with CV ID
+        List<Education> educations = buildEducations(safeEducations);
+        for (Education edu : educations) {
+            UUID eduId = UUID.randomUUID();
+            educationCommandRepository.insertEducation(
+                eduId,
+                cvId,
+                edu.getSchool(),
+                edu.getDegree(),
+                edu.getField(),
+                edu.getStartDate(),
+                edu.getEndDate()
+            );
+        }
 
+        // Fetch the created CV to return
+        CV saved = simpleCVRepository.findById(cvId)
+                .orElseThrow(() -> new OurException("Failed to create CV", 500));
         return cvMapper.toDto(saved);
     }
 
@@ -271,65 +370,37 @@ public class CVApi extends BaseApi {
 
     @Transactional(readOnly = true)
     public List<CVDto> handleGetAllCVs() {
-        return cvRepository.findAll().stream()
-                .map(cvMapper::toDto)
-                .collect(Collectors.toList());
+        // Sử dụng CVQueryService để fetch tất cả CV với children
+        return cvQueryService.findAllWithChildren(org.springframework.data.domain.Pageable.unpaged()).getContent();
     }
 
     public long handleGetTotalCVs() {
-        return cvRepository.count();
+        return cvQueryRepository.countTotalCVs();
     }
 
     public List<CVDto> handleGetCVsByVisibility(boolean isVisibility) {
-        return cvRepository.findAll().stream()
-                .filter(cv -> cv.getIsVisibility()
-                        .equals(isVisibility))
-                .map(cvMapper::toDto)
-                .collect(Collectors.toList());
+        // Sử dụng CVQueryService để fetch CV theo visibility với children
+        return cvQueryService.findByVisibilityWithChildren(isVisibility, org.springframework.data.domain.Pageable.unpaged()).getContent();
     }
 
     public long handleGetCVsCountByVisibility(boolean isVisibility) {
-        return cvRepository.findAll().stream()
-                .filter(cv -> cv.getIsVisibility().equals(isVisibility))
-                .count();
+        return cvQueryRepository.countByVisibility(isVisibility);
     }
 
     public List<CVDto> handleGetCVsCreatedInRange(Instant startDate, Instant endDate) {
-        return cvRepository.findAll().stream()
-                .filter(cv -> cv.getCreatedAt() != null &&
-                        !cv.getCreatedAt().isBefore(startDate) &&
-                        !cv.getCreatedAt().isAfter(endDate))
+        return cvQueryRepository.findCVsCreatedBetween(startDate, endDate, org.springframework.data.domain.Pageable.unpaged()).stream()
                 .map(cvMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public long handleGetCVsCountCreatedInRange(Instant startDate, Instant endDate) {
-        return cvRepository.findAll().stream()
-                .filter(cv -> cv.getCreatedAt() != null &&
-                        !cv.getCreatedAt().isBefore(startDate) &&
-                        !cv.getCreatedAt().isAfter(endDate))
-                .count();
+        return cvQueryRepository.countCVsCreatedBetween(startDate, endDate);
     }
 
     @Transactional(readOnly = true)
     public List<CVDto> handleGetRecentCVs(int limit) {
-        List<CV> cvs = cvRepository.findAll();
-        // Force initialization of lazy collections within transaction
-        cvs.forEach(cv -> {
-            if (cv.getSkills() != null) {
-                cv.getSkills().size();
-            }
-            if (cv.getExperiences() != null) {
-                cv.getExperiences().size();
-            }
-            if (cv.getEducations() != null) {
-                cv.getEducations().size();
-            }
-        });
-        
-        return cvs.stream()
-                .map(cvMapper::toDto)
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+        // Sử dụng CVQueryService để fetch recent CVs với children
+        return cvQueryService.findRecentCVsWithChildren(org.springframework.data.domain.Pageable.unpaged()).stream()
                 .limit(limit)
                 .collect(Collectors.toList());
     }
@@ -375,13 +446,13 @@ public class CVApi extends BaseApi {
             return new ArrayList<>();
         }
 
-        List<CV> cvs = cvRepository.findAllByUserId(userId);
+        // Sử dụng CVQueryService để fetch user CVs với children
+        List<CVDto> cvs = cvQueryService.findAllByUserIdWithChildren(userId, org.springframework.data.domain.Pageable.unpaged()).getContent();
         if (cvs == null || cvs.isEmpty()) {
             return new ArrayList<>();
         }
 
         return cvs.stream()
-                .map(cvMapper::toDto)
                 .sorted((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()))
                 .collect(Collectors.toList());
     }
@@ -407,14 +478,16 @@ public class CVApi extends BaseApi {
         Response response = new Response();
 
         try {
-            Optional<CV> cvOpt = cvRepository.findByTitle(title);
+            Optional<CV> cvOpt = cvQueryRepository.findByTitle(title);
 
             if (!cvOpt.isPresent()) {
                 throw new OurException("CV not found with title: " + title, 404);
             }
 
             CV cv = cvOpt.get();
-            CVDto cvDto = cvMapper.toDto(cv);
+            // Fetch CV with children using query service
+            CVDto cvDto = cvQueryService.findByIdWithChildren(cv.getId())
+                    .orElseThrow(() -> new OurException("CV not found", 404));
 
             response.setMessage("Get cv successfully");
             response.setCv(cvDto);
@@ -441,97 +514,155 @@ public class CVApi extends BaseApi {
             String template,
             String font) {
         try {
-            CV existing = cvRepository.findById(cvId)
+            CV existing = simpleCVRepository.findById(cvId)
                     .orElseThrow(() -> new OurException("CV not found", 404));
+
+            Instant now = Instant.now();
+            boolean hasUpdates = false;
 
             // Only update if not null
             if (title != null && !title.trim().isEmpty()) {
-                existing.setTitle(title);
+                cvCommandRepository.updateCVTitle(cvId, title, now);
+                hasUpdates = true;
             }
             if (color != null && !color.trim().isEmpty()) {
-                existing.setColor(color);
+                cvCommandRepository.updateCVColor(cvId, color, now);
+                hasUpdates = true;
             }
             if (template != null && !template.trim().isEmpty()) {
-                existing.setTemplate(template);
+                cvCommandRepository.updateCVTemplate(cvId, template, now);
+                hasUpdates = true;
             }
             if (font != null && !font.trim().isEmpty()) {
-                existing.setFont(font);
+                cvCommandRepository.updateCVFont(cvId, font, now);
+                hasUpdates = true;
             }
 
+            // Update PersonalInfo separately
             if (personalInfoDto != null) {
-                PersonalInfo pi = existing.getPersonalInfo();
+                Optional<PersonalInfo> optionalPi = personalInfoQueryRepository.findByCvId(cvId);
+                
+                if (optionalPi.isPresent()) {
+                    PersonalInfo pi = optionalPi.get();
+                    
+                    // Build updated values (preserve existing if null)
+                    String fullname = personalInfoDto.getFullname() != null && !personalInfoDto.getFullname().trim().isEmpty() 
+                        ? personalInfoDto.getFullname() : pi.getFullname();
+                    String email = personalInfoDto.getEmail() != null && !personalInfoDto.getEmail().trim().isEmpty()
+                        ? personalInfoDto.getEmail() : pi.getEmail();
+                    String phone = personalInfoDto.getPhone() != null ? personalInfoDto.getPhone() : pi.getPhone();
+                    String location = personalInfoDto.getLocation() != null ? personalInfoDto.getLocation() : pi.getLocation();
+                    String summary = personalInfoDto.getSummary() != null ? personalInfoDto.getSummary() : pi.getSummary();
+                    String birth = pi.getBirth();
 
-                if (pi == null)
-                    pi = new PersonalInfo();
+                    if (avatar != null && !avatar.isEmpty()) {
+                        String oldAvatarPublicId = pi.getAvatarPublicId();
+                        if (oldAvatarPublicId != null && !oldAvatarPublicId.isEmpty()) {
+                            cloudinaryService.deleteImage(oldAvatarPublicId);
+                        }
 
-                // Only update non-null fields
-                if (personalInfoDto.getFullname() != null && !personalInfoDto.getFullname().trim().isEmpty()) {
-                    pi.setFullname(personalInfoDto.getFullname());
-                }
-                if (personalInfoDto.getEmail() != null && !personalInfoDto.getEmail().trim().isEmpty()) {
-                    pi.setEmail(personalInfoDto.getEmail());
-                }
-                if (personalInfoDto.getPhone() != null) {
-                    pi.setPhone(personalInfoDto.getPhone());
-                }
-                if (personalInfoDto.getLocation() != null) {
-                    pi.setLocation(personalInfoDto.getLocation());
-                }
-                if (personalInfoDto.getSummary() != null) {
-                    pi.setSummary(personalInfoDto.getSummary());
-                }
+                        var uploadResult = cloudinaryService.uploadImage(avatar);
+                        if (uploadResult.containsKey("error")) {
+                            throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
+                        }
 
-                if (avatar != null && !avatar.isEmpty()) {
-                    String oldAvatarPublicId = pi.getAvatarPublicId();
-                    if (oldAvatarPublicId != null && !oldAvatarPublicId.isEmpty()) {
-                        cloudinaryService.deleteImage(oldAvatarPublicId);
+                        personalInfoCommandRepository.updatePersonalInfoAvatar(
+                            pi.getId(),
+                            (String) uploadResult.get("url"),
+                            (String) uploadResult.get("publicId")
+                        );
                     }
 
-                    var uploadResult = cloudinaryService.uploadImage(avatar);
-                    if (uploadResult.containsKey("error")) {
-                        throw new RuntimeException("Failed to upload avatar: " + uploadResult.get("error"));
-                    }
-
-                    pi.setAvatarUrl((String) uploadResult.get("url"));
-                    pi.setAvatarPublicId((String) uploadResult.get("publicId"));
+                    personalInfoCommandRepository.updatePersonalInfoBasic(
+                        pi.getId(),
+                        fullname,
+                        email,
+                        phone,
+                        location,
+                        birth,
+                        summary
+                    );
+                } else {
+                    // Create new PersonalInfo if not exists
+                    PersonalInfo pi = buildPersonalInfo(personalInfoDto, avatar);
+                    UUID personalInfoId = UUID.randomUUID();
+                    personalInfoCommandRepository.insertPersonalInfo(
+                        personalInfoId,
+                        cvId,
+                        pi.getFullname(),
+                        pi.getEmail(),
+                        pi.getPhone(),
+                        pi.getLocation(),
+                        pi.getBirth(),
+                        pi.getSummary(),
+                        pi.getAvatarUrl(),
+                        pi.getAvatarPublicId()
+                    );
                 }
-
-                existing.setPersonalInfo(pi);
+                hasUpdates = true;
             }
 
-            // Only update experiences if provided
+            // Update experiences separately
             if (experiencesDto != null) {
-                existing.getExperiences().clear();
+                // Delete old experiences
+                experienceCommandRepository.deleteAllByCvId(cvId);
+                
+                // Add new experiences
                 for (ExperienceDto e : experiencesDto) {
                     Experience ex = new Experience(e);
-                    existing.getExperiences().add(ex);
+                    UUID expId = UUID.randomUUID();
+                    experienceCommandRepository.insertExperience(
+                        expId,
+                        cvId,
+                        ex.getCompany(),
+                        ex.getPosition(),
+                        ex.getStartDate(),
+                        ex.getEndDate(),
+                        ex.getDescription()
+                    );
                 }
+                hasUpdates = true;
             }
 
-            // Only update educations if provided
+            // Update educations separately
             if (educationsDto != null) {
-                existing.getEducations().clear();
+                // Delete old educations
+                educationCommandRepository.deleteAllByCvId(cvId);
+                
+                // Add new educations
                 for (EducationDto ed : educationsDto) {
                     Education e = new Education(ed);
-                    existing.getEducations().add(e);
+                    UUID eduId = UUID.randomUUID();
+                    educationCommandRepository.insertEducation(
+                        eduId,
+                        cvId,
+                        e.getSchool(),
+                        e.getDegree(),
+                        e.getField(),
+                        e.getStartDate(),
+                        e.getEndDate()
+                    );
                 }
+                hasUpdates = true;
             }
 
             // Only update skills if provided
             if (skills != null) {
-                existing.getSkills().clear();
-                existing.getSkills().addAll(skills);
+                cvCommandRepository.updateCVSkills(cvId, skills, now);
+                hasUpdates = true;
             }
 
             // Only update isVisibility if provided
             if (isVisibility != null) {
-                existing.setIsVisibility(isVisibility);
+                cvCommandRepository.updateCVVisibility(cvId, isVisibility, now);
+                hasUpdates = true;
             }
 
-            existing.setUpdatedAt(Instant.now());
+            if (hasUpdates) {
+                cvCommandRepository.updateCVUpdatedAt(cvId, now);
+            }
 
-            CV saved = cvRepository.save(existing);
-            logger.info("Async update completed for CV id={} (userId={})", cvId, saved.getUserId());
+            logger.info("Async update completed for CV id={} (userId={})", cvId, existing.getUserId());
         } catch (OurException e) {
             throw e;
         } catch (Exception e) {
@@ -571,22 +702,21 @@ public class CVApi extends BaseApi {
 
     @Transactional
     public boolean handleDeleteCV(UUID cvId) {
-        CV cv = cvRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
+        CV cv = simpleCVRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
 
         // Delete avatar from Cloudinary if exists
-        if (cv.getPersonalInfo() != null && cv.getPersonalInfo().getAvatarPublicId() != null) {
-            cloudinaryService.deleteImage(cv.getPersonalInfo().getAvatarPublicId());
+        Optional<PersonalInfo> personalInfo = personalInfoQueryRepository.findByCvId(cvId);
+        if (personalInfo.isPresent() && personalInfo.get().getAvatarPublicId() != null) {
+            cloudinaryService.deleteImage(personalInfo.get().getAvatarPublicId());
+            personalInfoCommandRepository.deletePersonalInfoById(personalInfo.get().getId());
         }
 
-        // Delete related entities
-        if (cv.getPersonalInfo() != null) {
-            personalInfoRepository.delete(cv.getPersonalInfo());
-        }
-        experienceRepository.deleteAll(cv.getExperiences());
-        educationRepository.deleteAll(cv.getEducations());
+        // Delete related entities using command repositories
+        experienceCommandRepository.deleteAllByCvId(cvId);
+        educationCommandRepository.deleteAllByCvId(cvId);
 
         // Delete the CV
-        cvRepository.delete(cv);
+        cvCommandRepository.deleteCVById(cvId);
         return true;
     }
 

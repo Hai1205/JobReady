@@ -106,15 +106,29 @@ const fonts: Font[] = [
 interface FontSelectorProps {
   selectedFont: string;
   onFontChange: (font: string) => void;
+  isExpanded?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 export function FontSelector({
   selectedFont,
   onFontChange,
+  isExpanded: controlledIsExpanded,
+  onExpandChange,
 }: FontSelectorProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [internalIsExpanded, setInternalIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const selectedFontObj = fonts.find((f) => f.value === selectedFont);
+
+  // Sử dụng controlled state nếu có, ngược lại dùng internal state
+  const isExpanded = controlledIsExpanded ?? internalIsExpanded;
+  const setIsExpanded = (value: boolean) => {
+    if (onExpandChange) {
+      onExpandChange(value);
+    } else {
+      setInternalIsExpanded(value);
+    }
+  };
 
   // Filter fonts based on search
   const filteredFonts = useMemo(() => {

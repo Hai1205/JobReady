@@ -1,6 +1,25 @@
 import { EAISuggestionType, EUserRole, EUserStatus } from "./enum";
 
 declare global {
+    // Pagination types
+    interface IPageable {
+        page: number;
+        size: number;
+        sort?: string;
+    }
+
+    interface IPageResponse<T> {
+        content: T[];
+        totalElements: number;
+        totalPages: number;
+        currentPage: number;
+        pageSize: number;
+        hasNext: boolean;
+        hasPrevious: boolean;
+        first: boolean;
+        last: boolean;
+    }
+
     interface IUser {
         id: string
         username: string
@@ -79,7 +98,8 @@ declare global {
             degree?: string
             [key: string]: any
         }
-        applied: boolean
+        applied?: boolean
+        rejected?: boolean
     }
 
     interface IAnalyzeResult {

@@ -136,7 +136,7 @@ export function CompactJobMatch({
     try {
       // Auto-detect language from CV content
       const detectedLanguage = detectCVLanguage(currentCV);
-      console.log("🌐 Detected CV language:", detectedLanguage);
+      console.log("Detected CV language:", detectedLanguage);
 
       const response = await analyzeCVWithJD(
         jobDescription,

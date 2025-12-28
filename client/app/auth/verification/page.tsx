@@ -1,44 +1,15 @@
-"use client";
+import VerificationClient from "@/components/commons/auth/VerificationClient";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import { useAuthStore } from "@/stores/authStore";
-import Link from "next/link";
-import { Loader2, ArrowLeft, Shield, Clock } from "lucide-react";
+interface PageProps {
+  searchParams: { identifier?: string; isActivation?: string };
+}
 
-const VerificationPage: React.FC = () => {
-  const { isLoading, verifyOTP } = useAuthStore();
-
-  const router = useRouter();
-  const [identifier, setIdentifier] = useState("");
-  const [isActivation, setIsActivation] = useState(false);
-  const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
-
-  const [isExpired, setIsExpired] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
-  const [isClient, setIsClient] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  // Get email from URL params on client side only
-  useEffect(() => {
-    setIsClient(true);
-    const urlParams = new URLSearchParams(window.location.search);
-    const isActivationParam = urlParams.get("isActivation") === "true";
-    const identifierParam = urlParams.get("identifier");
-
-    if (identifierParam) {
-      setIdentifier(identifierParam);
-    }
-
-    if (identifierParam) {
-      setIsActivation(isActivationParam);
-    }
-  }, []);
+export default function VerificationPage({ searchParams }: PageProps) {
+  const identifier = searchParams.identifier || null;
+  const isActivation = searchParams.isActivation === "true";
+  
+  return <VerificationClient identifier={identifier} isActivation={isActivation} />;
+}
 
   useEffect(() => {
     if (timeLeft <= 0) {

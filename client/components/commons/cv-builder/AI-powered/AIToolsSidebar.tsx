@@ -7,6 +7,7 @@ import { CompactJobMatch } from "./CompactJobMatch";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
+import { detectCVLanguage } from "@/lib/languageDetector";
 import {
   Accordion,
   AccordionContent,
@@ -52,12 +53,17 @@ export function AIToolsSidebar({
     setIsAnalyzing(true);
     handleSetIsAnalyzing(true);
     try {
+      // Auto-detect language from CV content
+      const detectedLanguage = detectCVLanguage(currentCV);
+      console.log("Detected CV language:", detectedLanguage);
+
       const response = await analyzeCV(
         currentCV?.title,
         currentCV?.personalInfo,
         currentCV?.experiences,
         currentCV?.educations,
-        currentCV?.skills
+        currentCV?.skills,
+        detectedLanguage
       );
 
       const maybeResponse = (response as any).data;

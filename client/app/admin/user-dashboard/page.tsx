@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { RefreshCw } from "lucide-react";
@@ -8,6 +6,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { EUserRole, EUserStatus } from "@/types/enum";
 import { useUserStore } from "@/stores/userStore";
 import { useAuthStore } from "@/stores/authStore";
+import { usePagination } from "@/hooks/use-pagination";
 import { toast } from "react-toastify";
 import { DashboardHeader } from "@/components/commons/admin/DashboardHeader";
 import CreateUserDialog from "@/components/commons/admin/userDashboard/CreateUserDialog";
@@ -45,6 +44,12 @@ function UserDashboardPage() {
     role: string[];
   }>(userInitialFilters);
   const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
+
+  // Pagination
+  const { paginationState, paginationData, setPage } = usePagination({
+    initialPage: 1,
+    initialPageSize: 10,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,6 +95,20 @@ function UserDashboardPage() {
   useEffect(() => {
     filterData(searchQuery, activeFilters);
   }, [usersTable, searchQuery, activeFilters, filterData]);
+
+  // Update pagination when filtered users change
+  useEffect(() => {
+    paginationData.totalElements = filteredUsers.length;
+    paginationData.totalPages = Math.ceil(
+      filteredUsers.length / paginationState.pageSize
+    );
+  }, [filteredUsers.length, paginationState.pageSize]);
+
+  // Paginate filtered users
+  const paginatedUsers = filteredUsers.slice(
+    (paginationState.page - 1) * paginationState.pageSize,
+    paginationState.page * paginationState.pageSize
+  );
 
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
@@ -362,11 +381,14 @@ function UserDashboardPage() {
           </CardHeader>
 
           <UserTable
-            users={filteredUsers}
+            users={paginatedUsers}
             isLoading={isLoading}
             onUpdate={onUpdate}
             onDelete={onDelete}
             onResetPassword={onResetPassword}
+            showPagination={filteredUsers.length > 10}
+            paginationData={paginationData}
+            onPageChange={setPage}
           />
         </Card>
       </div>

@@ -1,6 +1,7 @@
 import { formatDateAgo } from "@/lib/utils";
 import { DataTable } from "../adminTable/DataTable";
 import { Pencil, Download, Trash2 } from "lucide-react";
+import { PaginationData } from "@/components/commons/pagination/PaginationControls";
 
 interface ICVTableProps {
   CVs: ICV[];
@@ -8,6 +9,9 @@ interface ICVTableProps {
   onUpdate?: (cv: ICV) => void;
   onDownload?: (cv: ICV) => void;
   onDelete?: (cv: ICV) => void;
+  paginationData?: PaginationData;
+  onPageChange?: (page: number) => void;
+  showPagination?: boolean;
 }
 
 const getPrivacyColor = (isVisibility: boolean) => {
@@ -20,11 +24,20 @@ export const CVTable = ({
   onUpdate,
   onDownload,
   onDelete,
+  paginationData,
+  onPageChange,
+  showPagination = false,
 }: ICVTableProps) => {
   const columns = [
     {
       header: "STT",
-      accessor: (_: ICV, index: number) => index + 1,
+      accessor: (_: ICV, index: number) => {
+        // Calculate correct index based on current page
+        const baseIndex = paginationData
+          ? (paginationData.currentPage - 1) * paginationData.pageSize
+          : 0;
+        return baseIndex + index + 1;
+      },
     },
     {
       header: "Tiêu đề",
@@ -89,6 +102,9 @@ export const CVTable = ({
       columns={columns}
       actions={actions}
       emptyMessage="Không tìm thấy CV nào"
+      showPagination={showPagination}
+      paginationData={paginationData}
+      onPageChange={onPageChange}
     />
   );
 };

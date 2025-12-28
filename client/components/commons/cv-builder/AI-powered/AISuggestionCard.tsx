@@ -92,7 +92,9 @@ export default function AISuggestionCard({
   const displayData = formatDataForDisplay(suggestion.data, suggestion.section);
 
   return (
-    <Card className={suggestion.applied ? "opacity-50" : ""}>
+    <Card
+      className={suggestion.applied || suggestion.rejected ? "opacity-50" : ""}
+    >
       <CardContent className="pt-6">
         <div className="flex items-start gap-3">
           <div className="mt-1">{getSuggestionIcon(suggestion.type)}</div>
@@ -106,6 +108,12 @@ export default function AISuggestionCard({
                 <Badge variant="outline" className="text-green-600">
                   <Check className="h-3 w-3 mr-1" />
                   Applied
+                </Badge>
+              )}
+              {suggestion.rejected && (
+                <Badge variant="outline" className="text-red-600">
+                  <X className="h-3 w-3 mr-1" />
+                  Rejected
                 </Badge>
               )}
             </div>
@@ -156,12 +164,11 @@ export default function AISuggestionCard({
               </div>
             )}
 
-            {!suggestion.applied && (
+            {!suggestion.applied && !suggestion.rejected && (
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   onClick={() => onApply(suggestion)}
-                  className="flex-1"
                   disabled={isApplying}
                   title="Áp dụng gợi ý này vào CV của bạn"
                 >
