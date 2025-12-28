@@ -31,7 +31,14 @@ export function PaginationControls({
   className,
   showFirstLast = true,
 }: PaginationControlsProps) {
-  const { currentPage, totalPages, totalElements, pageSize, hasNext, hasPrevious } = paginationData;
+  const {
+    currentPage,
+    totalPages,
+    totalElements,
+    pageSize,
+    hasNext,
+    hasPrevious,
+  } = paginationData;
 
   // Generate page numbers to display
   const getPageNumbers = () => {
@@ -87,9 +94,12 @@ export function PaginationControls({
     <div className={cn("flex flex-col items-center gap-4 mt-6", className)}>
       {/* Info text */}
       <div className="text-sm text-muted-foreground bg-card/50 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50">
-        Hiển thị <span className="font-semibold text-foreground">{startItem}</span> đến{" "}
-        <span className="font-semibold text-foreground">{endItem}</span> trong tổng số{" "}
-        <span className="font-semibold text-foreground">{totalElements}</span> kết quả
+        Hiển thị{" "}
+        <span className="font-semibold text-foreground">{startItem}</span> đến{" "}
+        <span className="font-semibold text-foreground">{endItem}</span> trong
+        tổng số{" "}
+        <span className="font-semibold text-foreground">{totalElements}</span>{" "}
+        kết quả
       </div>
 
       {/* Pagination controls */}

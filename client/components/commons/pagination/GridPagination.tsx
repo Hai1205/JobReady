@@ -44,7 +44,14 @@ export function GridPagination({
   showPageSizeSelector = true,
   pageSizeOptions = [8, 12, 16, 24, 32],
 }: GridPaginationProps) {
-  const { currentPage, totalPages, totalElements, pageSize, hasNext, hasPrevious } = paginationData;
+  const {
+    currentPage,
+    totalPages,
+    totalElements,
+    pageSize,
+    hasNext,
+    hasPrevious,
+  } = paginationData;
 
   // Generate page numbers to display
   const getPageNumbers = () => {
@@ -137,7 +144,8 @@ export function GridPagination({
                     isActive={currentPage === page}
                     className={cn(
                       "rounded-xl hover:scale-105 hover:shadow-md hover:shadow-primary/20 transition-all duration-200 min-w-[3rem] font-semibold",
-                      currentPage === page && "pointer-events-none bg-linear-to-br from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/30"
+                      currentPage === page &&
+                        "pointer-events-none bg-linear-to-br from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/30"
                     )}
                   >
                     {page}
@@ -189,7 +197,9 @@ export function GridPagination({
         {/* Page size selector */}
         {showPageSizeSelector && onPageSizeChange && (
           <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm px-5 py-2.5 rounded-xl border border-border/50 shadow-md">
-            <span className="text-sm text-muted-foreground font-medium">Số lượng:</span>
+            <span className="text-sm text-muted-foreground font-medium">
+              Số lượng:
+            </span>
             <Select
               value={pageSize.toString()}
               onValueChange={(value) => onPageSizeChange(parseInt(value))}

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import {
@@ -237,6 +239,4 @@ function AdminDashboardPage() {
   );
 }
 
-export default dynamic(() => Promise.resolve(AdminDashboardPage), {
-  ssr: false,
-});
+export default AdminDashboardPage;

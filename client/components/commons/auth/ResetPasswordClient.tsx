@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { InputWithIcon } from "@/components/ui/input-with-icon";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type React from "react";
@@ -95,29 +95,17 @@ const ResetPasswordClient: React.FC<ResetPasswordClientProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="newPassword">Mật khẩu mới</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="newPassword"
-              name="newPassword"
-              type={showPassword ? "text" : "password"}
-              placeholder="Nhập mật khẩu mới"
-              value={formData.newPassword}
-              onChange={handleChange}
-              className="pl-10 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </button>
-          </div>
+          <InputWithIcon
+            id="newPassword"
+            name="newPassword"
+            type={showPassword ? "text" : "password"}
+            placeholder="Nhập mật khẩu mới"
+            value={formData.newPassword}
+            onChange={handleChange}
+            leftIcon={Lock}
+            rightIcon={showPassword ? EyeOff : Eye}
+            onRightIconClick={() => setShowPassword(!showPassword)}
+          />
           {errors.newPassword && (
             <Alert variant="destructive">
               <AlertDescription>{errors.newPassword}</AlertDescription>
@@ -130,29 +118,19 @@ const ResetPasswordClient: React.FC<ResetPasswordClientProps> = ({
 
         <div className="space-y-2">
           <Label htmlFor="rePassword">Xác nhận mật khẩu</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="rePassword"
-              name="rePassword"
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Nhập lại mật khẩu mới"
-              value={formData.rePassword}
-              onChange={handleChange}
-              className="pl-10 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </button>
-          </div>
+          <InputWithIcon
+            id="rePassword"
+            name="rePassword"
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Nhập lại mật khẩu mới"
+            value={formData.rePassword}
+            onChange={handleChange}
+            leftIcon={Lock}
+            rightIcon={showConfirmPassword ? EyeOff : Eye}
+            onRightIconClick={() =>
+              setShowConfirmPassword(!showConfirmPassword)
+            }
+          />
           {errors.rePassword && (
             <Alert variant="destructive">
               <AlertDescription>{errors.rePassword}</AlertDescription>

@@ -20,7 +20,10 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { TableSkeleton } from "./TableSkeleton";
 import { cn } from "@/lib/utils";
-import { PaginationControls, PaginationData } from "@/components/commons/pagination/PaginationControls";
+import {
+  PaginationControls,
+  PaginationData,
+} from "@/components/commons/pagination/PaginationControls";
 
 interface DataTableProps<T> {
   data: T[];

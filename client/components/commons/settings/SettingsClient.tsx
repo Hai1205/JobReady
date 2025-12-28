@@ -10,15 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Lock, Bell, Shield } from "lucide-react";
+import { User, Lock, Receipt, CreditCard } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUserStore } from "@/stores/userStore";
 import { toast } from "react-toastify";
 import { EUserRole, EUserStatus } from "@/types/enum";
 import ProfileTab from "@/components/commons/settings/ProfileTab";
 import SecurityTab from "@/components/commons/settings/SecurityTab";
-import NotificationsTab from "@/components/commons/settings/NotificationsTab";
-import PrivacyTab from "@/components/commons/settings/PrivacyTab";
+import BillingHistoryTab from "@/components/commons/settings/BillingHistoryTab";
+import PlanManagementTab from "@/components/commons/settings/PlanManagementTab";
 
 export default function SettingsClient() {
   const { userAuth, changePassword } = useAuthStore();
@@ -40,6 +40,7 @@ export default function SettingsClient() {
 
   const defaultUser: ExtendedUserData = {
     id: "",
+    plan: {} as IPlan,
     username: "",
     email: "",
     password: "",
@@ -172,18 +173,18 @@ export default function SettingsClient() {
       ),
     },
     {
-      value: "notifications",
-      icon: Bell,
-      title: "Thông Báo",
-      description: "Quản lý cách bạn nhận thông báo",
-      component: <NotificationsTab />,
+      value: "billing",
+      icon: Receipt,
+      title: "Thanh Toán",
+      description: "Xem lịch sử thanh toán và hóa đơn",
+      component: <BillingHistoryTab />,
     },
     {
-      value: "privacy",
-      icon: Shield,
-      title: "Quyền Riêng Tư",
-      description: "Kiểm soát quyền riêng tư và dữ liệu của bạn",
-      component: <PrivacyTab />,
+      value: "plan",
+      icon: CreditCard,
+      title: "Quản Lý Plan",
+      description: "Xem và nâng cấp plan của bạn",
+      component: <PlanManagementTab />,
     },
   ];
 

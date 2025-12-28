@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { InputWithIcon } from "@/components/ui/input-with-icon";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type React from "react";
@@ -54,18 +54,15 @@ const ForgotPasswordClient: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="identifier">Email hoặc username</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="identifier"
-              type="text"
-              name="identifier"
-              placeholder="Nhập email hoặc username của bạn"
-              value={identifier}
-              onChange={handleChange}
-              className="pl-10"
-            />
-          </div>
+          <InputWithIcon
+            id="identifier"
+            type="text"
+            name="identifier"
+            placeholder="Nhập email hoặc username của bạn"
+            value={identifier}
+            onChange={handleChange}
+            leftIcon={Mail}
+          />
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>

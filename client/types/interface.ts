@@ -1,4 +1,4 @@
-import { EAISuggestionType, EUserRole, EUserStatus } from "./enum";
+import { EAISuggestionType, EPlanType, EUserRole, EUserStatus } from "./enum";
 
 declare global {
     // Pagination types
@@ -22,6 +22,7 @@ declare global {
 
     interface IUser {
         id: string
+        plan: IPlan
         username: string
         email: string
         fullname: string
@@ -98,8 +99,38 @@ declare global {
             degree?: string
             [key: string]: any
         }
-        applied?: boolean
-        rejected?: boolean
+    }
+
+    interface IPlan {
+        id: string
+        type: EPlanType
+        name: string
+        price: number
+        currency: string
+        interval: string
+        description: string
+        features: string[]
+        recommended: boolean
+        popular: boolean
+        buttonText: string
+        buttonVariant: "default" | "outline" | "secondary"
+    }
+
+    interface IInvoice {
+        id: string
+        userId: string
+        planId: string
+        planName: string
+        amount: number
+        currency: string
+        status: "paid" | "pending" | "failed" | "refunded"
+        paymentMethod: string
+        transactionId: string
+        billingDate: string
+        periodStart: string
+        periodEnd: string
+        description: string
+        downloadUrl?: string
     }
 
     interface IAnalyzeResult {

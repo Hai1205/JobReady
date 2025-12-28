@@ -1,7 +1,10 @@
 "use client";
 
 import CVCard from "./CVCard";
-import { GridPagination, PaginationData } from "@/components/commons/pagination/GridPagination";
+import {
+  GridPagination,
+  PaginationData,
+} from "@/components/commons/pagination/GridPagination";
 
 interface Props {
   templateCVs: ICV[];

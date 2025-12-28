@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { RefreshCw } from "lucide-react";
@@ -413,6 +415,4 @@ function UserDashboardPage() {
   );
 }
 
-export default dynamic(() => Promise.resolve(UserDashboardPage), {
-  ssr: false,
-});
+export default UserDashboardPage;

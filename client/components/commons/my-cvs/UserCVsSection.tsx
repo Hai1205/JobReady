@@ -2,7 +2,10 @@
 
 import CVCard from "@/components/commons/my-cvs/CVCard";
 import EmptyState from "@/components/commons/my-cvs/EmptyState";
-import { GridPagination, PaginationData } from "@/components/commons/pagination/GridPagination";
+import {
+  GridPagination,
+  PaginationData,
+} from "@/components/commons/pagination/GridPagination";
 
 interface Props {
   userCVs: ICV[];

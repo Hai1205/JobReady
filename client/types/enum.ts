@@ -19,3 +19,9 @@ export enum EAISuggestionType {
     WARNING = "warning",
     TIP = "tip",
 }
+
+export enum EPlanType {
+    FREE = "free",
+    PRO = "pro",
+    ULTRA = "ultra",
+}

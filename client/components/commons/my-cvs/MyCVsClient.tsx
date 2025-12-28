@@ -13,7 +13,7 @@ import ConfirmationDialog from "../layout/ConfirmationDialog";
 import { toast } from "react-toastify";
 import DraggingOnPage from "../layout/DraggingOnPage";
 
-export default function MyCVsPageClient() {
+export default function MyCVsClient() {
   const { userAuth } = useAuthStore();
   const {
     createCV,
@@ -51,14 +51,18 @@ export default function MyCVsPageClient() {
 
   // Paginate user CVs in memory
   const paginatedUserCVs = userCVs.slice(
-    (userCVsPagination.paginationState.page - 1) * userCVsPagination.paginationState.pageSize,
-    userCVsPagination.paginationState.page * userCVsPagination.paginationState.pageSize
+    (userCVsPagination.paginationState.page - 1) *
+      userCVsPagination.paginationState.pageSize,
+    userCVsPagination.paginationState.page *
+      userCVsPagination.paginationState.pageSize
   );
 
   // Paginate template CVs in memory
   const paginatedTemplateCVs = templateCVs.slice(
-    (templateCVsPagination.paginationState.page - 1) * templateCVsPagination.paginationState.pageSize,
-    templateCVsPagination.paginationState.page * templateCVsPagination.paginationState.pageSize
+    (templateCVsPagination.paginationState.page - 1) *
+      templateCVsPagination.paginationState.pageSize,
+    templateCVsPagination.paginationState.page *
+      templateCVsPagination.paginationState.pageSize
   );
 
   useEffect(() => {

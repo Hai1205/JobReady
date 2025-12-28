@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { InputWithIcon } from "@/components/ui/input-with-icon";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type React from "react";
@@ -84,18 +84,15 @@ const LoginClient: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="identifier">Email hoặc username</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="identifier"
-              name="identifier"
-              type="text"
-              placeholder="Nhập email hoặc username"
-              value={formData.identifier}
-              onChange={handleChange}
-              className="pl-10"
-            />
-          </div>
+          <InputWithIcon
+            id="identifier"
+            name="identifier"
+            type="text"
+            placeholder="Nhập email hoặc username"
+            value={formData.identifier}
+            onChange={handleChange}
+            leftIcon={Mail}
+          />
           {errors.identifier && (
             <Alert variant="destructive">
               <AlertDescription>{errors.identifier}</AlertDescription>
@@ -105,29 +102,17 @@ const LoginClient: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="password">Mật khẩu</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Nhập mật khẩu của bạn"
-              value={formData.password}
-              onChange={handleChange}
-              className="pl-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </button>
-          </div>
+          <InputWithIcon
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Nhập mật khẩu của bạn"
+            value={formData.password}
+            onChange={handleChange}
+            leftIcon={Lock}
+            rightIcon={showPassword ? EyeOff : Eye}
+            onRightIconClick={() => setShowPassword(!showPassword)}
+          />
           {errors.password && (
             <Alert variant="destructive">
               <AlertDescription>{errors.password}</AlertDescription>

@@ -1,5 +1,5 @@
-import MyCVsPageClient from "@/components/commons/my-cvs/MyCVsPageClient";
+import MyCVsClient from "@/components/commons/my-cvs/MyCVsClient";
 
 export default function Page() {
-  return <MyCVsPageClient />;
+  return <MyCVsClient />;
 }

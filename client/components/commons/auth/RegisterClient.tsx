@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { InputWithIcon } from "@/components/ui/input-with-icon";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type React from "react";
@@ -107,18 +107,15 @@ const RegisterClient: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="fullname">Họ và tên</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="fullname"
-              name="fullname"
-              type="text"
-              placeholder="Nhập họ và tên của bạn"
-              value={formData.fullname}
-              onChange={handleChange}
-              className="pl-10"
-            />
-          </div>
+          <InputWithIcon
+            id="fullname"
+            name="fullname"
+            type="text"
+            placeholder="Nhập họ và tên của bạn"
+            value={formData.fullname}
+            onChange={handleChange}
+            leftIcon={Mail}
+          />
           {errors.fullname && (
             <Alert variant="destructive">
               <AlertDescription>{errors.fullname}</AlertDescription>
@@ -128,18 +125,15 @@ const RegisterClient: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="username">Username</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="username"
-              name="username"
-              type="text"
-              placeholder="Nhập username của bạn"
-              value={formData.username}
-              onChange={handleChange}
-              className="pl-10"
-            />
-          </div>
+          <InputWithIcon
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Nhập username của bạn"
+            value={formData.username}
+            onChange={handleChange}
+            leftIcon={Mail}
+          />
           {errors.username && (
             <Alert variant="destructive">
               <AlertDescription>{errors.username}</AlertDescription>
@@ -149,18 +143,15 @@ const RegisterClient: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Nhập email của bạn"
-              value={formData.email}
-              onChange={handleChange}
-              className="pl-10"
-            />
-          </div>
+          <InputWithIcon
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Nhập email của bạn"
+            value={formData.email}
+            onChange={handleChange}
+            leftIcon={Mail}
+          />
           {errors.email && (
             <Alert variant="destructive">
               <AlertDescription>{errors.email}</AlertDescription>
@@ -170,29 +161,17 @@ const RegisterClient: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="password">Mật khẩu</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Nhập mật khẩu"
-              value={formData.password}
-              onChange={handleChange}
-              className="pl-10 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </button>
-          </div>
+          <InputWithIcon
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Nhập mật khẩu"
+            value={formData.password}
+            onChange={handleChange}
+            leftIcon={Lock}
+            rightIcon={showPassword ? EyeOff : Eye}
+            onRightIconClick={() => setShowPassword(!showPassword)}
+          />
           {errors.password && (
             <Alert variant="destructive">
               <AlertDescription>{errors.password}</AlertDescription>
@@ -205,29 +184,19 @@ const RegisterClient: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Nhập lại mật khẩu"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="pl-10 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </button>
-          </div>
+          <InputWithIcon
+            id="confirmPassword"
+            name="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Nhập lại mật khẩu"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            leftIcon={Lock}
+            rightIcon={showConfirmPassword ? EyeOff : Eye}
+            onRightIconClick={() =>
+              setShowConfirmPassword(!showConfirmPassword)
+            }
+          />
           {errors.confirmPassword && (
             <Alert variant="destructive">
               <AlertDescription>{errors.confirmPassword}</AlertDescription>
