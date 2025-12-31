@@ -206,7 +206,7 @@ public class CVApi extends BaseApi {
     }
 
     private UserDto validateUser(UUID userId) {
-        UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+        UserDto user = userFeignClient.getUserById(userId).getUser();
         if (user == null) {
             logger.warn("User not found when creating CV: userId={}", userId);
             throw new OurException("User not found", 404);
@@ -311,7 +311,7 @@ public class CVApi extends BaseApi {
     }
 
     public CVDto handleCreateNew(UUID userId) {
-        UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+        UserDto user = userFeignClient.getUserById(userId).getUser();
 
         if (user == null) {
             logger.warn("User not found when creating CV: userId={}", userId);
@@ -340,7 +340,7 @@ public class CVApi extends BaseApi {
         Response response = new Response();
 
         try {
-            UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+            UserDto user = userFeignClient.getUserById(userId).getUser();
 
             if (user == null) {
                 logger.warn("User not found when creating CV: userId={}", userId);
@@ -441,7 +441,7 @@ public class CVApi extends BaseApi {
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<CVDto> handleGetUserCVs(UUID userId) {
-        UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+        UserDto user = userFeignClient.getUserById(userId).getUser();
         if (user == null) {
             return new ArrayList<>();
         }
@@ -724,7 +724,7 @@ public class CVApi extends BaseApi {
         logger.info("Duplicating CV id={} for userId={}", cvId, userId);
         CVDto existingCV = handleGetCVById(cvId);
         
-                UserDto user = userFeignClient.getUserById(userId.toString()).getUser();
+                UserDto user = userFeignClient.getUserById(userId).getUser();
         
                 if (user == null) {
                     logger.warn("User not found when duplicating CV: userId={}", userId);

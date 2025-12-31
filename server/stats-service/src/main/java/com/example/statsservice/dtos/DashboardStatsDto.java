@@ -18,13 +18,16 @@ public class DashboardStatsDto {
     private long pendingUsers;
     private long bannedUsers;
     private long usersCreatedThisMonth;
-    
+
     // CV statistics
     private long totalCVs;
     private long publicCVs;
     private long privateCVs;
     private long cvsCreatedThisMonth;
-    
+
+    // Revenue statistics
+    private RevenueStatsDto revenueStats;
+
     // Recent activities
     private List<ActivityDto> recentActivities;
 }

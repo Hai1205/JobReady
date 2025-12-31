@@ -1,6 +1,6 @@
 # Production Dockerfile for Next.js application with Puppeteer support
 # Use the official Node.js image as the base image
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install Chromium and dependencies for Puppeteer
 RUN apk add --no-cache \

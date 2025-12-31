@@ -4,18 +4,23 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 @Data
 @NoArgsConstructor // Empty constructor for MapStruct
+@EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private UUID planId;
+    // private UUID planId;
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -42,6 +47,12 @@ public class User {
     @Column(nullable = false)
     private UserStatus status = UserStatus.pending;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PlanType planType = PlanType.free;
+
+    private LocalDateTime planExpiration;
+
     // OAuth2 Provider Information
     private String oauthProvider; // google, facebook, github
     private String oauthProviderId; // Provider-specific user ID
@@ -49,12 +60,22 @@ public class User {
     private String avatarPublicId; // Cloudinary public ID for avatar deletion
     private boolean isOAuthUser = false; // Flag to distinguish OAuth vs regular users
 
+    // Audit fields
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
     // Full constructor for MapStruct
     @Builder
     public User(UUID id, String username, String password, String email, String fullname,
             String phone, String location, String birth, String summary,
             UserRole role, UserStatus status, String oauthProvider, String oauthProviderId,
-            String avatarUrl, String avatarPublicId, boolean isOAuthUser) {
+            String avatarUrl, String avatarPublicId, boolean isOAuthUser,
+            LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -71,6 +92,8 @@ public class User {
         this.avatarUrl = avatarUrl;
         this.avatarPublicId = avatarPublicId;
         this.isOAuthUser = isOAuthUser;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // Basic constructor
@@ -103,5 +126,11 @@ public class User {
         active,
         banned,
         pending
+    }
+
+    public enum PlanType {
+        free,
+        pro,
+        ultra
     }
 }

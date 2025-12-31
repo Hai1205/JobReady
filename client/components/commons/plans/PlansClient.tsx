@@ -1,19 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Check } from "lucide-react";
 import { mockPlans } from "@/services/mockData";
 import PlanCard from "./PlanCard";
 
 export default function PlansClient() {
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-
-  const handleSelectPlan = (planId: string) => {
-    setSelectedPlan(planId);
-    // TODO: Integrate with backend API
-    console.log("Selected plan:", planId);
-  };
-
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-16">
@@ -34,8 +25,8 @@ export default function PlansClient() {
             <PlanCard
               key={plan.id}
               plan={plan}
-              isSelected={selectedPlan === plan.id}
-              onSelect={handleSelectPlan}
+              isSelected={false}
+              onSelect={() => {}}
             />
           ))}
         </div>

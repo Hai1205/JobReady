@@ -37,6 +37,7 @@ export function Navbar() {
     { href: "/", label: "Trang Chủ" },
     { href: "/cv-builder", label: "Tạo CV", onClick: handleCreate },
     { href: "/my-cvs", label: "CV Của Tôi" },
+    { href: "/plans", label: "Gói dịch vụ" },
   ];
   const allNavLinks = isAdmin
     ? [...navLinks, { href: "/admin", label: "Admin Dashboard" }]

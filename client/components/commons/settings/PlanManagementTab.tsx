@@ -63,7 +63,7 @@ export default function PlanManagementTab() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-xl font-bold">Plan Hiện Tại</h3>
-                  {currentPlan?.recommended && (
+                  {currentPlan?.isRecommended && (
                     <Badge className="bg-linear-to-r from-primary to-primary/80 text-white">
                       Recommended
                     </Badge>
@@ -83,7 +83,7 @@ export default function PlanManagementTab() {
                 {currentPlan?.price}
               </div>
               <p className="text-sm text-muted-foreground">
-                /{currentPlan?.interval}
+                /{currentPlan?.period}
               </p>
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function PlanManagementTab() {
                 key={plan.id}
                 className="relative group rounded-lg border border-border/50 hover:border-primary/50 bg-card p-5 transition-all duration-300 hover:shadow-lg"
               >
-                {plan.popular && (
+                {plan.isPopular && (
                   <Badge className="absolute -top-2 -right-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20">
                     Popular
                   </Badge>
@@ -147,7 +147,7 @@ export default function PlanManagementTab() {
                     <h4 className="font-semibold">{plan.name}</h4>
                     <p className="text-sm text-muted-foreground">
                       {plan.currency}
-                      {plan.price}/{plan.interval}
+                      {plan.price}/{plan.period}
                     </p>
                   </div>
                 </div>
@@ -171,7 +171,7 @@ export default function PlanManagementTab() {
                 </div>
 
                 <Button
-                  variant={plan.recommended ? "default" : "outline"}
+                  variant={plan.isRecommended ? "default" : "outline"}
                   size="sm"
                   className="w-full"
                   onClick={() => handleUpgrade(plan)}

@@ -48,12 +48,14 @@ export default function AdminSidebar({
     { icon: Home, label: "Dashboard", href: "/admin" },
     { icon: FileText, label: "CV Dashboard", href: "/admin/cv-dashboard" },
     { icon: Users, label: "User Dashboard", href: "/admin/user-dashboard" },
+    { icon: Users, label: "Plan Dashboard", href: "/admin/plan-dashboard" },
+    { icon: Users, label: "Invoice Dashboard", href: "/admin/invoice-dashboard" },
   ];
 
   return (
     <aside
       className={cn(
-        "bg-gradient-to-b from-card via-card to-muted/30 dark:from-card dark:via-card dark:to-card/80 border border-border/50 flex flex-col transition-all duration-300 ease-in-out z-30 rounded-tr-2xl rounded-br-2xl backdrop-blur-sm",
+        "bg-linear-to-b from-card via-card to-muted/30 dark:from-card dark:via-card dark:to-card/80 border border-border/50 flex flex-col transition-all duration-300 ease-in-out z-30 rounded-tr-2xl rounded-br-2xl backdrop-blur-sm",
         collapsed ? "shadow-lg shadow-primary/5" : "shadow-xl shadow-primary/10"
       )}
       style={{ width: collapsed ? 80 : width, height: "100%" }}

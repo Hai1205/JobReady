@@ -2,22 +2,26 @@ package com.example.userservice.services.apis;
 
 import com.example.userservice.dtos.UserDto;
 import com.example.userservice.dtos.OAuth2UserDto;
-import com.example.userservice.dtos.requests.*;
+import com.example.userservice.dtos.requests.auth.ChangePasswordRequest;
+import com.example.userservice.dtos.requests.auth.ForgotPasswordRequest;
+import com.example.userservice.dtos.requests.user.CreateUserRequest;
+import com.example.userservice.dtos.requests.user.UpdateUserRequest;
 import com.example.userservice.dtos.response.Response;
 import com.example.userservice.entities.*;
 import com.example.userservice.entities.User.UserRole;
 import com.example.userservice.entities.User.UserStatus;
 import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
-import com.example.userservice.repositories.SimpleUserRepository;
-import com.example.userservice.repositories.UserQueryRepository;
-import com.example.userservice.repositories.UserCommandRepository;
+import com.example.userservice.repositories.user.SimpleUserRepository;
+import com.example.userservice.repositories.user.UserCommandRepository;
+import com.example.userservice.repositories.user.UserQueryRepository;
 import com.example.cloudinarycommon.CloudinaryService;
 import com.example.securitycommon.utils.SecurityUtils;
 import com.example.securitycommon.models.AuthenticatedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -362,7 +366,7 @@ public class UserApi extends BaseApi {
 
     public List<UserDto> handleGetAllUsers() {
         try {
-            return userQueryRepository.findAllUsers(org.springframework.data.domain.Pageable.unpaged()).stream()
+            return userQueryRepository.findAllUsers(Pageable.unpaged()).stream()
                     .map(userMapper::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
@@ -933,7 +937,7 @@ public class UserApi extends BaseApi {
      */
     public long handleGetUsersByStatus(String status) {
         try {
-            return userQueryRepository.findAllUsers(org.springframework.data.domain.Pageable.unpaged()).stream()
+            return userQueryRepository.findAllUsers(Pageable.unpaged()).stream()
                     .filter(user -> user.getStatus().toString().equalsIgnoreCase(status))
                     .count();
         } catch (Exception e) {
@@ -965,7 +969,7 @@ public class UserApi extends BaseApi {
         try {
             // Note: User entity doesn't have createdAt field in current implementation
             // This returns first N users instead
-            return userQueryRepository.findAllUsers(org.springframework.data.domain.Pageable.unpaged()).stream()
+            return userQueryRepository.findAllUsers(Pageable.unpaged()).stream()
                     .limit(limit)
                     .map(userMapper::toDto)
                     .collect(Collectors.toList());

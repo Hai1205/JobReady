@@ -20,7 +20,7 @@ export default function FeaturesSection() {
       icon: Zap,
       title: "Trình Tạo Theo Bước",
       description:
-        "Form đa bước dễ sử dụng hướng dẫn bạn tạo CV hoàn chỉnh. Có thể nhập CV hiện có hoặc bắt đầu từ đầu.",
+        "Form đa dễ sử dụng hướng dẫn bạn tạo CV hoàn chỉnh. Có thể nhập CV hiện có hoặc bắt đầu từ đầu.",
       color: "secondary",
       delay: "200ms",
     },
@@ -41,7 +41,9 @@ export default function FeaturesSection() {
           <div
             key={i}
             className={`group flex flex-col gap-4 rounded-lg border border-border bg-card p-6 transition-all duration-500 hover:shadow-xl hover:scale-105 hover:-translate-y-2 ${
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
             }`}
             style={{ transitionDelay: delay }}
           >

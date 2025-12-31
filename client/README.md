@@ -1,4 +1,4 @@
-# 🚀 JobReady Frontend - Next.js CV Builder
+# JobReady Frontend - Next.js CV Builder
 
 Ứng dụng frontend JobReady với AI-powered CV builder, cung cấp trải nghiệm tạo và cải thiện CV chuyên nghiệp với sự hỗ trợ của trí tuệ nhân tạo.
 
@@ -20,7 +20,7 @@
 - **Responsive Design**: Tương thích với mọi thiết bị
 - **Dark/Light Mode**: Chế độ sáng/tối với next-themes
 
-### 🔐 Authentication & Security
+### Authentication & Security
 
 - **JWT Authentication**: Bảo mật với JSON Web Tokens
 - **Protected Routes**: Bảo vệ các route nhạy cảm với middleware
@@ -79,7 +79,7 @@
 - **Real-time Updates**: Optimistic updates cho better UX
 - **Immer**: Immutable state updates
 
-## 🚀 Cách chạy
+## Cách chạy
 
 ### Prerequisites
 
@@ -371,7 +371,7 @@ const analyzeCV = async (cvId: string) => {
 - **Hover Effects**: Interactive feedback
 - **Page Transitions**: Smooth navigation
 
-## 🔐 Authentication Flow
+## Authentication Flow
 
 ### Middleware Protection
 
@@ -436,7 +436,7 @@ npm run test:e2e
 npm run lint
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Vercel (Recommended)
 

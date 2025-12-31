@@ -89,12 +89,12 @@ const refreshAccessToken = async (): Promise<string | null> => {
     // Chỉ xóa cookie khi server trả về lỗi 401 (invalid/expired token)
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       console.log('🔒 Token invalid or expired - clearing auth state');
-      document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      localStorage.removeItem('refresh_token');
-      sessionStorage.removeItem('refresh_token');
 
       if (typeof window !== 'undefined') {
+        document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        localStorage.removeItem('refresh_token');
+        sessionStorage.removeItem('refresh_token');
         window.location.href = '/auth/login';
       }
     } else {

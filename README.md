@@ -1,4 +1,4 @@
-# 🚀 JobReady - AI-Powered CV Builder Platform
+# JobReady - AI-Powered CV Builder Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -32,7 +32,7 @@ Frontend (Next.js) ─── API Gateway ─── Microservices Backend
 **Frontend**: Next.js với TypeScript, Tailwind CSS, shadcn/ui, Zustand
 **Infrastructure**: MySQL, PostgreSQL (pgvector), RabbitMQ, Redis, Docker, Kubernetes
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Yêu cầu hệ thống
 
@@ -86,7 +86,7 @@ kubectl get pods -n jobready -w
 - **Intelligent Suggestions**: AI-generated recommendations cho từng phần của CV
 - **Real-time Improvements**: Cải thiện CV theo thời gian thực với AI guidance
 
-### 🔐 Authentication & Security
+### Authentication & Security
 
 - **JWT Authentication**: Bảo mật với RSA 2048-bit keys
 - **OAuth2 Integration**: Đăng nhập với Google, Facebook, GitHub

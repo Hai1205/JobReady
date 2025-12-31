@@ -4,11 +4,11 @@
 
 Hệ thống pagination đã được tích hợp hoàn chỉnh cho cả **Backend** (Spring Boot) và **Frontend** (Next.js). Hệ thống hỗ trợ:
 
-- ✅ Pagination cho DataTable (admin tables)
-- ✅ Pagination cho Grid Layout (CV cards)
-- ✅ Custom hook để quản lý state
-- ✅ Responsive và đẹp mắt
-- ✅ Tương thích với backend Spring Data Page
+- Pagination cho DataTable (admin tables)
+- Pagination cho Grid Layout (CV cards)
+- Custom hook để quản lý state
+- Responsive và đẹp mắt
+- Tương thích với backend Spring Data Page
 
 ---
 
@@ -331,7 +331,7 @@ Các component pagination sử dụng design system hiện tại:
 
 ## 🔧 Migration Guide
 
-### Bước 1: Import dependencies
+### 1: Import dependencies
 
 ```typescript
 import { usePagination } from "@/hooks/use-pagination";
@@ -340,7 +340,7 @@ import { GridPagination } from "@/components/commons/pagination/GridPagination";
 import { PaginationControls } from "@/components/commons/pagination/PaginationControls";
 ```
 
-### Bước 2: Setup pagination hook
+### 2: Setup pagination hook
 
 ```typescript
 const {
@@ -355,7 +355,7 @@ const {
 });
 ```
 
-### Bước 3: Update fetch function
+### 3: Update fetch function
 
 ```typescript
 const fetchData = async (page: number, size: number) => {
@@ -375,7 +375,7 @@ const fetchData = async (page: number, size: number) => {
 };
 ```
 
-### Bước 4: Add useEffect
+### 4: Add useEffect
 
 ```typescript
 useEffect(() => {
@@ -383,7 +383,7 @@ useEffect(() => {
 }, [paginationState.page, paginationState.pageSize]);
 ```
 
-### Bước 5: Add pagination component
+### 5: Add pagination component
 
 ```typescript
 <GridPagination
@@ -397,7 +397,7 @@ useEffect(() => {
 
 ---
 
-## ✅ Checklist
+## Checklist
 
 Khi implement pagination cho một component mới:
 

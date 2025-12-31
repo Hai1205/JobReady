@@ -1,4 +1,4 @@
-# 🚀 JobReady Backend - Spring Boot Microservices
+# JobReady Backend - Spring Boot Microservices
 
 Hệ thống backend JobReady với kiến trúc microservices hoàn chỉnh, tích hợp AI-powered CV processing và authentication system. Dự án sử dụng **Kubernetes Service Discovery** thay vì Eureka Server.
 
@@ -80,7 +80,7 @@ Gateway (8080)
 - Sử dụng cho CV analyze và improvement suggestions
 - API Key required trong environment variables
 
-## 🔐 Bảo mật & Authentication
+## Bảo mật & Authentication
 
 ### JWT Token Authentication
 
@@ -95,7 +95,7 @@ Gateway (8080)
 - **User Integration**: Tự động tạo hoặc cập nhật user sau OAuth2 login
 - **JWT Generation**: OAuth2 login cũng tạo JWT token
 
-## 🚀 Cách chạy
+## Cách chạy
 
 ### Phương pháp chính: Kubernetes Deployment (Recommended)
 
@@ -129,6 +129,7 @@ mvn clean install -pl mail-service
 mvn clean install -pl cv-service
 mvn clean install -pl ai-service
 mvn clean install -pl stats-service
+mvn clean install -pl payment-service
 
 # Hoặc build with jacoco
 mvn clean verify -DskipITs=true -pl coverage-report -am
@@ -305,7 +306,7 @@ Dự án đã được chuyển đổi từ Eureka Service Discovery sang Kubern
 **Benefits:**
 
 - Simplified architecture (no Eureka server)
-- 🚀 Better scalability with Kubernetes
+- Better scalability with Kubernetes
 - 💪 Production-ready features (health checks, auto-scaling)
 - ☁️ Cloud-native deployment
 

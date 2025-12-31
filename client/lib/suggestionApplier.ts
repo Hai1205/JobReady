@@ -37,7 +37,7 @@ export const applySuggestionToCV = (
                     ...updatedCV.personalInfo,
                     summary: data.text,
                 };
-                console.log('✅ Applied summary:', data.text.substring(0, 50) + '...');
+                console.log('Applied summary:', data.text.substring(0, 50) + '...');
             }
             break;
 
@@ -63,7 +63,7 @@ export const applySuggestionToCV = (
                         ...updatedCV.experiences[suggestion.lineNumber],
                         description: cleanedDescription,
                     };
-                    console.log('✅ Applied experience at index:', suggestion.lineNumber);
+                    console.log('Applied experience at index:', suggestion.lineNumber);
                 } else if (updatedCV.experiences.length > 0) {
                     // Apply to first/most recent experience
                     updatedCV.experiences = [...updatedCV.experiences];
@@ -71,7 +71,7 @@ export const applySuggestionToCV = (
                         ...updatedCV.experiences[0],
                         description: cleanedDescription,
                     };
-                    console.log('✅ Applied experience to most recent position');
+                    console.log('Applied experience to most recent position');
                 }
             }
 
@@ -85,7 +85,7 @@ export const applySuggestionToCV = (
                         ...(data.startDate && { startDate: data.startDate }),
                         ...(data.endDate && { endDate: data.endDate }),
                     };
-                    console.log('✅ Applied dates:', data.startDate, '->', data.endDate);
+                    console.log('Applied dates:', data.startDate, '->', data.endDate);
                 }
             }
             break;
@@ -103,7 +103,7 @@ export const applySuggestionToCV = (
                     ...(data.startDate && { startDate: data.startDate }),
                     ...(data.endDate && { endDate: data.endDate }),
                 };
-                console.log('✅ Applied education updates');
+                console.log('Applied education updates');
             }
             break;
 
@@ -111,7 +111,7 @@ export const applySuggestionToCV = (
         case "skill":
         case "kỹ năng":
             if (data.skills && Array.isArray(data.skills)) {
-                console.log('📋 Current skills:', updatedCV.skills);
+                console.log('Current skills:', updatedCV.skills);
                 console.log('➕ Adding skills:', data.skills);
 
                 // Filter out skills that already exist (case insensitive)
@@ -123,7 +123,7 @@ export const applySuggestionToCV = (
 
                 if (uniqueNewSkills.length > 0) {
                     updatedCV.skills = [...updatedCV.skills, ...uniqueNewSkills];
-                    console.log('✅ Added new skills:', uniqueNewSkills);
+                    console.log('Added new skills:', uniqueNewSkills);
                     console.log('📊 Updated skills list:', updatedCV.skills);
                 } else {
                     console.log('ℹ️ All skills already exist, no new skills added');
@@ -135,7 +135,7 @@ export const applySuggestionToCV = (
         case "tiêu đề":
             if (data.text) {
                 updatedCV.title = data.text;
-                console.log('✅ Applied title:', data.text);
+                console.log('Applied title:', data.text);
             }
             break;
 
@@ -147,7 +147,7 @@ export const applySuggestionToCV = (
                     ...updatedCV.personalInfo,
                     fullname: data.text,
                 };
-                console.log('✅ Applied fullname:', data.text);
+                console.log('Applied fullname:', data.text);
             }
             break;
 
@@ -157,7 +157,7 @@ export const applySuggestionToCV = (
                     ...updatedCV.personalInfo,
                     email: data.text,
                 };
-                console.log('✅ Applied email:', data.text);
+                console.log('Applied email:', data.text);
             }
             break;
 
@@ -169,7 +169,7 @@ export const applySuggestionToCV = (
                     ...updatedCV.personalInfo,
                     phone: data.text,
                 };
-                console.log('✅ Applied phone:', data.text);
+                console.log('Applied phone:', data.text);
             }
             break;
 
@@ -181,7 +181,7 @@ export const applySuggestionToCV = (
                     ...updatedCV.personalInfo,
                     location: data.text,
                 };
-                console.log('✅ Applied location:', data.text);
+                console.log('Applied location:', data.text);
             }
             break;
 

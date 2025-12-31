@@ -76,7 +76,7 @@ public class CVKnowledgeBaseService {
             log.info("Knowledge base initialization completed");
 
         } catch (Exception e) {
-            log.error("❌ Knowledge base initialization failed", e);
+            log.error("Knowledge base initialization failed", e);
             throw new RuntimeException("Knowledge base initialization failed", e);
         }
     }

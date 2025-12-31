@@ -90,7 +90,7 @@ export default function CVBuilderClient() {
         <div>
           <h1 className="text-3xl font-bold">Tạo CV</h1>
           <p className="text-muted-foreground">
-            Tạo CV chuyên nghiệp của bạn từng bước một
+            Tạo CV chuyên nghiệp của bạn từng một
           </p>
         </div>
 

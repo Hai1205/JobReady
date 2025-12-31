@@ -30,6 +30,7 @@ export enum EStorageType {
 
 const createCookieStorage = <T>(): PersistStorage<T> => ({
   getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
     try {
       const value = Cookies.get(name);
       return value ? JSON.parse(value) : null;
@@ -38,12 +39,14 @@ const createCookieStorage = <T>(): PersistStorage<T> => ({
     }
   },
   setItem: (name: string, value: any) => {
+    if (typeof window === 'undefined') return;
     try {
       Cookies.set(name, JSON.stringify(value), { expires: 7 });
     } catch {
     }
   },
   removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
     Cookies.remove(name);
   },
 });
@@ -59,6 +62,15 @@ export function createStore<T extends IBaseStore, U = TVariables>(
 ) {
   const storageType = options?.storageType ?? EStorageType.SESSION;
   const storage = (() => {
+    // SSR safety check
+    if (typeof window === 'undefined') {
+      return {
+        getItem: () => null,
+        setItem: () => { },
+        removeItem: () => { },
+      } as PersistStorage<T>;
+    }
+
     switch (storageType) {
       case EStorageType.SESSION:
         return createJSONStorage<T>(() => sessionStorage);

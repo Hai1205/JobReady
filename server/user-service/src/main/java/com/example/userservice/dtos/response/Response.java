@@ -3,6 +3,7 @@ package com.example.userservice.dtos.response;
 import java.util.List;
 import java.util.Map;
 
+import com.example.userservice.dtos.PlanDto;
 import com.example.userservice.dtos.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -22,6 +23,10 @@ public class Response {
     private String token;
     private String role;
     private String status;
+    
+    // Plan related data
+    private PlanDto plan;
+    private List<PlanDto> planList;
 
     // Pagination and stats
     private Object pagination;

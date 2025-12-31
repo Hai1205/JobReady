@@ -1,4 +1,4 @@
-import { EAISuggestionType, EPlanType, EUserRole, EUserStatus } from "./enum";
+import { EAISuggestionType, EInvoiceStatus, EUserRole, EUserStatus } from "./enum";
 
 declare global {
     // Pagination types
@@ -103,17 +103,17 @@ declare global {
 
     interface IPlan {
         id: string
-        type: EPlanType
         name: string
+        type: string
         price: number
         currency: string
-        interval: string
+        period: string
         description: string
         features: string[]
-        recommended: boolean
-        popular: boolean
-        buttonText: string
-        buttonVariant: "default" | "outline" | "secondary"
+        isRecommended: boolean
+        isPopular: boolean
+        buttonText?: string
+        buttonVariant?: "default" | "outline" | "secondary"
     }
 
     interface IInvoice {
@@ -123,7 +123,7 @@ declare global {
         planName: string
         amount: number
         currency: string
-        status: "paid" | "pending" | "failed" | "refunded"
+        status: EInvoiceStatus
         paymentMethod: string
         transactionId: string
         billingDate: string
@@ -154,6 +154,31 @@ declare global {
         benefits: string[]
     }
 
+    export interface IDailyRevenue {
+        date: string;
+        revenue: number;
+        transactions: number;
+    }
+
+    export interface IMonthlyRevenue {
+        month: string;
+        revenue: number;
+        transactions: number;
+    }
+    export interface IRevenueStats {
+        totalRevenue: number;
+        thisMonthRevenue: number;
+        lastMonthRevenue: number;
+        growthRate: number;
+        successfulTransactions: number;
+        failedTransactions: number;
+        pendingTransactions: number;
+        revenueByPaymentMethod: Record<string, number>;
+        revenueByPlan: Record<string, number>;
+        dailyRevenue: IDailyRevenue[];
+        monthlyRevenue: IMonthlyRevenue[];
+    }
+
     export interface IDashboardStats {
         totalUsers: number;
         activeUsers: number;
@@ -165,6 +190,7 @@ declare global {
         privateCVs: number;
         cvsCreatedThisMonth: number;
         recentActivities: IActivityInfo[];
+        revenueStats: IRevenueStats | null;
     }
 
     export interface IActivityInfo {

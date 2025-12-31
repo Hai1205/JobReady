@@ -350,18 +350,18 @@ public class CompactPromptBuilder {
             R (Result): Kết quả đo lường được (BẮT BUỘC có số liệu)
 
             [QUY TẮC VIẾT]
-            ✓ PHẢI BẮT ĐẦU bằng Action Verb mạnh:
+            PHẢI BẮT ĐẦU bằng Action Verb mạnh:
               - Achieved, Accelerated, Built, Coordinated, Delivered, Engineered, Founded
               - Generated, Implemented, Led, Optimized, Pioneered, Reduced, Streamlined
-            ✓ PHẢI CÓ metrics (số liệu):
+            PHẢI CÓ metrics (số liệu):
               - Percentage: "Increased by 30%%"
               - Absolute: "Managed team of 5 engineers"
               - Time: "Reduced processing time from 5h to 30min"
-            ✓ Độ dài: 1-2 dòng per bullet point
-            ✓ Keyword density: 2-3 keywords per bullet
-            ✗ TRÁNH passive voice ("was responsible for", "helped to")
-            ✗ TRÁNH soft words ("many", "some", "various")
-            ✗ TRÁNH generic terms ("good", "excellent", "best")
+            Độ dài: 1-2 dòng per bullet point
+            Keyword density: 2-3 keywords per bullet
+            TRÁNH passive voice ("was responsible for", "helped to")
+            TRÁNH soft words ("many", "some", "various")
+            TRÁNH generic terms ("good", "excellent", "best")
 
             [ĐỊNH DẠNG ĐẦU RA]
             Trả về CHỈ improved text, không thêm explanation, không thêm "Here is...".
@@ -376,9 +376,9 @@ public class CompactPromptBuilder {
             • Implemented CDN caching strategy and code splitting, achieving 90+ Lighthouse score and handling 50K concurrent users"
 
             [LƯU Ý ĐẶC BIỆT]
-            - Nếu input thiếu thông tin metrics → Gợi ý placeholder: "[X%%]", "[Y users]"
-            - Nếu section là Summary → Chuyển sang format: "[Job Title] with [X years] experience in [Top 2 skills]. Specialized in [Domain]. Track record of [Key achievement with metric]."
-            - Nếu section là Skills → Group theo category: "Frontend: React, Next.js, TypeScript | Backend: Node.js, Spring Boot | Cloud: AWS, Docker"
+            - Nếu input thiếu thông tin metrics Gợi ý placeholder: "[X%%]", "[Y users]"
+            - Nếu section là Summary Chuyển sang format: "[Job Title] with [X years] experience in [Top 2 skills]. Specialized in [Domain]. Track record of [Key achievement with metric]."
+            - Nếu section là Skills Group theo category: "Frontend: React, Next.js, TypeScript | Backend: Node.js, Spring Boot | Cloud: AWS, Docker"
                             """,
         section, jobTitle, requirementsStr);
   }
@@ -456,8 +456,8 @@ public class CompactPromptBuilder {
           }
 
           [ĐIỀU KIỆN]
-          - Nếu match score < 70 → Phải có ít nhất 5 suggestions type="improvement"
-          - Nếu missing critical skill → Bắt buộc có trong suggestions
+          - Nếu match score < 70 Phải có ít nhất 5 suggestions type="improvement"
+          - Nếu missing critical skill Bắt buộc có trong suggestions
           - Keywords phải unique (không duplicate)
           - Suggestions phải realistic và actionable
           - Mỗi suggestion PHẢI có id unique (uuid format)
@@ -526,8 +526,8 @@ public class CompactPromptBuilder {
           }
 
           [CONDITIONS]
-          - If match score < 70 → Must have at least 5 suggestions type="improvement"
-          - If missing critical skill → Must be in suggestions
+          - If match score < 70 Must have at least 5 suggestions type="improvement"
+          - If missing critical skill Must be in suggestions
           - Keywords must be unique (no duplicates)
           - Suggestions must be realistic and actionable
           - Each suggestion MUST have unique id (uuid format)

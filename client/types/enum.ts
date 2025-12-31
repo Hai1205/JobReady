@@ -20,8 +20,15 @@ export enum EAISuggestionType {
     TIP = "tip",
 }
 
-export enum EPlanType {
-    FREE = "free",
-    PRO = "pro",
-    ULTRA = "ultra",
+export enum EInvoiceStatus {
+    PAID = "paid",
+    PENDING = "pending",
+    FAILED = "failed",
+    REFUNDED = "refunded",
+}
+
+export enum EPaymentMethod {
+    MOMO = "momo",
+    VNPAY = "vnpay",
+    PAYPAL = "paypal",
 }

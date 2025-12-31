@@ -3,8 +3,10 @@ package com.example.statsservice.services.apis;
 import com.example.rediscommon.services.RedisService;
 import com.example.statsservice.dtos.ActivityDto;
 import com.example.statsservice.dtos.DashboardStatsDto;
+import com.example.statsservice.dtos.RevenueStatsDto;
 import com.example.statsservice.services.feigns.UserFeignClient;
 import com.example.statsservice.services.feigns.CVFeignClient;
+import com.example.statsservice.services.feigns.PaymentFeignClient;
 import com.example.statsservice.dtos.responses.Response;
 
 import net.sf.jasperreports.engine.JRDataSource;
@@ -38,6 +40,7 @@ public class StatsApi extends BaseApi {
 
     private final UserFeignClient userFeignClient;
     private final CVFeignClient cvFeignClient;
+    private final PaymentFeignClient paymentFeignClient;
     private final RedisService redisService;
 
     @Value("${LOGO_PATH}")
@@ -46,9 +49,11 @@ public class StatsApi extends BaseApi {
     public StatsApi(
             UserFeignClient userFeignClient,
             CVFeignClient cvFeignClient,
+            PaymentFeignClient paymentFeignClient,
             RedisService redisService) {
         this.userFeignClient = userFeignClient;
         this.cvFeignClient = cvFeignClient;
+        this.paymentFeignClient = paymentFeignClient;
         this.redisService = redisService;
     }
 
@@ -119,6 +124,16 @@ public class StatsApi extends BaseApi {
         CompletableFuture<List<ActivityDto>> recentActivitiesFuture = CompletableFuture
                 .supplyAsync(() -> handleGetRecentActivities());
 
+        CompletableFuture<RevenueStatsDto> revenueStatsFuture = CompletableFuture
+                .supplyAsync(() -> {
+                    try {
+                        return paymentFeignClient.getRevenueStats();
+                    } catch (Exception e) {
+                        logger.warn("Failed to fetch revenue stats: {}", e.getMessage());
+                        return null;
+                    }
+                });
+
         // Wait for all futures to complete and get results
         Response userStatsResponse = userStatsFuture.join();
         Response totalCVsResponse = totalCVsFuture.join();
@@ -127,6 +142,7 @@ public class StatsApi extends BaseApi {
         Response usersThisMonthResponse = usersThisMonthFuture.join();
         Response cvsThisMonthResponse = cvsThisMonthFuture.join();
         List<ActivityDto> recentActivities = recentActivitiesFuture.join();
+        RevenueStatsDto revenueStats = revenueStatsFuture.join();
 
         // Build dashboard stats
         DashboardStatsDto stats = DashboardStatsDto.builder()
@@ -139,6 +155,7 @@ public class StatsApi extends BaseApi {
                 .publicCVs(toLong(publicCVsResponse.getAdditionalData().get("count")))
                 .privateCVs(toLong(privateCVsResponse.getAdditionalData().get("count")))
                 .cvsCreatedThisMonth(toLong(cvsThisMonthResponse.getAdditionalData().get("count")))
+                .revenueStats(revenueStats)
                 .recentActivities(recentActivities)
                 .build();
 

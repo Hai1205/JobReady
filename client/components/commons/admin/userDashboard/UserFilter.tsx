@@ -3,7 +3,7 @@
 import { EUserRole, EUserStatus } from "@/types/enum";
 import { FilterType, SharedFilter } from "../adminTable/SharedFilter";
 import { capitalizeFirstLetter } from "@/lib/utils";
-import { UserFilterType } from "@/app/admin/user-dashboard/page";
+import { UserFilterType } from "./UserDashboardClient";
 
 interface UserFilterProps {
   openMenuFilters: boolean;

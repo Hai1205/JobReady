@@ -1,3 +1,5 @@
+"use client";
+
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface PlanCardProps {
   plan: IPlan;
@@ -22,16 +25,29 @@ export default function PlanCard({
   isSelected,
   onSelect,
 }: PlanCardProps) {
+  const router = useRouter();
+
+  const handleSelectPlan = () => {
+    onSelect(plan.id);
+    // Redirect to payment page with plan info
+    const params = new URLSearchParams({
+      planId: plan.id,
+      planName: plan.name,
+      amount: plan.price.toString(),
+    });
+    router.push(`/payment?${params.toString()}`);
+  };
+
   return (
     <Card
       className={cn(
         "relative flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1",
-        plan.popular && "border-primary shadow-xl scale-105 md:scale-110",
+        plan.isPopular && "border-primary shadow-xl scale-105 md:scale-110",
         isSelected && "ring-2 ring-primary"
       )}
     >
       {/* Recommended Badge */}
-      {plan.recommended && (
+      {plan.isRecommended && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
           <Badge className="bg-linear-to-r from-primary to-primary/80 text-white px-4 py-1 text-sm font-semibold shadow-lg">
             Recommended
@@ -40,7 +56,7 @@ export default function PlanCard({
       )}
 
       {/* Popular Badge */}
-      {plan.popular && (
+      {plan.isPopular && (
         <div className="absolute -top-4 right-4">
           <Badge
             variant="secondary"
@@ -59,7 +75,7 @@ export default function PlanCard({
               {plan.currency}
               {plan.price}
             </span>
-            <span className="text-muted-foreground">/{plan.interval}</span>
+            <span className="text-muted-foreground">/{plan.period}</span>
           </div>
         </div>
         <CardDescription className="text-base">
@@ -93,11 +109,11 @@ export default function PlanCard({
           variant={plan.buttonVariant}
           className={cn(
             "w-full font-semibold",
-            plan.popular &&
+            plan.isPopular &&
               "bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
           )}
           size="lg"
-          onClick={() => onSelect(plan.id)}
+          onClick={handleSelectPlan}
         >
           {isSelected ? "Selected" : plan.buttonText}
         </Button>
