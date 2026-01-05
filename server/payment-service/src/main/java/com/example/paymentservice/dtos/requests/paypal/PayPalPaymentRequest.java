@@ -23,9 +23,9 @@ public class PayPalPaymentRequest {
     private String description;
     private String cancelUrl;
     private String successUrl;
-    
+
     // Invoice information
     private UUID userId;
     private UUID planId;
-    private String planName;
+    private String planTitle;
 }

@@ -9,29 +9,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Filter } from "lucide-react";
 
-export type FilterType = "status" | "visibility" | "role";
-export const initialFilters = {
-  status: [] as string[],
-  role: [] as string[],
-  visibility: [] as string[],
-};
-
-interface SharedFilterProps {
+interface SharedFilterProps<T = string, S = any> {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
-  activeFilters: { status?: string[]; visibility?: string[]; role?: string[] };
-  toggleFilter: (value: string, type: FilterType) => void;
+  activeFilters: Record<string, string[]>;
+  toggleFilter: (value: string, type: T) => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;
-  filterOptions?: {
-    status?: { label: string; value: string }[];
-    visibility?: { label: string; value: string }[];
-    role?: { label: string; value: string }[];
-  };
+  filterSections: S[];
 }
 
-export const SharedFilter = ({
+export const SharedFilter = <
+  T = string,
+  S extends {
+    key: string;
+    label: string;
+    options: { label: string; value: string }[];
+  } = any
+>({
   openMenuFilters,
   setOpenMenuFilters,
   activeFilters,
@@ -39,8 +35,8 @@ export const SharedFilter = ({
   clearFilters,
   applyFilters,
   closeMenuMenuFilters,
-  filterOptions,
-}: SharedFilterProps) => {
+  filterSections,
+}: SharedFilterProps<T, S>) => {
   return (
     <DropdownMenu open={openMenuFilters} onOpenChange={closeMenuMenuFilters}>
       <DropdownMenuTrigger asChild>
@@ -65,111 +61,45 @@ export const SharedFilter = ({
 
         <DropdownMenuSeparator className="bg-border/50" />
 
-        {filterOptions?.status && (
-          <div className="p-3">
+        {filterSections.map((section, index) => (
+          <div key={section.key} className="p-3">
             <h4 className="mb-3 text-sm font-semibold text-foreground">
-              Trạng thái
+              {section.label}
             </h4>
 
             <div className="space-y-3">
-              {filterOptions.status.map((status) => (
+              {section.options.map((option) => (
                 <div
-                  key={status.value}
+                  key={option.value}
                   className="flex items-center hover:bg-primary/5 p-1.5 rounded-lg transition-colors"
                 >
                   <Checkbox
-                    id={`status-${status.value}`}
+                    id={`${section.key}-${option.value}`}
                     checked={
-                      activeFilters.status?.includes(status.value) || false
-                    }
-                    onCheckedChange={() => toggleFilter(status.value, "status")}
-                    className="mr-2 border-primary/50"
-                  />
-
-                  <label
-                    htmlFor={`status-${status.value}`}
-                    className="text-foreground text-sm cursor-pointer flex-1"
-                  >
-                    {status.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {filterOptions?.visibility && (
-          <div className="p-3">
-            <h4 className="mb-3 text-sm font-semibold text-foreground">
-              Chế độ hiển thị
-            </h4>
-
-            <div className="space-y-3">
-              {filterOptions.visibility.map((visibility) => (
-                <div
-                  key={visibility.value}
-                  className="flex items-center hover:bg-primary/5 p-1.5 rounded-lg transition-colors"
-                >
-                  <Checkbox
-                    id={`visibility-${visibility.value}`}
-                    checked={
-                      activeFilters.visibility?.includes(visibility.value) ||
+                      activeFilters[section.key]?.includes(option.value) ||
                       false
                     }
                     onCheckedChange={() =>
-                      toggleFilter(visibility.value, "visibility")
+                      toggleFilter(option.value, section.key as T)
                     }
                     className="mr-2 border-primary/50"
                   />
 
                   <label
-                    htmlFor={`visibility-${visibility.value}`}
+                    htmlFor={`${section.key}-${option.value}`}
                     className="text-foreground text-sm cursor-pointer flex-1"
                   >
-                    {visibility.label}
+                    {option.label}
                   </label>
                 </div>
               ))}
             </div>
+
+            {index < filterSections.length - 1 && (
+              <DropdownMenuSeparator className="bg-border/50 mt-3" />
+            )}
           </div>
-        )}
-
-        {filterOptions?.role && (
-          <div className="p-3">
-            <h4 className="mb-3 text-sm font-semibold text-foreground">
-              Vai trò
-            </h4>
-
-            <div className="space-y-3">
-              {filterOptions.role.map((role) => (
-                <div
-                  key={role.value}
-                  className="flex items-center hover:bg-primary/5 p-1.5 rounded-lg transition-colors"
-                >
-                  <Checkbox
-                    id={`role-${role.value}`}
-                    checked={activeFilters.role?.includes(role.value) || false}
-                    onCheckedChange={() => toggleFilter(role.value, "role")}
-                    className="mr-2 border-primary/50"
-                  />
-
-                  <label
-                    htmlFor={`role-${role.value}`}
-                    className="text-foreground text-sm cursor-pointer flex-1"
-                  >
-                    {role.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {((filterOptions?.status && filterOptions?.visibility) ||
-          (filterOptions?.status && filterOptions?.role) ||
-          (filterOptions?.visibility && filterOptions?.role)) && (
-          <DropdownMenuSeparator className="bg-border/50" />
-        )}
+        ))}
 
         <DropdownMenuSeparator className="bg-border/50" />
 

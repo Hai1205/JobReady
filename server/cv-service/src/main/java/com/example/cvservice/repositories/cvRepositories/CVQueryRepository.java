@@ -24,6 +24,12 @@ import java.util.UUID;
 public interface CVQueryRepository extends JpaRepository<CV, UUID> {
 
     /**
+     * Tìm CV theo ID
+     */
+    @Query("SELECT c FROM CV c WHERE c.id = :id")
+    Optional<CV> findCVById(@Param("id") UUID id);
+
+    /**
      * Tìm CV theo title (trả về entity cho simple operations)
      */
     @Query("SELECT c FROM CV c WHERE c.title = :title")

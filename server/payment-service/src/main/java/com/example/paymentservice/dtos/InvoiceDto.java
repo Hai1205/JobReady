@@ -12,14 +12,11 @@ import lombok.*;
 @Builder
 public class InvoiceDto {
     private UUID id;
-
     private UUID userId;
     
-    private UUID planId;
-    private String planName;
+    private String planTitle;
     private Integer amount;
     private String currency;
-
     private String status;
     private String paymentMethod;
     private String transactionId;

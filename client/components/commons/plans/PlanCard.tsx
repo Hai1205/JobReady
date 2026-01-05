@@ -16,26 +16,35 @@ import { useRouter } from "next/navigation";
 
 interface PlanCardProps {
   plan: IPlan;
-  isSelected: boolean;
+  isCurrentPlan: boolean;
   onSelect: (planId: string) => void;
 }
 
 export default function PlanCard({
   plan,
-  isSelected,
+  isCurrentPlan,
   onSelect,
 }: PlanCardProps) {
   const router = useRouter();
+  const isFree = plan.type.toLowerCase() === "free";
 
   const handleSelectPlan = () => {
+    if (isFree || isCurrentPlan) return;
+
     onSelect(plan.id);
-    // Redirect to payment page with plan info
-    const params = new URLSearchParams({
-      planId: plan.id,
-      planName: plan.name,
-      amount: plan.price.toString(),
-    });
-    router.push(`/payment?${params.toString()}`);
+
+    // Store payment info in localStorage
+    localStorage.setItem(
+      "paymentInfo",
+      JSON.stringify({
+        planId: plan.id,
+        planTitle: plan.title,
+        amount: plan.price,
+      })
+    );
+
+    // Redirect to payment page
+    router.push("/payment");
   };
 
   return (
@@ -43,7 +52,7 @@ export default function PlanCard({
       className={cn(
         "relative flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1",
         plan.isPopular && "border-primary shadow-xl scale-105 md:scale-110",
-        isSelected && "ring-2 ring-primary"
+        isCurrentPlan && "ring-2 ring-primary"
       )}
     >
       {/* Recommended Badge */}
@@ -55,20 +64,27 @@ export default function PlanCard({
         </div>
       )}
 
-      {/* Popular Badge */}
-      {plan.isPopular && (
-        <div className="absolute -top-4 right-4">
-          <Badge
-            variant="secondary"
-            className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20 px-3 py-1"
-          >
-            Most Popular
-          </Badge>
-        </div>
-      )}
-
       <CardHeader className="text-center pb-4">
-        <CardTitle className="text-2xl font-bold mb-2">{plan.name}</CardTitle>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <CardTitle className="text-2xl font-bold">{plan.title}</CardTitle>
+          {/* Most Popular Badge - Inside Card */}
+          {plan.isPopular && (
+            <Badge
+              variant="secondary"
+              className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20 px-2 py-0.5 text-xs"
+            >
+              Most Popular
+            </Badge>
+          )}
+        </div>
+
+        {/* Current Plan Indicator */}
+        {isCurrentPlan && (
+          <Badge className="mx-auto mb-2 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
+            Gói hiện tại
+          </Badge>
+        )}
+
         <div className="mb-4">
           <div className="flex items-baseline justify-center gap-1">
             <span className="text-4xl font-bold">
@@ -105,18 +121,22 @@ export default function PlanCard({
       </CardContent>
 
       <CardFooter>
-        <Button
-          variant={plan.buttonVariant}
-          className={cn(
-            "w-full font-semibold",
-            plan.isPopular &&
-              "bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-          )}
-          size="lg"
-          onClick={handleSelectPlan}
-        >
-          {isSelected ? "Selected" : plan.buttonText}
-        </Button>
+        {!isFree ? (
+          <Button
+            variant={plan.buttonVariant}
+            className={cn(
+              "w-full font-semibold",
+              plan.isPopular &&
+                "bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70",
+              isCurrentPlan && "opacity-50 cursor-not-allowed"
+            )}
+            size="lg"
+            onClick={handleSelectPlan}
+            disabled={isCurrentPlan}
+          >
+            {isCurrentPlan ? "Đang sử dụng" : "Đăng ký gói"}
+          </Button>
+        ) : null}
       </CardFooter>
     </Card>
   );

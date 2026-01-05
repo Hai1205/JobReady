@@ -145,6 +145,38 @@ services:
     networks:
       - app-network
 
+  payment-service:
+    build:
+      context: .
+      dockerfile: server/payment-service/Dockerfile
+    container_name: payment-service
+    env_file:
+      - server/payment-service/.env
+    ports:
+      - "8088:8088"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - app-network
+
+  contact-service:
+    build:
+      context: .
+      dockerfile: server/contact-service/Dockerfile
+    container_name: contact-service
+    env_file:
+      - server/contact-service/.env
+    ports:
+      - "8089:8089"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
   client:
     build:
       context: client/

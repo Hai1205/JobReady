@@ -8,9 +8,11 @@ import { AIPanel } from "@/components/commons/cv-builder/AI-powered/AIPanel";
 import { toast } from "react-toastify";
 import DraggingOnPage from "@/components/commons/layout/DraggingOnPage";
 import { useAIStore } from "@/stores/aiStore";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function CVBuilderClient() {
-  const { handleSetCurrentStep } = useCVStore();
+  const { handleSetCurrentStep, fetchUserCVsInBackground } = useCVStore();
+  const { userAuth } = useAuthStore();
   const { reset: resetAIStore } = useAIStore();
   const [isDraggingOnPage, setIsDraggingOnPage] = useState(false);
   const [droppedFile, setDroppedFile] = useState<File | null>(null);
@@ -19,6 +21,13 @@ export default function CVBuilderClient() {
   useEffect(() => {
     handleSetCurrentStep(0);
   }, [handleSetCurrentStep]);
+
+  // Load user CVs on mount to enable plan limit checking
+  useEffect(() => {
+    if (userAuth?.id) {
+      fetchUserCVsInBackground(userAuth.id);
+    }
+  }, [userAuth?.id, fetchUserCVsInBackground]);
 
   useEffect(() => {
     return () => {

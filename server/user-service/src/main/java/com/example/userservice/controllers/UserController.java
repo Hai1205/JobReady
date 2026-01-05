@@ -113,7 +113,8 @@ public class UserController {
     }
 
     @PostMapping("/authenticate/{identifier}")
-    public ResponseEntity<Response> authenticateUser(@PathVariable("identifier") String identifier, @RequestParam("password") String password) {
+    public ResponseEntity<Response> authenticateUser(@PathVariable("identifier") String identifier,
+            @RequestParam("password") String password) {
         Response response = userApi.authenticateUser(identifier, password);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -161,6 +162,16 @@ public class UserController {
     @GetMapping("/email/{email}")
     public ResponseEntity<Response> findUserByEmail(@PathVariable("email") String email) {
         Response response = userApi.findUserByEmail(email);
+
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PatchMapping("/{userId}/plan")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<Response> updateUserPlan(
+            @PathVariable("userId") UUID userId,
+            @RequestBody String dataJson) {
+        Response response = userApi.updateUserPlan(userId, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

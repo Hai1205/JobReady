@@ -4,6 +4,7 @@ import { renderCVToHTMLAsync } from "@/components/commons/cv-builder/CVRenderer"
 import { toast } from "react-toastify";
 import { testFormData } from "@/lib/utils";
 import { exportCustomHTML, exportToPDF } from "@/services/pdfExportService";
+import { EPlanType } from "@/types/enum";
 
 interface ICVDataResponse {
 	cv: ICV,
@@ -234,6 +235,33 @@ export const useCVStore = createStore<ICVStore>(
 		createCV: async (
 			user: IUser | null
 		): Promise<IApiResponse<ICVDataResponse>> => {
+			// Check plan limit before creating CV
+			if (!user) {
+				toast.error("User not authenticated");
+				throw new Error("User not authenticated");
+			}
+
+			// Get plan limits
+			const planLimits: Record<string, number> = {
+				[EPlanType.FREE]: 1,
+				[EPlanType.PRO]: 30,
+				[EPlanType.ULTRA]: -1 // unlimited
+			};
+
+			const userPlanType = (user.planType as keyof typeof planLimits) || EPlanType.FREE;
+			const limit = planLimits[userPlanType];
+			const currentCVCount = get().userCVs.length;
+
+			// Check if user exceeded limit (except for ULTRA with -1)
+			if (limit > 0 && currentCVCount >= limit) {
+				const planName = userPlanType.charAt(0).toUpperCase() + userPlanType.slice(1);
+				toast.error(
+					`${planName} plan allows maximum ${limit} CV${limit > 1 ? 's' : ''}. Upgrade your plan to create more CVs.`,
+					{ autoClose: 5000 }
+				);
+				throw new Error(`CV limit exceeded for ${planName} plan`);
+			}
+
 			const initialCVWithUserInfo = {
 				...get().initialCV,
 				personalInfo: {

@@ -66,6 +66,7 @@
         <module>ai-service</module>
         <module>stats-service</module>
         <module>payment-service</module>
+        <module>contact-service</module>
         <module>coverage-report</module>
     </modules>
 

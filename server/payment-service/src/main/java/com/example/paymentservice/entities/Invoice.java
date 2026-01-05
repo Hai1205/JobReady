@@ -17,8 +17,7 @@ public class Invoice {
 
     private UUID userId;
     
-    private UUID planId;
-    private String planName;
+    private String planTitle;
     private Integer amount;
     private String currency;
 
@@ -35,11 +34,10 @@ public class Invoice {
 
     // Full constructor for MapStruct
     @Builder
-    public Invoice(UUID id, UUID userId, UUID planId, String planName, Integer amount, String currency, InvoiceStatus status, String paymentMethod, String transactionId, String billingDate, String periodStart, String periodEnd, String description, String downloadUrl) {
+    public Invoice(UUID id, UUID userId, String planTitle, Integer amount, String currency, InvoiceStatus status, String paymentMethod, String transactionId, String billingDate, String periodStart, String periodEnd, String description, String downloadUrl) {
         this.id = id;
         this.userId = userId;
-        this.planId = planId;
-        this.planName = planName;
+        this.planTitle = planTitle;
         this.amount = amount;
         this.currency = currency;
         this.status = status;

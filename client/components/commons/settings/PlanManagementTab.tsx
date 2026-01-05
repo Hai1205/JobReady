@@ -12,23 +12,11 @@ import { toast } from "react-toastify";
 export default function PlanManagementTab() {
   const { userAuth } = useAuthStore();
   const router = useRouter();
-  const [isChanging, setIsChanging] = useState(false);
 
-  const currentPlan = userAuth?.plan;
-
-  const handleUpgrade = (plan: IPlan) => {
-    if (plan.id === currentPlan?.id) {
-      toast.info("Bạn đang sử dụng plan này");
-      return;
-    }
-
-    setIsChanging(true);
-    // TODO: Integrate with backend API
-    setTimeout(() => {
-      toast.success(`Đã chuyển sang plan ${plan.name}`);
-      setIsChanging(false);
-    }, 1500);
-  };
+  // Find current plan based on user's planType
+  const currentPlan = mockPlans.find(
+    (plan) => plan.type.toLowerCase() === userAuth?.planType?.toLowerCase()
+  );
 
   const handleViewAllPlans = () => {
     router.push("/plans");
@@ -45,6 +33,15 @@ export default function PlanManagementTab() {
       default:
         return <Sparkles className="h-5 w-5" />;
     }
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   return (
@@ -72,7 +69,7 @@ export default function PlanManagementTab() {
                 <p className="text-sm text-muted-foreground">
                   Bạn đang sử dụng plan{" "}
                   <span className="font-semibold text-foreground">
-                    {currentPlan?.name}
+                    {currentPlan?.title || "Free"}
                   </span>
                 </p>
               </div>
@@ -80,11 +77,16 @@ export default function PlanManagementTab() {
             <div className="text-right">
               <div className="text-3xl font-bold text-primary">
                 {currentPlan?.currency}
-                {currentPlan?.price}
+                {currentPlan?.price || 0}
               </div>
               <p className="text-sm text-muted-foreground">
-                /{currentPlan?.period}
+                /{currentPlan?.period || "forever"}
               </p>
+              {userAuth?.planExpiration && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Hết hạn: {formatDate(userAuth.planExpiration)}
+                </p>
+              )}
             </div>
           </div>
 
@@ -102,11 +104,19 @@ export default function PlanManagementTab() {
               + {currentPlan.features.length - 4} tính năng khác
             </p>
           )}
+
+          {/* Action Button */}
+          <div className="mt-6">
+            <Button onClick={handleViewAllPlans} className="w-full gap-2">
+              Xem Tất Cả Các Gói
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Upgrade Options */}
-      <div>
+      {/* <div>
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold">Các Plan Khác</h3>
@@ -184,7 +194,7 @@ export default function PlanManagementTab() {
               </div>
             ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Benefits Section */}
       <div className="rounded-lg border border-border/50 bg-muted/30 p-5">

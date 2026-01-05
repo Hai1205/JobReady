@@ -16,6 +16,9 @@ import java.util.UUID;
 @Repository
 public interface InvoiceQueryRepository extends JpaRepository<Invoice, UUID> {
 
+    @Query("SELECT i FROM Invoice i WHERE i.id = :invoiceId")
+    Optional<Invoice> findInvoiceById(@Param("invoiceId") UUID invoiceId);
+
     @Query("SELECT i FROM Invoice i WHERE i.transactionId = :transactionId")
     Optional<Invoice> findByTransactionId(@Param("transactionId") String transactionId);
 
@@ -25,8 +28,9 @@ public interface InvoiceQueryRepository extends JpaRepository<Invoice, UUID> {
     @Query("SELECT i FROM Invoice i WHERE i.status = :status")
     List<Invoice> findByStatus(@Param("status") Invoice.InvoiceStatus status);
 
-    @Query("SELECT i FROM Invoice i WHERE i.invoiceId = :invoiceId AND i.status = :status")
-    List<Invoice> findByInvoiceIdAndStatus(@Param("invoiceId") UUID invoiceId, @Param("status") Invoice.InvoiceStatus status);
+    @Query("SELECT i FROM Invoice i WHERE i.id = :invoiceId AND i.status = :status")
+    List<Invoice> findByInvoiceIdAndStatus(@Param("invoiceId") UUID invoiceId,
+            @Param("status") Invoice.InvoiceStatus status);
 
     @Query("SELECT COUNT(i) FROM Invoice i WHERE i.status = :status")
     long countByStatus(@Param("status") Invoice.InvoiceStatus status);

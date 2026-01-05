@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface PaymentButtonProps {
   planId: string;
-  planName: string;
+  planTitle: string;
   amount: number;
   disabled?: boolean;
   className?: string;
@@ -17,7 +17,7 @@ interface PaymentButtonProps {
 
 export default function PaymentButton({
   planId,
-  planName,
+  planTitle,
   amount,
   disabled = false,
   className = "",
@@ -29,7 +29,7 @@ export default function PaymentButton({
 
   const handlePayment = async () => {
     setIsLoading(true);
-    
+
     try {
       // Validate user authentication
       // const token = localStorage.getItem("token");
@@ -43,14 +43,18 @@ export default function PaymentButton({
       //   return;
       // }
 
-      // Navigate to payment page with plan details
-      const params = new URLSearchParams({
-        planId,
-        planName,
-        amount: amount.toString(),
-      });
+      // Store payment info in localStorage for payment page
+      localStorage.setItem(
+        "paymentInfo",
+        JSON.stringify({
+          planId,
+          planTitle,
+          amount,
+        })
+      );
 
-      router.push(`/payment?${params.toString()}`);
+      // Navigate to payment page
+      router.push("/payment");
     } catch (error) {
       toast({
         title: "Lỗi",

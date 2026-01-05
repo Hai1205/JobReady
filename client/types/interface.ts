@@ -1,4 +1,4 @@
-import { EAISuggestionType, EInvoiceStatus, EUserRole, EUserStatus } from "./enum";
+import { EAISuggestionType, EContactStatus, EInvoiceStatus, EPlanType, EUserRole, EUserStatus } from "./enum";
 
 declare global {
     // Pagination types
@@ -22,7 +22,8 @@ declare global {
 
     interface IUser {
         id: string
-        plan: IPlan
+        planType: EPlanType
+        planExpiration: string
         username: string
         email: string
         fullname: string
@@ -103,7 +104,7 @@ declare global {
 
     interface IPlan {
         id: string
-        name: string
+        title: string
         type: string
         price: number
         currency: string
@@ -120,7 +121,7 @@ declare global {
         id: string
         userId: string
         planId: string
-        planName: string
+        planTitle: string
         amount: number
         currency: string
         status: EInvoiceStatus
@@ -199,6 +200,20 @@ declare global {
         description: string;
         timestamp: string;
         userId: string;
+    }
+
+    export interface IContact {
+        id: string;
+        name: string;
+        email: string;
+        phone: string;
+        program?: string;
+        message: string;
+        resolvedBy?: string;
+        resolvedAt?: string;
+        createdAt?: string;
+        updatedAt?: string;
+        status?: EContactStatus;
     }
 }
 export { };

@@ -51,8 +51,7 @@ public class PaymentApi extends BaseApi {
     private final MoMoConfig moMoConfig;
     private final PayPalConfig payPalConfig;
     private final VNPayConfig vnPayConfig;
-    private final PlanFeignClient planFeignClient;
-    // private final UserFeignClient userFeignClient;
+    private final UserFeignClient userFeignClient;
 
     public PaymentApi(
             SimpleInvoiceRepository simpleInvoiceRepository,
@@ -62,9 +61,7 @@ public class PaymentApi extends BaseApi {
             MoMoConfig moMoConfig,
             PayPalConfig payPalConfig,
             VNPayConfig vnPayConfig,
-            PlanFeignClient planFeignClient
-    // UserFeignClient userFeignClient
-    ) {
+            UserFeignClient userFeignClient) {
         this.simpleInvoiceRepository = simpleInvoiceRepository;
         this.invoiceQueryRepository = invoiceQueryRepository;
         this.invoiceCommandRepository = invoiceCommandRepository;
@@ -72,8 +69,7 @@ public class PaymentApi extends BaseApi {
         this.moMoConfig = moMoConfig;
         this.payPalConfig = payPalConfig;
         this.vnPayConfig = vnPayConfig;
-        this.planFeignClient = planFeignClient;
-        // this.userFeignClient = userFeignClient;
+        this.userFeignClient = userFeignClient;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -103,7 +99,7 @@ public class PaymentApi extends BaseApi {
             return buildErrorResponse(500, e.getMessage());
         }
     }
-   
+
     public List<InvoiceDto> handleGetUserInvoices(UUID userId) {
         try {
             return invoiceQueryRepository.findByUserId(userId).stream()
@@ -134,7 +130,7 @@ public class PaymentApi extends BaseApi {
 
     public InvoiceDto handleGetInvoiceById(UUID invoiceId) {
         try {
-            Invoice invoice = simpleInvoiceRepository.findById(invoiceId)
+            Invoice invoice = invoiceQueryRepository.findInvoiceById(invoiceId)
                     .orElseThrow(() -> new OurException("Invoice not found", 404));
             return invoiceMapper.toDto(invoice);
         } catch (OurException e) {
@@ -162,12 +158,16 @@ public class PaymentApi extends BaseApi {
         }
     }
 
-    public Response createVnPayPayment(UUID userId, UUID planId) {
+    public Response createVnPayPayment(UUID userId, String dataJson) {
         logger.info("Creating new VNPay payment");
         Response response = new Response();
 
         try {
-            VNPayPaymentResponse res = handleCreateVnPayPayment(userId, planId);
+            CreatePaymentRequest request = objectMapper.readValue(dataJson, CreatePaymentRequest.class);
+            String planTitle = request.getPlanTitle();
+            Long price = request.getPrice();
+
+            VNPayPaymentResponse res = handleCreateVnPayPayment(userId, price, planTitle);
 
             response.setStatusCode(201);
             response.setMessage("VNPay payment created successfully");
@@ -186,21 +186,13 @@ public class PaymentApi extends BaseApi {
         }
     }
 
-    public VNPayPaymentResponse handleCreateVnPayPayment(UUID userId, UUID planId) {
+    public VNPayPaymentResponse handleCreateVnPayPayment(UUID userId, Long price, String planTitle) {
         try {
-            PlanDto plan = (PlanDto) planFeignClient.getPlanById(planId).getPlan();
+            String orderInfo = "Payment for plan " + planTitle;
 
-            Long price = plan.getPrice();
-            String orderInfo = "Payment for plan " + plan.getName();
-            String name = plan.getName();
-
-            // if (amount == null || amount <= 0) {
-            // throw new OurException("Số tiền không hợp lệ", 400);
-            // }
-
-            // if (orderInfo == null || orderInfo.trim().isEmpty()) {
-            // throw new OurException("Thông tin đơn hàng không được để trống", 400);
-            // }
+            if (price == null || price <= 0) {
+                throw new OurException("Số tiền không hợp lệ", 400);
+            }
 
             // Tạo txnRef (order ID)
             String txnRef = "VNP_" + System.currentTimeMillis();
@@ -269,20 +261,17 @@ public class PaymentApi extends BaseApi {
             logger.info("   {}", paymentUrl);
 
             // Lưu invoice vào database
-            UUID invoiceId = UUID.randomUUID();
-            invoiceCommandRepository.insertInvoice(
-                    invoiceId,
+            Invoice invoice = invoiceCommandRepository.insertInvoice(
                     userId,
-                    planId,
-                    name,
-                    price.intValue(),
+                    planTitle,
+                    price,
                     "VND",
-                    InvoiceStatus.pending.name(),
+                    InvoiceStatus.pending,
                     "VNPay",
                     txnRef,
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                     orderInfo);
-            logger.info("Invoice saved with ID: {}", invoiceId);
+            logger.info("Invoice saved with ID: {}", invoice.getId());
 
             return VNPayPaymentResponse.builder()
                     .paymentUrl(paymentUrl)
@@ -359,6 +348,19 @@ public class PaymentApi extends BaseApi {
 
                 if (updated > 0) {
                     logger.info("Invoice updated to {} for txnRef: {}", newStatus, txnRef);
+
+                    // Update user plan if payment success
+                    if ("00".equals(responseCode)) {
+                        try {
+                            Invoice invoice = invoiceQueryRepository.findByTransactionId(txnRef)
+                                    .orElse(null);
+                            if (invoice != null) {
+                                handleUpdateUserPlanAfterPayment(invoice);
+                            }
+                        } catch (Exception e) {
+                            logger.error("Failed to update user plan after VNPay payment", e);
+                        }
+                    }
                 } else {
                     logger.warn("Invoice not found for txnRef: {}", txnRef);
                 }
@@ -378,12 +380,16 @@ public class PaymentApi extends BaseApi {
         return secret.substring(0, 4) + "****" + secret.substring(secret.length() - 4);
     }
 
-    public Response createMoMoPayment(UUID userId, UUID planId) {
+    public Response createMoMoPayment(UUID userId, String dataJson) {
         logger.info("Creating new MoMo payment");
         Response response = new Response();
 
         try {
-            MoMoPaymentResponse res = handleCreateMoMoPayment(userId, planId);
+            CreatePaymentRequest request = objectMapper.readValue(dataJson, CreatePaymentRequest.class);
+            String planTitle = request.getPlanTitle();
+            Long price = request.getPrice();
+
+            MoMoPaymentResponse res = handleCreateMoMoPayment(userId, planTitle, price);
 
             response.setStatusCode(201);
             response.setMessage("MoMo payment created successfully");
@@ -402,10 +408,8 @@ public class PaymentApi extends BaseApi {
         }
     }
 
-    public MoMoPaymentResponse handleCreateMoMoPayment(UUID userId, UUID planId) {
+    public MoMoPaymentResponse handleCreateMoMoPayment(UUID userId, String planTitle, Long price) {
         try {
-            PlanDto plan = (PlanDto) planFeignClient.getPlanById(planId).getPlan();
-
             // 1: Tạo các thông tin cần thiết
             logger.info("1: Chuẩn bị thông tin thanh toán");
             String requestId = UUID.randomUUID().toString();
@@ -413,23 +417,20 @@ public class PaymentApi extends BaseApi {
 
             logger.info("Request ID: {}", requestId);
             logger.info("Order ID: {}", orderId);
-            logger.info("Số tiền: {} VND", plan.getPrice());
-            logger.info("Thông tin đơn hàng: {}", plan.getName());
-            logger.info("Extra Data: {}", plan.getDescription());
+            logger.info("Số tiền: {} VND", price);
+            logger.info("Thông tin đơn hàng: {}", planTitle);
+            logger.info("Extra Data: {}", planTitle);
 
             // 2: Tạo raw data để ký
             logger.info("\n2: Tạo chữ ký số (Signature)");
-            String extraData = plan.getDescription();
-            Long price = plan.getPrice();
-            String name = plan.getName();
             String orderType = "momo_wallet";
             String rawData = MoMoSignatureUtil.buildRawDataForPayment(
                     moMoConfig.getAccessKey(),
                     price,
-                    extraData,
+                    planTitle,
                     moMoConfig.getIpnUrl(),
                     orderId,
-                    name,
+                    planTitle,
                     moMoConfig.getPartnerCode(),
                     moMoConfig.getRedirectUrl(),
                     requestId,
@@ -453,11 +454,11 @@ public class PaymentApi extends BaseApi {
                     .requestId(requestId)
                     .amount(price)
                     .orderId(orderId)
-                    .orderInfo(name)
+                    .orderInfo(planTitle)
                     .redirectUrl(moMoConfig.getRedirectUrl())
                     .ipnUrl(moMoConfig.getIpnUrl())
                     .requestType(moMoConfig.getRequestType())
-                    .extraData(extraData)
+                    .extraData(planTitle)
                     .orderType(orderType)
                     .lang("vi")
                     .signature(signature)
@@ -489,17 +490,15 @@ public class PaymentApi extends BaseApi {
                 // Lưu invoice vào database
                 UUID invoiceId = UUID.randomUUID();
                 invoiceCommandRepository.insertInvoice(
-                        invoiceId,
                         userId,
-                        planId,
-                        name,
-                        price.intValue(),
+                        planTitle,
+                        price,
                         "VND",
-                        InvoiceStatus.pending.name(),
+                        InvoiceStatus.pending,
                         "MoMo",
                         orderId,
                         LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                        name);
+                        planTitle);
                 logger.info("Invoice saved with ID: {}", invoiceId);
             } else {
                 logger.error("Tạo thanh toán THẤT BẠI!");
@@ -598,6 +597,17 @@ public class PaymentApi extends BaseApi {
 
                 if (updated > 0) {
                     logger.info("Invoice updated to PAID for orderId: {}", ipnRequest.getOrderId());
+
+                    // Update user plan after payment success
+                    try {
+                        Invoice invoice = invoiceQueryRepository.findByTransactionId(ipnRequest.getOrderId())
+                                .orElse(null);
+                        if (invoice != null) {
+                            handleUpdateUserPlanAfterPayment(invoice);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Failed to update user plan after payment", e);
+                    }
                 } else {
                     logger.warn("Invoice not found for orderId: {}", ipnRequest.getOrderId());
                 }
@@ -755,6 +765,52 @@ public class PaymentApi extends BaseApi {
         }
     }
 
+    private void handleUpdateUserPlanAfterPayment(Invoice invoice) {
+        try {
+            logger.info("Updating user plan after successful payment for userId: {}", invoice.getUserId());
+
+            // Extract plan type from planTitle
+            String planType = extractPlanTypeFromTitle(invoice.getPlanTitle());
+
+            // Create update plan request - server will auto-set expiration to 30 days from
+            // now
+            // unless plan is free (no expiration)
+            Map<String, Object> updatePlanData = new HashMap<>();
+            updatePlanData.put("planType", planType);
+            // Let server handle auto-setting expiration
+
+            String updatePlanJson = objectMapper.writeValueAsString(updatePlanData);
+
+            // Call user service to update plan
+            Response response = userFeignClient.updateUserPlan(invoice.getUserId(), updatePlanJson);
+
+            if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
+                logger.info("User plan updated successfully after payment for userId: {}", invoice.getUserId());
+            } else {
+                logger.warn("Failed to update user plan after payment for userId: {}. Response: {}",
+                        invoice.getUserId(), response.getMessage());
+            }
+        } catch (Exception e) {
+            logger.error("Error updating user plan after payment for userId: {}", invoice.getUserId(), e);
+            // Log but don't throw - payment already succeeded
+        }
+    }
+
+    private String extractPlanTypeFromTitle(String planTitle) {
+        if (planTitle == null) {
+            return "free";
+        }
+
+        String title = planTitle.toLowerCase().trim();
+        if (title.contains("ultra")) {
+            return "ultra";
+        } else if (title.contains("pro")) {
+            return "pro";
+        } else {
+            return "free";
+        }
+    }
+
     private MoMoIPNResponse handleBuildMoMoIPNResponse(MoMoIPNRequest ipnRequest, int resultCode, String message) {
         String rawData = "partnerCode=" + moMoConfig.getPartnerCode() +
                 "&requestId=" + ipnRequest.getRequestId() +
@@ -778,12 +834,16 @@ public class PaymentApi extends BaseApi {
                 .build();
     }
 
-    public Response createPayPalPayment(UUID userId, UUID planId) {
+    public Response createPayPalPayment(UUID userId, String dataJson) {
         logger.info("Creating new PayPal payment");
         Response response = new Response();
 
         try {
-            PayPalPaymentResponse res = handleCreatePayPalPayment(userId, planId);
+            CreatePaymentRequest request = objectMapper.readValue(dataJson, CreatePaymentRequest.class);
+            String planTitle = request.getPlanTitle();
+            Long price = request.getPrice();
+
+            PayPalPaymentResponse res = handleCreatePayPalPayment(userId, planTitle, price);
 
             response.setStatusCode(201);
             response.setMessage("PayPal payment created successfully");
@@ -801,13 +861,10 @@ public class PaymentApi extends BaseApi {
         }
     }
 
-    public PayPalPaymentResponse handleCreatePayPalPayment(UUID userId, UUID planId) {
+    public PayPalPaymentResponse handleCreatePayPalPayment(UUID userId, String planTitle, Long price) {
         try {
-            PlanDto plan = (PlanDto) planFeignClient.getPlanById(planId).getPlan();
-            Long price = plan.getPrice();
-            String name = plan.getName();
-            String currency = plan.getCurrency();
-            String orderInfo = "Payment for plan " + plan.getName();
+            String currency = "VND";
+            String orderInfo = "Payment for plan " + planTitle;
             String method = "paypal";
             String intent = "sale";
 
@@ -873,13 +930,11 @@ public class PaymentApi extends BaseApi {
             // Lưu invoice vào database
             UUID invoiceId = UUID.randomUUID();
             invoiceCommandRepository.insertInvoice(
-                    invoiceId,
                     userId,
-                    planId,
-                    name,
-                    (int) (price * 100),
+                    planTitle,
+                    (price * 100),
                     currency,
-                    InvoiceStatus.pending.name(),
+                    InvoiceStatus.pending,
                     "PayPal",
                     createdPayment.getId(),
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
@@ -970,6 +1025,19 @@ public class PaymentApi extends BaseApi {
 
             if (updated > 0) {
                 logger.info("Invoice updated to {} for paymentId: {}", newStatus, paymentId);
+
+                // Update user plan if payment approved
+                if ("approved".equals(executedPayment.getState())) {
+                    try {
+                        Invoice invoice = invoiceQueryRepository.findByTransactionId(paymentId)
+                                .orElse(null);
+                        if (invoice != null) {
+                            handleUpdateUserPlanAfterPayment(invoice);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Failed to update user plan after PayPal payment", e);
+                    }
+                }
             } else {
                 logger.warn("Invoice not found for paymentId: {}", paymentId);
             }
@@ -1112,9 +1180,9 @@ public class PaymentApi extends BaseApi {
 
             // Doanh thu theo gói
             Map<String, BigDecimal> revenueByPlan = paidInvoices.stream()
-                    .filter(inv -> inv.getPlanName() != null)
+                    .filter(inv -> inv.getPlanTitle() != null)
                     .collect(Collectors.groupingBy(
-                            inv -> inv.getPlanName(),
+                            inv -> inv.getPlanTitle(),
                             Collectors.reducing(
                                     BigDecimal.ZERO,
                                     inv -> BigDecimal.valueOf(inv.getAmount()).divide(BigDecimal.valueOf(100), 2,

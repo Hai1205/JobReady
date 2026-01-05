@@ -7,7 +7,11 @@ interface PaymentIconProps {
   className?: string;
 }
 
-export default function PaymentIcon({ method, size = 40, className = "" }: PaymentIconProps) {
+export default function PaymentIcon({
+  method,
+  size = 40,
+  className = "",
+}: PaymentIconProps) {
   const icons = {
     [EPaymentMethod.MOMO]: {
       emoji: "💰",

@@ -58,7 +58,6 @@ public class User {
     private String oauthProviderId; // Provider-specific user ID
     private String avatarUrl; // Profile picture URL
     private String avatarPublicId; // Cloudinary public ID for avatar deletion
-    private boolean isOAuthUser = false; // Flag to distinguish OAuth vs regular users
 
     // Audit fields
     @CreatedDate
@@ -74,7 +73,7 @@ public class User {
     public User(UUID id, String username, String password, String email, String fullname,
             String phone, String location, String birth, String summary,
             UserRole role, UserStatus status, String oauthProvider, String oauthProviderId,
-            String avatarUrl, String avatarPublicId, boolean isOAuthUser,
+            String avatarUrl, String avatarPublicId,
             LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.username = username;
@@ -91,7 +90,6 @@ public class User {
         this.oauthProviderId = oauthProviderId;
         this.avatarUrl = avatarUrl;
         this.avatarPublicId = avatarPublicId;
-        this.isOAuthUser = isOAuthUser;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -101,20 +99,6 @@ public class User {
         this.username = username;
         this.email = email;
         this.fullname = fullname;
-        this.isOAuthUser = false;
-    }
-
-    // Constructor for OAuth2 users
-    public User(String username, String email, String fullname, String lastName,
-            String oauthProvider, String oauthProviderId, String avatarUrl) {
-        this.username = username;
-        this.password = "OAUTH_USER"; // OAuth users don't have traditional passwords
-        this.email = email;
-        this.fullname = fullname;
-        this.oauthProvider = oauthProvider;
-        this.oauthProviderId = oauthProviderId;
-        this.avatarUrl = avatarUrl;
-        this.isOAuthUser = true;
     }
 
     public enum UserRole {

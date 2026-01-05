@@ -7,7 +7,6 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { CVTable } from "@/components/commons/admin/cvDashboard/CVTable";
 import { DashboardHeader } from "@/components/commons/admin/DashboardHeader";
 import { useCVStore } from "@/stores/cvStore";
-import { usePagination } from "@/hooks/use-pagination";
 import { TableSearch } from "@/components/commons/admin/adminTable/TableSearch";
 import { CVFilter } from "@/components/commons/admin/cvDashboard/CVFilter";
 import { useRouter } from "next/navigation";
@@ -53,10 +52,25 @@ export default function CVDashboardClient() {
   }>(initialFilters);
 
   // Pagination
-  const { paginationState, paginationData, setPage } = usePagination({
-    initialPage: 1,
-    initialPageSize: 10,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const totalPages = Math.ceil(filteredCVs.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  const paginationState = { page: currentPage, pageSize: pageSize };
+  const paginationData = {
+    totalElements: filteredCVs.length,
+    totalPages: totalPages,
+    currentPage: currentPage,
+    pageSize: pageSize,
+    hasNext: currentPage < totalPages,
+    hasPrevious: currentPage > 1,
+  };
+
+  const setPage = (page: number) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     // Fetch in background to update cache

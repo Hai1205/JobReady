@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff, Lock, Save, UserIcon } from "lucide-react";
-import { ExtendedUserData, userRole, userStatus } from "./constant";
+import { ExtendedUserData, userRole, userStatus, planTypes } from "./constant";
 import { EUserRole, EUserStatus } from "@/types/enum";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -281,6 +281,47 @@ const UserForm: React.FC<UserFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+        </div>
+      </div>
+
+      {/* Plan Type and Expiration */}
+      <div className="flex gap-4">
+        <div className="flex-1 space-y-2">
+          <Label htmlFor="form-plan-type" className="text-sm font-medium">
+            Loại gói
+          </Label>
+          <Select
+            value={data?.planType || planTypes[0].value}
+            onValueChange={(value) => onChange("planType", value)}
+          >
+            <SelectTrigger
+              id="form-plan-type"
+              className="bg-background/50 border-border/50"
+            >
+              <SelectValue placeholder="Chọn loại gói" />
+            </SelectTrigger>
+            <SelectContent>
+              {planTypes.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1 space-y-2">
+          <Label htmlFor="form-plan-expiration" className="text-sm font-medium">
+            Hạn gói (ngày)
+          </Label>
+          <Input
+            id="form-plan-expiration"
+            type="datetime-local"
+            value={data?.planExpiration || ""}
+            onChange={(e) => onChange("planExpiration", e.target.value)}
+            className="bg-background/50 border-border/50 focus:border-primary transition-colors"
+            placeholder="Chọn hạn sử dụng gói"
+          />
         </div>
       </div>
     </div>

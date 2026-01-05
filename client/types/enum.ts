@@ -32,3 +32,14 @@ export enum EPaymentMethod {
     VNPAY = "vnpay",
     PAYPAL = "paypal",
 }
+
+export enum EPlanType {
+    FREE = "free",
+    PRO = "pro",
+    ULTRA = "ultra",
+}
+
+export enum EContactStatus {
+    PENDING = "pending",
+    RESOLVED = "resolved",
+}

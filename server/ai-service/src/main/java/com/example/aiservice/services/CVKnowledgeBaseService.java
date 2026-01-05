@@ -2,7 +2,9 @@ package com.example.aiservice.services;
 
 import com.example.aiservice.dtos.CVTemplateDTO;
 import com.example.aiservice.entities.CVTemplateEntity;
-import com.example.aiservice.repositories.CVTemplateRepository;
+import com.example.aiservice.repositories.CVTemplateCommandRepository;
+import com.example.aiservice.repositories.CVTemplateQueryRepository;
+import com.example.aiservice.repositories.SimpleCVTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -16,13 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CVKnowledgeBaseService {
 
-    private final CVTemplateRepository templateRepository;
+    private final CVTemplateCommandRepository templateCommandRepository;
+    private final CVTemplateQueryRepository templateQueryRepository;
+    private final SimpleCVTemplateRepository simpleTemplateRepository;
     private final EmbeddingService embeddingService;
     private final CVTemplateDataProvider templateDataProvider;
 
@@ -44,11 +49,11 @@ public class CVKnowledgeBaseService {
 
         try {
             // 1. Check PostgreSQL templates
-            long templateCount = templateRepository.count();
+            long templateCount = templateQueryRepository.countAllTemplates();
             if (templateCount == 0) {
                 log.info("📝 No templates in DB, creating defaults...");
                 createDefaultTemplates();
-                templateCount = templateRepository.count();
+                templateCount = templateQueryRepository.countAllTemplates();
             }
 
             // 2. Check vector store status
@@ -57,7 +62,7 @@ public class CVKnowledgeBaseService {
             if (vectorStoreEmpty) {
                 log.info("Vector store is empty, ingesting {} templates...", templateCount);
 
-                List<CVTemplateEntity> templates = templateRepository
+                List<CVTemplateEntity> templates = templateQueryRepository
                         .findByRatingGreaterThanEqualAndIsActiveTrue(4);
 
                 List<Document> documents = templates.stream()
@@ -120,11 +125,32 @@ public class CVKnowledgeBaseService {
      */
     @Transactional
     public CVTemplateEntity addTemplate(CVTemplateEntity template) {
-        template.setCreatedAt(LocalDateTime.now());
-        template.setUpdatedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        template.setCreatedAt(now);
+        template.setUpdatedAt(now);
         template.setIsActive(true);
 
-        CVTemplateEntity saved = templateRepository.save(template);
+        // Generate ID if not set
+        if (template.getId() == null) {
+            template.setId(UUID.randomUUID().toString());
+        }
+
+        // Insert using command repository
+        templateCommandRepository.insertTemplate(
+                template.getId(),
+                template.getCategory(),
+                template.getLevel(),
+                template.getSection(),
+                template.getContent(),
+                template.getRating(),
+                template.getKeywords() != null ? String.join(",", template.getKeywords()) : null,
+                template.getIsActive(),
+                template.getCreatedAt(),
+                template.getUpdatedAt());
+
+        // Get the saved template
+        CVTemplateEntity saved = templateQueryRepository.findTemplateById(template.getId())
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve saved template"));
 
         // Ingest if high quality
         if (saved.getRating() >= 4) {
@@ -144,18 +170,29 @@ public class CVKnowledgeBaseService {
      */
     @Transactional
     public CVTemplateEntity updateTemplate(String id, CVTemplateEntity updatedTemplate) {
-        CVTemplateEntity existing = templateRepository.findById(id)
+        CVTemplateEntity existing = templateQueryRepository.findTemplateById(id)
                 .orElseThrow(() -> new RuntimeException("Template not found: " + id));
 
-        existing.setContent(updatedTemplate.getContent());
-        existing.setCategory(updatedTemplate.getCategory());
-        existing.setLevel(updatedTemplate.getLevel());
-        existing.setSection(updatedTemplate.getSection());
-        existing.setRating(updatedTemplate.getRating());
-        existing.setKeywords(updatedTemplate.getKeywords());
-        existing.setUpdatedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
 
-        CVTemplateEntity saved = templateRepository.save(existing);
+        // Update using command repository
+        int updated = templateCommandRepository.updateTemplate(
+                id,
+                updatedTemplate.getContent(),
+                updatedTemplate.getCategory(),
+                updatedTemplate.getLevel(),
+                updatedTemplate.getSection(),
+                updatedTemplate.getRating(),
+                updatedTemplate.getKeywords(),
+                now);
+
+        if (updated == 0) {
+            throw new RuntimeException("Failed to update template: " + id);
+        }
+
+        // Get updated template
+        CVTemplateEntity saved = templateQueryRepository.findTemplateById(id)
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve updated template"));
 
         // Update in vector store
         if (saved.getRating() >= 4 && saved.getIsActive()) {
@@ -176,12 +213,17 @@ public class CVKnowledgeBaseService {
      */
     @Transactional
     public void deleteTemplate(String id) {
-        CVTemplateEntity template = templateRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Template not found: " + id));
+        // Verify template exists
+        if (!simpleTemplateRepository.existsById(id)) {
+            throw new RuntimeException("Template not found: " + id);
+        }
 
-        template.setIsActive(false);
-        template.setUpdatedAt(LocalDateTime.now());
-        templateRepository.save(template);
+        // Soft delete using command repository
+        int deleted = templateCommandRepository.softDeleteTemplate(id, LocalDateTime.now());
+
+        if (deleted == 0) {
+            throw new RuntimeException("Failed to delete template: " + id);
+        }
 
         embeddingService.deleteTemplate(id);
         log.info("Template {} soft deleted", id);
@@ -210,24 +252,28 @@ public class CVKnowledgeBaseService {
     @Transactional
     protected void createDefaultTemplates() {
         List<CVTemplateDTO> dtos = templateDataProvider.getAllDefaultTemplates();
+        LocalDateTime now = LocalDateTime.now();
 
-        List<CVTemplateEntity> entities = dtos.stream()
-                .map(dto -> CVTemplateEntity.builder()
-                        .category(dto.getCategory())
-                        .level(dto.getLevel())
-                        .section(dto.getSection())
-                        .content(dto.getContent())
-                        .rating(dto.getRating())
-                        .keywords(dto.getKeywords())
-                        .isActive(true)
-                        .build())
-                .collect(Collectors.toList());
+        for (CVTemplateDTO dto : dtos) {
+            String id = UUID.randomUUID().toString();
 
-        templateRepository.saveAll(entities);
-        log.info("Created {} default templates", entities.size());
+            templateCommandRepository.insertTemplate(
+                    id,
+                    dto.getCategory(),
+                    dto.getLevel(),
+                    dto.getSection(),
+                    dto.getContent(),
+                    dto.getRating(),
+                    dto.getKeywords() != null ? String.join(",", dto.getKeywords()) : null,
+                    true,
+                    now,
+                    now);
+        }
+
+        log.info("Created {} default templates", dtos.size());
     }
 
     public List<CVTemplateEntity> getAllTemplates() {
-        return templateRepository.findByIsActiveTrue();
+        return templateQueryRepository.findByIsActiveTrue();
     }
 }

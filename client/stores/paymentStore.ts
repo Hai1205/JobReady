@@ -101,21 +101,39 @@ export const usePaymentStore = createStore<IPaymentStore>(
 			});
 		},
 
-		createMoMoPayment: async (userId: string, planId: string): Promise<IApiResponse<IPaymentDataResponse>> => {
+		createMoMoPayment: async (userId: string, planTitle: string, price: number): Promise<IApiResponse<IPaymentDataResponse>> => {
+			const formData = new FormData();
+			formData.append("data", JSON.stringify({
+				planTitle,
+				price,
+			}));
+
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `payments/momo/${userId}/${planId}`);
+				return await handleRequest(EHttpType.POST, `payments/momo/${userId}`, formData);
 			});
 		},
 		
-		createVnPayPayment: async (userId: string, planId: string): Promise<IApiResponse<IPaymentDataResponse>> => {
+		createVnPayPayment: async (userId: string, planTitle: string, price: number): Promise<IApiResponse<IPaymentDataResponse>> => {
+			const formData = new FormData();
+			formData.append("data", JSON.stringify({
+				planTitle,
+				price,
+			}));
+
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `payments/vnpay/${userId}/${planId}`);
+				return await handleRequest(EHttpType.POST, `payments/vnpay/${userId}`, formData);
 			});
 		},
 		
-		createPayPalPayment: async (userId: string, planId: string): Promise<IApiResponse<IPaymentDataResponse>> => {
+		createPayPalPayment: async (userId: string, planTitle: string, price: number): Promise<IApiResponse<IPaymentDataResponse>> => {
+			const formData = new FormData();
+			formData.append("data", JSON.stringify({
+				planTitle,
+				price,
+			}));
+
 			return await get().handleRequest(async () => {
-				return await handleRequest(EHttpType.POST, `payments/paypal/${userId}/${planId}`);
+				return await handleRequest(EHttpType.POST, `payments/paypal/${userId}`, formData);
 			});
 		},
 

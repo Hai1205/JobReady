@@ -15,14 +15,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VNPayPaymentRequest {
-    
+
     private Long amount;
     private String orderInfo;
     private String orderType;
-    private String locale;  // "vn" hoặc "en"
-    
+    private String locale; // "vn" hoặc "en"
+
     // Invoice information
     private UUID userId;
     private UUID planId;
-    private String planName;
+    private String planTitle;
 }

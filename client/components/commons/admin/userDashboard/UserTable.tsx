@@ -39,6 +39,17 @@ const getRoleColor = (role: string) => {
   }
 };
 
+const getPlanColor = (role: string) => {
+  switch (role) {
+    case "ultra":
+      return "bg-blue-500";
+    case "pro":
+      return "bg-yellow-500";
+    default:
+      return "bg-gray-500";
+  }
+};
+
 export const UserTable = ({
   users,
   isLoading,
@@ -97,6 +108,24 @@ export const UserTable = ({
         <div className="inline-flex items-center justify-center gap-2">
           <span className={`h-2 w-2 rounded-full ${getRoleColor(user.role)}`} />
           <span className="capitalize">{user.role}</span>
+        </div>
+      ),
+    },
+    {
+      header: "Vai trò",
+      accessor: (user: IUser) => (
+        <div className="inline-flex items-center justify-center gap-2">
+          <span className={`h-2 w-2 rounded-full ${getRoleColor(user.role)}`} />
+          <span className="capitalize">{user.role}</span>
+        </div>
+      ),
+    },
+    {
+      header: "Gói dịch vụ",
+      accessor: (user: IUser) => (
+        <div className="inline-flex items-center justify-center gap-2">
+          <span className={`h-2 w-2 rounded-full ${getPlanColor(user.planType)}`} />
+          <span className="capitalize">{user.planType}</span>
         </div>
       ),
     },

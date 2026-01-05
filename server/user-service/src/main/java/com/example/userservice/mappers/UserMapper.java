@@ -29,10 +29,7 @@ public class UserMapper {
         dto.setSummary(user.getSummary());
         dto.setRole(user.getRole() != null ? user.getRole().name() : null);
         dto.setStatus(user.getStatus() != null ? user.getStatus().name() : null);
-        dto.setOauthProvider(user.getOauthProvider());
-        dto.setOauthProviderId(user.getOauthProviderId());
         dto.setAvatarUrl(user.getAvatarUrl());
-        dto.setOAuthUser(user.isOAuthUser());
 
         return dto;
     }
@@ -72,10 +69,8 @@ public class UserMapper {
             }
         }
 
-        user.setOauthProvider(dto.getOauthProvider());
-        user.setOauthProviderId(dto.getOauthProviderId());
         user.setAvatarUrl(dto.getAvatarUrl());
-        user.setOAuthUser(dto.isOAuthUser());
+        user.setAvatarPublicId(dto.getAvatarPublicId());
 
         return user;
     }

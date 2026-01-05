@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   LogOut,
+  Receipt,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -48,8 +49,11 @@ export default function AdminSidebar({
     { icon: Home, label: "Dashboard", href: "/admin" },
     { icon: FileText, label: "CV Dashboard", href: "/admin/cv-dashboard" },
     { icon: Users, label: "User Dashboard", href: "/admin/user-dashboard" },
-    { icon: Users, label: "Plan Dashboard", href: "/admin/plan-dashboard" },
-    { icon: Users, label: "Invoice Dashboard", href: "/admin/invoice-dashboard" },
+    {
+      icon: Receipt,
+      label: "Invoice Dashboard",
+      href: "/admin/invoice-dashboard",
+    },
   ];
 
   return (
@@ -145,7 +149,7 @@ export default function AdminSidebar({
 
       {/* Resize Handle */}
       <div
-        className="absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-gradient-to-b hover:from-primary hover:to-secondary transition-all duration-200 hover:w-1.5"
+        className="absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-linear-to-b hover:from-primary hover:to-secondary transition-all duration-200 hover:w-1.5"
         onMouseDown={onStartResizing}
       />
     </aside>

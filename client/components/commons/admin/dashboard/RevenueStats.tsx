@@ -23,53 +23,44 @@ import {
 } from "recharts";
 
 interface RevenueStatsProps {
-  revenueStats: {
-    totalRevenue: number;
-    thisMonthRevenue: number;
-    lastMonthRevenue: number;
-    growthRate: number;
-    successfulTransactions: number;
-    failedTransactions: number;
-    pendingTransactions: number;
-    revenueByPaymentMethod: Record<string, number>;
-    revenueByPlan: Record<string, number>;
-    dailyRevenue: Array<{
-      date: string;
-      revenue: number;
-      transactions: number;
-    }>;
-    monthlyRevenue: Array<{
-      month: string;
-      revenue: number;
-      transactions: number;
-    }>;
-  } | null;
+  revenueStats: IRevenueStats | null;
 }
 
 export function RevenueStats({ revenueStats }: RevenueStatsProps) {
-  if (!revenueStats) {
-    return null;
-  }
+  // Always show component, use default values if no data
+  const stats = revenueStats || {
+    totalRevenue: 0,
+    thisMonthRevenue: 0,
+    growthRate: 0,
+    successfulTransactions: 0,
+    pendingTransactions: 0,
+    failedTransactions: 0,
+    dailyRevenue: [],
+    revenueByPaymentMethod: [],
+  };
 
-  const isPositiveGrowth = revenueStats.growthRate >= 0;
+  const isPositiveGrowth = stats.growthRate >= 0;
 
   // Transform daily revenue data for chart
-  const dailyRevenueData = revenueStats.dailyRevenue.map((d) => ({
-    date: new Date(d.date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    }),
-    revenue: d.revenue,
-    transactions: d.transactions,
-  }));
+  const dailyRevenueData =
+    stats.dailyRevenue.length > 0
+      ? stats.dailyRevenue.map((d) => ({
+          date: new Date(d.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          }),
+          revenue: d.revenue,
+          transactions: d.transactions,
+        }))
+      : [];
 
   // Transform payment method data for pie chart
-  const paymentMethodData = Object.entries(
-    revenueStats.revenueByPaymentMethod
-  ).map(([name, value]) => ({
-    name,
-    value,
-  }));
+  const paymentMethodData = Object.entries(stats.revenueByPaymentMethod).map(
+    ([name, value]) => ({
+      name,
+      value,
+    })
+  );
 
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
@@ -88,7 +79,7 @@ export function RevenueStats({ revenueStats }: RevenueStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              ${revenueStats.totalRevenue.toLocaleString()}
+              ${stats.totalRevenue.toLocaleString()}
             </div>
             <p className="text-xs opacity-90 mt-1">All time revenue</p>
           </CardContent>
@@ -107,11 +98,11 @@ export function RevenueStats({ revenueStats }: RevenueStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              ${revenueStats.thisMonthRevenue.toLocaleString()}
+              ${stats.thisMonthRevenue.toLocaleString()}
             </div>
             <p className="text-xs opacity-90 mt-1 flex items-center gap-1">
               {isPositiveGrowth ? "+" : ""}
-              {revenueStats.growthRate.toFixed(1)}% vs last month
+              {stats.growthRate.toFixed(1)}% vs last month
             </p>
           </CardContent>
         </Card>
@@ -125,7 +116,7 @@ export function RevenueStats({ revenueStats }: RevenueStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {revenueStats.successfulTransactions.toLocaleString()}
+              {stats.successfulTransactions.toLocaleString()}
             </div>
             <p className="text-xs opacity-90 mt-1">Completed transactions</p>
           </CardContent>
@@ -140,10 +131,10 @@ export function RevenueStats({ revenueStats }: RevenueStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {revenueStats.pendingTransactions.toLocaleString()}
+              {stats.pendingTransactions.toLocaleString()}
             </div>
             <p className="text-xs opacity-90 mt-1">
-              {revenueStats.failedTransactions} failed
+              {stats.failedTransactions} failed
             </p>
           </CardContent>
         </Card>

@@ -43,9 +43,9 @@ public class PaymentController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/momo/{userId}/{planId}")
-    public ResponseEntity<Response> createMomoPayment(@PathVariable UUID userId, @PathVariable UUID planId) {
-        Response response = paymentApi.createMoMoPayment(userId, planId);
+    @PostMapping("/momo/{userId}")
+    public ResponseEntity<Response> createMomoPayment(@PathVariable UUID userId, @RequestPart("data") String dataJson) {
+        Response response = paymentApi.createMoMoPayment(userId, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -79,8 +79,8 @@ public class PaymentController {
     }
 
     @PostMapping("/paypal/{userId}/{planId}")
-    public ResponseEntity<Response> createPayPalPayment(@PathVariable UUID userId, @PathVariable UUID planId) {
-        Response response = paymentApi.createPayPalPayment(userId, planId);
+    public ResponseEntity<Response> createPayPalPayment(@PathVariable UUID userId, @RequestPart String dataJson) {
+        Response response = paymentApi.createPayPalPayment(userId, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -115,9 +115,9 @@ public class PaymentController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/vnpay/{userId}/{planId}")
-    public ResponseEntity<Response> createVnPayPayment(@PathVariable UUID userId, @PathVariable UUID planId) {
-        Response response = paymentApi.createVnPayPayment(userId, planId);
+    @PostMapping("/vnpay/{userId}")
+    public ResponseEntity<Response> createVnPayPayment(@PathVariable UUID userId, @RequestPart String dataJson) {
+        Response response = paymentApi.createVnPayPayment(userId, dataJson);
 
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -126,7 +126,6 @@ public class PaymentController {
     public RedirectView handleVnPayCallback(@RequestParam Map<String, String> params) {
         String responseCode = params.get("vnp_ResponseCode");
         String txnRef = params.get("vnp_TxnRef");
-        String amount = params.get("vnp_Amount");
 
         Response verifyResponse = paymentApi.verifyVnPayCallback(params);
 

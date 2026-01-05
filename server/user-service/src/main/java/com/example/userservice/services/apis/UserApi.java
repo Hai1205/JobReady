@@ -12,9 +12,7 @@ import com.example.userservice.entities.User.UserRole;
 import com.example.userservice.entities.User.UserStatus;
 import com.example.userservice.exceptions.OurException;
 import com.example.userservice.mappers.UserMapper;
-import com.example.userservice.repositories.user.SimpleUserRepository;
-import com.example.userservice.repositories.user.UserCommandRepository;
-import com.example.userservice.repositories.user.UserQueryRepository;
+import com.example.userservice.repositories.*;
 import com.example.cloudinarycommon.CloudinaryService;
 import com.example.securitycommon.utils.SecurityUtils;
 import com.example.securitycommon.models.AuthenticatedUser;
@@ -78,6 +76,8 @@ public class UserApi extends BaseApi {
             String summary,
             String role,
             String status,
+            String planType,
+            LocalDateTime planExpiration,
             MultipartFile avatar) {
         try {
             System.out.println("Stored password hash: " + password);
@@ -155,6 +155,20 @@ public class UserApi extends BaseApi {
                 user.setStatus(UserStatus.valueOf(status));
             }
 
+            // Set plan information
+            if (planType != null && !planType.isEmpty()) {
+                try {
+                    user.setPlanType(User.PlanType.valueOf(planType));
+                } catch (IllegalArgumentException e) {
+                    user.setPlanType(User.PlanType.free);
+                }
+            } else {
+                user.setPlanType(User.PlanType.free);
+            }
+            if (planExpiration != null) {
+                user.setPlanExpiration(planExpiration);
+            }
+
             // Insert user using command repository
             UUID userId = UUID.randomUUID();
             LocalDateTime now = LocalDateTime.now();
@@ -176,7 +190,7 @@ public class UserApi extends BaseApi {
                     now);
 
             // Fetch created user to return
-            User savedUser = simpleUserRepository.findById(userId)
+            User savedUser = userQueryRepository.findUserById(userId)
                     .orElseThrow(() -> new OurException("Failed to create user", 500));
             logger.info("User created successfully with ID: {}", savedUser.getId());
             return userMapper.toDto(savedUser);
@@ -347,7 +361,7 @@ public class UserApi extends BaseApi {
             MultipartFile avatar = request.getAvatar();
 
             UserDto savedUserDto = handleCreateUser(username, email, password, fullname, phone, location, birth,
-                    summary, role, status, avatar);
+                    summary, role, status, null, null, avatar);
 
             response.setStatusCode(201);
             response.setMessage("User created successfully");
@@ -394,7 +408,7 @@ public class UserApi extends BaseApi {
 
     public UserDto handleGetUserById(UUID userId) {
         try {
-            User user = simpleUserRepository.findById(userId)
+            User user = userQueryRepository.findUserById(userId)
                     .orElseThrow(() -> new OurException("User not found", 404));
             return userMapper.toDto(user);
         } catch (OurException e) {
@@ -428,7 +442,7 @@ public class UserApi extends BaseApi {
         try {
             logger.info("Updating user with ID: {}", userId);
 
-            User existingUser = simpleUserRepository.findById(userId)
+            User existingUser = userQueryRepository.findUserById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             AuthenticatedUser currentUser = SecurityUtils.getCurrentUser();
@@ -508,7 +522,7 @@ public class UserApi extends BaseApi {
                     LocalDateTime.now());
 
             // Fetch updated user
-            User updatedUser = simpleUserRepository.findById(userId)
+            User updatedUser = userQueryRepository.findUserById(userId)
                     .orElseThrow(() -> new OurException("User not found", 404));
             logger.info("User updated successfully: {}", userId);
             return userMapper.toDto(updatedUser);
@@ -619,7 +633,7 @@ public class UserApi extends BaseApi {
 
     public UserDto handleFindById(UUID userId) {
         try {
-            return simpleUserRepository.findById(userId)
+            return userQueryRepository.findUserById(userId)
                     .map(userMapper::toDto)
                     .orElse(null);
         } catch (Exception e) {
@@ -642,279 +656,6 @@ public class UserApi extends BaseApi {
         } catch (Exception e) {
             logger.error("Error in handleFindByIdentifier: {}", e.getMessage(), e);
             throw new OurException("Failed to find user by identifier", 500);
-        }
-    }
-
-    public UserDto handleFindOAuth2User(String email, String provider, String providerId) {
-        try {
-            logger.debug("Finding OAuth2 user: email={}, provider={}, providerId={}", email, provider, providerId);
-
-            // Tìm theo email và provider trước
-            Optional<User> userByEmailAndProvider = userQueryRepository.findByEmailAndOauthProvider(email, provider);
-            if (userByEmailAndProvider.isPresent()) {
-                return userMapper.toDto(userByEmailAndProvider.get());
-            }
-
-            // Nếu không tìm thấy, thử tìm theo email thôi (trường hợp user có thể đã tồn
-            // tại nhưng chưa link provider)
-            Optional<User> userByEmail = userQueryRepository.findByEmail(email);
-            if (userByEmail.isPresent()) {
-                User user = userByEmail.get();
-                // Kiểm tra nếu user chưa có OAuth provider, có thể link
-                if (user.getOauthProvider() == null || user.getOauthProvider().isEmpty()) {
-                    logger.info("Found existing user by email, can be linked to OAuth provider");
-                    return userMapper.toDto(user);
-                }
-            }
-
-            return null;
-        } catch (Exception e) {
-            logger.error("Error in handleFindOAuth2User: {}", e.getMessage(), e);
-            throw new OurException("Failed to find OAuth2 user", 500);
-        }
-    }
-
-    /**
-     * Tìm user theo email và provider
-     */
-    public UserDto handleFindByEmailAndProvider(String email, String provider) {
-        try {
-            logger.debug("Finding user by email and provider: email={}, provider={}", email, provider);
-
-            Optional<User> user = userQueryRepository.findByEmailAndOauthProvider(email, provider);
-            return user.map(userMapper::toDto).orElse(null);
-        } catch (Exception e) {
-            logger.error("Error in handleFindByEmailAndProvider: {}", e.getMessage(), e);
-            throw new OurException("Failed to find user by email and provider", 500);
-        }
-    }
-
-    /**
-     * Tạo user mới từ OAuth2
-     */
-    public UserDto handleCreateOAuth2User(OAuth2UserDto oauth2UserDto) {
-        try {
-            logger.info("Creating OAuth2 user: email={}, provider={}", oauth2UserDto.getEmail(),
-                    oauth2UserDto.getProvider());
-
-            // Kiểm tra user đã tồn tại chưa
-            if (userQueryRepository.existsByEmail(oauth2UserDto.getEmail())) {
-                // User đã tồn tại, cần link với OAuth provider
-                Optional<User> existingUser = userQueryRepository.findByEmail(oauth2UserDto.getEmail());
-                if (existingUser.isPresent()) {
-                    User user = existingUser.get();
-                    return handleLinkOAuth2Provider(user, oauth2UserDto);
-                }
-            }
-
-            // Tạo username unique từ email hoặc name
-            String username = handleGenerateUniqueUsername(oauth2UserDto);
-
-            // Tạo user mới
-            new User(
-                    username,
-                    oauth2UserDto.getEmail(),
-                    oauth2UserDto.getFirstName() != null ? oauth2UserDto.getFirstName()
-                            : handleExtractFirstName(oauth2UserDto.getName()),
-                    oauth2UserDto.getLastName() != null ? oauth2UserDto.getLastName()
-                            : handleExtractLastName(oauth2UserDto.getName()),
-                    oauth2UserDto.getProvider(),
-                    oauth2UserDto.getProviderId(),
-                    oauth2UserDto.getAvatarUrl());
-
-            // Insert OAuth2 user using command repository
-            UUID userId = UUID.randomUUID();
-            LocalDateTime now = LocalDateTime.now();
-            String fullname = (oauth2UserDto.getFirstName() != null ? oauth2UserDto.getFirstName()
-                    : handleExtractFirstName(oauth2UserDto.getName()))
-                    + " " + (oauth2UserDto.getLastName() != null ? oauth2UserDto.getLastName()
-                            : handleExtractLastName(oauth2UserDto.getName()));
-
-            userCommandRepository.insertOAuth2User(
-                    userId,
-                    username,
-                    oauth2UserDto.getEmail(),
-                    fullname,
-                    oauth2UserDto.getProvider(),
-                    oauth2UserDto.getProviderId(),
-                    oauth2UserDto.getAvatarUrl(),
-                    UserRole.user.name(),
-                    UserStatus.active.name(),
-                    true,
-                    now,
-                    now);
-
-            // Fetch created user
-            User savedUser = simpleUserRepository.findById(userId)
-                    .orElseThrow(() -> new OurException("Failed to create OAuth2 user", 500));
-            logger.info("OAuth2 user created successfully with ID: {}", savedUser.getId());
-
-            return userMapper.toDto(savedUser);
-        } catch (OurException e) {
-            logger.error("Error in handleCreateOAuth2User: {}", e.getMessage(), e);
-            throw e;
-        } catch (Exception e) {
-            logger.error("Unexpected error in handleCreateOAuth2User: {}", e.getMessage(), e);
-            throw new OurException("Failed to create OAuth2 user", 500);
-        }
-    }
-
-    /**
-     * Cập nhật user OAuth2
-     */
-    public UserDto handleUpdateOAuth2User(UUID userId, OAuth2UserDto oauth2UserDto) {
-        try {
-            logger.info("Updating OAuth2 user: userId={}", userId);
-
-            User existingUser = simpleUserRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-
-            // Cập nhật thông tin
-            if (oauth2UserDto.getLastName() != null && oauth2UserDto.getFirstName() != null) {
-                existingUser.setFullname(oauth2UserDto.getLastName() + " " + oauth2UserDto.getFirstName());
-            }
-            if (oauth2UserDto.getAvatarUrl() != null) {
-                existingUser.setAvatarUrl(oauth2UserDto.getAvatarUrl());
-            }
-
-            if (existingUser.getOauthProvider() == null) {
-                existingUser.setOauthProvider(oauth2UserDto.getProvider());
-                existingUser.setOauthProviderId(oauth2UserDto.getProviderId());
-                existingUser.setOAuthUser(true);
-            }
-
-            // Update OAuth2 user using command repository
-            String fullname = existingUser.getFullname();
-            if (oauth2UserDto.getLastName() != null && oauth2UserDto.getFirstName() != null) {
-                fullname = oauth2UserDto.getLastName() + " " + oauth2UserDto.getFirstName();
-            }
-
-            userCommandRepository.updateOAuth2User(
-                    userId,
-                    fullname,
-                    oauth2UserDto.getAvatarUrl() != null ? oauth2UserDto.getAvatarUrl() : existingUser.getAvatarUrl(),
-                    existingUser.getOauthProvider() != null ? existingUser.getOauthProvider()
-                            : oauth2UserDto.getProvider(),
-                    existingUser.getOauthProviderId() != null ? existingUser.getOauthProviderId()
-                            : oauth2UserDto.getProviderId(),
-                    true,
-                    LocalDateTime.now());
-
-            // Fetch updated user
-            User updatedUser = simpleUserRepository.findById(userId)
-                    .orElseThrow(() -> new OurException("User not found", 404));
-            logger.info("OAuth2 user updated successfully: userId={}", userId);
-
-            return userMapper.toDto(updatedUser);
-        } catch (OurException e) {
-            logger.error("Error in handleUpdateOAuth2User: {}", e.getMessage(), e);
-            throw e;
-        } catch (Exception e) {
-            logger.error("Unexpected error in handleUpdateOAuth2User: {}", e.getMessage(), e);
-            throw new OurException("Failed to update OAuth2 user", 500);
-        }
-    }
-
-    /**
-     * Link existing user với OAuth2 provider
-     */
-    private UserDto handleLinkOAuth2Provider(User existingUser, OAuth2UserDto oauth2UserDto) {
-        try {
-            logger.info("Linking existing user with OAuth2 provider: userId={}, provider={}",
-                    existingUser.getId(), oauth2UserDto.getProvider());
-
-            existingUser.setOauthProvider(oauth2UserDto.getProvider());
-            existingUser.setOauthProviderId(oauth2UserDto.getProviderId());
-            existingUser.setAvatarUrl(oauth2UserDto.getAvatarUrl());
-            existingUser.setOAuthUser(true);
-
-            // Cập nhật name nếu chưa có
-            if (existingUser.getFullname() == null && oauth2UserDto.getFirstName() != null
-                    && oauth2UserDto.getLastName() != null) {
-                existingUser.setFullname(oauth2UserDto.getFirstName() + "" + oauth2UserDto.getLastName());
-            }
-
-            // Link OAuth2 provider using command repository
-            userCommandRepository.linkOAuth2Provider(
-                    existingUser.getId(),
-                    oauth2UserDto.getProvider(),
-                    oauth2UserDto.getProviderId(),
-                    oauth2UserDto.getAvatarUrl(),
-                    true,
-                    LocalDateTime.now());
-
-            // Fetch updated user
-            User savedUser = simpleUserRepository.findById(existingUser.getId())
-                    .orElseThrow(() -> new OurException("User not found", 500));
-            return userMapper.toDto(savedUser);
-        } catch (Exception e) {
-            logger.error("Error in handleLinkOAuth2Provider: {}", e.getMessage(), e);
-            throw new OurException("Failed to link OAuth2 provider", 500);
-        }
-    }
-
-    /**
-     * Tạo username unique
-     */
-    private String handleGenerateUniqueUsername(OAuth2UserDto oauth2UserDto) {
-        try {
-            String baseUsername;
-
-            if (oauth2UserDto.getUsername() != null && !oauth2UserDto.getUsername().isEmpty()) {
-                baseUsername = oauth2UserDto.getUsername();
-            } else {
-                // Extract từ email
-                String emailPrefix = oauth2UserDto.getEmail().split("@")[0];
-                baseUsername = emailPrefix.replaceAll("[^a-zA-Z0-9]", "");
-            }
-
-            String username = baseUsername;
-            int counter = 1;
-
-            while (userQueryRepository.existsByUsername(username)) {
-                username = baseUsername + counter;
-                counter++;
-            }
-
-            return username;
-        } catch (Exception e) {
-            logger.error("Error in handleGenerateUniqueUsername: {}", e.getMessage(), e);
-            throw new OurException("Failed to generate unique username", 500);
-        }
-    }
-
-    /**
-     * Extract first name từ full name
-     */
-    private String handleExtractFirstName(String fullname) {
-        try {
-            if (fullname == null || fullname.trim().isEmpty())
-                return null;
-
-            String[] parts = fullname.trim().split("\\s+");
-            return parts[0];
-        } catch (Exception e) {
-            logger.error("Error in handleExtractFirstName: {}", e.getMessage(), e);
-            return null;
-        }
-    }
-
-    /**
-     * Extract last name từ full name
-     */
-    private String handleExtractLastName(String fullname) {
-        try {
-            if (fullname == null || fullname.trim().isEmpty())
-                return null;
-
-            String[] parts = fullname.trim().split("\\s+");
-            if (parts.length > 1) {
-                return String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
-            }
-            return null;
-        } catch (Exception e) {
-            logger.error("Error in handleExtractLastName: {}", e.getMessage(), e);
-            return null;
         }
     }
 
@@ -1199,6 +940,67 @@ public class UserApi extends BaseApi {
             return buildErrorResponse(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
             logger.error("Find user by email failed with unexpected error", e);
+            e.printStackTrace();
+            return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    public Response updateUserPlan(UUID userId, String dataJson) {
+        logger.info("Updating user plan for user: {}", userId);
+        Response response = new Response();
+
+        try {
+            User user = userQueryRepository.findUserById(userId)
+                    .orElseThrow(() -> new OurException("User not found", 404));
+
+            Map<String, Object> planData = objectMapper.readValue(dataJson, Map.class);
+            String planType = (String) planData.get("planType");
+            Object planExpirationObj = planData.get("planExpiration");
+            LocalDateTime planExpiration = null;
+
+            if (planExpirationObj != null) {
+                planExpiration = LocalDateTime.parse(planExpirationObj.toString());
+            }
+
+            if (planType != null && !planType.isEmpty()) {
+                try {
+                    user.setPlanType(User.PlanType.valueOf(planType));
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Invalid plan type: {}", planType);
+                    throw new OurException("Invalid plan type", 400);
+                }
+            }
+
+            if (planExpiration != null) {
+                user.setPlanExpiration(planExpiration);
+            }
+
+            userCommandRepository.updateUserAllFields(
+                    userId,
+                    user.getFullname(),
+                    user.getPhone(),
+                    user.getLocation(),
+                    user.getBirth(),
+                    user.getSummary(),
+                    user.getAvatarUrl(),
+                    user.getAvatarPublicId(),
+                    user.getRole(),
+                    user.getStatus(),
+                    LocalDateTime.now());
+
+            User updatedUser = userQueryRepository.findUserById(userId)
+                    .orElseThrow(() -> new OurException("User not found", 404));
+
+            response.setStatusCode(200);
+            response.setMessage("User plan updated successfully");
+            response.setUser(userMapper.toDto(updatedUser));
+            logger.info("User plan updated successfully for user: {}", userId);
+            return response;
+        } catch (OurException e) {
+            logger.error("User plan update failed with OurException: {}", e.getMessage());
+            return buildErrorResponse(e.getStatusCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("User plan update failed with unexpected error", e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
         }

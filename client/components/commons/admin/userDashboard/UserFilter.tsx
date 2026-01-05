@@ -1,18 +1,24 @@
 "use client";
 
-import { EUserRole, EUserStatus } from "@/types/enum";
-import { FilterType, SharedFilter } from "../adminTable/SharedFilter";
+import { EPlanType, EUserRole, EUserStatus } from "@/types/enum";
+import { SharedFilter } from "../adminTable/SharedFilter";
 import { capitalizeFirstLetter } from "@/lib/utils";
-import { UserFilterType } from "./UserDashboardClient";
+import { IUserFilter, UserFilterType } from "./UserDashboardClient";
 
 interface UserFilterProps {
   openMenuFilters: boolean;
   setOpenMenuFilters: (open: boolean) => void;
-  activeFilters: { status: string[]; role: string[] };
+  activeFilters: IUserFilter;
   toggleFilter: (value: string, type: UserFilterType) => void;
   clearFilters: () => void;
   applyFilters: () => void;
   closeMenuMenuFilters: () => void;
+}
+
+interface UserFilterSection {
+  key: UserFilterType;
+  label: string;
+  options: { label: string; value: string }[];
 }
 
 export const UserFilter = ({
@@ -24,38 +30,43 @@ export const UserFilter = ({
   applyFilters,
   closeMenuMenuFilters,
 }: UserFilterProps) => {
-  const handleToggleFilter = (value: string, type: FilterType) => {
-    if (type === "status") {
-      toggleFilter(value, "status");
-    }
-
-    if (type === "role") {
-      toggleFilter(value, "role");
-    }
-  };
-
-  const filterOptions = {
-    status: Object.values(EUserStatus).map((status) => ({
-      label: capitalizeFirstLetter(status),
-      value: status,
-    })),
-
-    role: Object.values(EUserRole).map((role) => ({
-      label: capitalizeFirstLetter(role),
-      value: role,
-    })),
-  };
+  const filterSections: UserFilterSection[] = [
+    {
+      key: "status",
+      label: "Trạng thái",
+      options: Object.values(EUserStatus).map((status) => ({
+        label: capitalizeFirstLetter(status),
+        value: status,
+      })),
+    },
+    {
+      key: "role",
+      label: "Vai trò",
+      options: Object.values(EUserRole).map((role) => ({
+        label: capitalizeFirstLetter(role),
+        value: role,
+      })),
+    },
+    {
+      key: "plan",
+      label: "Gói dịch vụ",
+      options: Object.values(EPlanType).map((plan) => ({
+        label: capitalizeFirstLetter(plan),
+        value: plan,
+      })),
+    },
+  ];
 
   return (
-    <SharedFilter
+    <SharedFilter<UserFilterType, UserFilterSection>
       openMenuFilters={openMenuFilters}
       setOpenMenuFilters={setOpenMenuFilters}
-      activeFilters={activeFilters}
-      toggleFilter={handleToggleFilter}
+      activeFilters={activeFilters as Record<string, string[]>}
+      toggleFilter={toggleFilter}
       clearFilters={clearFilters}
       applyFilters={applyFilters}
       closeMenuMenuFilters={closeMenuMenuFilters}
-      filterOptions={filterOptions}
+      filterSections={filterSections}
     />
   );
 };

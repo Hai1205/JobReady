@@ -20,8 +20,7 @@ public class InvoiceMapper {
         InvoiceDto dto = new InvoiceDto();
         dto.setId(invoice.getId());
         dto.setUserId(invoice.getUserId());
-        dto.setPlanId(invoice.getPlanId());
-        dto.setPlanName(invoice.getPlanName());
+        dto.setPlanTitle(invoice.getPlanTitle());
         dto.setAmount(invoice.getAmount());
         dto.setCurrency(invoice.getCurrency());
         dto.setStatus(invoice.getStatus() != null ? invoice.getStatus().name() : null);
@@ -47,8 +46,7 @@ public class InvoiceMapper {
         Invoice invoice = new Invoice();
         invoice.setId(dto.getId()); // Set ID for updates
         invoice.setUserId(dto.getUserId());
-        invoice.setPlanId(dto.getPlanId());
-        invoice.setPlanName(dto.getPlanName());
+        invoice.setPlanTitle(dto.getPlanTitle());
         invoice.setAmount(dto.getAmount());
         invoice.setCurrency(dto.getCurrency());
         invoice.setStatus(dto.getStatus() != null ? InvoiceStatus.valueOf(dto.getStatus()) : null);

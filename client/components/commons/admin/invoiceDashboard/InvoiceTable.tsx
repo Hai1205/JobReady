@@ -1,3 +1,4 @@
+import { EyeIcon } from "lucide-react";
 import { DataTable } from "../adminTable/DataTable";
 import { PaginationData } from "@/components/commons/pagination/PaginationControls";
 
@@ -7,6 +8,7 @@ interface InvoiceTableProps {
   paginationData?: PaginationData;
   onPageChange?: (page: number) => void;
   showPagination?: boolean;
+  onView?: (invoice: IInvoice) => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -28,6 +30,7 @@ export const InvoiceTable = ({
   paginationData,
   onPageChange,
   showPagination = false,
+  onView,
 }: InvoiceTableProps) => {
   const columns = [
     {
@@ -42,7 +45,7 @@ export const InvoiceTable = ({
     },
     {
       header: "Tên gói",
-      accessor: (invoice: IInvoice) => invoice.planName,
+      accessor: (invoice: IInvoice) => invoice.planTitle,
     },
     {
       header: "Giá tiền",
@@ -65,11 +68,22 @@ export const InvoiceTable = ({
     },
   ];
 
+  const actions = [];
+
+  if (onView) {
+    actions.push({
+      label: "Xem",
+      onClick: onView,
+      icon: EyeIcon,
+    });
+  }
+
   return (
     <DataTable
       data={invoices}
       isLoading={isLoading}
       columns={columns}
+      actions={actions}
       emptyMessage="Không tìm thấy hóa đơn nào"
       showPagination={showPagination}
       paginationData={paginationData}

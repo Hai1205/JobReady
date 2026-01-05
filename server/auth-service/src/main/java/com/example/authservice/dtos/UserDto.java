@@ -3,6 +3,7 @@ package com.example.authservice.dtos;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import lombok.*;
 
@@ -29,12 +30,17 @@ public class UserDto {
     private String avatarPublicId;
     private boolean isOAuthUser;
 
+    // Plan Information
+    private String planType;
+    private LocalDateTime planExpiration;
+
     // Constructor with all fields for MapStruct
     @Builder
     public UserDto(UUID id, String username, String password, String email,
             String fullname, String phone, String location, String birth, String summary,
             String status, String role, String oauthProvider,
-            String oauthProviderId, String avatarUrl, String avatarPublicId, boolean isOAuthUser) {
+            String oauthProviderId, String avatarUrl, String avatarPublicId, boolean isOAuthUser,
+            String planType, LocalDateTime planExpiration) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -51,6 +57,8 @@ public class UserDto {
         this.avatarUrl = avatarUrl;
         this.avatarPublicId = avatarPublicId;
         this.isOAuthUser = isOAuthUser;
+        this.planType = planType;
+        this.planExpiration = planExpiration;
     }
 
     // Basic constructor

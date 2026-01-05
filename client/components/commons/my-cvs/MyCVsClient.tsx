@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useCVStore } from "@/stores/cvStore";
-import { usePagination } from "@/hooks/use-pagination";
 import PageHeader from "@/components/commons/my-cvs/PageHeader";
 import UserCVsSkeleton from "@/components/commons/layout/UserCVsSkeleton";
 import UserCVsSection from "@/components/commons/my-cvs/UserCVsSection";
@@ -38,31 +37,54 @@ export default function MyCVsClient() {
   const [droppedFile, setDroppedFile] = useState<File | null>(null);
 
   // Pagination for user CVs
-  const userCVsPagination = usePagination({
-    initialPage: 1,
-    initialPageSize: 12,
-  });
+  const [userCVsPage, setUserCVsPage] = useState(1);
+  const userCVsPageSize = 12;
+  const userCVsTotalPages = Math.ceil(userCVs.length / userCVsPageSize);
+  const userCVsStartIndex = (userCVsPage - 1) * userCVsPageSize;
+  const userCVsEndIndex = userCVsStartIndex + userCVsPageSize;
+
+  const userCVsPagination = {
+    paginationState: { page: userCVsPage, pageSize: userCVsPageSize },
+    paginationData: {
+      totalElements: userCVs.length,
+      totalPages: userCVsTotalPages,
+      currentPage: userCVsPage,
+      pageSize: userCVsPageSize,
+      hasNext: userCVsPage < userCVsTotalPages,
+      hasPrevious: userCVsPage > 1,
+    },
+    setPage: setUserCVsPage,
+  };
 
   // Pagination for template CVs
-  const templateCVsPagination = usePagination({
-    initialPage: 1,
-    initialPageSize: 12,
-  });
+  const [templateCVsPage, setTemplateCVsPage] = useState(1);
+  const templateCVsPageSize = 12;
+  const templateCVsTotalPages = Math.ceil(
+    templateCVs.length / templateCVsPageSize
+  );
+  const templateCVsStartIndex = (templateCVsPage - 1) * templateCVsPageSize;
+  const templateCVsEndIndex = templateCVsStartIndex + templateCVsPageSize;
+
+  const templateCVsPagination = {
+    paginationState: { page: templateCVsPage, pageSize: templateCVsPageSize },
+    paginationData: {
+      totalElements: templateCVs.length,
+      totalPages: templateCVsTotalPages,
+      currentPage: templateCVsPage,
+      pageSize: templateCVsPageSize,
+      hasNext: templateCVsPage < templateCVsTotalPages,
+      hasPrevious: templateCVsPage > 1,
+    },
+    setPage: setTemplateCVsPage,
+  };
 
   // Paginate user CVs in memory
-  const paginatedUserCVs = userCVs.slice(
-    (userCVsPagination.paginationState.page - 1) *
-      userCVsPagination.paginationState.pageSize,
-    userCVsPagination.paginationState.page *
-      userCVsPagination.paginationState.pageSize
-  );
+  const paginatedUserCVs = userCVs.slice(userCVsStartIndex, userCVsEndIndex);
 
   // Paginate template CVs in memory
   const paginatedTemplateCVs = templateCVs.slice(
-    (templateCVsPagination.paginationState.page - 1) *
-      templateCVsPagination.paginationState.pageSize,
-    templateCVsPagination.paginationState.page *
-      templateCVsPagination.paginationState.pageSize
+    templateCVsStartIndex,
+    templateCVsEndIndex
   );
 
   useEffect(() => {
@@ -79,18 +101,19 @@ export default function MyCVsClient() {
     setTemplateCVs(publicCvs);
   }, [CVsTable]);
 
-  // Update pagination when data changes
-  useEffect(() => {
-    userCVsPagination.updateTotalElements(userCVs.length);
-  }, [userCVs.length]);
-
-  useEffect(() => {
-    templateCVsPagination.updateTotalElements(templateCVs.length);
-  }, [templateCVs.length]);
-
   const handleCreate = async () => {
-    router.push("/cv-builder");
-    await createCV(userAuth);
+    try {
+      router.push("/cv-builder");
+      await createCV(userAuth);
+    } catch (error) {
+      // Error toast already shown by createCV or plan limit check
+      console.error("Failed to create CV:", error);
+      // Optional: navigate back if plan limit exceeded
+      const errorMessage = (error as Error).message || "";
+      if (errorMessage.includes("CV limit exceeded")) {
+        router.back();
+      }
+    }
   };
 
   const handleImport = async (file: File | null) => {

@@ -130,6 +130,7 @@ mvn clean install -pl cv-service
 mvn clean install -pl ai-service
 mvn clean install -pl stats-service
 mvn clean install -pl payment-service
+mvn clean install -pl contact-service
 
 # Hoặc build with jacoco
 mvn clean verify -DskipITs=true -pl coverage-report -am
@@ -152,6 +153,8 @@ mvn spring-boot:run -pl mail-service
 mvn spring-boot:run -pl cv-service
 mvn spring-boot:run -pl ai-service
 mvn spring-boot:run -pl stats-service
+mvn spring-boot:run -pl payment-service
+mvn spring-boot:run -pl contact-service
 ```
 
 ### 5. Kiểm tra Services

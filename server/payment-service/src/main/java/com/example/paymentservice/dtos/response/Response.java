@@ -23,7 +23,6 @@ public class Response {
     private int resultCode;
 
     private UserDto user;
-    private PlanDto plan;
     private InvoiceDto invoice;
     private List<InvoiceDto> invoices;
     private RevenueStatsDto revenueStats;

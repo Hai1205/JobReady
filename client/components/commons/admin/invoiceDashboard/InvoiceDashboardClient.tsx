@@ -4,26 +4,23 @@ import { useCallback, useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { EUserRole, EUserStatus } from "@/types/enum";
-import { usePagination } from "@/hooks/use-pagination";
+import { EUserRole, EUserStatus, EPlanType } from "@/types/enum";
 import { DashboardHeader } from "@/components/commons/admin/DashboardHeader";
 import { TableSearch } from "@/components/commons/admin/adminTable/TableSearch";
 import { ExtendedUserData } from "@/components/commons/admin/userDashboard/constant";
 import TableDashboardSkeleton from "../../layout/TableDashboardSkeleton";
 import { InvoiceFilter } from "./InvoiceFilter";
 import { InvoiceTable } from "./InvoiceTable";
+import { InvoiceDialog } from "./InvoiceDialog";
 import { usePaymentStore } from "@/stores/paymentStore";
+import { mockInvoices } from "@/services/mockData";
 
 export type InvoiceFilterType = "status";
 const initialFilters = { status: [] as string[] };
 
-
 export default function InvoiceDashboardClient() {
-  const {
-    invoicesTable,
-    fetchAllInvoicesInBackground,
-    getAllInvoices,
-  } = usePaymentStore();
+  const { invoicesTable, fetchAllInvoicesInBackground, getAllInvoices } =
+    usePaymentStore();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -33,10 +30,24 @@ export default function InvoiceDashboardClient() {
   const [filtered, setFiltered] = useState<IInvoice[]>([]);
 
   // Pagination
-  const { paginationState, paginationData, setPage } = usePagination({
-    initialPage: 1,
-    initialPageSize: 10,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  const paginationData = {
+    totalElements: filtered.length,
+    totalPages: totalPages,
+    currentPage: currentPage,
+    pageSize: pageSize,
+    hasNext: currentPage < totalPages,
+    hasPrevious: currentPage > 1,
+  };
+
+  const setPage = (page: number) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     // Fetch in background to update cache
@@ -51,7 +62,7 @@ export default function InvoiceDashboardClient() {
         const searchTerms = query.toLowerCase().trim();
         results = results.filter(
           (invoice) =>
-            invoice.planName.toLowerCase().includes(searchTerms) ||
+            invoice.planTitle.toLowerCase().includes(searchTerms) ||
             invoice.paymentMethod.toLowerCase().includes(searchTerms)
         );
       }
@@ -71,19 +82,8 @@ export default function InvoiceDashboardClient() {
     filterData(searchQuery, activeFilters);
   }, [invoicesTable, searchQuery, activeFilters, filterData]);
 
-  // Update pagination when filtered invoices change
-  useEffect(() => {
-    paginationData.totalElements = filtered.length;
-    paginationData.totalPages = Math.ceil(
-      filtered.length / paginationState.pageSize
-    );
-  }, [filtered.length, paginationState.pageSize]);
-
   // Paginate filtered invoicesTable
-  const paginated = filtered.slice(
-    (paginationState.page - 1) * paginationState.pageSize,
-    paginationState.page * paginationState.pageSize
-  );
+  const paginated = filtered.slice(startIndex, endIndex);
 
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
@@ -127,17 +127,26 @@ export default function InvoiceDashboardClient() {
   const [openMenuFilters, setOpenMenuFilters] = useState(false);
   const closeMenuMenuFilters = () => setOpenMenuFilters(false);
 
+  const [selectedInvoice, setSelectedInvoice] = useState<IInvoice | null>(null);
+  const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+
+  const handleViewInvoice = (invoice: IInvoice) => {
+    setSelectedInvoice(invoice);
+    setIsInvoiceDialogOpen(true);
+  };
+
   const [data, setData] = useState<ExtendedUserData | null>(null);
 
   const defaultUser: ExtendedUserData = {
     id: "",
-    plan: {} as IPlan,
     username: "",
     email: "",
     password: "",
     fullname: "",
     role: EUserRole.USER,
     status: EUserStatus.PENDING,
+    planType: EPlanType.FREE,
+    planExpiration: new Date().toISOString(),
   };
 
   const handleChange = (
@@ -159,9 +168,7 @@ export default function InvoiceDashboardClient() {
 
   return (
     <div className="space-y-4">
-      <DashboardHeader
-        title="User Dashboard"
-      />
+      <DashboardHeader title="Invoice Dashboard" />
 
       <div className="space-y-4">
         <Card className="border-border/50 shadow-lg bg-linear-to-br from-card to-card/80 backdrop-blur-sm">
@@ -203,14 +210,21 @@ export default function InvoiceDashboardClient() {
           </CardHeader>
 
           <InvoiceTable
-            invoices={paginated}
+            invoices={mockInvoices}
             isLoading={false}
             showPagination={filtered.length > 10}
             paginationData={paginationData}
             onPageChange={setPage}
+            onView={handleViewInvoice}
           />
         </Card>
       </div>
+
+      <InvoiceDialog
+        invoice={selectedInvoice}
+        open={isInvoiceDialogOpen}
+        onOpenChange={setIsInvoiceDialogOpen}
+      />
     </div>
   );
 }

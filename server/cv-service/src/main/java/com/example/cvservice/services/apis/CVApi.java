@@ -200,7 +200,7 @@ public class CVApi extends BaseApi {
         }
 
         // Fetch the created CV to return
-        CV saved = simpleCVRepository.findById(cvId)
+        CV saved = cvQueryRepository.findCVById(cvId)
                 .orElseThrow(() -> new OurException("Failed to create CV", 500));
         return cvMapper.toDto(saved);
     }
@@ -514,7 +514,7 @@ public class CVApi extends BaseApi {
             String template,
             String font) {
         try {
-            CV existing = simpleCVRepository.findById(cvId)
+            CV existing = cvQueryRepository.findCVById(cvId)
                     .orElseThrow(() -> new OurException("CV not found", 404));
 
             Instant now = Instant.now();
@@ -702,7 +702,7 @@ public class CVApi extends BaseApi {
 
     @Transactional
     public boolean handleDeleteCV(UUID cvId) {
-        CV cv = simpleCVRepository.findById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
+        CV cv = cvQueryRepository.findCVById(cvId).orElseThrow(() -> new OurException("CV not found", 404));
 
         // Delete avatar from Cloudinary if exists
         Optional<PersonalInfo> personalInfo = personalInfoQueryRepository.findByCvId(cvId);

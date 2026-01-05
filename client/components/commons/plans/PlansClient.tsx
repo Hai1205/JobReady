@@ -3,8 +3,12 @@
 import { Check } from "lucide-react";
 import { mockPlans } from "@/services/mockData";
 import PlanCard from "./PlanCard";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function PlansClient() {
+  const userAuth = useAuthStore((state) => state.userAuth);
+  const currentPlanType = userAuth?.planType?.toLowerCase() || "free";
+
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-16">
@@ -25,7 +29,7 @@ export default function PlansClient() {
             <PlanCard
               key={plan.id}
               plan={plan}
-              isSelected={false}
+              isCurrentPlan={plan.type.toLowerCase() === currentPlanType}
               onSelect={() => {}}
             />
           ))}

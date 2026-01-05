@@ -17,8 +17,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class AuthApi extends BaseApi {
@@ -82,6 +84,9 @@ public class AuthApi extends BaseApi {
                 throw new OurException("Account is banned. Please contact support.", 405);
             }
 
+            // Check if plan has expired
+            handleCheckAndUpdatePlanExpiration(user);
+
             String userId = user.getId().toString();
             String email = user.getEmail();
             String username = user.getUsername();
@@ -110,6 +115,43 @@ public class AuthApi extends BaseApi {
                     request != null ? request.getIdentifier() : "unknown", e);
             e.printStackTrace();
             return buildErrorResponse(500, e.getMessage());
+        }
+    }
+
+    private void handleCheckAndUpdatePlanExpiration(UserDto user) {
+        try {
+            logger.debug("Checking plan expiration for userId: {}", user.getId());
+            
+            if (user.getPlanExpiration() == null) {
+                logger.debug("No plan expiration set for user: {}", user.getId());
+                return;
+            }
+            
+            LocalDateTime now = LocalDateTime.now();
+            if (user.getPlanExpiration().isBefore(now)) {
+                logger.info("Plan expired for userId: {}. Expiration was: {}", 
+                    user.getId(), user.getPlanExpiration());
+                
+                // Update plan to free
+                Map<String, Object> updatePlanData = new HashMap<>();
+                updatePlanData.put("planType", "free");
+                updatePlanData.put("planExpiration", null);
+                
+                String updatePlanJson = objectMapper.writeValueAsString(updatePlanData);
+                Response response = userFeignClient.updateUserPlan(user.getId(), updatePlanJson);
+                
+                if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
+                    logger.info("User plan reset to free after expiration for userId: {}", user.getId());
+                    // Update the user object with new plan
+                    user.setPlanType("free");
+                    user.setPlanExpiration(null);
+                } else {
+                    logger.warn("Failed to update plan after expiration for userId: {}", user.getId());
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error checking plan expiration for userId: {}", user.getId(), e);
+            // Don't throw - allow login to proceed even if plan check fails
         }
     }
 
@@ -457,6 +499,9 @@ public class AuthApi extends BaseApi {
                 logger.warn("Token refresh failed: User not found for email: {}", email);
                 throw new OurException("User not found", 404);
             }
+
+            // Check if plan has expired
+            handleCheckAndUpdatePlanExpiration(user);
 
             // Generate new access token
             String newAccessToken = jwtService.generateAccessToken(userId, email, user.getRole(),

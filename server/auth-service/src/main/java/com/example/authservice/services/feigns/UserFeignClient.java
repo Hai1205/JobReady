@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.util.UUID;
 
 import com.example.authservice.dtos.requests.AuthenticateUserRequest;
 import com.example.authservice.dtos.requests.ChangePasswordRequest;
@@ -43,4 +44,7 @@ public interface UserFeignClient {
 
     @GetMapping("/api/v1/users/email/{email}")
     Response findUserByEmail(@PathVariable("email") String email);
+
+    @PatchMapping("/api/v1/users/{userId}/plan")
+    Response updateUserPlan(@PathVariable("userId") UUID userId, @RequestBody String updatePlanRequest);
 }

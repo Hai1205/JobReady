@@ -47,7 +47,8 @@ public class RootUserInitializer implements CommandLineRunner {
         if (existingUser == null) {
             log.info("Root user not found. Creating root user: {}", rootEmail);
 
-            userService.handleCreateUser(rootUsername, rootEmail, rootPassword, rootFullname, null, null, null, null, rootRole, rootStatus, null);
+            userService.handleCreateUser(rootUsername, rootEmail, rootPassword, rootFullname, null, null, null, null,
+                    rootRole, rootStatus, null, null, null);
 
             log.info("Root user created successfully");
         } else {

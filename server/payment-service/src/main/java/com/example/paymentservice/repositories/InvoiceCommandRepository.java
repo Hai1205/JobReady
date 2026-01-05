@@ -20,31 +20,24 @@ public interface InvoiceCommandRepository extends JpaRepository<Invoice, UUID> {
      */
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO invoices (id, user_id, plan_id, plan_name, amount, currency, status, payment_method, transaction_id, billing_date, description) " +
-                   "VALUES (:id, :userId, :planId, :planName, :amount, :currency, :status, :paymentMethod, :transactionId, :billingDate, :description)", 
-           nativeQuery = true)
-    void insertInvoice(
-        @Param("id") UUID id,
-        @Param("userId") UUID userId,
-        @Param("planId") UUID planId,
-        @Param("planName") String planName,
-        @Param("amount") Integer amount,
-        @Param("currency") String currency,
-        @Param("status") String status,
-        @Param("paymentMethod") String paymentMethod,
-        @Param("transactionId") String transactionId,
-        @Param("billingDate") String billingDate,
-        @Param("description") String description
-    );
-    
-    /**
-     * Cập nhật status của invoice theo transaction ID
-     */
+    @Query(value = "INSERT INTO invoices (user_id, plan_name, price, currency, status, payment_method, transaction_id, billing_date, description) "
+            +
+            "VALUES (:userId, :planTitle, :price, :currency, :status, :paymentMethod, :transactionId, :billingDate, :description)", nativeQuery = true)
+    Invoice insertInvoice(
+            @Param("userId") UUID userId,
+            @Param("planTitle") String planTitle,
+            @Param("price") Long price,
+            @Param("currency") String currency,
+            @Param("status") InvoiceStatus status,
+            @Param("paymentMethod") String paymentMethod,
+            @Param("transactionId") String transactionId,
+            @Param("billingDate") String billingDate,
+            @Param("description") String description);
+
     @Modifying
     @Transactional
     @Query("UPDATE Invoice i SET i.status = :status WHERE i.transactionId = :transactionId")
     int updateStatusByTransactionId(
-        @Param("transactionId") String transactionId, 
-        @Param("status") InvoiceStatus status
-    );
+            @Param("transactionId") String transactionId,
+            @Param("status") InvoiceStatus status);
 }

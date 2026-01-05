@@ -4,10 +4,9 @@ import { useCallback, useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { EUserRole, EUserStatus } from "@/types/enum";
+import { EPlanType, EUserRole, EUserStatus } from "@/types/enum";
 import { useUserStore } from "@/stores/userStore";
 import { useAuthStore } from "@/stores/authStore";
-import { usePagination } from "@/hooks/use-pagination";
 import { toast } from "react-toastify";
 import { DashboardHeader } from "@/components/commons/admin/DashboardHeader";
 import CreateUserDialog from "@/components/commons/admin/userDashboard/CreateUserDialog";
@@ -19,9 +18,19 @@ import { ExtendedUserData } from "@/components/commons/admin/userDashboard/const
 import ConfirmationDialog from "@/components/commons/layout/ConfirmationDialog";
 import TableDashboardSkeleton from "../../layout/TableDashboardSkeleton";
 
-export type UserFilterType = "status" | "role";
-const userInitialFilters = { status: [] as string[], role: [] as string[] };
+export type UserFilterType = "status" | "role" | "plan";
+export interface IUserFilter {
+  status: string[];
+  role: string[];
+  plan: string[];
+  [key: string]: string[];
+}
 
+const userInitialFilters: IUserFilter = {
+  status: [],
+  role: [],
+  plan: [],
+};
 
 export default function UserDashboardClient() {
   const {
@@ -40,17 +49,30 @@ export default function UserDashboardClient() {
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isUpdateUserOpen, setIsUpdateUserOpen] = useState(false);
 
-  const [activeFilters, setActiveFilters] = useState<{
-    status: string[];
-    role: string[];
-  }>(userInitialFilters);
+  const [activeFilters, setActiveFilters] =
+    useState<IUserFilter>(userInitialFilters);
   const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
 
   // Pagination
-  const { paginationState, paginationData, setPage } = usePagination({
-    initialPage: 1,
-    initialPageSize: 10,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  const paginationState = { page: currentPage, pageSize: pageSize };
+  const paginationData = {
+    totalElements: filteredUsers.length,
+    totalPages: totalPages,
+    currentPage: currentPage,
+    pageSize: pageSize,
+    hasNext: currentPage < totalPages,
+    hasPrevious: currentPage > 1,
+  };
+
+  const setPage = (page: number) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     // Fetch in background to update cache
@@ -165,13 +187,14 @@ export default function UserDashboardClient() {
 
   const defaultUser: ExtendedUserData = {
     id: "",
-    plan: {} as IPlan,
     username: "",
     email: "",
     password: "",
     fullname: "",
     role: EUserRole.USER,
     status: EUserStatus.PENDING,
+    planType: EPlanType.FREE,
+    planExpiration: "",
   };
 
   const handleChange = (

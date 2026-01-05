@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterType, SharedFilter } from "../adminTable/SharedFilter";
+import { SharedFilter } from "../adminTable/SharedFilter";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import { InvoiceFilterType } from "./InvoiceDashboardClient";
 import { EInvoiceStatus } from "@/types/enum";
@@ -15,6 +15,12 @@ interface InvoiceFilterProps {
   closeMenuMenuFilters: () => void;
 }
 
+interface InvoiceFilterSection {
+  key: InvoiceFilterType;
+  label: string;
+  options: { label: string; value: string }[];
+}
+
 export const InvoiceFilter = ({
   openMenuFilters,
   setOpenMenuFilters,
@@ -24,29 +30,27 @@ export const InvoiceFilter = ({
   applyFilters,
   closeMenuMenuFilters,
 }: InvoiceFilterProps) => {
-  const handleToggleFilter = (value: string, type: FilterType) => {
-    if (type === "status") {
-      toggleFilter(value, "status");
-    }
-  };
-
-  const filterOptions = {
-    status: Object.values(EInvoiceStatus).map((status) => ({
-      label: capitalizeFirstLetter(status),
-      value: status,
-    })),
-  };
+  const filterSections: InvoiceFilterSection[] = [
+    {
+      key: "status",
+      label: "Trạng thái",
+      options: Object.values(EInvoiceStatus).map((status) => ({
+        label: capitalizeFirstLetter(status),
+        value: status,
+      })),
+    },
+  ];
 
   return (
-    <SharedFilter
+    <SharedFilter<InvoiceFilterType, InvoiceFilterSection>
       openMenuFilters={openMenuFilters}
       setOpenMenuFilters={setOpenMenuFilters}
       activeFilters={activeFilters}
-      toggleFilter={handleToggleFilter}
+      toggleFilter={toggleFilter}
       clearFilters={clearFilters}
       applyFilters={applyFilters}
       closeMenuMenuFilters={closeMenuMenuFilters}
-      filterOptions={filterOptions}
+      filterSections={filterSections}
     />
   );
 };
