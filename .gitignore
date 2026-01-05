@@ -6,6 +6,12 @@
 .env.development
 .env.production
 
+# Credentials and sensitive files
+**/credentials/*.json
+**/keys/*.pem
+**/keys/*.key
+service-account-key.json
+
 # IDE
 .idea/
 .vscode/
