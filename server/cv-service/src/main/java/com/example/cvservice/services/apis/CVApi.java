@@ -379,7 +379,6 @@ public class CVApi extends BaseApi {
     }
 
     public List<CVDto> handleGetCVsByVisibility(boolean isVisibility) {
-        // Sử dụng CVQueryService để fetch CV theo visibility với children
         return cvQueryService.findByVisibilityWithChildren(isVisibility, org.springframework.data.domain.Pageable.unpaged()).getContent();
     }
 

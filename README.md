@@ -214,6 +214,96 @@ cd client && npm run test
 - **Service communication**: Verify service names và ports
 - **Database migration**: Check pgvector extension cho PostgreSQL
 
+## 🖼️ Artwork
+
+### Home Page
+
+![Home Page](assets/images/hame_page.png)
+
+### Login Page
+
+![Login Page](assets/images/login_page.png)
+
+### Register Page
+
+![Register Page](assets/images/register_page.png)
+
+### Verify OTP Page
+
+![Verify OTP Page](assets/images/verify_otp_page.png)
+
+### Forgot Password Page
+
+![Forgot Password Page](assets/images/forgot_password_page.png)
+
+### Change Password Page
+
+![Change Password Page](assets/images/change_password_page.png)
+
+### My CV Page
+
+![My CV Page](assets/images/my_cv_page.png)
+
+### Write Info
+
+![Write Info](assets/images/write_info.png)
+
+### Write Education
+
+![Write Education](assets/images/write_education.png)
+
+### Write Experience
+
+![Write Experience](assets/images/write_experience.png)
+
+### Write Skill
+
+![Write Skill](assets/images/write_skill.png)
+
+### Optional Template Selection
+
+![Optional Template Selection](assets/images/optional_template_selection.png)
+
+### Optional Color Selection
+
+![Optional Color Selection](assets/images/optional_color_selection.png)
+
+### Preview CV
+
+![Preview CV](assets/images/preview_cv.png)
+
+### AI Suggestion
+
+![AI Suggestion](assets/images/ai-suggestion.png)
+
+### AI Control
+
+![AI Control](assets/images/ai-control.png)
+
+### Update Info Page
+
+![Update Info Page](assets/images/update_info_page.png)
+
+### Change Password Settings Page
+
+![Change Password Settings Page](assets/images/change_password_settings_page.png)
+
+### User Dashboard
+
+![User Dashboard](assets/images/user_dashboard.png)
+
+### CV Dashboard Page
+
+![CV Dashboard Page](assets/images/cv_dashboard_page.png)
+
+### Stats Dashboard Page
+
+![Stats Dashboard Page](assets/images/stats_dashbpard_page.png)
+
+### Stats Dialog
+
+![Stats Dialog](assets/images/stats_dialog.png)
+
 ## 🤝 Contributing
 
 Chúng tôi hoan nghênh mọi đóng góp! Vui lòng đọc documentation chi tiết trong từng thư mục trước khi contribute.
